@@ -141,7 +141,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             lastContentFuture = sendFileFuture;
         }
 
-        sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+        //uncomment to see file transfer progress (especially with large files)
+        /*sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
             @Override
             public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
                 if (total < 0) { // total unknown
@@ -155,7 +156,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             public void operationComplete(ChannelProgressiveFuture future) {
                 System.err.println(future.channel() + " Transfer complete.");
             }
-        });
+        });*/
 
         // Decide whether to close the connection or not.
         if (!keepAlive) {
