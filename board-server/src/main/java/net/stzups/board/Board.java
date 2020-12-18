@@ -2,29 +2,38 @@ package net.stzups.board;
 
 import net.stzups.board.httpserver.HttpServer;
 
+import java.util.logging.Logger;
+
 public class Board {
     private static HttpServer httpServer;
+    private static Logger logger;
 
     public static void main(String[] args) {
-        System.out.println("Starting Board server...");
+        logger = LogFactory.getLogger("Board Server");
+
+        logger.info("Starting Board server...");
 
         long start = System.currentTimeMillis();
 
         new ConsoleManager();
-        
+
         httpServer = new HttpServer();
         httpServer.run();
 
-        System.out.println("Started Board server in " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Started Board server in " + (System.currentTimeMillis() - start) + "ms");
     }
 
     static void stop() {
-        System.out.println("Stopping Board server...");
+        logger.info("Stopping Board server...");
 
         long start = System.currentTimeMillis();
 
         httpServer.stop();
 
-        System.out.println("Stopped Board server in " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Stopped Board server in " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    public static Logger getLogger() {
+        return logger;
     }
 }

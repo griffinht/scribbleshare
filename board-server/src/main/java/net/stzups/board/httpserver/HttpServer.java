@@ -10,6 +10,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import net.stzups.board.Board;
+import net.stzups.board.LogFactory;
 
 public class HttpServer {
     private static final int PORT = 80;
@@ -24,14 +26,14 @@ public class HttpServer {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.INFO))
+                .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.INFO))
                 .childHandler(new HttpServerInitializer());
         channelFuture = serverBootstrap.bind(PORT);
-        System.out.println("Listening on port " + PORT);
+        Board.getLogger().info("Listening on port " + PORT);
     }
 
     public void stop() {
-        System.out.println("Closing HTTP server...");
+        Board.getLogger().info("Closing HTTP server...");
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
         try {
@@ -39,6 +41,6 @@ public class HttpServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Closed HTTP server");
+        Board.getLogger().info("Closed HTTP server");
     }
 }

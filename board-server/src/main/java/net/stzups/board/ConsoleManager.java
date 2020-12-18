@@ -17,7 +17,7 @@ public class ConsoleManager implements Runnable {
                 switch (args[0].toLowerCase()) {
                     case "stop":
                         Board.stop();
-                        break;
+                        return;
                     default:
                         System.out.println("Unknown command " + args[0]);
                 }
