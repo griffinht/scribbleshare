@@ -77,11 +77,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         if (file.isDirectory()) {
-            if (uri.endsWith("/")) {
-                sendRedirect(ctx, uri + "index.html");
-            } else {
-                sendRedirect(ctx, uri + "/index.html");
-            }
+            sendRedirect(ctx, uri + ((uri.endsWith("/") ? "" : "/") + "index.html"));
             return;
         }
 
@@ -192,8 +188,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         // Convert file separators.
         uri = uri.replace('/', File.separatorChar);
-
-        System.out.print(uri + " -> ");
 
         // todo
         // Simplistic dumb security check.
