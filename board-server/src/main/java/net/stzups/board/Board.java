@@ -10,6 +10,8 @@ public class Board {
 
         long start = System.currentTimeMillis();
 
+        new ConsoleManager();
+        
         httpServer = new HttpServer();
         httpServer.run();
 

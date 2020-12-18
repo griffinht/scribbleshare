@@ -26,7 +26,7 @@ public class HttpServer {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new HttpServerInitializer());
-        serverBootstrap.bind(PORT);
+        channelFuture = serverBootstrap.bind(PORT);
         System.out.println("Listening on port " + PORT);
     }
 
