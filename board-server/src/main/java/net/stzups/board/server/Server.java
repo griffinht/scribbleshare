@@ -10,6 +10,9 @@ import io.netty.handler.logging.LoggingHandler;
 import net.stzups.board.Board;
 import net.stzups.board.LogFactory;
 
+/**
+ * Uses netty to create an HTTP/WebSocket server on the specified port
+ */
 public class Server {
     private static final int PORT = 80;
 
@@ -17,6 +20,9 @@ public class Server {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
+    /**
+     * Initializes the server and binds to the specified port
+     */
     public void run() {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
@@ -29,8 +35,11 @@ public class Server {
         Board.getLogger().info("Listening on port " + PORT);
     }
 
+    /**
+     * Shuts down the server gracefully, then blocks until the server is shut down
+     */
     public void stop() {
-        Board.getLogger().info("Closing HTTP server...");
+        Board.getLogger().info("Closing server...");
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
         try {
@@ -38,6 +47,6 @@ public class Server {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Board.getLogger().info("Closed HTTP server");
+        Board.getLogger().info("Closed server");
     }
 }

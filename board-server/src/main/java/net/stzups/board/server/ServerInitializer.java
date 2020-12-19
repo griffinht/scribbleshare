@@ -10,6 +10,11 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.board.Board;
 
+/**
+ * Creates pipeline to handle HTTP requests and WebSocket connections on the same port
+ * WebSocket connections should be made to the specified WebSocket path
+ * Connections not made to the WebSocket path go to ServerHandler
+ */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) {

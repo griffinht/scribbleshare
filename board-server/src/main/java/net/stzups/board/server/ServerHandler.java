@@ -39,6 +39,7 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 /**
+ * Handles HTTP requests
  * modified from https://netty.io/4.1/xref/io/netty/example/http/file/HttpStaticFileServerHandler.html
  */
 public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
@@ -56,6 +57,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
     private FullHttpRequest request;
 
+    /**
+     * Currently only handles GET requests, will search working directory for files to serve
+     * Serves index.html if a directory is requested
+     */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         this.request = request;
@@ -159,6 +164,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
     private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
 
+    /**
+     * Simplistic dumb security check for client request uris
+     * Will also replace file separators (/ or \) with the system specific separator
+     * todo thoroughly test before deploying to production environment.
+     *
+     * @param uri request uri from client
+     * @return sanitized uri or null if the uri is unsafe and should not be handled
+     */
     private static String sanitizeUri(String uri) {
         // Decode the path.
         try {
@@ -174,9 +187,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         // Convert file separators.
         uri = uri.replace('/', File.separatorChar);
 
-        // todo
-        // Simplistic dumb security check.
-        // You will have to do something serious in the production environment.
+
         if (uri.contains(File.separator + '.') ||
                 uri.contains('.' + File.separator) ||
                 uri.charAt(0) == '.' || uri.charAt(uri.length() - 1) == '.' ||
@@ -246,6 +257,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));*/
     }
 
+    /**
+     * Sets a MIME type for a file
+     * Additional MIME types can be defined in META-INF/mine.types
+     */
     private static void setContentTypeHeader(HttpResponse response, File file) {
         //System.out.println(file.getPath() + ", " + mimeTypesMap.getContentType(file.getPath())); //todo uncomment if you are having trouble with mime types
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
