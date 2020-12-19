@@ -1,11 +1,11 @@
 package net.stzups.board;
 
-import net.stzups.board.httpserver.HttpServer;
+import net.stzups.board.server.Server;
 
 import java.util.logging.Logger;
 
 public class Board {
-    private static HttpServer httpServer;
+    private static Server server;
     private static Logger logger;
 
     public static void main(String[] args) {
@@ -17,8 +17,8 @@ public class Board {
 
         new ConsoleManager();
 
-        httpServer = new HttpServer();
-        httpServer.run();
+        server = new Server();
+        server.run();
 
         logger.info("Started Board server in " + (System.currentTimeMillis() - start) + "ms");
     }
@@ -28,7 +28,7 @@ public class Board {
 
         long start = System.currentTimeMillis();
 
-        httpServer.stop();
+        server.stop();
 
         logger.info("Stopped Board server in " + (System.currentTimeMillis() - start) + "ms");
     }

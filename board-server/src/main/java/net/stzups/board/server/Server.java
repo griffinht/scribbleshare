@@ -1,19 +1,16 @@
-package net.stzups.board.httpserver;
+package net.stzups.board.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import net.stzups.board.Board;
 import net.stzups.board.LogFactory;
 
-public class HttpServer {
+public class Server {
     private static final int PORT = 80;
 
     private ChannelFuture channelFuture;
@@ -27,7 +24,7 @@ public class HttpServer {
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.INFO))
-                .childHandler(new HttpServerInitializer());
+                .childHandler(new ServerInitializer());
         channelFuture = serverBootstrap.bind(PORT);
         Board.getLogger().info("Listening on port " + PORT);
     }
