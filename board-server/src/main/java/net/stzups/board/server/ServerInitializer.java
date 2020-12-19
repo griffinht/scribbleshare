@@ -9,6 +9,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.board.Board;
+import net.stzups.board.room.PacketHandler;
+import net.stzups.board.room.protocol.PacketEncoder;
+import net.stzups.board.room.protocol.PacketDecoder;
 
 /**
  * Creates pipeline to handle HTTP requests and WebSocket connections on the same port
@@ -16,6 +19,9 @@ import net.stzups.board.Board;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+    private PacketEncoder packetEncoder = new PacketEncoder();
+    private PacketDecoder packetDecoder = new PacketDecoder();
+
     @Override
     protected void initChannel(SocketChannel socketChannel) {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
@@ -26,7 +32,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new ChunkedWriteHandler());
         pipeline.addLast(new WebSocketServerCompressionHandler());
         pipeline.addLast(new WebSocketServerProtocolHandler("/websocket", null, true));
-        pipeline.addLast(new ServerHandler());
-        pipeline.addLast(new WebSocketFrameHandler());
+        pipeline.addLast(new ServerHandler());//todo rename to http server
+        pipeline.addLast(packetEncoder);
+        pipeline.addLast(packetDecoder);
+        pipeline.addLast(new PacketHandler());
     }
 }

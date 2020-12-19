@@ -33,12 +33,12 @@ canvas.addEventListener('mousemove', (event) => {
         ctx.moveTo(event.x - event.movementX, event.y - event.movementY);
         ctx.lineTo(event.x, event.y);
         ctx.stroke();
+        socket.sendOffsetDraw(event.movementX, event.movementY);
         mouse.x = event.x;
         mouse.y = event.y;
     }
 });
 
 const socket = new WebSocketHandler();
-socket.send('poggers');
 
 
