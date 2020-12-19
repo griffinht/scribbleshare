@@ -6,8 +6,10 @@ var ctx = canvas.getContext('2d');
 // handle resize
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
+        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        ctx.putImageData(imageData, 0, 0);
         //todo redraw?
 };
 resizeCanvas();
