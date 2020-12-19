@@ -1,6 +1,6 @@
 # Contributing to Board
 
-###General guidelines
+#### General guidelines
 
 - Make sure to respect line endings (LF)
 
@@ -9,7 +9,7 @@ You will need to build and run the `board-server` project before using or contri
 
 `board-server` is written in Java. Make sure you have [Apache Maven](https://maven.apache.org/index.html) installed on your system before attempting to build the project.
 
-###Build Steps
+#### Build Steps
 - Clone or fork this repository
 - Run `mvn clean package` in `board-server` to generate the server artifact in the newly generated `.target` folder
 - Set the working directory of the generated server artifact to `board-web-client` (copy the `.jar` to `board-web-client`) and run in a terminal using `java -jar board-server-xxx.jar`
