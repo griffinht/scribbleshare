@@ -1,4 +1,4 @@
-package net.stzups.board.httpserver;
+package net.stzups.board.server;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 /**
  * modified from https://netty.io/4.1/xref/io/netty/example/http/file/HttpStaticFileServerHandler.html
  */
-public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     private static final int HTTP_CACHE_SECONDS = 60;
