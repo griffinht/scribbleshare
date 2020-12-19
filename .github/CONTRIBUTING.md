@@ -3,6 +3,7 @@
 #### General guidelines
 
 - Make sure to respect line endings (LF)
+- Tabs should be 4 spaces
 
 ## Building and running `board-server`
 You will need to build and run the `board-server` project before using or contributing to the client or server. 
