@@ -12,7 +12,7 @@ You will need to build and run the `board-server` project before using or contri
 
 #### Build Steps
 - Clone or fork this repository
-- Run `mvn clean package` in `board-server` to generate the server artifact in the newly generated `target` folder
+- Run `mvn clean package` in `board-server` to generate server artifact in the newly created `target` folder
 - Set the working directory of the generated server artifact to `board-web-client` (copy the `.jar` to `board-web-client`) and run in a terminal using `java -jar board-server-xxx.jar`
  - This starts an HTTP server listening on port 80, which you can connect to at [`localhost`](localhost)
  - Stop the server gracefully by running the `stop` command in the console or by killing the process
