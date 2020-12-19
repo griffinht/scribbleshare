@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * Handles user input to the console, allowing the user to execute commands
+ */
 public class ConsoleManager implements Runnable {
     ConsoleManager() {
         new Thread(this).start();

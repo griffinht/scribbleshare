@@ -9,7 +9,17 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+/**
+ * Helper class used to format log messages
+ */
 public class LogFactory {
+    /**
+     * Creates or finds a Java logger and sets formatting to the following:
+     * [hh:mm:ss] [name] [level (if not INFO)] message
+     *
+     * @param name the name of the logger to create or find
+     * @return the created logger
+     */
     public static Logger getLogger(String name) {
         Logger logger = Logger.getLogger(name);
         logger.setUseParentHandlers(false);
