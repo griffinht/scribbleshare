@@ -24,15 +24,18 @@ public class PacketEncoder extends MessageToByteEncoder<ServerPacket> {
             byteBuf.writeByte(((ServerPacketId) serverPacket).getId());
         }
         switch (serverPacket.getPacketType()) {
-            case OFFSET_DRAW:
-                ServerPacketOffsetDraw packetOffsetDraw = (ServerPacketOffsetDraw) serverPacket;
-                byteBuf.writeShort(packetOffsetDraw.getOffsetX());
-                byteBuf.writeShort(packetOffsetDraw.getOffsetY());
+            case ADD_CLIENT:
+            case REMOVE_CLIENT:
                 break;
             case DRAW:
                 ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
                 byteBuf.writeShort(packetDraw.getX());
                 byteBuf.writeShort(packetDraw.getY());
+                break;
+            case OFFSET_DRAW:
+                ServerPacketOffsetDraw packetOffsetDraw = (ServerPacketOffsetDraw) serverPacket;
+                byteBuf.writeShort(packetOffsetDraw.getOffsetX());
+                byteBuf.writeShort(packetOffsetDraw.getOffsetY());
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + serverPacket + " while encoding");

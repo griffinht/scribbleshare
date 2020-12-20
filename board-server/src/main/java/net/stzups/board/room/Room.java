@@ -2,6 +2,7 @@ package net.stzups.board.room;
 
 import io.netty.channel.Channel;
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.board.Board;
 import net.stzups.board.room.protocol.server.ServerPacket;
 import net.stzups.board.room.protocol.server.ServerPacketAddClient;
 import net.stzups.board.room.protocol.server.ServerPacketRemoveClient;
@@ -64,13 +65,18 @@ class Room {
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
         sendPacket(new ServerPacketAddClient(client));
+        for (Client c : clients.values()) {
+            sendPacket(new ServerPacketAddClient(c), client);
+        }
         clients.put(client.getId(), client);
+        Board.getLogger().info("Added " + client + " to " + this);
         return client;
     }
 
     void removeClient(Client client) {
         clients.remove(client.getId());
         sendPacket(new ServerPacketRemoveClient(client));
+        Board.getLogger().info("Removed " + client + " to " + this);
     }
     /**
      * Send given packet to all members of the room except for the specified client
@@ -105,5 +111,10 @@ class Room {
         for (Client client : clients.values()) {
             client.getChannel().writeAndFlush(serverPacket);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Room{id=" + id + "}";
     }
 }

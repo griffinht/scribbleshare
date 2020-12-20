@@ -6,10 +6,10 @@ import java.util.EnumSet;
 import java.util.Map;
 
 public enum ServerPacketType {
-    ADD_CLIENT(1),
-    REMOVE_CLIENT(2),
-    DRAW(3),
-    OFFSET_DRAW(4),
+    ADD_CLIENT(0),
+    REMOVE_CLIENT(1),
+    DRAW(2),
+    OFFSET_DRAW(3),
     ;
 
     private static Map<Integer, ServerPacketType> packetTypeMap = new IntObjectHashMap<>();
