@@ -4,8 +4,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.Board;
 import net.stzups.board.room.protocol.client.ClientPacket;
+import net.stzups.board.room.protocol.client.ClientPacketDraw;
 import net.stzups.board.room.protocol.client.ClientPacketOffsetDraw;
-import net.stzups.board.room.protocol.server.ServerPacketDraw;
+import net.stzups.board.room.protocol.server.ServerPacketOffsetDraw;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     private Room room;
@@ -23,7 +24,11 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         switch (packet.getPacketType()) {
             case OFFSET_DRAW:
                 ClientPacketOffsetDraw clientPacketOffsetDraw = (ClientPacketOffsetDraw) packet;
-                room.sendPacketExcept(new ServerPacketDraw(client.getId(), clientPacketOffsetDraw.getOffsetX(), clientPacketOffsetDraw.getOffsetY()), client);
+                room.sendPacketExcept(new ServerPacketOffsetDraw(client.getId(), clientPacketOffsetDraw.getOffsetX(), clientPacketOffsetDraw.getOffsetY()), client);
+                break;
+            case DRAW:
+                ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
+                room.sendPacketExcept(new ServerPacketOffsetDraw(client.getId(), clientPacketDraw.getX(), clientPacketDraw.getY()), client);
                 break;
             case OPEN:
                 if (room == null) {
