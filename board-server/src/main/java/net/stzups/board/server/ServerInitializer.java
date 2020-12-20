@@ -32,7 +32,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new ChunkedWriteHandler());
         pipeline.addLast(new WebSocketServerCompressionHandler());
         pipeline.addLast(new WebSocketServerProtocolHandler("/websocket", null, true));
-        pipeline.addLast(new ServerHandler());//todo rename to http server
+        pipeline.addLast(new HttpServerHandler());
         pipeline.addLast(packetEncoder);
         pipeline.addLast(packetDecoder);
         pipeline.addLast(new PacketHandler());
