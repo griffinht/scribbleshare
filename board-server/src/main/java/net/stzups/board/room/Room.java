@@ -30,7 +30,10 @@ class Room {
      * @return the created room
      */
     static Room createRoom() {
-        String id = String.valueOf((int) (Math.random() * ROOM_ID_LENGTH));
+        String id;
+        do {
+            id = String.valueOf((int) (Math.random() * Math.pow(10, ROOM_ID_LENGTH)));
+        } while (rooms.containsKey(id)); //todo improve
         Room room = new Room(id);
         rooms.put(room.getId(), room);
         return room;
