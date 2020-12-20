@@ -19,9 +19,9 @@ public class PacketEncoder extends MessageToByteEncoder<ServerPacket> {
     protected void encode(ChannelHandlerContext ctx, ServerPacket serverPacket, ByteBuf b) {
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
         ByteBuf byteBuf = binaryWebSocketFrame.content();
-        byteBuf.writeByte(serverPacket.getPacketType().getId());
+        byteBuf.writeByte(serverPacket.getPacketType().getId()); //todo test with values over 127 (sign issues)
         if (serverPacket instanceof ServerPacketId) {
-            byteBuf.writeByte(((ServerPacketId) serverPacket).getId());
+            byteBuf.writeShort(((ServerPacketId) serverPacket).getId());
         }
         switch (serverPacket.getPacketType()) {
             case ADD_CLIENT:
