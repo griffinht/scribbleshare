@@ -81,7 +81,7 @@ class Room {
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
         for (Client client : clients.values()) {
             if (except != client) {
-                except.getChannel().writeAndFlush(serverPacket);
+                client.getChannel().writeAndFlush(serverPacket);
             }
         }
     }
