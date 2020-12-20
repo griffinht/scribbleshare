@@ -23,24 +23,31 @@ export default class WebSocketHandler {
                 let dataView = new DataView(event.data);
                 let offset = 0;
 
-                while (true) {
+                while (offset < dataView.byteLength) {
                     let type = dataView.getUint8(offset);
                     offset += 1;
                     console.log('got ' + type);
-                    break;
                     switch (type) {
-                        case 0:
+                        case 0: //add client
+                            offset += 2;
+                            console.log(clients);
                             return;
-                        case 1: //draw
-                            offset += 1 + 2 + 2;
+                        case 1: //remove client
+                            offset += 2;
                             console.log(ctx);
                             break;
-                        case 2: //offset draw
-                            offset += 1 + 2 + 2;
+                        case 2: //draw
+                            offset += 2 + 2 + 2;
                             console.log(ctx);
+                            break;
+                        case 3: //offset draw
+                            offset += 2 + 2 + 2;
+                            console.log(ctx);
+                            break;
                         default:
                             console.error('unknown payload type ' + type + ', offset ' + offset + ', event ' + event);
                     }
+                    console.log(offset < dataView.byteLength);
                 }
             }
         });

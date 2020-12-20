@@ -1,8 +1,5 @@
 import WebSocketHandler from './WebSocketHandler.js'
 
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-
 // handle resize
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
@@ -40,5 +37,4 @@ canvas.addEventListener('mousemove', (event) => {
 });
 
 const socket = new WebSocketHandler();
-
 
