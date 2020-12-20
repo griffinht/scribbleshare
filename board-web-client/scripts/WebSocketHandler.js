@@ -1,16 +1,18 @@
 export default class WebSocketHandler {
+    static updateInterval = 1000/10;
+    socket = {};
+    
     constructor() {
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
-            console.log(this);
-            console.log(event);
-            this.socket.send('opened connection, handshaking');
+            console.log('WebSocket connection opened');
+            this.sendOpen();
         });
 
         this.socket.addEventListener('close', (event) => {
-            console.log('close');
+            console.log('WebSocket connection closed');
         });
     
         this.socket.addEventListener('message', (event) => {
@@ -55,6 +57,17 @@ export default class WebSocketHandler {
         }
     }
 
+    sendOpen() {
+        let buffer = new ArrayBuffer(1);
+        let dataView = new DataView(buffer);
+        let offset = 0;
+
+        dataView.setUint8(offset, 0);
+        offset += 1;
+
+        this.send(buffer);
+    }
+
     sendDraw(x, y) {
         let buffer = new ArrayBuffer(5);
         let dataView = new DataView(buffer);
@@ -84,4 +97,6 @@ export default class WebSocketHandler {
 
         this.send(buffer);
     }
+
+
 }

@@ -13,7 +13,7 @@ public class Client {
         this.channel = channel;
     }
 
-    int getId() {
+    public int getId() {
         return id;
     }
 
@@ -36,6 +36,6 @@ public class Client {
 
     @Override
     public String toString() {
-        return "[" + id + " " + channel.remoteAddress() + "]";
+        return "Client{id=" + id + ",address=" + channel.remoteAddress() + "}";
     }
 }
