@@ -4,15 +4,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import net.stzups.board.room.protocol.server.ServerPacket;
 import net.stzups.board.room.protocol.server.ServerPacketDraw;
 import net.stzups.board.room.protocol.server.ServerPacketId;
 import net.stzups.board.room.protocol.server.ServerPacketOffsetDraw;
-
-import java.util.List;
 
 /**
  * Encodes a ServerPacket sent by the server to

@@ -1,6 +1,7 @@
 export default class WebSocketHandler {
-    static updateInterval = 1000/10;
+    static updateInterval = 1000/20;
     socket = {};
+    lastSend = 0;
     
     constructor() {
         this.socket = new WebSocket('ws://localhost/websocket');
@@ -25,7 +26,7 @@ export default class WebSocketHandler {
                 while (true) {
                     let type = dataView.getUint8(offset);
                     offset += 1;
-                    console.log(type);
+                    console.log('got ' + type);
                     break;
                     switch (type) {
                         case 0:
@@ -50,8 +51,16 @@ export default class WebSocketHandler {
     }
 
     send(payload) {
+        let now = performance.now();
+        if ((now - this.lastSend) > WebSocketHandler.updateInterval) {
+            
+        } else {
+            return;
+        }
         if (this.socket.readyState === WebSocket.OPEN) {
+            console.log('sending');
             this.socket.send(payload);
+            this.lastSend = now;
         } else {
             console.error('tried to send payload while websocket was closed' + payload);
         }

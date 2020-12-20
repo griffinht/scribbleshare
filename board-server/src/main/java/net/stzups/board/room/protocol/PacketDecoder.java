@@ -22,13 +22,12 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
         if (webSocketFrame instanceof TextWebSocketFrame) {
             System.out.println(((TextWebSocketFrame) webSocketFrame).text());
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
-            System.out.println(packetType);
             ClientPacket packet;
             switch (packetType) {
                 case DRAW:

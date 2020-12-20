@@ -79,16 +79,11 @@ class Room {
      * @param except client to exclude
      */
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
-        int a = 0;
-        System.out.print("not sending to " + except + ", sending to ");
         for (Client client : clients.values()) {
             if (except != client) {
-                a++;
-                System.out.print(client + " ");
-                client.getChannel().write(serverPacket);
+                except.getChannel().writeAndFlush(serverPacket);
             }
         }
-        System.out.println("(" + a + "/" + clients.size() + ")");
     }
 
     /**
@@ -98,7 +93,7 @@ class Room {
      * @param client the client to send to
      */
     void sendPacket(ServerPacket serverPacket, Client client) {
-        client.getChannel().write(serverPacket);
+        client.getChannel().writeAndFlush(serverPacket);
     }
 
     /**
@@ -108,7 +103,7 @@ class Room {
      */
     void sendPacket(ServerPacket serverPacket) {
         for (Client client : clients.values()) {
-            client.getChannel().write(serverPacket);
+            client.getChannel().writeAndFlush(serverPacket);
         }
     }
 }

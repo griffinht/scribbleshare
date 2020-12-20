@@ -17,7 +17,6 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     }
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        System.out.println("INACTIVE" + room + ", " + client);
         if (room != null) {
             room.removeClient(client);
         }
