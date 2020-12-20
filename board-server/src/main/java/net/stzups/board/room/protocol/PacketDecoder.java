@@ -16,6 +16,9 @@ import net.stzups.board.room.protocol.client.ClientPacketType;
 import javax.naming.OperationNotSupportedException;
 import java.util.List;
 
+/**
+ * Decodes a WebSocketFrame sent by the client to a ClientPacket
+ */
 @ChannelHandler.Sharable
 public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override

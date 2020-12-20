@@ -1,5 +1,8 @@
 package net.stzups.board.room.protocol.client;
 
+/**
+ * Represents a packet sent by the client
+ */
 public abstract class ClientPacket {
     private ClientPacketType packetType;
 

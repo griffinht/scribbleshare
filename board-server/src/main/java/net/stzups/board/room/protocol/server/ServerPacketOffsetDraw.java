@@ -1,8 +1,5 @@
 package net.stzups.board.room.protocol.server;
 
-import net.stzups.board.room.protocol.Packet;
-import net.stzups.board.room.protocol.client.ClientPacketType;
-
 public class ServerPacketOffsetDraw extends ServerPacketId {
     private int x;
     private int y;

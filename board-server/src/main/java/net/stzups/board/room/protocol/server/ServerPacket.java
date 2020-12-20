@@ -1,5 +1,8 @@
 package net.stzups.board.room.protocol.server;
 
+/**
+ * Represents a packet sent by the server
+ */
 public abstract class ServerPacket {
     private ServerPacketType packetType;
 

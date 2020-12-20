@@ -1,8 +1,5 @@
 package net.stzups.board.room.protocol.client;
 
-import net.stzups.board.room.protocol.server.ServerPacketId;
-import net.stzups.board.room.protocol.server.ServerPacketType;
-
 public class ClientPacketDraw extends ClientPacket {
     private int x;
     private int y;
