@@ -87,13 +87,11 @@ class Room {
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
         sendPacket(new ServerPacketAddClient(client));
-        List<ServerPacket> serverPackets = new ArrayList<>();
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
-            serverPackets.add(new ServerPacketDraw(client.getId(), c.getPoints().toArray(new Point[0])));
+            sendPacket(new ServerPacketDraw(c.getId(), c.getPoints().toArray(new Point[0])), client);
         }
         clients.put(client.getId(), client);
-        sendPackets(serverPackets, client);
         Board.getLogger().info("Added " + client + " to " + this);
         return client;
     }
@@ -125,17 +123,6 @@ class Room {
      */
     void sendPacket(ServerPacket serverPacket, Client client) {
         client.addPacket(serverPacket);
-    }
-
-    /**
-     * Send multiple packets to a client
-     * @param serverPackets the packets to send
-     * @param client the client to sent to
-     */
-    void sendPackets(List<ServerPacket> serverPackets, Client client){
-        for (ServerPacket serverPacket : serverPackets) {
-            client.addPacket(serverPacket);
-        }
     }
 
     /**
