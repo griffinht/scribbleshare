@@ -1,4 +1,4 @@
-package net.stzups.board.room.protocol.client;
+package net.stzups.board.protocol.client;
 
 import io.netty.util.collection.IntObjectHashMap;
 
@@ -8,7 +8,6 @@ import java.util.Map;
 public enum ClientPacketType {
     OPEN(0),
     DRAW(1),
-    OFFSET_DRAW(2),
     ;
 
     private static Map<Integer, ClientPacketType> packetTypeMap = new IntObjectHashMap<>();

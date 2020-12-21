@@ -1,4 +1,4 @@
-package net.stzups.board.room.protocol.server;
+package net.stzups.board.protocol.server;
 
 /**
  * Represents a packet sent by the server

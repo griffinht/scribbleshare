@@ -10,8 +10,8 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.board.Board;
 import net.stzups.board.room.PacketHandler;
-import net.stzups.board.room.protocol.PacketEncoder;
-import net.stzups.board.room.protocol.PacketDecoder;
+import net.stzups.board.protocol.PacketEncoder;
+import net.stzups.board.protocol.PacketDecoder;
 
 /**
  * Creates pipeline to handle HTTP requests and WebSocket connections on the same port

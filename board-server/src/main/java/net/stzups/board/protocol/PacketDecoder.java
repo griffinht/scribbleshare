@@ -1,4 +1,4 @@
-package net.stzups.board.room.protocol;
+package net.stzups.board.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -7,11 +7,10 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import net.stzups.board.room.protocol.client.ClientPacket;
-import net.stzups.board.room.protocol.client.ClientPacketDraw;
-import net.stzups.board.room.protocol.client.ClientPacketOffsetDraw;
-import net.stzups.board.room.protocol.client.ClientPacketOpen;
-import net.stzups.board.room.protocol.client.ClientPacketType;
+import net.stzups.board.protocol.client.ClientPacket;
+import net.stzups.board.protocol.client.ClientPacketDraw;
+import net.stzups.board.protocol.client.ClientPacketOpen;
+import net.stzups.board.protocol.client.ClientPacketType;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.List;
@@ -29,12 +28,14 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
             ClientPacket packet;
+            System.out.println(packetType);
             switch (packetType) {
                 case DRAW:
-                    packet = new ClientPacketDraw(byteBuf.readShort(), byteBuf.readShort());
-                    break;
-                case OFFSET_DRAW:
-                    packet = new ClientPacketOffsetDraw(byteBuf.readShort(), byteBuf.readShort());
+                    Point[] points = new Point[byteBuf.readUnsignedByte()];
+                    for (int i = 0; i < points.length; i++) {
+                        points[i] = new Point(byteBuf.readUnsignedByte(), byteBuf.readShort(), byteBuf.readShort());
+                    }
+                    packet = new ClientPacketDraw(points);
                     break;
                 case OPEN:
                     packet = new ClientPacketOpen();

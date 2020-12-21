@@ -1,4 +1,4 @@
-package net.stzups.board.room.protocol.server;
+package net.stzups.board.protocol.server;
 
 import net.stzups.board.room.Client;
 

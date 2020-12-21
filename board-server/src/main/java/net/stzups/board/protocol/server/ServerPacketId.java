@@ -1,4 +1,4 @@
-package net.stzups.board.room.protocol.server;
+package net.stzups.board.protocol.server;
 
 public abstract class ServerPacketId extends ServerPacket {
     private int id;

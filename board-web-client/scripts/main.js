@@ -1,3 +1,4 @@
+import LocalClient from './LocalClient.js';
 import WebSocketHandler from './WebSocketHandler.js'
 
 // handle resize
@@ -11,30 +12,16 @@ function resizeCanvas() {
 };
 resizeCanvas();
 
-// handle mouse interactions
-var mouse = {
-    x:0,
-    y:0,
-    isDown:false,
-}
-canvas.addEventListener('mousedown', (event) => {
-    mouse.isDown = true;
-});
-canvas.addEventListener('mouseup', (event) => {
-    mouse.isDown = false;
-    mouse.wasDown = false;
-});
-canvas.addEventListener('mousemove', (event) => {
-    if (mouse.isDown) {
-        ctx.beginPath();
-        ctx.moveTo(event.x - event.movementX, event.y - event.movementY);
-        ctx.lineTo(event.x, event.y);
-        ctx.stroke();
-        socket.sendOffsetDraw(event.movementX, event.movementY);
-        mouse.x = event.x;
-        mouse.y = event.y;
-    }
-});
-
 const socket = new WebSocketHandler();
+localClient = new LocalClient();
 
+let last = performance.now();
+function draw(now) {
+    let dt = (now - last);
+    last = now;
+
+    clients.forEach(e => e.draw(dt));
+
+    window.requestAnimationFrame(draw);
+}
+window.requestAnimationFrame(draw);

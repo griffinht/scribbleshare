@@ -1,7 +1,7 @@
+import Client from './Client.js'
+
 export default class WebSocketHandler {
-    static updateInterval = 1000/20;
-    socket = {};
-    lastSend = 0;
+    static UPDATE_INTERVAL = 1000/10;
     
     constructor() {
         this.socket = new WebSocket('ws://localhost/websocket');
@@ -10,6 +10,34 @@ export default class WebSocketHandler {
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
             this.sendOpen();
+            setInterval(() => {
+                let points  = localClient.getPoints();
+                if (points.length === 0) {
+                    return;
+                }
+                let buffer = new ArrayBuffer(1 + 1 + points.length * 5);
+                let dataView = new DataView(buffer);
+                let offset = 0;
+
+                dataView.setUint8(offset, 1);
+                offset += 1;
+
+                dataView.setUint8(offset, points.length);
+                offset += 1;
+
+                points.forEach(point => {
+                    dataView.setUint8(offset, point.dt);
+                    offset += 1;
+                    dataView.setInt16(offset, point.x);
+                    offset += 2;
+                    dataView.setInt16(offset, point.y);
+                    offset += 2;
+                });
+
+                points.length = 0;//clear
+
+                this.send(buffer);
+            }, WebSocketHandler.UPDATE_INTERVAL);
         });
 
         this.socket.addEventListener('close', (event) => {
@@ -28,26 +56,36 @@ export default class WebSocketHandler {
                     offset += 1;
                     console.log('got ' + type);
                     switch (type) {
-                        case 0: //add client
+                        case 0: {//add client
+                            new Client(dataView.getUint16(offset));
                             offset += 2;
-                            console.log(clients);
-                            return;
-                        case 1: //remove client
+                            break;
+                        }
+                        case 1: {//remove client
+                            clients.delete(dataView.getUint16(offset));
                             offset += 2;
-                            console.log(ctx);
                             break;
-                        case 2: //draw
-                            offset += 2 + 2 + 2;
-                            console.log(ctx);
+                        }
+                        case 2: {//draw
+                            let client = clients.get(dataView.getUint16(offset));
+                            offset += 2;
+                            let size = dataView.getUint8(offset);
+                            offset += 1;
+                            for (let i = 0; i < size; i++) {
+                                let point = {};
+                                point.dt = dataView.getUint8(offset);
+                                offset += 1;
+                                point.x = dataView.getInt16(offset);
+                                offset += 2;
+                                point.y = dataView.getInt16(offset);
+                                offset += 2;
+                                client.points.push(point);
+                            }
                             break;
-                        case 3: //offset draw
-                            offset += 2 + 2 + 2;
-                            console.log(ctx);
-                            break;
+                        }
                         default:
                             console.error('unknown payload type ' + type + ', offset ' + offset + ', event ' + event);
                     }
-                    console.log(offset < dataView.byteLength);
                 }
             }
         });
@@ -58,16 +96,9 @@ export default class WebSocketHandler {
     }
 
     send(payload) {
-        let now = performance.now();
-        if ((now - this.lastSend) > WebSocketHandler.updateInterval) {
-            
-        } else {
-            return;
-        }
         if (this.socket.readyState === WebSocket.OPEN) {
             console.log('sending');
             this.socket.send(payload);
-            this.lastSend = now;
         } else {
             console.error('tried to send payload while websocket was closed' + payload);
         }
@@ -83,36 +114,4 @@ export default class WebSocketHandler {
 
         this.send(buffer);
     }
-
-    sendDraw(x, y) {
-        let buffer = new ArrayBuffer(5);
-        let dataView = new DataView(buffer);
-        let offset = 0;
-
-        dataView.setUint8(offset, 1);
-        offset += 1;
-        dataView.setInt16(offset, x);
-        offset += 2;
-        dataView.setInt16(offset, y);
-        offset += 2;
-
-        this.send(buffer);
-    }
-
-    sendOffsetDraw(offsetX, offsetY) {
-        let buffer = new ArrayBuffer(5);
-        let dataView = new DataView(buffer);
-        let offset = 0;
-
-        dataView.setUint8(offset, 2);
-        offset += 1;
-        dataView.setInt16(offset, offsetX);
-        offset += 2;
-        dataView.setInt16(offset, offsetY);
-        offset += 2;
-
-        this.send(buffer);
-    }
-
-
 }

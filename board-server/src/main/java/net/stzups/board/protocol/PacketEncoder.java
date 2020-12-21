@@ -1,14 +1,13 @@
-package net.stzups.board.room.protocol;
+package net.stzups.board.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import net.stzups.board.room.protocol.server.ServerPacket;
-import net.stzups.board.room.protocol.server.ServerPacketDraw;
-import net.stzups.board.room.protocol.server.ServerPacketId;
-import net.stzups.board.room.protocol.server.ServerPacketOffsetDraw;
+import net.stzups.board.protocol.server.ServerPacket;
+import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.protocol.server.ServerPacketId;
 
 /**
  * Encodes a ServerPacket sent by the server to
@@ -19,9 +18,9 @@ public class PacketEncoder extends MessageToByteEncoder<ServerPacket> {
     protected void encode(ChannelHandlerContext ctx, ServerPacket serverPacket, ByteBuf b) {
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
         ByteBuf byteBuf = binaryWebSocketFrame.content();
-        byteBuf.writeByte(serverPacket.getPacketType().getId()); //todo test with values over 127 (sign issues)
+        byteBuf.writeByte((byte) serverPacket.getPacketType().getId()); //todo test with values over 127 (sign issues)
         if (serverPacket instanceof ServerPacketId) {
-            byteBuf.writeShort(((ServerPacketId) serverPacket).getId());
+            byteBuf.writeShort((short) ((ServerPacketId) serverPacket).getId());
         }
         switch (serverPacket.getPacketType()) {
             case ADD_CLIENT:
@@ -29,13 +28,13 @@ public class PacketEncoder extends MessageToByteEncoder<ServerPacket> {
                 break;
             case DRAW:
                 ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
-                byteBuf.writeShort(packetDraw.getX());
-                byteBuf.writeShort(packetDraw.getY());
-                break;
-            case OFFSET_DRAW:
-                ServerPacketOffsetDraw packetOffsetDraw = (ServerPacketOffsetDraw) serverPacket;
-                byteBuf.writeShort(packetOffsetDraw.getOffsetX());
-                byteBuf.writeShort(packetOffsetDraw.getOffsetY());
+                Point[] points = packetDraw.getPoints();
+                byteBuf.writeByte((byte) points.length);
+                for (Point point : points) {
+                    byteBuf.writeByte((byte) point.dt);
+                    byteBuf.writeShort(point.x);
+                    byteBuf.writeShort(point.y);
+                }
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + serverPacket + " while encoding");

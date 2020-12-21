@@ -3,9 +3,9 @@ package net.stzups.board.room;
 import io.netty.channel.Channel;
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
-import net.stzups.board.room.protocol.server.ServerPacket;
-import net.stzups.board.room.protocol.server.ServerPacketAddClient;
-import net.stzups.board.room.protocol.server.ServerPacketRemoveClient;
+import net.stzups.board.protocol.server.ServerPacket;
+import net.stzups.board.protocol.server.ServerPacketAddClient;
+import net.stzups.board.protocol.server.ServerPacketRemoveClient;
 
 import java.util.HashMap;
 import java.util.Map;
