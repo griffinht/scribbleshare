@@ -9,33 +9,27 @@ export default class Client {
 
     draw(dt) {
         let i;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
         for (i = 0; i < this.points.length; i++) {
             console.log(this.points.length);
             let point = this.points[i];
             if (point.dt === 0) {
+                ctx.stroke();//todo only do this at the end
                 this.x = point.x;
                 this.y = point.y;
+                ctx.moveTo(this.x, this.y);
                 continue;
             }
-            dt -= point.dt;
-            let multiplier;
-            if (dt < 0) {
-                multiplier = point.dt / (dt + point.dt);
-                dt = 0;
-            } else {
-                multiplier = 1;
-            }
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y);
             this.x += point.x;
             this.y += point.y;
             ctx.lineTo(this.x, this.y);
-            ctx.stroke();//todo only do this at the end
             if (dt > 0) { //if dt runs out before the point, then there may still be drawable points
                 break;
             }
             ///otherwise remove from the array, this point has been drawn
         }
+        ctx.stroke();
         this.points.splice(0, i + 1);
     }
 }

@@ -37,6 +37,14 @@ export default class LocalClient extends Client {
                 this.point.dt += now - this.lastTime;
                 this.point.x += event.movementX;
                 this.point.y += event.movementY;
+                if (Math.abs(this.point.x) > 5 || Math.abs(this.point.y) > 5) {
+                    this.pushPoint();
+                    this.point = {
+                        dt:0,
+                        x:0,
+                        y:0,
+                    };
+                }
                 this.lastTime = now;
                 
             }
@@ -45,10 +53,6 @@ export default class LocalClient extends Client {
 
     draw(dt) {
 
-    }
-
-    flushPoints() {
-        
     }
 
     pushPoint() {
@@ -61,15 +65,7 @@ export default class LocalClient extends Client {
 
     getPoints() {
         this.lastSend = performance.now();
-        if (this.point !== null) {
-            this.pushPoint();
 
-            this.point = {
-                dt:0,
-                x:0,
-                y:0.
-            };
-        }
         this.points.forEach(p => console.log(p));
         
         return this.points;
