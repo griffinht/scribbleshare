@@ -23,18 +23,14 @@ import java.util.concurrent.Executors;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
-    private GlobalTrafficShapingHandler globalTrafficShapingHandler;
+    private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
+        @Override
+        protected void doAccounting(TrafficCounter counter) {
+            System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+        }
+    };
     private PacketEncoder packetEncoder = new PacketEncoder();
     private PacketDecoder packetDecoder = new PacketDecoder();
-
-    ServerInitializer() {
-        globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
-            @Override
-            protected void doAccounting(TrafficCounter counter) {
-                System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
-            }
-        };
-    }
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
