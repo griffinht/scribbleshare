@@ -8,11 +8,15 @@ export default class Client {
     }
 
     draw(dt) {
+        let now = performance.now();
         let i;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        for (i = 0; i < this.points.length; i++) {
+        if (this.points.length > 0) {
             console.log(this.points.length);
+        }
+        for (i = 0; i < this.points.length; i++) {
+            //console.log(this.points.length);
             let point = this.points[i];
             if (point.dt === 0) {
                 ctx.stroke();//todo only do this at the end
@@ -24,12 +28,13 @@ export default class Client {
             this.x += point.x;
             this.y += point.y;
             ctx.lineTo(this.x, this.y);
-            if (dt > 0) { //if dt runs out before the point, then there may still be drawable points
-                break;
-            }
             ///otherwise remove from the array, this point has been drawn
         }
         ctx.stroke();
+        if (this.points.length > 0) {
+            console.log((performance.now() - now) + 'time');
+        }
         this.points.splice(0, i + 1);
+        
     }
 }

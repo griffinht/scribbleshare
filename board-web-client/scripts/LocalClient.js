@@ -27,6 +27,12 @@ export default class LocalClient extends Client {
                 this.point = null;
             }
         });
+        canvas.addEventListener('mouseleave', (event) => {
+            if (this.point !== null) {
+                this.pushPoint();
+                this.point = null;
+            }
+        });
         canvas.addEventListener('mousemove', (event) => {
             if (this.point !== null) {
                 ctx.beginPath();
