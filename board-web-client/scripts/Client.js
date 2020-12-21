@@ -13,6 +13,14 @@ export default class Client {
         while (this.points.length > 0 && dt > 0) {
             //console.log(this.points.length);
             let point = this.points[0];
+            if (point.dt === 255) {
+                this.x += point.x;
+                this.y += point.y;
+                ctx.lineTo(this.x, this.y);
+                this.points.splice(0, 1);
+                
+                continue;
+            }
             if (point.dt === 0) {
                 ctx.stroke();//todo only do this at the end
                 this.x = point.x;

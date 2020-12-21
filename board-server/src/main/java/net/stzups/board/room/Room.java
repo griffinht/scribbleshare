@@ -89,7 +89,16 @@ class Room {
         sendPacket(new ServerPacketAddClient(client));
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
-            sendPacket(new ServerPacketDraw(c.getId(), c.getPoints().toArray(new Point[0])), client);
+            List<Point> points = new ArrayList<>(c.getPoints());
+            Point[] pts = new Point[points.size()];
+            int i = 0;
+            for (Point point : points) {
+                if (point.dt != 0) {
+                    point.dt = -1;
+                }
+                pts[i++] = point;
+            }
+            sendPacket(new ServerPacketDraw(c.getId(), pts), client);
         }
         clients.put(client.getId(), client);
         Board.getLogger().info("Added " + client + " to " + this);
