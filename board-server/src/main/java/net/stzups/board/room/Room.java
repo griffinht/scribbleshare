@@ -18,7 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 class Room {
-    private static final int SEND_PERIOD = 100;
+    private static final int SEND_PERIOD = 1000;
     private static final int ROOM_ID_LENGTH = 4;
 
     private static Map<String, Room> rooms = new HashMap<>();
