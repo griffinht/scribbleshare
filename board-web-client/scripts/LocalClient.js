@@ -5,6 +5,7 @@ export default class LocalClient extends Client {
         this.point = null;
         this.lastTime = 0;
         this.lastSend = 0;
+        this.lastDirection = 0;
         this.refresh = true;
         this.points = [];
         console.log(this.point);
@@ -26,7 +27,7 @@ export default class LocalClient extends Client {
                 this.point.dt += now - this.lastTime;
                 this.point.x += event.movementX;
                 this.point.y += event.movementY;
-                if (Math.abs(this.point.x) > 5 || Math.abs(this.point.y) > 5) {
+                if (this.point.dt > 10 && (Math.abs(Math.atan2(this.point.y, this.point.x) - this.lastDirection) > 0.1 || this.point.dt > 100)) {
                     this.pushPoint();
                     this.point = {
                         dt:0,
@@ -64,6 +65,7 @@ export default class LocalClient extends Client {
             this.point.x !== 0 ||
             this.point.y !== 0) {
             this.points.push(this.point);
+            this.lastDirection = Math.atan2(this.point.y, this.point.x);
         }
     }
 
