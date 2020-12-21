@@ -89,10 +89,16 @@ class Room {
      */
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
+        //for the new client
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
-            sendPacket(new ServerPacketDraw(c.getId(), convert(new ArrayList<>(c.getPoints()))), client);
+            List<Point> points = c.getPoints();
+            if (points.size() > 0) {
+                sendPacket(new ServerPacketDraw(c.getId(), convert(new ArrayList<>(points))), client);
+            }
         }
+        //for the existing clients
+        sendPacket(new ServerPacketAddClient(client));
         clients.put(client.getId(), client);
         Board.getLogger().info("Added " + client + " to " + this);
         return client;

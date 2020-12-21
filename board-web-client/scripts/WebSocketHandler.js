@@ -57,12 +57,12 @@ export default class WebSocketHandler {
                     console.log('got ' + type);
                     switch (type) {
                         case 0: {//add client
-                            new Client(dataView.getUint16(offset));
+                            console.log('Add client ', new Client(dataView.getUint16(offset)));
                             offset += 2;
                             break;
                         }
                         case 1: {//remove client
-                            clients.delete(dataView.getUint16(offset));
+                            console.log('Remove client ', clients.delete(dataView.getUint16(offset)));
                             offset += 2;
                             break;
                         }
