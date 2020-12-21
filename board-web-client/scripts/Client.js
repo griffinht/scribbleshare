@@ -8,26 +8,41 @@ export default class Client {
     }
 
     draw(dt) {
-        let i;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        for (i = 0; i < this.points.length; i++) {
+        while (this.points.length > 0 && dt > 0) {
             //console.log(this.points.length);
-            let point = this.points[i];
+            let point = this.points[0];
             if (point.dt === 0) {
                 ctx.stroke();//todo only do this at the end
                 this.x = point.x;
                 this.y = point.y;
                 ctx.moveTo(this.x, this.y);
+                this.points.splice(0, 1);
                 continue;
             }
-            this.x += point.x;
-            this.y += point.y;
-            ctx.lineTo(this.x, this.y);
-            ///otherwise remove from the array, this point has been drawn
+            let multiplier;
+            
+            if (dt + point.usedDt < point.dt) {
+                multiplier = (dt + point.usedDt) / point.dt;
+                ctx.lineTo(this.x + lerp(0, point.x, multiplier), this.y + lerp(0, point.y, multiplier));
+
+                point.usedDt += dt;
+                dt = 0;
+            } else {
+                multiplier = 1;
+                ctx.lineTo(this.x + lerp(0, point.x, multiplier), this.y + lerp(0, point.y, multiplier));
+
+                dt -= point.dt + point.usedDt;
+                this.x += point.x;
+                this.y += point.y;
+                this.points.splice(0, 1);
+            }
         }
         ctx.stroke();
-        this.points.splice(0, i + 1);
-        
     }
+}
+
+function lerp(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t;
 }

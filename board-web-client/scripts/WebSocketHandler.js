@@ -79,6 +79,7 @@ export default class WebSocketHandler {
                                 offset += 2;
                                 point.y = dataView.getInt16(offset);
                                 offset += 2;
+                                point.usedDt = 0;
                                 client.points.push(point);
                             }
                             break;
