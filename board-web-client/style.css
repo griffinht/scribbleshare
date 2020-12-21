@@ -20,8 +20,32 @@ body {
     flex: 1 1 auto;
 }
 
-#header {
-    height: 50px;
-    width: 100%;
+.header {
     background-color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header * {
+    padding: .2em;
+    font-size: 2.5em;
+    font-family: serif;
+}
+
+.header p {
+    color: white;
+}
+
+.header button {
+    border: .08em solid gray;
+}
+
+.header button:focus {
+    outline: none;
+}
+
+.header button:active {
+    box-shadow: inset 0 0 .5em #c1c1c1;
 }
