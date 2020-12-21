@@ -7,6 +7,7 @@ function resizeCanvas() {
         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         canvas.width = canvas.parentElement.offsetWidth;
         canvas.height = canvas.parentElement.offsetHeight;
+        ctx.putImageData(imageData, 0, 0);
         //todo redraw?
 };
 resizeCanvas();
