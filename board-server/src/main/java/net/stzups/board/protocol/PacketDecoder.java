@@ -28,7 +28,6 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
             ClientPacket packet;
-            System.out.println(packetType);
             switch (packetType) {
                 case DRAW:
                     Point[] points = new Point[byteBuf.readUnsignedByte()];
