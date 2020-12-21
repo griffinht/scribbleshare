@@ -104,6 +104,11 @@ class Room {
         return client;
     }
 
+    /**
+     * Converts a List<Point> to Point[], and marks them as instant draw
+     * @param points points to convert
+     * @return converted points
+     */
     private static Point[] convert(List<Point> points) {
         Point[] pts = new Point[points.size()];
         int i = 0;
