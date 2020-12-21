@@ -3,6 +3,25 @@
     padding: 0;
 }
 
-canvas {
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-flow: column;
+}
+
+#canvas {
     display: block;
+}
+
+#canvasWrapper {
+    flex: 1 1 auto;
+}
+
+#header {
+    height: 50px;
+    width: 100%;
+    background-color: black;
 }
