@@ -34,13 +34,16 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private int nextClientId = 0;
+    private int nextClientId = 1; //0 is reserved for room client
 
     private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for int keys
+    private Client emptyClient;
     private String id;
 
     private Room(String id) {
         this.id = id;
+        emptyClient = new EmptyClient(0);
+        clients.put(emptyClient.getId(), emptyClient);
     }
 
     /**
@@ -86,26 +89,29 @@ class Room {
      */
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
-        sendPacket(new ServerPacketAddClient(client));
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
-            List<Point> points = new ArrayList<>(c.getPoints());
-            Point[] pts = new Point[points.size()];
-            int i = 0;
-            for (Point point : points) {
-                if (point.dt != 0) {
-                    point.dt = -1;
-                }
-                pts[i++] = point;
-            }
-            sendPacket(new ServerPacketDraw(c.getId(), pts), client);
+            sendPacket(new ServerPacketDraw(c.getId(), convert(new ArrayList<>(c.getPoints()))), client);
         }
         clients.put(client.getId(), client);
         Board.getLogger().info("Added " + client + " to " + this);
         return client;
     }
 
+    private static Point[] convert(List<Point> points) {
+        Point[] pts = new Point[points.size()];
+        int i = 0;
+        for (Point point : points) {
+            if (point.dt != 0) {
+                point.dt = -1;
+            }
+            pts[i++] = point;
+        }
+        return pts;
+    }
+
     void removeClient(Client client) {
+        emptyClient.addPoints(client.getPoints().toArray(new Point[0]));
         clients.remove(client.getId());
         sendPacket(new ServerPacketRemoveClient(client));
         Board.getLogger().info("Removed " + client + " to " + this);

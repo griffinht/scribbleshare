@@ -31,10 +31,6 @@ public class Client {
         return points;
     }
 
-    Channel getChannel() {
-        return channel;
-    }
-
     void addPacket(ServerPacket serverPacket) {
         packets.add(serverPacket);
     }
