@@ -26,7 +26,7 @@ export default class LocalClient extends Client {
                 this.point.dt += now - this.lastTime;
                 this.point.x += event.movementX;
                 this.point.y += event.movementY;
-                if (this.point.dt > 10 && (Math.abs(Math.atan2(this.point.y, this.point.x) - this.lastDirection) > 0.1 || this.point.dt > 100)) {
+                if (this.point.dt > 10 && (Math.abs(Math.atan2(this.point.y, this.point.x) - this.lastDirection) > 0.1 || this.point.dt > UPDATE_INTERVAL)) {
                     this.pushPoint();
                     this.point = {
                         dt:0,

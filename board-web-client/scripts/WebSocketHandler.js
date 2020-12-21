@@ -1,8 +1,6 @@
 import Client from './Client.js'
 
 export default class WebSocketHandler {
-    static UPDATE_INTERVAL = 1000/10;
-    
     constructor() {
         inviteButton.innerHTML = "Connecting...";//todo add spinner
 
@@ -39,7 +37,7 @@ export default class WebSocketHandler {
                 points.length = 0;//clear
 
                 this.send(buffer);
-            }, WebSocketHandler.UPDATE_INTERVAL);
+            }, UPDATE_INTERVAL);
         });
 
         this.socket.addEventListener('close', (event) => {
