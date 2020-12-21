@@ -11,12 +11,12 @@ export default class LocalClient extends Client {
         canvas.addEventListener('mousedown', (event) => {
             this.lastTime = performance.now();
             this.points.push({
-                dt:this.lastTime - this.lastSend,
+                dt:0,
                 x:event.x,
                 y:event.y,
             })
             this.point = {
-                dt:0,
+                dt:this.lastTime - this.lastSend,
                 x:0,
                 y:0,
             }
@@ -71,8 +71,6 @@ export default class LocalClient extends Client {
             };
         }
         this.points.forEach(p => console.log(p));
-        
-        console.log('asd');
         
         return this.points;
     }
