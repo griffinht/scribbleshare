@@ -17,6 +17,6 @@ public class EmptyClient extends Client {
 
     @Override
     public String toString() {
-        return "Fake" + super.toString();
+        return "FakeClient{id=" + getId() + "}";
     }
 }
