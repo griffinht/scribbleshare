@@ -3,17 +3,36 @@ package net.stzups.board.room;
 import io.netty.channel.Channel;
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
+import net.stzups.board.protocol.Point;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketAddClient;
+import net.stzups.board.protocol.server.ServerPacketDraw;
 import net.stzups.board.protocol.server.ServerPacketRemoveClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 class Room {
+    private static final int SEND_PERIOD = 100;
     private static final int ROOM_ID_LENGTH = 4;
 
     private static Map<String, Room> rooms = new HashMap<>();
+    static {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                for (Room room : rooms.values()) {
+                    for (Client client : room.clients.values()) {
+                        client.sendPackets();
+                    }
+                }
+            }
+        }, 0, SEND_PERIOD);
+    }
 
     private int nextClientId = 0;
 
@@ -68,10 +87,13 @@ class Room {
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
         sendPacket(new ServerPacketAddClient(client));
+        List<ServerPacket> serverPackets = new ArrayList<>();
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
+            serverPackets.add(new ServerPacketDraw(client.getId(), c.getPoints().toArray(new Point[0])));
         }
         clients.put(client.getId(), client);
+        sendPackets(serverPackets, client);
         Board.getLogger().info("Added " + client + " to " + this);
         return client;
     }
@@ -90,19 +112,30 @@ class Room {
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
         for (Client client : clients.values()) {
             if (except != client) {
-                client.getChannel().writeAndFlush(serverPacket);
+                client.addPacket(serverPacket);
             }
         }
     }
 
     /**
-     * Send packet to client
+     * Send packet to a client
      *
      * @param serverPacket the packet to send
      * @param client the client to send to
      */
     void sendPacket(ServerPacket serverPacket, Client client) {
-        client.getChannel().writeAndFlush(serverPacket);
+        client.addPacket(serverPacket);
+    }
+
+    /**
+     * Send multiple packets to a client
+     * @param serverPackets the packets to send
+     * @param client the client to sent to
+     */
+    void sendPackets(List<ServerPacket> serverPackets, Client client){
+        for (ServerPacket serverPacket : serverPackets) {
+            client.addPacket(serverPacket);
+        }
     }
 
     /**
@@ -112,7 +145,7 @@ class Room {
      */
     void sendPacket(ServerPacket serverPacket) {
         for (Client client : clients.values()) {
-            client.getChannel().writeAndFlush(serverPacket);
+            client.addPacket(serverPacket);
         }
     }
 

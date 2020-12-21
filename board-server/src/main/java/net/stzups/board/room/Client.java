@@ -1,12 +1,18 @@
 package net.stzups.board.room;
 
 import io.netty.channel.Channel;
+import net.stzups.board.protocol.Point;
+import net.stzups.board.protocol.server.ServerPacket;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Client {
     private int id;
     private Channel channel;
-    private int x = 0;
-    private int y = 0;
+    private List<Point> points = new ArrayList<>();
+    private List<ServerPacket> packets = new ArrayList<>();
 
     Client(int id, Channel channel) {
         this.id = id;
@@ -17,21 +23,27 @@ public class Client {
         return id;
     }
 
-    void updatePosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+    void addPoints(Point[] points) {
+        this.points.addAll(Arrays.asList(points));
     }
 
-    int getX() {
-        return x;
-    }
-
-    int getY() {
-        return y;
+    List<Point> getPoints() {
+        return points;
     }
 
     Channel getChannel() {
         return channel;
+    }
+
+    void addPacket(ServerPacket serverPacket) {
+        packets.add(serverPacket);
+    }
+
+    void sendPackets() {
+        if (packets.size() > 0) {
+            channel.writeAndFlush(packets);
+            packets = new ArrayList<>();
+        }
     }
 
     @Override

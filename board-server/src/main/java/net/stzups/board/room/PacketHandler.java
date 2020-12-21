@@ -23,6 +23,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         switch (packet.getPacketType()) {
             case DRAW:
                 ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
+                client.addPoints(clientPacketDraw.getPoints());
                 room.sendPacketExcept(new ServerPacketDraw(client.getId(), clientPacketDraw.getPoints()), client);
                 break;
             case OPEN:
