@@ -19,8 +19,8 @@ export default class LocalClient extends Client {
         canvas.addEventListener('mousemove', (event) => {
             if (event.buttons & 1 && this.point !== null) {
                 ctx.beginPath();
-                ctx.moveTo(event.x - event.movementX, event.y - event.movementY);
-                ctx.lineTo(event.x, event.y);
+                ctx.moveTo(event.offsetX - event.movementX, event.offsetY - event.movementY);
+                ctx.lineTo(event.offsetX, event.offsetY);
                 ctx.stroke();
                 let now = performance.now();
                 this.point.dt += now - this.lastTime;
@@ -48,8 +48,8 @@ export default class LocalClient extends Client {
             this.lastTime = performance.now();
             this.points.push({
                 dt:0,
-                x:event.x,
-                y:event.y,
+                x:event.offsetX,
+                y:event.offsetY,
             })
             this.point = {
                 dt:this.lastTime - this.lastSend,
