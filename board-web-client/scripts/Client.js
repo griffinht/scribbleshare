@@ -8,13 +8,9 @@ export default class Client {
     }
 
     draw(dt) {
-        let now = performance.now();
         let i;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        if (this.points.length > 0) {
-            console.log(this.points.length);
-        }
         for (i = 0; i < this.points.length; i++) {
             //console.log(this.points.length);
             let point = this.points[i];
@@ -31,9 +27,6 @@ export default class Client {
             ///otherwise remove from the array, this point has been drawn
         }
         ctx.stroke();
-        if (this.points.length > 0) {
-            console.log((performance.now() - now) + 'time');
-        }
         this.points.splice(0, i + 1);
         
     }

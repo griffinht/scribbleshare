@@ -8,7 +8,6 @@ export default class LocalClient extends Client {
         this.lastDirection = 0;
         this.refresh = true;
         this.points = [];
-        console.log(this.point);
         canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
         canvas.addEventListener('mouseup', (event) => {
             if (this.point !== null) {
@@ -71,8 +70,6 @@ export default class LocalClient extends Client {
 
     getPoints() {
         this.lastSend = performance.now();
-
-        this.points.forEach(p => console.log(p));
         
         return this.points;
     }
