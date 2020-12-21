@@ -8,33 +8,16 @@ export default class LocalClient extends Client {
         this.refresh = true;
         this.points = [];
         console.log(this.point);
-        canvas.addEventListener('mousedown', (event) => {
-            this.lastTime = performance.now();
-            this.points.push({
-                dt:0,
-                x:event.x,
-                y:event.y,
-            })
-            this.point = {
-                dt:this.lastTime - this.lastSend,
-                x:0,
-                y:0,
-            }
-        });
+        canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
         canvas.addEventListener('mouseup', (event) => {
             if (this.point !== null) {
                 this.pushPoint();
                 this.point = null;
             }
         });
-        canvas.addEventListener('mouseleave', (event) => {
-            if (this.point !== null) {
-                this.pushPoint();
-                this.point = null;
-            }
-        });
+        canvas.addEventListener('mouseenter', (event) => {this.mousedown(event)});
         canvas.addEventListener('mousemove', (event) => {
-            if (this.point !== null) {
+            if (event.buttons & 1 && this.point !== null) {
                 ctx.beginPath();
                 ctx.moveTo(event.x - event.movementX, event.y - event.movementY);
                 ctx.lineTo(event.x, event.y);
@@ -52,13 +35,28 @@ export default class LocalClient extends Client {
                     };
                 }
                 this.lastTime = now;
-                
             }
         });
     }
 
     draw(dt) {
 
+    }
+
+    mousedown(event) {
+        if (event.buttons & 1) {
+            this.lastTime = performance.now();
+            this.points.push({
+                dt:0,
+                x:event.x,
+                y:event.y,
+            })
+            this.point = {
+                dt:this.lastTime - this.lastSend,
+                x:0,
+                y:0,
+            }
+        }
     }
 
     pushPoint() {
