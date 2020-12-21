@@ -7,6 +7,7 @@ import net.stzups.board.protocol.Point;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketAddClient;
 import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.protocol.server.ServerPacketOpen;
 import net.stzups.board.protocol.server.ServerPacketRemoveClient;
 
 import java.util.ArrayList;
@@ -90,6 +91,7 @@ class Room {
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
         //for the new client
+        sendPacket(new ServerPacketOpen(id), client);
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
             List<Point> points = c.getPoints();

@@ -8,7 +8,9 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketDraw;
 import net.stzups.board.protocol.server.ServerPacketId;
+import net.stzups.board.protocol.server.ServerPacketOpen;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -38,6 +40,12 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                         byteBuf.writeShort(point.x);
                         byteBuf.writeShort(point.y);
                     }
+                    break;
+                case OPEN:
+                    ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
+                    byte[] buffer = serverPacketOpen.getId().getBytes(StandardCharsets.UTF_8);
+                    byteBuf.writeByte((byte) buffer.length);
+                    byteBuf.writeBytes(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported packet type " + serverPacket + " while encoding");

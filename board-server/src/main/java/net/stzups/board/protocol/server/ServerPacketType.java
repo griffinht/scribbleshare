@@ -9,6 +9,7 @@ public enum ServerPacketType {
     ADD_CLIENT(0),
     REMOVE_CLIENT(1),
     DRAW(2),
+    OPEN(3),
     ;
 
     private static Map<Integer, ServerPacketType> packetTypeMap = new IntObjectHashMap<>();

@@ -4,6 +4,8 @@ export default class WebSocketHandler {
     static UPDATE_INTERVAL = 1000/10;
     
     constructor() {
+        inviteButton.innerHTML = "Connecting...";//todo add spinner
+
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
 
@@ -82,6 +84,15 @@ export default class WebSocketHandler {
                                 point.usedDt = 0;
                                 client.points.push(point);
                             }
+                            break;
+                        }
+                        case 3: {//open
+                            let length = dataView.getUint8(offset);
+                            offset += 1;
+                            let roomName = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            offset += length;
+                            console.log(roomName, length);
+                            inviteButton.innerHTML = roomName;//todo add spinner
                             break;
                         }
                         default:

@@ -26,7 +26,7 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-document.getElementById('inviteButton').addEventListener('click', (event) => {
+inviteButton.addEventListener('click', (event) => {
     if (socket == null) {
         socket = new WebSocketHandler();
     }
