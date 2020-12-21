@@ -32,7 +32,7 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                 case DRAW:
                     ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
                     Point[] points = packetDraw.getPoints();
-                    byteBuf.writeByte((byte) points.length);
+                    byteBuf.writeShort((short) points.length);
                     for (Point point : points) {
                         byteBuf.writeByte((byte) point.dt);
                         byteBuf.writeShort(point.x);

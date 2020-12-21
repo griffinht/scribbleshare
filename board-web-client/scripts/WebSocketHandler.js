@@ -69,8 +69,8 @@ export default class WebSocketHandler {
                         case 2: {//draw
                             let client = clients.get(dataView.getUint16(offset));
                             offset += 2;
-                            let size = dataView.getUint8(offset);
-                            offset += 1;
+                            let size = dataView.getUint16(offset);
+                            offset += 2;
                             for (let i = 0; i < size; i++) {
                                 let point = {};
                                 point.dt = dataView.getUint8(offset);
@@ -85,7 +85,7 @@ export default class WebSocketHandler {
                             break;
                         }
                         default:
-                            console.error('unknown payload type ' + type + ', offset ' + offset + ', event ' + event);
+                            console.error('unknown payload type ' + type + ', offset ' + offset + ', event ', event);
                     }
                 }
             }
