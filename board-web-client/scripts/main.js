@@ -12,8 +12,8 @@ function resizeCanvas() {
 };
 resizeCanvas();
 
-const socket = new WebSocketHandler();
 localClient = new LocalClient();
+var socket = null;
 
 let last = performance.now();
 function draw(now) {
@@ -25,3 +25,9 @@ function draw(now) {
     window.requestAnimationFrame(draw);
 }
 window.requestAnimationFrame(draw);
+
+document.getElementById('inviteButton').addEventListener('click', (event) => {
+    if (socket == null) {
+        socket = new WebSocketHandler();
+    }
+});
