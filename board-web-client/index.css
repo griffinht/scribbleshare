@@ -1,0 +1,11 @@
+#canvas {
+    display: block;
+}
+
+#canvasWrapper {
+    flex: 1 1 auto;
+}
+
+#inviteButton {
+    margin-left: auto;
+}
