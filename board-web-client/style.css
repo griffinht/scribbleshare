@@ -7,25 +7,32 @@ html, body {
     height: 100%;
 }
 
+a {
+    color: white;
+    text-decoration: none;
+}
+
+a:hover {
+    color: lightgray;
+}
+
+a:active {
+    color: gray;
+}
+
+
 body {
     display: flex;
     flex-flow: column;
-}
-
-#canvas {
-    display: block;
-}
-
-#canvasWrapper {
-    flex: 1 1 auto;
 }
 
 .header {
     background-color: black;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    height: 5em;
 }
 
 .header * {
@@ -40,6 +47,7 @@ body {
 
 .header button {
     border: .08em solid gray;
+    height: 100%;
 }
 
 .header button:focus {
