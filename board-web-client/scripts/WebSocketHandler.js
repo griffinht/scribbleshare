@@ -115,13 +115,20 @@ export default class WebSocketHandler {
     }
 
     sendOpen() {
-        let buffer = new ArrayBuffer(1);
+        let encoded = new TextEncoder().encode(document.location.href.substring(document.location.href.lastIndexOf("/") + 1));
+        let buffer = new ArrayBuffer(2 + encoded.length);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 0);
         offset += 1;
+        
+        dataView.setUint8(offset, encoded.byteLength);
+        offset += 1;
 
-        this.send(buffer);
+        let newBuffer = new Uint8Array(buffer);
+        newBuffer.set(encoded, offset);
+
+        this.send(newBuffer);
     }
 }

@@ -80,8 +80,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendRedirect(ctx, uri + "index.html");
             return;
         }*/
-        System.out.println(uri);
-        System.out.println("/r/");
         if (uri.startsWith("/r/")) {
             //room code
             uri = "/index.html";
@@ -90,7 +88,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         } else if (uri.endsWith("/")) {
             uri += "index.html";
         }
-        System.out.println(uri);
         final String path = sanitizeUri(uri);
         if (path == null) {
             sendError(ctx, HttpResponseStatus.FORBIDDEN); //todo return not found instead

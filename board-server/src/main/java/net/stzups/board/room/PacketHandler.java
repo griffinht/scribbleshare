@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.Board;
 import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketDraw;
+import net.stzups.board.protocol.client.ClientPacketOpen;
 import net.stzups.board.protocol.server.ServerPacketDraw;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
@@ -27,6 +28,8 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 room.sendPacketExcept(new ServerPacketDraw(client.getId(), clientPacketDraw.getPoints()), client);
                 break;
             case OPEN:
+                ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
+                System.out.println(clientPacketOpen.getId() + "pog");
                 if (room == null) {
                     room = Room.getRoom();
                     client = room.addClient(ctx.channel());
