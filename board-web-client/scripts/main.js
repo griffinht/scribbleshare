@@ -31,3 +31,8 @@ inviteButton.addEventListener('click', (event) => {
         socket = new WebSocketHandler();
     }
 });
+
+let index = document.location.href.lastIndexOf("/");
+if (document.location.href.substring(index - 2, index + 1) === '/r/') {
+    socket = new WebSocketHandler();
+}

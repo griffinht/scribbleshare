@@ -75,7 +75,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
-        final String uri = request.uri();
+        String uri = request.uri();
+        /*if (uri.equals("/")) { //default directory
+            sendRedirect(ctx, uri + "index.html");
+            return;
+        }*/
+        if (uri.startsWith("/r/")) {
+            //room code
+            uri = "/index.html";
+        } else if (!uri.endsWith("/") && !uri.contains(".")) {
+            uri += ".html";
+        } else if (uri.endsWith("/")) {
+            uri += "index.html";
+        }
         final String path = sanitizeUri(uri);
         if (path == null) {
             sendError(ctx, HttpResponseStatus.FORBIDDEN); //todo return not found instead
@@ -89,7 +101,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         if (file.isDirectory()) {
-            sendRedirect(ctx, uri + ((uri.endsWith("/") ? "" : "/") + "index.html"));
+            sendError(ctx, HttpResponseStatus.FORBIDDEN);
+            //sendRedirect(ctx, uri + ((uri.endsWith("/") ? "" : "/") + "index.html"));
             return;
         }
 

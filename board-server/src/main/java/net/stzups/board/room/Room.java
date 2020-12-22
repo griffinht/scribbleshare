@@ -52,7 +52,7 @@ class Room {
      *
      * @return the created room
      */
-    static Room createRoom() {
+    private static Room createRoom() {
         String id;
         do {
             id = String.valueOf((int) (Math.random() * Math.pow(10, ROOM_ID_LENGTH)));
@@ -63,16 +63,15 @@ class Room {
     }
 
     /**
-     * for testing purposes, get the first room that already exists
-     * if no rooms exist, one will be made
+     * Gets the corresponding room for an id
      *
      * @return the newly created or existing room
      */
-    static Room getRoom() {
-        if (rooms.size() == 0) {
+    static Room getRoom(String id) {
+        if (id.equals("")) {
             return createRoom();
         } else {
-            return rooms.values().iterator().next();
+            return rooms.get(id);
         }
     }
 
