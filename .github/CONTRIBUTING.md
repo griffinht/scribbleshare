@@ -24,7 +24,6 @@ Modifying `board-server` will require you to recompile the project and restart t
 Modifying `board-web-client` only requires you to refresh your browser. If you do not see your new changes, then use `Ctrl+F5` to also reset your browser cache.
 
 ## Contributing to `board-server`
-
 It is recommended to use an IDE such as [IntelliJ IDEA](https://www.jetbrains.com/idea/) if you plan on contributing to `board-server`.
 
 - Keep things IDE agnostic - avoid checking in IDE specific files (.iml, .idea, etc.) to version control
