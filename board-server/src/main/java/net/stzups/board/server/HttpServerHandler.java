@@ -76,6 +76,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
         final String uri = request.uri();
+        if (uri.equals("/")) { //default directory
+            sendRedirect(ctx, uri + "real-time-web-client");
+            return;
+        }
         final String path = sanitizeUri(uri);
         if (path == null) {
             sendError(ctx, HttpResponseStatus.FORBIDDEN); //todo return not found instead
@@ -195,6 +199,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return null;
         }
 
+        if (!uri.endsWith("/") && !uri.contains(".")) {
+            uri += ".html";
+        }
         // Convert to absolute path.
         return SystemPropertyUtil.get("user.dir") + uri;
     }
