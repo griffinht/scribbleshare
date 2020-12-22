@@ -89,8 +89,13 @@ export default class WebSocketHandler {
                             offset += 1;
                             let roomName = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
+                            window.history.pushState(roomName, document.title, '/r/' + roomName);
                             console.log(roomName, length);
                             inviteButton.innerHTML = roomName;//todo add spinner
+                            break;
+                        }
+                        case 4: {//wrong room
+                            inviteButton.innerHTML = 'Invalid room id';//todo add spinner
                             break;
                         }
                         default:

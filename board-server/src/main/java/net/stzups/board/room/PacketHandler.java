@@ -7,6 +7,9 @@ import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketDraw;
 import net.stzups.board.protocol.client.ClientPacketOpen;
 import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.protocol.server.ServerPacketWrongRoom;
+
+import java.util.Collections;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     private Room room;
@@ -22,21 +25,26 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ClientPacket packet) {
         switch (packet.getPacketType()) {
-            case DRAW:
+            case DRAW: {
                 ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
                 client.addPoints(clientPacketDraw.getPoints());
                 room.sendPacketExcept(new ServerPacketDraw(client.getId(), clientPacketDraw.getPoints()), client);
                 break;
-            case OPEN:
-                ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
-                System.out.println(clientPacketOpen.getId() + "pog");
+            }
+            case OPEN: {
                 if (room == null) {
-                    room = Room.getRoom();
-                    client = room.addClient(ctx.channel());
+                    ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
+                    room = Room.getRoom(clientPacketOpen.getId());
+                    if (room != null) {
+                        client = room.addClient(ctx.channel());
+                    } else {
+                        ctx.writeAndFlush(Collections.singletonList(new ServerPacketWrongRoom()));
+                    }
                 } else {
                     Board.getLogger().warning(client + " tried to open a new room when it was already open");
                 }
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
         }

@@ -30,8 +30,9 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
             switch (serverPacket.getPacketType()) {
                 case ADD_CLIENT:
                 case REMOVE_CLIENT:
+                case WRONG_ROOM:
                     break;
-                case DRAW:
+                case DRAW: {
                     ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
                     Point[] points = packetDraw.getPoints();
                     byteBuf.writeShort((short) points.length);
@@ -41,12 +42,14 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                         byteBuf.writeShort(point.y);
                     }
                     break;
-                case OPEN:
+                }
+                case OPEN: {
                     ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
                     byte[] buffer = serverPacketOpen.getId().getBytes(StandardCharsets.UTF_8);
                     byteBuf.writeByte((byte) buffer.length);
                     byteBuf.writeBytes(buffer);
                     break;
+                }
                 default:
                     throw new UnsupportedOperationException("Unsupported packet type " + serverPacket + " while encoding");
             }
