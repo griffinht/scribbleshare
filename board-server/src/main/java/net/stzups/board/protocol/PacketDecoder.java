@@ -13,6 +13,7 @@ import net.stzups.board.protocol.client.ClientPacketOpen;
 import net.stzups.board.protocol.client.ClientPacketType;
 
 import javax.naming.OperationNotSupportedException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -37,7 +38,9 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     packet = new ClientPacketDraw(points);
                     break;
                 case OPEN:
-                    packet = new ClientPacketOpen();
+                    byte[] buffer = new byte[byteBuf.readUnsignedByte()];
+                    byteBuf.readBytes(buffer);
+                    packet = new ClientPacketOpen(new String(buffer, StandardCharsets.UTF_8));
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");
