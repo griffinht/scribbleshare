@@ -4,8 +4,30 @@
 
 #canvasWrapper {
     flex: 1 1 auto;
+    height: calc(100vh - 5em);
 }
 
 #inviteButton {
     margin-left: auto;
+}
+
+aside {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 5em;
+    background-color: lightgray;
+    height: calc(100vh - 5em);
+}
+
+aside * {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: .2em;
+    font-size: 2.5em;
+    font-family: serif;
+}
+
+aside button {
+    width: 100%;
 }

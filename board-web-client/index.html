@@ -10,13 +10,19 @@
         <script type="module" src="/scripts/main.js"></script>
     </head>
     <body>
-        <div class="header">
-            <a href="/">board</a>
-            <a href="/about-board">about</a>
-            <button id="inviteButton">invite</button>
-        </div>
-        <div id="canvasWrapper">
-            <canvas id="canvas"></canvas>
+        <div class="wrapper">
+            <header>
+                <a href="/">board</a>
+                <a href="/about-board">about</a>
+                <button id="inviteButton">invite</button>
+            </header>
+            <aside>
+                <button id="stuffButton">+</button>
+                <p>my stuff</p>
+            </aside>
+            <section id="canvasWrapper">
+                <canvas id="canvas"></canvas>
+            </section>
         </div>
         <script src="/scripts/globals.js"></script>
     </body>

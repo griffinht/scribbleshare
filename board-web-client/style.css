@@ -26,34 +26,45 @@ body {
     flex-flow: column;
 }
 
-.header {
+header {
     background-color: black;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     height: 5em;
+    width: 100%;
 }
 
-.header * {
+header * {
     padding: .2em;
     font-size: 2.5em;
     font-family: serif;
 }
 
-.header p {
+header p {
     color: white;
 }
 
-.header button {
-    border: .08em solid gray;
+header button {
     height: 100%;
 }
 
-.header button:focus {
+button {
+    border: .08em solid gray;
+}
+
+button:focus {
     outline: none;
 }
 
-.header button:active {
+button:active {
     box-shadow: inset 0 0 .5em #c1c1c1;
+}
+
+.wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
