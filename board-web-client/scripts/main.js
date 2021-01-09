@@ -1,6 +1,8 @@
 import LocalClient from './LocalClient.js';
 import WebSocketHandler from './WebSocketHandler.js'
+import Sidebar from './Sidebar.js'
 
+new Sidebar();
 // handle resize
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
