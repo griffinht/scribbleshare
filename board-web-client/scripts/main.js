@@ -7,12 +7,10 @@ new Sidebar();
 new Canvas();
 
 localClient = new LocalClient();
-var socket = null;
+var socket = new WebSocketHandler();
 
 inviteButton.addEventListener('click', (event) => {
-    if (socket == null) {
-        socket = new WebSocketHandler();
-    }
+    socket.sendOpen();
 });
 
 let index = document.location.href.lastIndexOf("/");

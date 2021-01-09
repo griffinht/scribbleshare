@@ -9,7 +9,7 @@ export default class WebSocketHandler {
 
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            this.sendOpen();
+            inviteButton.innerHTML = "Invite";
             setInterval(() => {
                 let points  = localClient.getPoints();
                 if (points.length === 0) {
