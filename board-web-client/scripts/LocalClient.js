@@ -6,6 +6,8 @@ export default class LocalClient extends Client {
         this.lastTime = 0;
         this.lastSend = 0;
         this.lastDirection = 0;
+        this.lastX = 0;
+        this.lastY = 0;
         this.refresh = true;
         this.points = [];
         canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
@@ -24,14 +26,14 @@ export default class LocalClient extends Client {
                 ctx.stroke();
                 let now = performance.now();
                 this.point.dt += now - this.lastTime;
-                this.point.x += event.movementX;
-                this.point.y += event.movementY;
-                if (this.point.dt > 10 && (Math.abs(Math.atan2(this.point.y, this.point.x) - this.lastDirection) > 0.1 || this.point.dt > UPDATE_INTERVAL)) {
+                this.point.x = event.offsetX;
+                this.point.y = event.offsetY;
+                if (this.point.dt > 10 && (Math.abs(Math.atan2(this.point.y - this.lastX, this.point.x - this.lastY) - this.lastDirection) > 0.1 || this.point.dt > UPDATE_INTERVAL)) {
                     this.pushPoint();
                     this.point = {
                         dt:0,
-                        x:0,
-                        y:0,
+                        x:this.point.x,
+                        y:this.point.y,
                     };
                 }
                 this.lastTime = now;
@@ -53,9 +55,11 @@ export default class LocalClient extends Client {
             })
             this.point = {
                 dt:this.lastTime - this.lastSend,
-                x:0,
-                y:0,
+                x:event.offsetX,
+                y:event.offsetY,
             }
+            this.lastX = event.offsetX;
+            this.lastY = event.offsetY;
         }
     }
 

@@ -14,8 +14,8 @@ export default class Client {
             //console.log(this.points.length);
             let point = this.points[0];
             if (point.dt === 255) {
-                this.x += point.x;
-                this.y += point.y;
+                this.x = point.x;
+                this.y = point.y;
                 ctx.lineTo(this.x, this.y);
                 this.points.splice(0, 1);
                 
@@ -29,21 +29,20 @@ export default class Client {
                 this.points.splice(0, 1);
                 continue;
             }
-            let multiplier;
-            
+
             if (dt + point.usedDt < point.dt) {
-                multiplier = (dt + point.usedDt) / point.dt;
-                ctx.lineTo(this.x + lerp(0, point.x, multiplier), this.y + lerp(0, point.y, multiplier));
+                let multiplier = (dt + point.usedDt) / point.dt;
+                ctx.lineTo(lerp(this.x, point.x, multiplier), lerp(this.y, point.y, multiplier));
 
                 point.usedDt += dt;
                 dt = 0;
             } else {
-                multiplier = 1;
-                ctx.lineTo(this.x + lerp(0, point.x, multiplier), this.y + lerp(0, point.y, multiplier));
+                this.x = point.x;
+                this.y = point.y;
+                ctx.lineTo(this.x, this.y);
 
                 dt -= point.dt + point.usedDt;
-                this.x += point.x;
-                this.y += point.y;
+                
                 this.points.splice(0, 1);
             }
         }
