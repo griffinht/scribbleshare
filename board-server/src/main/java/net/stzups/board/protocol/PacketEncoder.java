@@ -30,7 +30,6 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
             switch (serverPacket.getPacketType()) {
                 case ADD_CLIENT:
                 case REMOVE_CLIENT:
-                case WRONG_ROOM:
                     break;
                 case DRAW: {
                     ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
@@ -45,9 +44,8 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                 }
                 case OPEN: {
                     ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
-                    byte[] buffer = serverPacketOpen.getId().getBytes(StandardCharsets.UTF_8);
-                    byteBuf.writeByte((byte) buffer.length);
-                    byteBuf.writeBytes(buffer);
+                    writeString(serverPacketOpen.getDocument().getId(), byteBuf);
+                    writeString(serverPacketOpen.getDocument().getName(), byteBuf);
                     break;
                 }
                 default:
@@ -55,5 +53,14 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
             }
         }
         ctx.writeAndFlush(binaryWebSocketFrame);
+    }
+
+    private void writeString(String string, ByteBuf byteBuf) {
+        if (string.length() > 0xff) {
+            throw new UnsupportedOperationException("String too long");
+        }
+        byte[] buffer = string.getBytes(StandardCharsets.UTF_8);
+        byteBuf.writeByte((byte) buffer.length);
+        byteBuf.writeBytes(buffer);
     }
 }

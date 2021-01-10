@@ -40,7 +40,13 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                 case OPEN:
                     byte[] buffer = new byte[byteBuf.readUnsignedByte()];
                     byteBuf.readBytes(buffer);
-                    packet = new ClientPacketOpen(new String(buffer, StandardCharsets.UTF_8));
+                    String string = new String(buffer, StandardCharsets.UTF_8);
+                    int index = string.indexOf("\n");
+                    if (index != -1) {
+                        packet = new ClientPacketOpen(string.substring(0, index), string.substring(index + 1));
+                    } else {
+                        packet = new ClientPacketOpen(string, null);
+                    }
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");

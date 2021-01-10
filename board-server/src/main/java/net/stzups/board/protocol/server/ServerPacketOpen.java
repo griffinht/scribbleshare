@@ -1,14 +1,16 @@
 package net.stzups.board.protocol.server;
 
-public class ServerPacketOpen extends ServerPacket {
-    private String id;
+import net.stzups.board.room.Document;
 
-    public ServerPacketOpen(String id) {
+public class ServerPacketOpen extends ServerPacket {
+    private Document document;
+
+    public ServerPacketOpen(Document document) {
         super(ServerPacketType.OPEN);
-        this.id = id;
+        this.document = document;
     }
 
-    public String getId() {
-        return id;
+    public Document getDocument() {
+        return document;
     }
 }

@@ -7,9 +7,6 @@ import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketDraw;
 import net.stzups.board.protocol.client.ClientPacketOpen;
 import net.stzups.board.protocol.server.ServerPacketDraw;
-import net.stzups.board.protocol.server.ServerPacketWrongRoom;
-
-import java.util.Collections;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     private Room room;
@@ -32,17 +29,20 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case OPEN: {
-                if (room == null) {
-                    ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
-                    room = Room.getRoom(clientPacketOpen.getId());
-                    if (room != null) {
-                        client = room.addClient(ctx.channel());
-                    } else {
-                        ctx.writeAndFlush(Collections.singletonList(new ServerPacketWrongRoom()));
-                    }
-                } else {
-                    Board.getLogger().warning(client + " tried to open a new room when it was already open");
+                ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
+                if (room != null) {
+                    room.removeClient(client);
                 }
+                if (clientPacketOpen.getName() == null) {
+                    room = Room.getRoom(clientPacketOpen.getId());
+                } else {
+                    if (clientPacketOpen.getId().equals("")) {
+                        room = Room.createRoom(Document.createDocument(clientPacketOpen.getName()));
+                    } else {
+                        room = Room.createRoom(Document.getDocument(clientPacketOpen.getId()));
+                    }
+                }
+                client = room.addClient(ctx.channel());
                 break;
             }
             default:
