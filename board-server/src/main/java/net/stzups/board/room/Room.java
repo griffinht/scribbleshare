@@ -22,7 +22,7 @@ class Room {
     private static final int ROOM_ID_LENGTH = 6;
 
     private static Map<String, Room> rooms = new HashMap<>();
-    static {
+    static {//todo send some packets instantly and refactor to somewhere?
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {

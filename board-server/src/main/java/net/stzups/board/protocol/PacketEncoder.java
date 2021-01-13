@@ -44,6 +44,7 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                 }
                 case OPEN: {
                     ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
+                    System.out.println(serverPacketOpen.getDocument().getId() + ", " + serverPacketOpen.getDocument().getName());
                     writeString(serverPacketOpen.getDocument().getId(), byteBuf);
                     writeString(serverPacketOpen.getDocument().getName(), byteBuf);
                     break;

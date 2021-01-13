@@ -1,11 +1,12 @@
 import Client from './Client.js'
 import Document from './Document.js'
+import Sidebar from './Sidebar.js';
 
 const UPDATE_INTERVAL = 1000;
-
+var next = 0;
 export default class WebSocketHandler {
     constructor() {
-        Board.inviteButton.innerHTML = "Connecting...";//todo add spinner
+        Board.inviteButton.innerHTML = "connecting...";//todo add spinner
 
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
@@ -18,10 +19,9 @@ export default class WebSocketHandler {
             console.log('WebSocket connection opened');
             this.invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
             if (this.invite === '') {
-                Board.inviteButton.innerHTML = "invite";
-                //setDocument(new Document());
+                this.sendCreate(null);
             } else {
-                this.sendOpen();
+                this.sendOpen(this.invite);
             }
             setInterval(() => {
                 let points = Board.localClient.getPoints();
@@ -106,9 +106,9 @@ export default class WebSocketHandler {
                             offset += 1;
                             let name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            //window.history.pushState(name, document.title, '/d/' + id);
-                            //main.inviteButton.innerHTML = name;
-                            console.log('opened ' + id + ', ' + name);
+                            window.history.pushState(name, document.title, '/d/' + id);
+                            Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
+                            Board.sidebar.createButton(name, true);
                             break;
                         }
                         default:
@@ -151,6 +151,9 @@ export default class WebSocketHandler {
     }
 
     sendCreate(name) {
+        if (name == null) {
+            name = 'Untitled ' + next++;
+        }
         let encoded = new TextEncoder().encode(name);
         let buffer = new ArrayBuffer(2 + encoded.length);
         let dataView = new DataView(buffer);

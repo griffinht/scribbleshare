@@ -5,22 +5,25 @@ export default class Sidebar {
         this.untitled = 0;
     }
 
-    createButton(name, onclick) {
+    createButton(name, active) {
         let button = document.createElement("button");
         let inner = document.createTextNode(name);
         button.appendChild(inner);
-        button.addEventListener('click', event => {
-            this.sidebarButtons.forEach(sidebarButton => {
-                if (event.target.innerHTML === sidebarButton.innerHTML) {
-                    sidebarButton.classList.add('active');
-                    onclick();
-                } else {
-                    sidebarButton.classList.remove('active');
-                }
-            });
-        });
+        button.addEventListener('click', event => this.setActive(event.target));
         this.sidebar.appendChild(button);
         this.sidebarButtons.push(button);
-        return button;
+        if (active) {
+            this.setActive(button);
+        }
+    }
+
+    setActive(target) {
+        this.sidebarButtons.forEach(sidebarButton => {
+            if (target.innerHTML === sidebarButton.innerHTML) {
+                sidebarButton.classList.add('active');
+            } else {
+                sidebarButton.classList.remove('active');
+            }
+        });
     }
 }
