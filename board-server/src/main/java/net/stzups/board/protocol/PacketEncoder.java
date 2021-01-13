@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketDraw;
 import net.stzups.board.protocol.server.ServerPacketId;
-import net.stzups.board.protocol.server.ServerPacketOpen;
+import net.stzups.board.protocol.server.ServerPacketOpenDocument;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,11 +42,11 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                     }
                     break;
                 }
-                case OPEN: {
-                    ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
-                    System.out.println(serverPacketOpen.getDocument().getId() + ", " + serverPacketOpen.getDocument().getName());
-                    writeString(serverPacketOpen.getDocument().getId(), byteBuf);
-                    writeString(serverPacketOpen.getDocument().getName(), byteBuf);
+                case OPEN_DOCUMENT: {
+                    ServerPacketOpenDocument serverPacketOpenDocument = (ServerPacketOpenDocument) serverPacket;
+                    System.out.println(serverPacketOpenDocument.getDocument().getId() + ", " + serverPacketOpenDocument.getDocument().getName());
+                    writeString(serverPacketOpenDocument.getDocument().getId(), byteBuf);
+                    writeString(serverPacketOpenDocument.getDocument().getName(), byteBuf);
                     break;
                 }
                 default:

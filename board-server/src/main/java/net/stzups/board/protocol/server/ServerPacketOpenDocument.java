@@ -2,11 +2,11 @@ package net.stzups.board.protocol.server;
 
 import net.stzups.board.room.Document;
 
-public class ServerPacketOpen extends ServerPacket {
+public class ServerPacketOpenDocument extends ServerPacket {
     private Document document;
 
-    public ServerPacketOpen(Document document) {
-        super(ServerPacketType.OPEN);
+    public ServerPacketOpenDocument(Document document) {
+        super(ServerPacketType.OPEN_DOCUMENT);
         this.document = document;
     }
 
