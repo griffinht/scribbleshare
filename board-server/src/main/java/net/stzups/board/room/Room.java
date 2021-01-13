@@ -79,6 +79,10 @@ class Room {
         return id;
     }
 
+    Document getDocument() {
+        return document;
+    }
+
     /**
      * Creates a new client using its channel
      *

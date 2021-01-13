@@ -1,4 +1,6 @@
 import Client from './Client.js'
+import {ctx, canvas} from './Canvas.js'
+
 export default class LocalClient extends Client {
     constructor(id) {
         super(-1);

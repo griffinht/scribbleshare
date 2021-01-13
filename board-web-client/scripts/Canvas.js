@@ -1,3 +1,6 @@
+export let canvas = document.getElementById('canvas');
+export let ctx = canvas.getContext('2d');
+
 export default class Canvas {// handle resize
     constructor() {
         window.addEventListener('resize', resizeCanvas);
@@ -15,7 +18,7 @@ export default class Canvas {// handle resize
             let dt = (now - last);
             last = now;
     
-            clients.forEach(e => e.draw(dt));
+            Board.clients.forEach(e => e.draw(dt));
     
             window.requestAnimationFrame(draw);
         }

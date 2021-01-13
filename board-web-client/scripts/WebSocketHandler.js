@@ -1,17 +1,30 @@
 import Client from './Client.js'
+import Document from './Document.js'
+
+const UPDATE_INTERVAL = 1000;
 
 export default class WebSocketHandler {
     constructor() {
-        inviteButton.innerHTML = "Connecting...";//todo add spinner
+        Board.inviteButton.innerHTML = "Connecting...";//todo add spinner
 
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
 
+        document.getElementById('add').addEventListener('click', event => {
+            this.sendCreate();
+        });
+
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            inviteButton.innerHTML = "Invite";
+            this.invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
+            if (this.invite === '') {
+                Board.inviteButton.innerHTML = "invite";
+                //setDocument(new Document());
+            } else {
+                this.sendOpen();
+            }
             setInterval(() => {
-                let points  = localClient.getPoints();
+                let points = Board.localClient.getPoints();
                 if (points.length === 0) {
                     return;
                 }
@@ -87,15 +100,15 @@ export default class WebSocketHandler {
                         case 3: {//open
                             let length = dataView.getUint8(offset);
                             offset += 1;
-                            let roomName = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            let id = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            window.history.pushState(roomName, document.title, '/r/' + roomName);
-                            console.log(roomName, length);
-                            inviteButton.innerHTML = roomName;//todo add spinner
-                            break;
-                        }
-                        case 4: {//wrong room
-                            inviteButton.innerHTML = 'Invalid room id';//todo add spinner
+                            length = dataView.getUint8(offset);
+                            offset += 1;
+                            let name = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            offset += length;
+                            //window.history.pushState(name, document.title, '/d/' + id);
+                            //main.inviteButton.innerHTML = name;
+                            console.log('opened ' + id + ', ' + name);
                             break;
                         }
                         default:
@@ -119,13 +132,31 @@ export default class WebSocketHandler {
         }
     }
 
-    sendOpen() {
-        let encoded = new TextEncoder().encode(document.location.href.substring(document.location.href.lastIndexOf("/") + 1));
+    sendOpen(id) {//todo improve this garbage javascript string encoding
+        let encoded = new TextEncoder().encode(id);
         let buffer = new ArrayBuffer(2 + encoded.length);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 0);
+        offset += 1;
+        
+        dataView.setUint8(offset, encoded.byteLength);
+        offset += 1;
+
+        let newBuffer = new Uint8Array(buffer);
+        newBuffer.set(encoded, offset);
+
+        this.send(newBuffer);
+    }
+
+    sendCreate(name) {
+        let encoded = new TextEncoder().encode(name);
+        let buffer = new ArrayBuffer(2 + encoded.length);
+        let dataView = new DataView(buffer);
+        let offset = 0;
+
+        dataView.setUint8(offset, 2);
         offset += 1;
         
         dataView.setUint8(offset, encoded.byteLength);
