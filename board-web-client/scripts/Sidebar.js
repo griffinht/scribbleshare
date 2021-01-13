@@ -1,20 +1,20 @@
 export default class Sidebar {
     constructor() {
         this.sidebar = document.getElementById('side');
-        this.sidebarButtons = [];
+        this.sidebarButtons = new Map();
         this.untitled = 0;
     }
 
-    createButton(name, active, onclick) {
+    createButton(doc, active, onclick) {
         let button = document.createElement("button");
-        let inner = document.createTextNode(name);
+        let inner = document.createTextNode(doc.name);
         button.appendChild(inner);
         button.addEventListener('click', event => {
             this.setActive(event.target);
             onclick();
         });
         this.sidebar.appendChild(button);
-        this.sidebarButtons.push(button);
+        this.sidebarButtons.set(doc.id, button);
         if (active) {
             this.setActive(button);
         }

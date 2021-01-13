@@ -106,11 +106,17 @@ export default class WebSocketHandler {
                             offset += 1;
                             let name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            window.history.pushState(name, document.title, '/d/' + id);
+                            let doc = new Document(id, name);
+                            window.history.pushState(doc.name, document.title, '/d/' + id);
                             Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
-                            Board.sidebar.createButton(name, true, () => {
-                                this.sendOpen(id);
-                            });
+                            let d = Board.sidebar.sidebarButtons.get(doc.id);
+                            if (d != null) {
+                                Board.sidebar.setActive(d);
+                            } else {
+                                Board.sidebar.createButton(doc, true, () => {
+                                    this.sendOpen(id);
+                                });
+                            }
                             break;
                         }
                         default:
