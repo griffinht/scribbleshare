@@ -1,16 +1,16 @@
 const items = new Map();
-const sidebar = document.getElementById('sidebar');
+const sidebar = document.getElementById('side');
 
 export default class SidebarItem {
     constructor(display, onclick) {
         this.button = document.createElement("button");
-        let inner = document.createTextNode(doc.name);
-        button.appendChild(inner);
-        button.addEventListener('click', event => {
+        let inner = document.createTextNode(display);
+        this.button.appendChild(inner);
+        this.button.addEventListener('click', event => {
             this.setActive(event.target);
             onclick();
         });
-        sidebar.appendChild(button);
+        sidebar.appendChild(this.button);
         items.set(display, this);
         if (sidebar.size == 1) {
             this.setActive();

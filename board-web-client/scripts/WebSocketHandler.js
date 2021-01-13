@@ -7,6 +7,11 @@ export default class WebSocketHandler {
     constructor() {
         this.events = {};
         [
+            'socketopen',
+            'socketclose',
+            'addclient',
+            'removeclient',
+            'draw',
             'open',
         ].forEach((type) => {
             this.events[type] = [];
@@ -18,7 +23,6 @@ export default class WebSocketHandler {
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
-            this.dispatchEvent('open');
             console.log('WebSocket connection opened');
             setInterval(() => {
                 let points = Board.localClient.getPoints();
@@ -48,10 +52,12 @@ export default class WebSocketHandler {
 
                 this.send(buffer);
             }, Board.UPDATE_INTERVAL);
+            this.dispatchEvent('socketopen');
         });
 
         this.socket.addEventListener('close', (event) => {
             console.log('WebSocket connection closed');
+            this.dispatchEvent('socketclose');
         });
     
         this.socket.addEventListener('message', (event) => {
@@ -67,17 +73,22 @@ export default class WebSocketHandler {
                     console.log('got ' + type);
                     switch (type) {
                         case 0: {//add client
-                            console.log('Add client ', new Client(dataView.getUint16(offset)));
+                            let e = {};
+                            e.id = dataView.getUint16(offset);
                             offset += 2;
+                            this.dispatchEvent('addclient', e);
                             break;
                         }
                         case 1: {//remove client
-                            console.log('Remove client ', Board.clients.delete(dataView.getUint16(offset)));
+                            let e = {};
+                            e.id = dataView.getUint16(offset);
                             offset += 2;
+                            this.dispatchEvent('removeclient', e);
                             break;
                         }
                         case 2: {//draw
-                            let client = Board.clients.get(dataView.getUint16(offset));
+                            let e = {};
+                            e.id = dataView.getUint16(offset);
                             offset += 2;
                             let size = dataView.getUint16(offset);
                             offset += 2;
@@ -90,30 +101,22 @@ export default class WebSocketHandler {
                                 point.y = dataView.getInt16(offset);
                                 offset += 2;
                                 point.usedDt = 0;
-                                client.points.push(point);
+                                e.points.push(point);
                             }
+                            this.dispatchEvent('draw', e);
                             break;
                         }
                         case 3: {//open
+                            let e = {};
                             let length = dataView.getUint8(offset);
                             offset += 1;
-                            let id = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            e.id = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
                             length = dataView.getUint8(offset);
                             offset += 1;
-                            let name = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            e.name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            let doc = new Document(id, name);
-                            //window.history.pushState(doc.name, document.title, '/d/' + id);
-                            Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
-                            let d = Board.sidebar.sidebarButtons.get(doc.id);
-                            if (d != null) {
-                                Board.sidebar.setActive(d);
-                            } else {
-                                Board.sidebar.createButton(doc, true, () => {
-                                    this.sendOpen(id);
-                                });
-                            }
+                            this.dispatchEvent('open', e);
                             break;
                         }
                         default:
