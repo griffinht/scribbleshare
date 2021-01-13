@@ -108,7 +108,9 @@ export default class WebSocketHandler {
                             offset += length;
                             window.history.pushState(name, document.title, '/d/' + id);
                             Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
-                            Board.sidebar.createButton(name, true);
+                            Board.sidebar.createButton(name, true, () => {
+                                this.sendOpen(id);
+                            });
                             break;
                         }
                         default:
