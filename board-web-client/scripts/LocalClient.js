@@ -1,5 +1,6 @@
 import Client from './Client.js'
 import {ctx, canvas} from './Canvas.js'
+import {UPDATE_INTERVAL} from './WebSocketHandler.js'
 
 export default class LocalClient extends Client {
     constructor(id) {

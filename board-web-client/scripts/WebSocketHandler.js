@@ -1,28 +1,25 @@
 import Client from './Client.js'
 import Document from './Document.js'
-import Sidebar from './Sidebar.js';
 
-const UPDATE_INTERVAL = 1000;
-var next = 0;
+export const UPDATE_INTERVAL = 1000;
+
 export default class WebSocketHandler {
     constructor() {
+        this.events = {};
+        [
+            'open',
+        ].forEach((type) => {
+            this.events[type] = [];
+        })
+
         Board.inviteButton.innerHTML = "connecting...";//todo add spinner
 
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
 
-        document.getElementById('add').addEventListener('click', event => {
-            this.sendCreate();
-        });
-
         this.socket.addEventListener('open', (event) => {
+            this.dispatchEvent('open');
             console.log('WebSocket connection opened');
-            this.invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
-            if (this.invite === '') {
-                this.sendCreate(null);
-            } else {
-                this.sendOpen(this.invite);
-            }
             setInterval(() => {
                 let points = Board.localClient.getPoints();
                 if (points.length === 0) {
@@ -50,7 +47,7 @@ export default class WebSocketHandler {
                 points.length = 0;//clear
 
                 this.send(buffer);
-            }, UPDATE_INTERVAL);
+            }, Board.UPDATE_INTERVAL);
         });
 
         this.socket.addEventListener('close', (event) => {
@@ -75,12 +72,12 @@ export default class WebSocketHandler {
                             break;
                         }
                         case 1: {//remove client
-                            console.log('Remove client ', clients.delete(dataView.getUint16(offset)));
+                            console.log('Remove client ', Board.clients.delete(dataView.getUint16(offset)));
                             offset += 2;
                             break;
                         }
                         case 2: {//draw
-                            let client = clients.get(dataView.getUint16(offset));
+                            let client = Board.clients.get(dataView.getUint16(offset));
                             offset += 2;
                             let size = dataView.getUint16(offset);
                             offset += 2;
@@ -107,7 +104,7 @@ export default class WebSocketHandler {
                             let name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
                             let doc = new Document(id, name);
-                            window.history.pushState(doc.name, document.title, '/d/' + id);
+                            //window.history.pushState(doc.name, document.title, '/d/' + id);
                             Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
                             let d = Board.sidebar.sidebarButtons.get(doc.id);
                             if (d != null) {
@@ -127,8 +124,16 @@ export default class WebSocketHandler {
         });
 
         this.socket.addEventListener('error', (event) => {
-            console.log('error: ' + event);
+            console.log('socket error', event);
         });
+    }
+
+    addEventListener(type, onevent) {
+        this.events[type].push(onevent);
+    }
+    
+    dispatchEvent(type, event) {
+        this.events[type].forEach(onevent => onevent(event));
     }
 
     send(payload) {
@@ -158,10 +163,7 @@ export default class WebSocketHandler {
         this.send(newBuffer);
     }
 
-    sendCreate(name) {
-        if (name == null) {
-            name = 'Untitled ' + next++;
-        }
+    sendCreate() {
         let encoded = new TextEncoder().encode(name);
         let buffer = new ArrayBuffer(2 + encoded.length);
         let dataView = new DataView(buffer);
