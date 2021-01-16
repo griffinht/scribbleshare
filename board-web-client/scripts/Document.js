@@ -5,6 +5,7 @@ import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
+import './InviteButton.js'
 
 const documents = new Map();
 var activeDocument = null;
@@ -81,7 +82,6 @@ socket.addEventListener('open', (event) => {
     //window.history.pushState(doc.name, document.title, '/d/' + id);
 });
 socket.addEventListener('socketopen', (event) => {
-    Board.inviteButton.innerHTML = 'invite';//todo abstract invitebutton to class???????
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite === '') {
         socket.sendCreate();
