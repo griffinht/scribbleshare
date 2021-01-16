@@ -29,7 +29,7 @@ public class Server {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.INFO))
+                .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer());
         channelFuture = serverBootstrap.bind(PORT);
         Board.getLogger().info("Listening on port " + PORT);
