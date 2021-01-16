@@ -1,5 +1,8 @@
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
+import {ctx} from './Document.js'
+
+const UPDATE_INTERVAL = 1000;
 
 export default class LocalClient extends Client {
     constructor(id) {
@@ -44,7 +47,7 @@ export default class LocalClient extends Client {
         setInterval(() => {
             this.lastSend = performance.now();
             socket.sendDraw(this.points);
-        })
+        }, UPDATE_INTERVAL)
     }
 
     draw(dt) {

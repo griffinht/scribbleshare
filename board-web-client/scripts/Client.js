@@ -1,4 +1,4 @@
-
+import {ctx} from './Document.js'
 
 export default class Client {
     constructor(id) {
