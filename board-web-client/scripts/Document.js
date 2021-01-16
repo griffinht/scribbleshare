@@ -21,7 +21,9 @@ const documents = new Map();
 export default class Document {
     constructor(name, id) {
         this.name = name;
-        this.sidebarItem = new SidebarItem(this.name, open);
+        this.sidebarItem = new SidebarItem(this.name, () => {
+            this.open();
+        });
         if (id != null) {
             this.id = id;
             documents.set(this.id, this);
@@ -29,6 +31,6 @@ export default class Document {
     }
 
     open() {
-        console.log(this.name + ' has been opened');
+        console.log(this.name + "has been opened");
     }
 }

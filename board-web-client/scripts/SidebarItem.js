@@ -27,11 +27,11 @@ export default class SidebarItem {
     }
 
     setActive() {
-        this.items.forEach(item => {
-            if (this.button.innerHTML === item.innerHTML) {
-                item.classList.add('active');
+        items.forEach(item => {
+            if (this.button.innerHTML === item.button.innerHTML) {
+                item.button.classList.add('active');
             } else {
-                item.classList.remove('active');
+                item.button.classList.remove('active');
             }
         });
     }
