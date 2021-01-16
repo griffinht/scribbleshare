@@ -1,11 +1,11 @@
-import {ctx} from './Canvas.js'
+
+
 export default class Client {
     constructor(id) {
         this.id = id;
         this.x = 0;
         this.y = 0;
         this.points = [];
-        Board.clients.set(this.id, this);
     }
 
     draw(dt) {

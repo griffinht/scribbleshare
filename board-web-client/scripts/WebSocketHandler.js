@@ -1,9 +1,4 @@
-import Client from './Client.js'
-import Document from './Document.js'
-
-export const UPDATE_INTERVAL = 1000;
-
-export default class WebSocketHandler {
+class WebSocketHandler {
     constructor() {
         this.events = {};
         [
@@ -17,41 +12,11 @@ export default class WebSocketHandler {
             this.events[type] = [];
         })
 
-        Board.inviteButton.innerHTML = "connecting...";//todo add spinner
-
         this.socket = new WebSocket('ws://localhost/websocket');
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            setInterval(() => {
-                let points = Board.localClient.getPoints();
-                if (points.length === 0) {
-                    return;
-                }
-                let buffer = new ArrayBuffer(1 + 1 + points.length * 5);
-                let dataView = new DataView(buffer);
-                let offset = 0;
-
-                dataView.setUint8(offset, 1);
-                offset += 1;
-
-                dataView.setUint8(offset, points.length);
-                offset += 1;
-
-                points.forEach(point => {
-                    dataView.setUint8(offset, point.dt);
-                    offset += 1;
-                    dataView.setInt16(offset, point.x);
-                    offset += 2;
-                    dataView.setInt16(offset, point.y);
-                    offset += 2;
-                });
-
-                points.length = 0;//clear
-
-                this.send(buffer);
-            }, Board.UPDATE_INTERVAL);
             this.dispatchEvent('socketopen');
         });
 
@@ -144,7 +109,7 @@ export default class WebSocketHandler {
             console.log('sending');
             this.socket.send(payload);
         } else {
-            console.error('tried to send payload while websocket was closed' + payload);
+            console.error('tried to send payload while websocket was closed', payload);
         }
     }
 
@@ -183,4 +148,33 @@ export default class WebSocketHandler {
 
         this.send(newBuffer);
     }
+
+    sendDraw(points) {
+        if (points.length === 0) {
+            return;
+        }
+        let buffer = new ArrayBuffer(1 + 1 + points.length * 5);
+        let dataView = new DataView(buffer);
+        let offset = 0;
+
+        dataView.setUint8(offset, 1);
+        offset += 1;
+
+        dataView.setUint8(offset, points.length);
+        offset += 1;
+
+        points.forEach(point => {
+            dataView.setUint8(offset, point.dt);
+            offset += 1;
+            dataView.setInt16(offset, point.x);
+            offset += 2;
+            dataView.setInt16(offset, point.y);
+            offset += 2;
+        });
+
+        points.length = 0;//clear
+
+        this.send(buffer);
+    }
 }
+export default new WebSocketHandler();
