@@ -16,10 +16,16 @@ export function init() {
     }
 }
 
+const documents = new Map();
+
 export default class Document {
-    constructor(name) {
+    constructor(name, id) {
         this.name = name;
         this.sidebarItem = new SidebarItem(this.name, open);
+        if (id != null) {
+            this.id = id;
+            documents.set(this.id, this);
+        }
     }
 
     open() {
