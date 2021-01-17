@@ -37,6 +37,7 @@ export default class Document {
         activeDocument = this;
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
+        window.history.pushState(document.name, document.title, '/d/' + this.id);
         //todo canvas stuff
     }
 
@@ -101,7 +102,6 @@ socket.addEventListener('open', (event) => {
         doc = new Document(event.name, event.id);
     }
     doc.open();
-    //window.history.pushState(doc.name, document.title, '/d/' + id);
 });
 socket.addEventListener('socketopen', (event) => {
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
