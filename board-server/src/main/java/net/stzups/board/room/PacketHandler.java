@@ -36,28 +36,46 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
                 Document document = Document.getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
-                    Room r = documents.get(document);
-                    if (r != null) {
-                        room = r;
-                    } else {
-                        room = Room.createRoom(document);
-                        documents.put(document, room);
+                    if (client != null && room != null) {
+                        room.removeClient(client);
                     }
+                    room = getRoom(document);
                     client = room.addClient(ctx.channel());
                 } else {
-                    System.out.println("null");
+                    System.out.println(client + " tried to open document not that does not exist");
                 }
                 break;
             }
             case CREATE_DOCUMENT: {
                 ClientPacketCreateDocument clientPacketCreateDocument = (ClientPacketCreateDocument) packet;
-                room = Room.createRoom(Document.createDocument(clientPacketCreateDocument.getName()));
-                documents.put(room.getDocument(), room);
+                if (client != null && room != null) {
+                    room.removeClient(client);
+                }
+                room = getRoom(Document.createDocument(clientPacketCreateDocument.getName()));
                 client = room.addClient(ctx.channel());
                 break;
             }
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
         }
+    }
+
+    /**
+     * Gets or creates a room for an existing document
+     *
+     * @param document the existing document
+     * @return the live room
+     */
+    private static Room getRoom(Document document) {
+        Room r = documents.get(document);
+        if (r == null) {
+            r =  Room.createRoom(document);
+            documents.put(r.getDocument(), r);
+        }
+        return r;
+    }
+
+    private void joinRoom() {
+
     }
 }
