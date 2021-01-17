@@ -57,6 +57,7 @@ class WebSocketHandler {
                             offset += 2;
                             let size = dataView.getUint16(offset);
                             offset += 2;
+                            e.points = [];
                             for (let i = 0; i < size; i++) {
                                 let point = {};
                                 point.dt = dataView.getUint8(offset);

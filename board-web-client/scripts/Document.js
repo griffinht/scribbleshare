@@ -13,6 +13,7 @@ var activeDocument = null;
 
 export default class Document {
     constructor(name, id, points) {
+        this.clients = new Map();
         this.name = name;
         this.sidebarItem = new SidebarItem(this.name, () => {
             if (this.id != null) {
@@ -38,11 +39,12 @@ export default class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
-        //todo canvas stuff
     }
 
     draw(dt) {
-
+        this.clients.forEach((client) => {
+            client.draw(dt);
+        });
     }
 }
 
@@ -77,18 +79,17 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-const clients = new Map();
 socket.addEventListener('addclient', (event) => {
     let client = new Client(event.id);
-    clients.set(client.id, client);
+    activeDocument.clients.set(client.id, client);
     console.log('Add client ', client);
 });
 socket.addEventListener('removeclient', (event) => {
-    console.log('Remove client ', clients.delete(event.id));
+    console.log('Remove client ', activeDocument.clients.delete(event.id));
 });
 socket.addEventListener('draw', (event) => {
-    let client = clients.get(event.id);
-    event.points.forEach(point => {//todo styling (point) => {} or point => {}
+    let client = activeDocument.clients.get(event.id);
+    event.points.forEach((point) => {
         client.points.push(point);
     });
 });
@@ -105,6 +106,7 @@ socket.addEventListener('open', (event) => {
 });
 socket.addEventListener('socketopen', (event) => {
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
+    console.log(invite);
     if (invite === '') {
         newDocument();
     } else {

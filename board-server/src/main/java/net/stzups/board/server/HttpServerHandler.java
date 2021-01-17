@@ -46,6 +46,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     private static final int HTTP_CACHE_SECONDS = 0; //todo change
+    private static final String JOIN_PATH = "d";
 
     private static final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -80,8 +81,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendRedirect(ctx, uri + "index.html");
             return;
         }*/
-        if (uri.startsWith("/r/")) {
-            //room code
+        if (uri.startsWith("/" + JOIN_PATH + "/")) {
+            //client will join a room, just serve the default page todo change to php style url format?
             uri = "/index.html";
         } else if (!uri.endsWith("/") && !uri.contains(".")) {
             uri += ".html";
