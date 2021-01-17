@@ -15,19 +15,21 @@ export default class SidebarItem {
         this.button = document.createElement("button");
         let inner = document.createTextNode(display);
         this.button.appendChild(inner);
-        this.button.addEventListener('click', event => {
-            this.setActive(event.target);
+        this.button.addEventListener('click', () => {
+            this.setActive(true);
         });
         sidebar.appendChild(this.button);
         items.set(display, this);
         //todo this.setActive();
     }
 
-    setActive() {
+    setActive(open) {
         items.forEach(item => {
             if (this.button.innerHTML === item.button.innerHTML) {
                 item.button.classList.add('active');
-                this.open();
+                if (open) {
+                    this.open();
+                }
             } else {
                 item.button.classList.remove('active');
             }

@@ -131,7 +131,7 @@ class WebSocketHandler {
         this.send(newBuffer);
     }
 
-    sendCreate() {
+    sendCreate(name) {
         let encoded = new TextEncoder().encode(name);
         let buffer = new ArrayBuffer(2 + encoded.length);
         let dataView = new DataView(buffer);

@@ -8,32 +8,47 @@ import socket from './WebSocketHandler.js'
 import './InviteButton.js'
 
 const documents = new Map();
+const pendingDocuments = new Map();
 var activeDocument = null;
 
 export default class Document {
     constructor(name, id, points) {
         this.name = name;
-        this.sidebarItem = new SidebarItem(this.name, () => this.open());
+        this.sidebarItem = new SidebarItem(this.name, () => {
+            if (this.id != null) {
+                socket.sendOpen(this.id)
+            } else {
+                console.log('id was null', this);
+            };
+        });
         if (id != null) {
             this.id = id;
             documents.set(this.id, this);
+        } else {
+            pendingDocuments.set(this.name, this);
         }
         this.points = points;
+        //if (activeDocument == null) {
+        //    this.open();
+        //}
     }
 
     open() {
         activeDocument = this;
-        socket.sendOpen(this.id);
+        console.log('opened ' + this.name);
+        this.sidebarItem.setActive(false);
+        //todo canvas stuff
     }
 
     draw(dt) {
-        console.log('drawing ');
+
     }
 }
 
 var next = 0;
 function newDocument() {
-    return new Document('Untitled ' + next++);
+    let d = new Document('Untitled ' + next++);
+    socket.sendCreate(d.name);
 }
 
 document.getElementById('add').addEventListener('click', newDocument);
@@ -78,17 +93,23 @@ socket.addEventListener('draw', (event) => {
 });
 console.log(socket);
 socket.addEventListener('open', (event) => {
-    let doc = new Document(event.name, event.id);
+    let doc = pendingDocuments.get(event.name);
+    if (doc != null) {
+        doc.id = event.id;
+        documents.set(doc.name, doc);
+    } else {
+        doc = new Document(event.name, event.id);
+    }
+    doc.open();
     //window.history.pushState(doc.name, document.title, '/d/' + id);
 });
 socket.addEventListener('socketopen', (event) => {
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite === '') {
-        socket.sendCreate();
+        newDocument();
     } else {
         socket.sendOpen(invite);
     }
 });
 
-activeDocument = newDocument();
 const localClient = new LocalClient();
