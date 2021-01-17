@@ -7,7 +7,7 @@ import net.stzups.board.protocol.Point;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketAddClient;
 import net.stzups.board.protocol.server.ServerPacketDraw;
-import net.stzups.board.protocol.server.ServerPacketOpen;
+import net.stzups.board.protocol.server.ServerPacketOpenDocument;
 import net.stzups.board.protocol.server.ServerPacketRemoveClient;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ class Room {
     private static final int ROOM_ID_LENGTH = 6;
 
     private static Map<String, Room> rooms = new HashMap<>();
-    static {
+    static {//todo send some packets instantly and refactor to somewhere?
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -40,9 +40,11 @@ class Room {
     private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for int keys
     private Client emptyClient;
     private String id;
+    private Document document;
 
-    private Room(String id) {
+    private Room(String id, Document document) {
         this.id = id;
+        this.document = document;
         emptyClient = new EmptyClient(0);
         clients.put(emptyClient.getId(), emptyClient);
     }
@@ -52,12 +54,12 @@ class Room {
      *
      * @return the created room
      */
-    private static Room createRoom() {
+    static Room createRoom(Document document) {
         String id;
         do {
             id = String.valueOf((int) (Math.random() * Math.pow(10, ROOM_ID_LENGTH)));
         } while (rooms.containsKey(id)); //todo improve
-        Room room = new Room(id);
+        Room room = new Room(id, document);
         rooms.put(room.getId(), room);
         return room;
     }
@@ -68,17 +70,17 @@ class Room {
      * @return the newly created or existing room
      */
     static Room getRoom(String id) {
-        if (id.equals("")) {
-            return createRoom();
-        } else {
-            return rooms.get(id);
-        }
+        return rooms.get(id);
     }
 
 
 
     String getId() {
         return id;
+    }
+
+    Document getDocument() {
+        return document;
     }
 
     /**
@@ -90,7 +92,7 @@ class Room {
     Client addClient(Channel channel) {
         Client client = new Client(nextClientId++, channel);
         //for the new client
-        sendPacket(new ServerPacketOpen(id), client);
+        sendPacket(new ServerPacketOpenDocument(document), client);
         for (Client c : clients.values()) {
             sendPacket(new ServerPacketAddClient(c), client);
             List<Point> points = c.getPoints();
@@ -107,6 +109,7 @@ class Room {
 
     /**
      * Converts a List<Point> to Point[], and marks them as instant draw
+     *
      * @param points points to convert
      * @return converted points
      */
@@ -122,12 +125,18 @@ class Room {
         return pts;
     }
 
+    /**
+     * Removes given client from room
+     *
+     * @param client client to remove
+     */
     void removeClient(Client client) {
         emptyClient.addPoints(client.getPoints().toArray(new Point[0]));
         clients.remove(client.getId());
         sendPacket(new ServerPacketRemoveClient(client));
         Board.getLogger().info("Removed " + client + " to " + this);
     }
+
     /**
      * Send given packet to all members of the room except for the specified client
      *

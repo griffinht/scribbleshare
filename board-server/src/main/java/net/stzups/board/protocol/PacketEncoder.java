@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketDraw;
 import net.stzups.board.protocol.server.ServerPacketId;
-import net.stzups.board.protocol.server.ServerPacketOpen;
+import net.stzups.board.protocol.server.ServerPacketOpenDocument;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,7 +30,6 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
             switch (serverPacket.getPacketType()) {
                 case ADD_CLIENT:
                 case REMOVE_CLIENT:
-                case WRONG_ROOM:
                     break;
                 case DRAW: {
                     ServerPacketDraw packetDraw = (ServerPacketDraw) serverPacket;
@@ -43,11 +42,11 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
                     }
                     break;
                 }
-                case OPEN: {
-                    ServerPacketOpen serverPacketOpen = (ServerPacketOpen) serverPacket;
-                    byte[] buffer = serverPacketOpen.getId().getBytes(StandardCharsets.UTF_8);
-                    byteBuf.writeByte((byte) buffer.length);
-                    byteBuf.writeBytes(buffer);
+                case OPEN_DOCUMENT: {
+                    ServerPacketOpenDocument serverPacketOpenDocument = (ServerPacketOpenDocument) serverPacket;
+                    System.out.println(serverPacketOpenDocument.getDocument().getId() + ", " + serverPacketOpenDocument.getDocument().getName());
+                    writeString(serverPacketOpenDocument.getDocument().getId(), byteBuf);
+                    writeString(serverPacketOpenDocument.getDocument().getName(), byteBuf);
                     break;
                 }
                 default:
@@ -55,5 +54,14 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
             }
         }
         ctx.writeAndFlush(binaryWebSocketFrame);
+    }
+
+    private void writeString(String string, ByteBuf byteBuf) {
+        if (string.length() > 0xff) {
+            throw new UnsupportedOperationException("String too long");
+        }
+        byte[] buffer = string.getBytes(StandardCharsets.UTF_8);
+        byteBuf.writeByte((byte) buffer.length);
+        byteBuf.writeBytes(buffer);
     }
 }

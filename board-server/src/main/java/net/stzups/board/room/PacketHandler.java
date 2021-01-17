@@ -2,16 +2,17 @@ package net.stzups.board.room;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.stzups.board.Board;
 import net.stzups.board.protocol.client.ClientPacket;
+import net.stzups.board.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.protocol.client.ClientPacketDraw;
-import net.stzups.board.protocol.client.ClientPacketOpen;
+import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.server.ServerPacketDraw;
-import net.stzups.board.protocol.server.ServerPacketWrongRoom;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
+    private static Map<Document, Room> documents = new HashMap<>();//todo move somewhere
     private Room room;
     private Client client;
 
@@ -31,22 +32,50 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 room.sendPacketExcept(new ServerPacketDraw(client.getId(), clientPacketDraw.getPoints()), client);
                 break;
             }
-            case OPEN: {
-                if (room == null) {
-                    ClientPacketOpen clientPacketOpen = (ClientPacketOpen) packet;
-                    room = Room.getRoom(clientPacketOpen.getId());
-                    if (room != null) {
-                        client = room.addClient(ctx.channel());
-                    } else {
-                        ctx.writeAndFlush(Collections.singletonList(new ServerPacketWrongRoom()));
+            case OPEN_DOCUMENT: {
+                ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
+                Document document = Document.getDocument(clientPacketOpenDocument.getId());
+                if (document != null) {
+                    if (client != null && room != null) {
+                        room.removeClient(client);
                     }
+                    room = getRoom(document);
+                    client = room.addClient(ctx.channel());
                 } else {
-                    Board.getLogger().warning(client + " tried to open a new room when it was already open");
+                    System.out.println(client + " tried to open document not that does not exist");
                 }
+                break;
+            }
+            case CREATE_DOCUMENT: {
+                ClientPacketCreateDocument clientPacketCreateDocument = (ClientPacketCreateDocument) packet;
+                if (client != null && room != null) {
+                    room.removeClient(client);
+                }
+                room = getRoom(Document.createDocument(clientPacketCreateDocument.getName()));
+                client = room.addClient(ctx.channel());
                 break;
             }
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
         }
+    }
+
+    /**
+     * Gets or creates a room for an existing document
+     *
+     * @param document the existing document
+     * @return the live room
+     */
+    private static Room getRoom(Document document) {
+        Room r = documents.get(document);
+        if (r == null) {
+            r =  Room.createRoom(document);
+            documents.put(r.getDocument(), r);
+        }
+        return r;
+    }
+
+    private void joinRoom() {
+
     }
 }

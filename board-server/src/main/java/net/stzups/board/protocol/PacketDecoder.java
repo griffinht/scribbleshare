@@ -8,8 +8,9 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.protocol.client.ClientPacket;
+import net.stzups.board.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.protocol.client.ClientPacketDraw;
-import net.stzups.board.protocol.client.ClientPacketOpen;
+import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.client.ClientPacketType;
 
 import javax.naming.OperationNotSupportedException;
@@ -37,15 +38,22 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     }
                     packet = new ClientPacketDraw(points);
                     break;
-                case OPEN:
-                    byte[] buffer = new byte[byteBuf.readUnsignedByte()];
-                    byteBuf.readBytes(buffer);
-                    packet = new ClientPacketOpen(new String(buffer, StandardCharsets.UTF_8));
+                case OPEN_DOCUMENT:
+                    packet = new ClientPacketOpenDocument(readString(byteBuf));
+                    break;
+                case CREATE_DOCUMENT:
+                    packet = new ClientPacketCreateDocument((readString(byteBuf)));
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");
             }
             list.add(packet);
         }
+    }
+
+    private String readString(ByteBuf byteBuf) {
+        byte[] buffer = new byte[byteBuf.readUnsignedByte()];
+        byteBuf.readBytes(buffer);
+        return new String(buffer, StandardCharsets.UTF_8);
     }
 }

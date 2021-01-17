@@ -4,8 +4,46 @@
 
 #canvasWrapper {
     flex: 1 1 auto;
+    height: calc(100vh - 5em);
 }
 
 #inviteButton {
     margin-left: auto;
+}
+
+aside {
+    display: flex;
+    align-items: left;
+    flex-direction: column;
+    width: 20em;
+    background-color: lightgray;
+    height: calc(100vh - 5em);
+}
+
+aside button {
+    background-color: lightgray;
+}
+
+aside button:hover {
+    color: darkgray;
+}
+
+aside button:active {
+    box-shadow: none;
+}
+
+.active {
+    background-color: red;
+}
+
+aside * {
+    padding: .2em;
+    font-size: 2.5em;
+    font-family: serif;
+    text-align: left;
+}
+
+aside button {
+    width: 100%;
+    border: 0;
 }

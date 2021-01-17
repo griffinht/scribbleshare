@@ -6,8 +6,9 @@ import java.util.EnumSet;
 import java.util.Map;
 
 public enum ClientPacketType {
-    OPEN(0),
+    OPEN_DOCUMENT(0),
     DRAW(1),
+    CREATE_DOCUMENT(2),
     ;
 
     private static Map<Integer, ClientPacketType> packetTypeMap = new IntObjectHashMap<>();

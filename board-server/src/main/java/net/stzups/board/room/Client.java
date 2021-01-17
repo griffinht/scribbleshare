@@ -38,7 +38,7 @@ public class Client {
     void sendPackets() {
         if (packets.size() > 0) {
             channel.writeAndFlush(packets);
-            packets = new ArrayList<>();
+            packets = new ArrayList<>();//todo #clear instead of new
         }
     }
 
