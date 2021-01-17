@@ -106,7 +106,7 @@ socket.addEventListener('open', (event) => {
 });
 socket.addEventListener('socketopen', (event) => {
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
-    console.log(invite);
+    console.log('doing invite ' + invite);
     if (invite === '') {
         newDocument();
     } else {

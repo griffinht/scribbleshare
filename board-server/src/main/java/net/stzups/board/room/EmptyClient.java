@@ -8,11 +8,11 @@ public class EmptyClient extends Client {
     }
 
     @Override
-    void addPacket(ServerPacket serverPacket) {
+    void sendPacket(ServerPacket serverPacket) {
     }
 
     @Override
-    void sendPackets() {
+    void flushPackets() {
     }
 
     @Override

@@ -28,7 +28,7 @@ class Room {
             public void run() {
                 for (Room room : rooms.values()) {
                     for (Client client : room.clients.values()) {
-                        client.sendPackets();
+                        client.flushPackets();
                     }
                 }
             }
@@ -146,7 +146,7 @@ class Room {
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
         for (Client client : clients.values()) {
             if (except != client) {
-                client.addPacket(serverPacket);
+                client.sendPacket(serverPacket);
             }
         }
     }
@@ -158,7 +158,7 @@ class Room {
      * @param client the client to send to
      */
     void sendPacket(ServerPacket serverPacket, Client client) {
-        client.addPacket(serverPacket);
+        client.sendPacket(serverPacket);
     }
 
     /**
@@ -168,7 +168,7 @@ class Room {
      */
     void sendPacket(ServerPacket serverPacket) {
         for (Client client : clients.values()) {
-            client.addPacket(serverPacket);
+            client.sendPacket(serverPacket);
         }
     }
 

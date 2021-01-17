@@ -2,7 +2,7 @@ package net.stzups.board.protocol.server;
 
 import net.stzups.board.protocol.Point;
 
-public class ServerPacketDraw extends ServerPacketId {
+public class ServerPacketDraw extends ServerPacketId implements ServerPacketInterval {
     private Point[] points;
 
     public ServerPacketDraw(int id, Point[] points) {
