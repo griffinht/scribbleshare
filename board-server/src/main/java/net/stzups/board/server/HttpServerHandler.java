@@ -24,7 +24,6 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.SystemPropertyUtil;
 
-import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
@@ -48,7 +47,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final int HTTP_CACHE_SECONDS = 0; //todo change
     private static final String JOIN_PATH = "d";
 
-    private static final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
     private static final Calendar time = new GregorianCalendar();
 
@@ -271,12 +269,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));*/
     }
 
-    /**
-     * Sets a MIME type for a file
-     * Additional MIME types can be defined in META-INF/mine.types
-     */
     private static void setContentTypeHeader(HttpResponse response, File file) {
-        //System.out.println(file.getPath() + ", " + mimeTypesMap.getContentType(file.getPath())); //todo uncomment if you are having trouble with mime types
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeTypeFromExtension(file));
     }
 }
