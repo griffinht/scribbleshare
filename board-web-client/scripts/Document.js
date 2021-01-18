@@ -39,6 +39,7 @@ export default class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     draw(dt) {
