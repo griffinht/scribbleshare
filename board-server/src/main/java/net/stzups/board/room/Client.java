@@ -3,7 +3,6 @@ package net.stzups.board.room;
 import io.netty.channel.Channel;
 import net.stzups.board.protocol.Point;
 import net.stzups.board.protocol.server.ServerPacket;
-import net.stzups.board.protocol.server.ServerPacketInterval;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,12 +32,12 @@ public class Client {
         return points;
     }
 
+    void queuePacket(ServerPacket serverPacket) {
+        packets.add(serverPacket);
+    }
+
     void sendPacket(ServerPacket serverPacket) {
-        if (serverPacket instanceof ServerPacketInterval) {
-            packets.add(serverPacket);
-        } else {
-            channel.writeAndFlush(Collections.singletonList(serverPacket));
-        }
+        channel.writeAndFlush(Collections.singletonList(serverPacket));
     }
 
     void flushPackets() {

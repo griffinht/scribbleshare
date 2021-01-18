@@ -138,6 +138,20 @@ class Room {
     }
 
     /**
+     * Queue given packet to all members of the room except for the specified client
+     *
+     * @param serverPacket packet to send
+     * @param except client to exclude
+     */
+    void queuePacketExcept(ServerPacket serverPacket, Client except) {
+        for (Client client : clients.values()) {
+            if (except != client) {
+                client.queuePacket(serverPacket);
+            }
+        }
+    }
+
+    /**
      * Send given packet to all members of the room except for the specified client
      *
      * @param serverPacket packet to send
