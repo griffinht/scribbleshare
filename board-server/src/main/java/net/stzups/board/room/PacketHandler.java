@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
+    private static int TODO = 0;
     private static Map<Document, Room> documents = new HashMap<>();//todo move somewhere
     private Room room;
     private Client client;
@@ -51,7 +52,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 if (client != null && room != null) {
                     room.removeClient(client);
                 }
-                room = getRoom(Document.createDocument(clientPacketCreateDocument.getName()));
+                room = getRoom(Document.createDocument("Untitled " + TODO++));
                 client = room.addClient(ctx.channel());
                 break;
             }

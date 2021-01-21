@@ -42,7 +42,7 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     packet = new ClientPacketOpenDocument(readString(byteBuf));
                     break;
                 case CREATE_DOCUMENT:
-                    packet = new ClientPacketCreateDocument((readString(byteBuf)));
+                    packet = new ClientPacketCreateDocument();
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");

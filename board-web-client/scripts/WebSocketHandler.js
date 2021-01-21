@@ -132,22 +132,15 @@ class WebSocketHandler {
         this.send(newBuffer);
     }
 
-    sendCreate(name) {
-        let encoded = new TextEncoder().encode(name);
-        let buffer = new ArrayBuffer(2 + encoded.length);
+    sendCreate() {
+        let buffer = new ArrayBuffer(1);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 2);
         offset += 1;
-        
-        dataView.setUint8(offset, encoded.byteLength);
-        offset += 1;
 
-        let newBuffer = new Uint8Array(buffer);
-        newBuffer.set(encoded, offset);
-
-        this.send(newBuffer);
+        this.send(buffer);
     }
 
     sendDraw(points) {
