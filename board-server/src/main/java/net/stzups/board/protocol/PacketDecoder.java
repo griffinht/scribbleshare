@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.protocol.client.ClientPacketDraw;
+import net.stzups.board.protocol.client.ClientPacketHandshake;
 import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.client.ClientPacketType;
 
@@ -29,6 +30,7 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
+            System.out.println("recv " + packetType);
             ClientPacket packet;
             switch (packetType) {
                 case DRAW:
@@ -42,7 +44,10 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     packet = new ClientPacketOpenDocument(readString(byteBuf));
                     break;
                 case CREATE_DOCUMENT:
-                    packet = new ClientPacketCreateDocument((readString(byteBuf)));
+                    packet = new ClientPacketCreateDocument();
+                    break;
+                case HANDSHAKE:
+                    packet = new ClientPacketHandshake();
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");

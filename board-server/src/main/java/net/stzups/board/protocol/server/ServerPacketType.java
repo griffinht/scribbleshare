@@ -10,6 +10,7 @@ public enum ServerPacketType {
     REMOVE_CLIENT(1),
     DRAW(2),
     OPEN_DOCUMENT(3),
+    ADD_DOCUMENT(4)
     ;
 
     private static Map<Integer, ServerPacketType> packetTypeMap = new IntObjectHashMap<>();

@@ -2,12 +2,13 @@ class WebSocketHandler {
     constructor() {
         this.events = {};
         [
-            'socketopen',
-            'socketclose',
-            'addclient',
-            'removeclient',
-            'draw',
-            'open',
+            'socket.open',
+            'socket.close',
+            'protocol.addclient',
+            'protocol.removeclient',
+            'protocol.draw',
+            'protocol.opendocument',
+            'protocol.adddocument',
         ].forEach((type) => {
             this.events[type] = [];
         })
@@ -17,12 +18,12 @@ class WebSocketHandler {
 
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            this.dispatchEvent('socketopen');
+            this.dispatchEvent('socket.open');
         });
 
         this.socket.addEventListener('close', (event) => {
             console.log('WebSocket connection closed');
-            this.dispatchEvent('socketclose');
+            this.dispatchEvent('socket.close');
         });
     
         this.socket.addEventListener('message', (event) => {
@@ -37,24 +38,24 @@ class WebSocketHandler {
                     offset += 1;
                     console.log('got ' + type);
                     switch (type) {
-                        case 0: {//add client
+                        case 0: {
                             let e = {};
-                            e.id = dataView.getUint16(offset);
-                            offset += 2;
-                            this.dispatchEvent('addclient', e);
+                            e.id = dataView.getInt32(offset);
+                            offset += 4;
+                            this.dispatchEvent('protocol.addclient', e);
                             break;
                         }
-                        case 1: {//remove client
+                        case 1: {
                             let e = {};
-                            e.id = dataView.getUint16(offset);
-                            offset += 2;
-                            this.dispatchEvent('removeclient', e);
+                            e.id = dataView.getInt32(offset);
+                            offset += 4;
+                            this.dispatchEvent('protocol.removeclient', e);
                             break;
                         }
-                        case 2: {//draw
+                        case 2: {
                             let e = {};
-                            e.id = dataView.getUint16(offset);
-                            offset += 2;
+                            e.id = dataView.getInt32(offset);
+                            offset += 4;
                             let size = dataView.getUint16(offset);
                             offset += 2;
                             e.points = [];
@@ -69,10 +70,19 @@ class WebSocketHandler {
                                 point.usedDt = 0;
                                 e.points.push(point);
                             }
-                            this.dispatchEvent('draw', e);
+                            this.dispatchEvent('protocol.draw', e);
                             break;
                         }
-                        case 3: {//open
+                        case 3: {
+                            let e = {};
+                            let length = dataView.getUint8(offset);
+                            offset += 1;
+                            e.id = new TextDecoder().decode(event.data.slice(offset, offset + length));
+                            offset += length;
+                            this.dispatchEvent('protocol.opendocument', e);
+                            break;
+                        }
+                        case 4: {
                             let e = {};
                             let length = dataView.getUint8(offset);
                             offset += 1;
@@ -82,7 +92,7 @@ class WebSocketHandler {
                             offset += 1;
                             e.name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            this.dispatchEvent('open', e);
+                            this.dispatchEvent('protocol.adddocument', e);
                             break;
                         }
                         default:
@@ -102,6 +112,7 @@ class WebSocketHandler {
     }
     
     dispatchEvent(type, event) {
+        console.log(type, event);
         this.events[type].forEach(onevent => onevent(event));
     }
 
@@ -132,22 +143,15 @@ class WebSocketHandler {
         this.send(newBuffer);
     }
 
-    sendCreate(name) {
-        let encoded = new TextEncoder().encode(name);
-        let buffer = new ArrayBuffer(2 + encoded.length);
+    sendCreate() {
+        let buffer = new ArrayBuffer(1);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 2);
         offset += 1;
-        
-        dataView.setUint8(offset, encoded.byteLength);
-        offset += 1;
 
-        let newBuffer = new Uint8Array(buffer);
-        newBuffer.set(encoded, offset);
-
-        this.send(newBuffer);
+        this.send(buffer);
     }
 
     sendDraw(points) {
@@ -174,6 +178,17 @@ class WebSocketHandler {
         });
 
         points.length = 0;//clear
+
+        this.send(buffer);
+    }
+
+    sendHandshake() {
+        let buffer = new ArrayBuffer(1);
+        let dataView = new DataView(buffer);
+        let offset = 0;
+
+        dataView.setUint8(offset, 3);
+        offset += 1;
 
         this.send(buffer);
     }

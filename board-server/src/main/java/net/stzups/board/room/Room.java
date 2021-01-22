@@ -1,17 +1,13 @@
 package net.stzups.board.room;
 
-import io.netty.channel.Channel;
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
-import net.stzups.board.protocol.Point;
 import net.stzups.board.protocol.server.ServerPacket;
-import net.stzups.board.protocol.server.ServerPacketAddClient;
-import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.protocol.server.ServerPacketAddUser;
 import net.stzups.board.protocol.server.ServerPacketOpenDocument;
-import net.stzups.board.protocol.server.ServerPacketRemoveClient;
+import net.stzups.board.protocol.server.ServerPacketRemoveUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -19,34 +15,26 @@ import java.util.TimerTask;
 
 class Room {
     private static final int SEND_PERIOD = 1000;
-    private static final int ROOM_ID_LENGTH = 6;
 
-    private static Map<String, Room> rooms = new HashMap<>();
+    private static List<Room> rooms = new ArrayList<>();
     static {//todo send some packets instantly and refactor to somewhere?
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                for (Room room : rooms.values()) {
+                for (Room room : rooms) {
                     for (Client client : room.clients.values()) {
-                        client.sendPackets();
+                        client.flushPackets();
                     }
                 }
             }
         }, 0, SEND_PERIOD);
     }
 
-    private int nextClientId = 1; //0 is reserved for room client
+    private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
 
-    private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for int keys
-    private Client emptyClient;
-    private String id;
     private Document document;
-
-    private Room(String id, Document document) {
-        this.id = id;
+    private Room(Document document) {
         this.document = document;
-        emptyClient = new EmptyClient(0);
-        clients.put(emptyClient.getId(), emptyClient);
     }
 
     /**
@@ -55,28 +43,9 @@ class Room {
      * @return the created room
      */
     static Room createRoom(Document document) {
-        String id;
-        do {
-            id = String.valueOf((int) (Math.random() * Math.pow(10, ROOM_ID_LENGTH)));
-        } while (rooms.containsKey(id)); //todo improve
-        Room room = new Room(id, document);
-        rooms.put(room.getId(), room);
+        Room room = new Room(document);
+        rooms.add(room);
         return room;
-    }
-
-    /**
-     * Gets the corresponding room for an id
-     *
-     * @return the newly created or existing room
-     */
-    static Room getRoom(String id) {
-        return rooms.get(id);
-    }
-
-
-
-    String getId() {
-        return id;
     }
 
     Document getDocument() {
@@ -85,44 +54,15 @@ class Room {
 
     /**
      * Creates a new client using its channel
-     *
-     * @param channel the channel used by the client
-     * @return the newly created client
+     * todo
      */
-    Client addClient(Channel channel) {
-        Client client = new Client(nextClientId++, channel);
+    void addClient(Client client) {
         //for the new client
-        sendPacket(new ServerPacketOpenDocument(document), client);
-        for (Client c : clients.values()) {
-            sendPacket(new ServerPacketAddClient(c), client);
-            List<Point> points = c.getPoints();
-            if (points.size() > 0) {
-                sendPacket(new ServerPacketDraw(c.getId(), convert(new ArrayList<>(points))), client);
-            }
-        }
+        client.sendPacket(new ServerPacketOpenDocument(document));
         //for the existing clients
-        sendPacket(new ServerPacketAddClient(client));
-        clients.put(client.getId(), client);
+        sendPacket(new ServerPacketAddUser(client.getUser()));
+        clients.put(client.getUser().getId(), client);
         Board.getLogger().info("Added " + client + " to " + this);
-        return client;
-    }
-
-    /**
-     * Converts a List<Point> to Point[], and marks them as instant draw
-     *
-     * @param points points to convert
-     * @return converted points
-     */
-    private static Point[] convert(List<Point> points) {
-        Point[] pts = new Point[points.size()];
-        int i = 0;
-        for (Point point : points) {
-            if (point.dt != 0) {
-                point.dt = -1;
-            }
-            pts[i++] = point;
-        }
-        return pts;
     }
 
     /**
@@ -131,9 +71,7 @@ class Room {
      * @param client client to remove
      */
     void removeClient(Client client) {
-        emptyClient.addPoints(client.getPoints().toArray(new Point[0]));
-        clients.remove(client.getId());
-        sendPacket(new ServerPacketRemoveClient(client));
+        sendPacket(new ServerPacketRemoveUser(clients.remove(client.getUser().getId()).getUser()));
         Board.getLogger().info("Removed " + client + " to " + this);
     }
 
@@ -146,19 +84,9 @@ class Room {
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
         for (Client client : clients.values()) {
             if (except != client) {
-                client.addPacket(serverPacket);
+                client.sendPacket(serverPacket);
             }
         }
-    }
-
-    /**
-     * Send packet to a client
-     *
-     * @param serverPacket the packet to send
-     * @param client the client to send to
-     */
-    void sendPacket(ServerPacket serverPacket, Client client) {
-        client.addPacket(serverPacket);
     }
 
     /**
@@ -168,12 +96,26 @@ class Room {
      */
     void sendPacket(ServerPacket serverPacket) {
         for (Client client : clients.values()) {
-            client.addPacket(serverPacket);
+            client.sendPacket(serverPacket);
+        }
+    }
+
+    void queuePacketExcept(ServerPacket serverPacket, Client except) {
+        for (Client client : clients.values()) {
+            if (except != client) {
+                client.queuePacket(serverPacket);
+            }
+        }
+    }
+
+    void queuePacket(ServerPacket serverPacket) {
+        for (Client client : clients.values()) {
+            client.queuePacket(serverPacket);
         }
     }
 
     @Override
     public String toString() {
-        return "Room{id=" + id + "}";
+        return "Room{document=" + document + "}";
     }
 }

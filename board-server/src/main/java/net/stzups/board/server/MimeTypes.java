@@ -24,7 +24,7 @@ public class MimeTypes {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(MimeTypes.class.getResourceAsStream(MIME_TYPES_FILE_PATH)));
             for (String line; (line = bufferedReader.readLine()) != null;) {
-                String[] split = line.split(" ");
+                String[] split = line.split("\\s");
                 if (split.length > 1) {
                     for (int i = 1; i < split.length; i++) {
                         extensionMimeTypeMap.put(split[i], split[0]);

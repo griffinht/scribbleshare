@@ -44,14 +44,17 @@ export default class LocalClient extends Client {
                 this.lastTime = now;
             }
         });
-        setInterval(() => {
-            this.lastSend = performance.now();
-            socket.sendDraw(this.points);
-        }, UPDATE_INTERVAL)
+        setInterval(() => this.update(), UPDATE_INTERVAL);
     }
 
     draw(dt) {
-
+        this.lastSend = performance.now();
+        socket.sendDraw(this.points);
+    }
+    
+    update() {
+        this.lastSend = performance.now();
+        socket.sendDraw(this.points);
     }
 
     mousedown(event) {
