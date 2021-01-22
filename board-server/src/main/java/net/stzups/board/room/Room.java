@@ -100,6 +100,20 @@ class Room {
         }
     }
 
+    void queuePacketExcept(ServerPacket serverPacket, Client except) {
+        for (Client client : clients.values()) {
+            if (except != client) {
+                client.queuePacket(serverPacket);
+            }
+        }
+    }
+
+    void queuePacket(ServerPacket serverPacket) {
+        for (Client client : clients.values()) {
+            client.queuePacket(serverPacket);
+        }
+    }
+
     @Override
     public String toString() {
         return "Room{document=" + document + "}";

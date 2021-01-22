@@ -37,7 +37,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             case DRAW: {
                 ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
                 room.getDocument().addPoints(client.getUser(), clientPacketDraw.getPoints());
-                room.sendPacketExcept(new ServerPacketDraw(client.getUser(), clientPacketDraw.getPoints()), client);
+                room.queuePacketExcept(new ServerPacketDraw(client.getUser(), clientPacketDraw.getPoints()), client);//todo this has tons of latency
                 break;
             }
             case OPEN_DOCUMENT: {
