@@ -54,7 +54,7 @@ class WebSocketHandler {
                         }
                         case 2: {
                             let e = {};
-                            e.id = dataView.getUint32(offset);
+                            e.id = dataView.getInt32(offset);
                             offset += 4;
                             let size = dataView.getUint16(offset);
                             offset += 2;
