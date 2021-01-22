@@ -17,6 +17,7 @@ export default class LocalClient extends Client {
         this.points = [];
         canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
         canvas.addEventListener('mouseup', (event) => {
+            document.getElementsByTagName('body')[0].classList.remove('noselect');
             if (this.point !== null) {
                 this.pushPoint();
                 this.point = null;
@@ -58,6 +59,7 @@ export default class LocalClient extends Client {
     }
 
     mousedown(event) {
+        document.getElementsByTagName('body')[0].classList.add('noselect');
         if (event.buttons & 1) {
             this.lastTime = performance.now();
             this.points.push({
