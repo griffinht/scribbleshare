@@ -17,6 +17,7 @@ export default class Document {
         this.id = id;
         this.sidebarItem = new SidebarItem(this.name, () => {
             if (this.id != null) {
+                if (activeDocument != null) activeDocument.close();
                 socket.sendOpen(this.id)
             } else {
                 console.log('id was null', this);
@@ -34,7 +35,11 @@ export default class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    close() {
+        localClient.update();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
     }
 
     draw(dt) {
@@ -44,7 +49,10 @@ export default class Document {
     }
 }
 
-document.getElementById('add').addEventListener('click', () => socket.sendCreate());
+document.getElementById('add').addEventListener('click', () => {
+    if (activeDocument != null) activeDocument.close();
+    socket.sendCreate();
+});
 
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
@@ -87,7 +95,9 @@ socket.addEventListener('protocol.adddocument', (event) => {
     documents.get(event.id, new Document(event.name, event.id));
 });
 socket.addEventListener('protocol.opendocument', (event) => {
-    //todo activedocument#close()?
+    if (activeDocument != null) {
+        activeDocument.close();
+    }
     activeDocument = documents.get(event.id);
     activeDocument.open();
 });
