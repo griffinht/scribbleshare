@@ -4,6 +4,7 @@ import net.stzups.board.protocol.Point;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,10 @@ public class Document {
         Document document = new Document(id, name);
         documents.put(document.getId(), document);
         return document;
+    }
+
+    static Collection<Document> getDocuments() {
+        return documents.values();
     }
 
 

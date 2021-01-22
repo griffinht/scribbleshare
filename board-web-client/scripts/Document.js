@@ -102,10 +102,9 @@ socket.addEventListener('protocol.opendocument', (event) => {
     activeDocument.open();
 });
 socket.addEventListener('socket.open', (event) => {
+    socket.sendHandshake();
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
-    if (invite === '') {
-        socket.sendCreate();
-    } else {
+    if (invite !== '') {
         socket.sendOpen(invite);
     }
 });

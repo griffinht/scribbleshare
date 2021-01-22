@@ -181,5 +181,16 @@ class WebSocketHandler {
 
         this.send(buffer);
     }
+
+    sendHandshake() {
+        let buffer = new ArrayBuffer(1);
+        let dataView = new DataView(buffer);
+        let offset = 0;
+
+        dataView.setUint8(offset, 3);
+        offset += 1;
+
+        this.send(buffer);
+    }
 }
 export default new WebSocketHandler();

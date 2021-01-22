@@ -8,6 +8,7 @@ import net.stzups.board.protocol.client.ClientPacketDraw;
 import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.server.ServerPacketAddDocument;
 import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.protocol.server.ServerPacketOpenDocument;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 room.addClient(client);
                 break;
             }
+            case HANDSHAKE: {
+                for (Document document : Document.getDocuments()) {//todo if user has no documents then make a blank one
+                    client.sendPacket(new ServerPacketAddDocument(document));//todo this should only send one web socket message down the pipe
+                }
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
         }
@@ -85,9 +92,5 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             documents.put(r.getDocument(), r);
         }
         return r;
-    }
-
-    private void joinRoom() {
-
     }
 }
