@@ -71,7 +71,7 @@ window.requestAnimationFrame(draw);
 
 socket.addEventListener('addclient', (event) => {
     let client = new Client(event.id);
-    activeDocument.clients.set(client.id, client);
+    //activeDocument.clients.set(client.id, client);
     console.log('Add client ', client);
 });
 socket.addEventListener('removeclient', (event) => {
@@ -84,11 +84,12 @@ socket.addEventListener('draw', (event) => {
     });
 });
 socket.addEventListener('open', (event) => {
-    let doc = documents.get(event.id);
-    if (doc == null) {
-        doc = new Document(event.name, event.id);
+    //todo activedocument#close()?
+    activeDocument = documents.get(event.id);
+    if (activeDocument == null) {
+        activeDocument = new Document(event.name, event.id);
     }
-    doc.open();
+    activeDocument.open();
 });
 socket.addEventListener('socketopen', (event) => {
     var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
