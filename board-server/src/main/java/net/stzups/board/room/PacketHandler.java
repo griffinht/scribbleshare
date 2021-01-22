@@ -40,7 +40,6 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case OPEN_DOCUMENT: {
-                System.out.println("open ");
                 ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
                 Document document = Document.getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
@@ -55,12 +54,15 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case CREATE_DOCUMENT: {
-                System.out.println("Create");
                 ClientPacketCreateDocument clientPacketCreateDocument = (ClientPacketCreateDocument) packet;
                 if (room != null) {
                     room.removeClient(client);
                 }
-                room = getRoom(Document.createDocument("Untitled " + TODO++));
+                try {
+                    room = getRoom(Document.createDocument("Untitled " + TODO++));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 client.sendPacket(new ServerPacketAddDocument(room.getDocument()));
                 room.addClient(client);
                 break;

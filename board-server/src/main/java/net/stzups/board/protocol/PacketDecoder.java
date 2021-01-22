@@ -29,6 +29,7 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
+            System.out.println("recv " + packetType);
             ClientPacket packet;
             switch (packetType) {
                 case DRAW:

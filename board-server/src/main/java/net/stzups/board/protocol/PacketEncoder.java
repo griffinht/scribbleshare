@@ -19,6 +19,7 @@ public class PacketEncoder extends MessageToByteEncoder<List<ServerPacket>> {
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
         ByteBuf byteBuf = binaryWebSocketFrame.content();
         for (ServerPacket serverPacket : serverPackets) {
+            System.out.println("send " + serverPacket.getClass().getSimpleName());
             serverPacket.serialize(byteBuf);
         }
         ctx.writeAndFlush(binaryWebSocketFrame);
