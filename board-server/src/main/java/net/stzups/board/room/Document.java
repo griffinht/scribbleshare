@@ -56,6 +56,7 @@ public class Document {
             pts = new ArrayList<>();
         }
         pts.addAll(Arrays.asList(points));
+        this.points.put(user, pts);
     }
 
     @Override

@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.board.room.User;
 
 public abstract class ServerPacketUser extends ServerPacket {
-    private long id;
+    private int id;
 
     ServerPacketUser(ServerPacketType packetType, User user) {
         super(packetType);
@@ -14,6 +14,6 @@ public abstract class ServerPacketUser extends ServerPacket {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeLong(id);
+        byteBuf.writeInt(id);
     }
 }

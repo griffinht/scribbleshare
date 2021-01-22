@@ -1,6 +1,6 @@
 package net.stzups.board.room;
 
-import io.netty.util.collection.LongObjectHashMap;
+import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketAddUser;
@@ -30,7 +30,7 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Map<Long, Client> clients = new LongObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
+    private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
 
     private Document document;
     private Room(Document document) {

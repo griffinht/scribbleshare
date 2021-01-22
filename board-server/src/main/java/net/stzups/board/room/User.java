@@ -5,17 +5,17 @@ import java.util.Random;
 public class User {
     private static Random random = new Random();
 
-    private long id;
+    private int id;
 
     public User() {
-        id = random.nextLong();
+        id = random.nextInt();
     }
 
-    public User(long id) {
+    public User(int id) {
         this.id = id;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

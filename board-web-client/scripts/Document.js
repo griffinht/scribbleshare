@@ -71,7 +71,7 @@ window.requestAnimationFrame(draw);
 
 socket.addEventListener('protocol.addclient', (event) => {
     let client = new Client(event.id);
-    //activeDocument.clients.set(client.id, client);
+    activeDocument.clients.set(client.id, client);
     console.log('Add client ', client);
 });
 socket.addEventListener('protocol.removeclient', (event) => {
