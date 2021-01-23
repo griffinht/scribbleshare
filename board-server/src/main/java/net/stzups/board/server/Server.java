@@ -16,14 +16,13 @@ import net.stzups.board.LogFactory;
 public class Server {
     private static final int PORT = 80;
 
-    private ChannelFuture channelFuture;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
     /**
      * Initializes the server and binds to the specified port
      */
-    public void run() {
+    public ChannelFuture start() throws Exception {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -31,22 +30,15 @@ public class Server {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer());
-        channelFuture = serverBootstrap.bind(PORT);
-        Board.getLogger().info("Listening on port " + PORT);
+        Board.getLogger().info("Binding to port " + PORT);
+        return serverBootstrap.bind(PORT).sync().channel().closeFuture();
     }
 
     /**
      * Shuts down the server gracefully, then blocks until the server is shut down
      */
     public void stop() {
-        Board.getLogger().info("Closing server...");
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
-        try {
-            channelFuture.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Board.getLogger().info("Closed server");
     }
 }
