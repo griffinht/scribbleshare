@@ -43,7 +43,6 @@ public class Document implements Serializable {
     }
 
     public static Collection<Document> getDocuments() {
-        System.out.println(Arrays.toString(documents.values().toArray()));
         return documents.values();
     }
 

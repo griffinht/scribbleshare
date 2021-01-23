@@ -1,5 +1,7 @@
 package net.stzups.board.data;
 
+import net.stzups.board.Board;
+
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DataAccessObject<K extends Serializable, V extends Serializable> extends HashMap<K, V> {
+    private static final int SAVE_INTERVAL = -1;//in seconds, -1 to disable
     private static final String FILE_EXTENSION = "data";
 
     private File file;
@@ -32,13 +35,22 @@ public class DataAccessObject<K extends Serializable, V extends Serializable> ex
             save();
         }
         load();
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+        if (SAVE_INTERVAL > 0) {
+            Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+                try {
+                    save();
+                } catch (IOException e) {
+                    Board.getLogger().warning(new IOException("Autosave: Failed to save to disk (ruh roh raggy!)", e).toString());
+                }
+            }, 10, SAVE_INTERVAL, TimeUnit.SECONDS);
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 save();
             } catch (IOException e) {
-                e.printStackTrace();
+                Board.getLogger().warning(new IOException("Failed to save to disk (ruh roh raggy!)", e).toString());
             }
-        }, 10, 10, TimeUnit.SECONDS);
+        }));
     }
 
     protected File getFile() {
@@ -47,9 +59,7 @@ public class DataAccessObject<K extends Serializable, V extends Serializable> ex
 
     @SuppressWarnings("unchecked")
     public void load() throws IOException {
-        System.out.println("LOADING");
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(getFile()))) {
-            System.out.println(objectInputStream.available());
             while (true) {
                 Object key;
                 Object value;
@@ -58,19 +68,16 @@ public class DataAccessObject<K extends Serializable, V extends Serializable> ex
                     value = objectInputStream.readObject();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
-                    continue;
+                    continue;//maybe just one bad entry, so keep going
                 } catch (EOFException e) {
-                    System.out.println("eof exception");
-                    break;
+                    break;//indicates end of file
                 }
-                put((K) key, (V) value);//unchecked
+                put((K) key, (V) value);//todo unchecked
             }
-
         }
     }
 
     public void save() throws IOException {
-        System.out.println("SAVIGIN " + size());
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(getFile()))) {
             for (Map.Entry<K, V> entry : entrySet()) {
                 objectOutputStream.writeObject(entry.getKey());
