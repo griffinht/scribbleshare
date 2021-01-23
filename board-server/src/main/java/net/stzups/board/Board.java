@@ -5,7 +5,6 @@ import net.stzups.board.server.Server;
 import java.util.logging.Logger;
 
 public class Board {
-    private static Server server;
     private static Logger logger;
 
     public static void main(String[] args) {
@@ -15,10 +14,8 @@ public class Board {
 
         long start = System.currentTimeMillis();
 
-        new ConsoleManager();
-
-        server = new Server();
-        server.run();
+        Server server = new Server();
+        ChannelFuture channelFuture = server.start();
 
         logger.info("Started Board server in " + (System.currentTimeMillis() - start) + "ms");
     }
