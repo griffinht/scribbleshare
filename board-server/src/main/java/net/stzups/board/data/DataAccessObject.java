@@ -12,18 +12,17 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DataAccessObject<K extends Serializable, V extends Serializable> extends HashMap<K, V> {
-    private static final int SAVE_INTERVAL = -1;//in seconds, -1 to disable
+    private static final int SAVE_INTERVAL = Integer.parseInt(System.getProperty("AUTOSAVE_INTERVAL"));//in seconds, -1 to disable
     private static final String FILE_EXTENSION = "data";
 
     private File file;
 
     public DataAccessObject(String name) throws IOException {
-        File directory = new File(Optional.ofNullable(System.getenv("DATA_ROOT")).orElse("data"));
+        File directory = new File(System.getProperty("DATA_PATH"));
         if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Error while making directory at " + directory.getPath());
         }

@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * modified from https://netty.io/4.1/xref/io/netty/example/http/file/HttpStaticFileServerHandler.html
  */
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final File HTTP_ROOT = new File(Optional.ofNullable(System.getenv("DOCUMENT_ROOT_PATH")).orElse("document_root"));
+    private static final File HTTP_ROOT = new File(System.getProperty("DOCUMENT_ROOT_PATH"));
     static {
         if (!HTTP_ROOT.exists()) {
             if (!HTTP_ROOT.mkdirs()) {
