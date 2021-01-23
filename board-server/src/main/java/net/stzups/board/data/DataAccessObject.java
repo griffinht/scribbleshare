@@ -1,18 +1,20 @@
 package net.stzups.board.data;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class DataAccessObject<K, V> extends HashMap<K, V> {
+public class DataAccessObject<K extends Serializable, V extends Serializable> extends HashMap<K, V> {
     private static final String FILE_EXTENSION = "data";
 
     private File file;
@@ -43,24 +45,32 @@ public class DataAccessObject<K, V> extends HashMap<K, V> {
         return file;
     }
 
+    @SuppressWarnings("unchecked")
     public void load() throws IOException {
+        System.out.println("LOADING");
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(getFile()))) {
             System.out.println(objectInputStream.available());
-            while (objectInputStream.available() > 0) {
-                Object object;
+            while (true) {
+                Object key;
+                Object value;
                 try {
-                    object = objectInputStream.readObject();
+                    key = objectInputStream.readObject();
+                    value = objectInputStream.readObject();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                     continue;
+                } catch (EOFException e) {
+                    System.out.println("eof exception");
+                    break;
                 }
-                System.out.println(object.getClass() + ", " + object);
+                put((K) key, (V) value);//unchecked
             }
 
         }
     }
 
     public void save() throws IOException {
+        System.out.println("SAVIGIN " + size());
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(getFile()))) {
             for (Map.Entry<K, V> entry : entrySet()) {
                 objectOutputStream.writeObject(entry.getKey());
