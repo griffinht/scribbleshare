@@ -11,7 +11,6 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.board.Board;
-import net.stzups.board.room.PacketHandler;
 import net.stzups.board.protocol.PacketEncoder;
 import net.stzups.board.protocol.PacketDecoder;
 
@@ -31,21 +30,22 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     };
     private PacketEncoder packetEncoder = new PacketEncoder();
     private PacketDecoder packetDecoder = new PacketDecoder();
+    private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
         //todo ssl
-        pipeline.addLast(globalTrafficShapingHandler);
-        pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpObjectAggregator(65536));
-        pipeline.addLast(new ChunkedWriteHandler());
-        pipeline.addLast(new WebSocketServerCompressionHandler());
-        pipeline.addLast(new WebSocketServerProtocolHandler("/websocket", null, true));
-        pipeline.addLast(new HttpServerHandler());
-        pipeline.addLast(packetEncoder);
-        pipeline.addLast(packetDecoder);
-        pipeline.addLast(new PacketHandler());
+        pipeline.addLast(globalTrafficShapingHandler)
+                .addLast(new HttpServerCodec())
+                .addLast(new HttpObjectAggregator(65536))
+                .addLast(new ChunkedWriteHandler())
+                .addLast(new WebSocketServerCompressionHandler())
+                .addLast(new WebSocketServerProtocolHandler("/websocket", null, true))
+                .addLast(new HttpServerHandler())
+                .addLast(packetEncoder)
+                .addLast(packetDecoder)
+                .addLast(new WebSocketInitializer());
     }
 }
