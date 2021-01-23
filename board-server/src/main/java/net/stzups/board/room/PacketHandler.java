@@ -60,7 +60,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(Document.createDocument("Untitled " + TODO++));
+                    room = getRoom(Document.createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -1,22 +1,39 @@
 package net.stzups.board.room;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class User {
     private static Random random = new Random();
 
     private int id;
+    private List<String> ownedDocuments;
+    private List<String> sharedDocuments;
 
     public User() {
         id = random.nextInt();
+        ownedDocuments = new ArrayList<>();
+        ownedDocuments.add(Document.createDocument(this).getId());
+        sharedDocuments = new ArrayList<>();
     }
 
-    public User(int id) {
+    public User(int id, List<String> ownedDocuments, List<String> sharedDocuments) {
         this.id = id;
+        this.ownedDocuments = ownedDocuments;
+        this.sharedDocuments = sharedDocuments;
     }
 
     public int getId() {
         return id;
+    }
+
+    public List<String> getOwnedDocuments() {
+        return ownedDocuments;
+    }
+
+    public List<String> getSharedDocuments() {
+        return sharedDocuments;
     }
 
     @Override
