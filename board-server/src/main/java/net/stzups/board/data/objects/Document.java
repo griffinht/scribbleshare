@@ -1,7 +1,9 @@
-package net.stzups.board.room;
+package net.stzups.board.data.objects;
 
-import net.stzups.board.protocol.Point;
+import net.stzups.board.data.DataAccessObject;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,17 +11,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Document {
+public class Document implements Serializable {
     private static final int DOCUMENT_ID_LENGTH = 6;
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
-    private static Map<String, Document> documents = new HashMap<>();
+    private static DataAccessObject<String, Document> documents;
 
-    static Document getDocument(String id) {
+    static {
+        try {
+            documents = new DataAccessObject<>("document");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Document getDocument(String id) {
         return documents.get(id);
     }
 
-    static Document createDocument(User owner) {
+    public static Document createDocument(User owner) {
+        System.out.println("Created new " + owner);
         String id;
         int a = 0;
         do {
@@ -31,7 +42,8 @@ public class Document {
         return document;
     }
 
-    static Collection<Document> getDocuments() {
+    public static Collection<Document> getDocuments() {
+        System.out.println(Arrays.toString(documents.values().toArray()));
         return documents.values();
     }
 

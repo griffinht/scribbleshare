@@ -1,7 +1,7 @@
 package net.stzups.board.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.room.Document;
+import net.stzups.board.data.objects.Document;
 
 public class ServerPacketAddDocument extends ServerPacket {
     private Document document;

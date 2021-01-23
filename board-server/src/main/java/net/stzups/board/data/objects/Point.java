@@ -1,6 +1,8 @@
-package net.stzups.board.protocol;
+package net.stzups.board.data.objects;
 
-public class Point {
+import java.io.Serializable;
+
+public class Point implements Serializable {
     public int dt;
     public short x;
     public short y;

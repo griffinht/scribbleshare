@@ -7,6 +7,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import net.stzups.board.data.objects.Point;
 import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.protocol.client.ClientPacketDraw;

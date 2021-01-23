@@ -2,6 +2,7 @@ package net.stzups.board.room;
 
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
+import net.stzups.board.data.objects.Document;
 import net.stzups.board.protocol.server.ServerPacket;
 import net.stzups.board.protocol.server.ServerPacketAddUser;
 import net.stzups.board.protocol.server.ServerPacketOpenDocument;

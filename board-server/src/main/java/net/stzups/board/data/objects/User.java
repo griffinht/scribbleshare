@@ -1,10 +1,11 @@
-package net.stzups.board.room;
+package net.stzups.board.data.objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class User {
+public class User implements Serializable {
     private static Random random = new Random();
 
     private int id;

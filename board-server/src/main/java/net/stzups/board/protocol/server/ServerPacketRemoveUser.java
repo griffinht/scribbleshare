@@ -1,6 +1,6 @@
 package net.stzups.board.protocol.server;
 
-import net.stzups.board.room.User;
+import net.stzups.board.data.objects.User;
 
 public class ServerPacketRemoveUser extends ServerPacketUser {
     public ServerPacketRemoveUser(User user) {

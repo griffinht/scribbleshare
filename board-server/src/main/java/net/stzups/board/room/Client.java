@@ -1,6 +1,7 @@
 package net.stzups.board.room;
 
 import io.netty.channel.Channel;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.protocol.server.ServerPacket;
 
 import java.util.ArrayList;
