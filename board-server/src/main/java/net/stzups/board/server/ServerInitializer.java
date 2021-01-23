@@ -22,12 +22,16 @@ import java.util.concurrent.Executors;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+    private static final String WEB_SOCKET_PATH = "/websocket";
+    private static final boolean DEBUG_LOG_TRAFFIC = false;
+
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            //System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (DEBUG_LOG_TRAFFIC) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
+
     private PacketEncoder packetEncoder = new PacketEncoder();
     private PacketDecoder packetDecoder = new PacketDecoder();
     private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
@@ -42,7 +46,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new WebSocketServerProtocolHandler("/websocket", null, true))
+                .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
                 .addLast(new HttpServerHandler())
                 .addLast(packetEncoder)
                 .addLast(packetDecoder)
