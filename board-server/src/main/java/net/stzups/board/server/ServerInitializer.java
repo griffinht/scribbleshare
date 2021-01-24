@@ -50,6 +50,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpServerHandler())
                 .addLast(packetEncoder)
                 .addLast(packetDecoder)
-                .addLast(new WebSocketInitializer());
+                .addLast(webSocketInitializer);
     }
 }
