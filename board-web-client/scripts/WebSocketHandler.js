@@ -14,7 +14,6 @@ class WebSocketHandler {
         })
 
         let webSocketUrl;
-        console.log(window.location.protocol);
         if (window.location.protocol === 'https:') {
             webSocketUrl = 'wss://localhost/websocket';
         } else {
@@ -24,7 +23,7 @@ class WebSocketHandler {
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection opened');
+            console.log('WebSocket connection to ' + webSocketUrl + ' opened');
             this.dispatchEvent('socket.open');
         });
 

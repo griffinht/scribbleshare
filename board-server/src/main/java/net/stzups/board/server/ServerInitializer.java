@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
@@ -15,13 +15,6 @@ import net.stzups.board.Board;
 import net.stzups.board.protocol.PacketEncoder;
 import net.stzups.board.protocol.PacketDecoder;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.util.concurrent.Executors;
 
 /**
@@ -43,46 +36,10 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private PacketEncoder packetEncoder = new PacketEncoder();
     private PacketDecoder packetDecoder = new PacketDecoder();
     private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
-    private static SSLEngine sslEngine;
+    private SslContext sslContext;
 
-    static {
-        String keystorePath = Board.getConfig().get("ssl.keystore");
-
-        if (keystorePath != null) {//must not be null
-            //char[] passphrase = Board.getConfig().getCharArray("ssl.passphrase"); todo use this instead of below lines, passphrase should be put in an immutable string
-            char[] passphrase;
-            String todo = Board.getConfig().get("ssl.passphrase");
-            if (todo != null) {
-                passphrase = todo.toCharArray();
-            } else {
-                passphrase = null;
-            }
-            if (passphrase != null) {//can be null if value of keystore is http
-                try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
-                    sslEngine = sslContextFactory(passphrase, fileInputStream).createSSLEngine();
-                } catch (IOException | GeneralSecurityException e) {
-                    throw new RuntimeException("Exception while getting SSL context", e);
-                }
-            } else {
-                if (!keystorePath.equals("http")) {
-                    throw new RuntimeException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
-                }//otherwise sslEngine is null and program continues with unencrypted sockets
-            }
-        } else {
-            throw new RuntimeException("Failed to set required flag --ssl.keystore. Perhaps you meant to explicitly disable encrypted sockets and use http:// with --ssl.keystore http");
-        }
-    }
-
-    private static SSLContext sslContextFactory(char[] passphrase, FileInputStream keystore) throws IOException, GeneralSecurityException {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(keystore, passphrase);
-
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(keyStore, passphrase);
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
-        return sslContext;
+    ServerInitializer(SslContext sslContext) {
+        this.sslContext = sslContext;
     }
 
     @Override
@@ -90,7 +47,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
         pipeline.addLast(globalTrafficShapingHandler);
-        if (sslEngine != null) pipeline.addLast(new SslHandler(sslEngine));
+        if (sslContext != null) {
+            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+        }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new ChunkedWriteHandler())
