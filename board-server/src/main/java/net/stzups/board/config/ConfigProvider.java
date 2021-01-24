@@ -1,25 +1,32 @@
 package net.stzups.board.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigProvider {
-    private List<StringConfig> stringConfigs = new ArrayList<>();
-    private List<CharArrayConfig> charArrayConfigs = new ArrayList<>();
+/**
+ * Used to store and retrieve key-value pairs by finding the first result from many different strategies.
+ */
+public class ConfigProvider {//todo probably needs a better name
+    private List<StringConfig> stringConfigs;
+    private List<CharArrayConfig> charArrayConfigs;
 
-    ConfigProvider(List<Config> configs) {
-        for (Config config : configs) {
-            if (config instanceof StringConfig) {
-                stringConfigs.add((StringConfig) config);
-            } else if (config instanceof CharArrayConfig) {
-                charArrayConfigs.add((CharArrayConfig) config);
-            }
-        }
+    /**
+     * Constructs a new ConfigProvider from its builder
+     * @param stringConfigs configs for String
+     * @param charArrayConfigs configs for char[]
+     */
+    ConfigProvider(List<StringConfig> stringConfigs, List<CharArrayConfig> charArrayConfigs) {
+        this.stringConfigs = stringConfigs;
+        this.charArrayConfigs = charArrayConfigs;
     }
 
+    /**
+     * Searches all StringConfigs for a key and gets
+     * @param key the key to match
+     * @return the matching string, or null if none of the string configs have the key
+     */
     public String get(String key) {
-        for (StringConfig stringConfig : stringConfigs) {
-            String value = stringConfig.get(key);
+        for (Config<String> config : stringConfigs) {
+            String value = config.get(key);
             if (value != null) {
                 return value;
             }
@@ -28,6 +35,12 @@ public class ConfigProvider {
         return null;
     }
 
+    /**
+     * Searches all configs that provide a String value for a key, which if not found will instead return the defaultValue
+     * @param key the key to match
+     * @param defaultValue the value to return if a value for the key is not found
+     * @return the value for the key, or the defaultValue
+     */
     public String get(String key, String defaultValue) {
         String value = get(key);
         if (value == null) {
@@ -36,8 +49,13 @@ public class ConfigProvider {
         return value;
     }
 
+    /**
+     * Searches all configs that provide a char[] value for key
+     * @param key the key to match
+     * @return the value for the key, or null if none of the char[] configs have the key
+     */
     public char[] getCharArray(String key) {
-        for (CharArrayConfig charArrayConfig : charArrayConfigs) {
+        for (Config<char[]> charArrayConfig : charArrayConfigs) {
             char[] value = charArrayConfig.get(key);
             if (value != null) {
                 return value;
@@ -47,6 +65,12 @@ public class ConfigProvider {
         return null;
     }
 
+    /**
+     * Searches all configs that provide a char[] value for a key, which if not found will instead return the defaultValue
+     * @param key the key to match
+     * @param defaultValue the value to return if a value for the key is not found
+     * @return the value for key, or the defaultValue
+     */
     public char[] getCharArray(String key, char[] defaultValue) {
         char[] value = getCharArray(key);
         if (value == null) {
