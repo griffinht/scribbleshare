@@ -22,26 +22,45 @@ Modifying `board-web-client` only requires you to refresh your browser. If you d
 
 Once you have built `board-server`, you may run it using using the following command:
 
-    java -jar board-server-xxx.jar --flag1 value --flag2 "value with spaces"
+    java -jar board-server-xxx.jar --ssl.keystore http
 
 - This starts an HTTP/WebSocket server listening on port 80, which you can connect in your browser at [http://localhost](http://localhost). 
 - All WebSocket connections run on the same port as the HTTP server, and should connect to [ws://localhost/websocket](ws://localhost/websocket). 
 - Stop the server gracefully to save persistent data (`ctrl+c` on Windows terminals). Killing the process may result in data loss from any unsaved persistent data.
 
-#### Flags:
+### Properties
 
-- document\_root\_path:
-  - default: document_root (file path, relative paths start from the working directory)
+These can be set in several different ways:
+
+##### `board.properties`
+Create a file called `board.properties` in the working directory of the server and format as the following
+
+    key=value
+    other.key=value with spaces
+
+##### Command line arguments
+
+    java -jar board-server-xxx.jar --key value --other.key "value with spaces"
+
+
+- ssl.keystore:
+	- Path to the PKCS12 `mykeystore.pfx` containing the private key for the server
+	- Required, set to `http` to disable encryption and use `http://` for connecting to the server
+- ssl.passphrase:
+	- Optional
+	- Passphrase for `mykeystore.pfx`
+- document.root.path:
+  - default: documentRoot (file path, relative paths start from the working directory)
   - Sets the folder location of where the HTTP server should look to serve files. If the directory does not exist, one will be made.
   - Should be set to where `board-web-client` is. 
   - HTTP requests to a directory (`localhost` or `localhost/folder/`) will be served the `index.html` file of those directories
   - HTTP requests to a file that do not specify an extension (`localhost/file`) will be served a `.html` that corresponds to the requested name
-- data\_path
+- data.root.path
   - default: data (file path, relative paths start from the working directory)
   - Sets the folder location of the flat file storage
-- autosave_interval
-  - default: -1 (integer in seconds, negative values will disable autosave)
-  - Sets how often flat file storage will be saved to disk
-- debug\_log\_traffic
+- debug.log.traffic
 	- default: false (boolean)
 	- Will print network throughput (read/write) into the console
+- autosave.interval
+  - default: -1 (integer in seconds, negative values will disable autosave)
+  - Sets how often flat file storage will be saved to disk

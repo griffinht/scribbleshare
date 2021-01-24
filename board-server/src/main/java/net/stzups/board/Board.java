@@ -4,6 +4,7 @@ import io.netty.channel.ChannelFuture;
 import net.stzups.board.config.ConfigProvider;
 import net.stzups.board.config.ConfigProviderBuilder;
 import net.stzups.board.config.configs.ArgumentConfig;
+import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.server.Server;
 
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ public class Board {
 
         config = new ConfigProviderBuilder()
                 .addConfig(new ArgumentConfig(args))
+                .addConfig(new PropertiesConfig("board.properties"))
                 .build();
 
         Server server = new Server();
