@@ -15,7 +15,7 @@ public class User implements Serializable {
     public User() {
         id = random.nextInt();
         ownedDocuments = new ArrayList<>();
-        ownedDocuments.add(Document.createDocument(this).getId());
+        //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();
     }
 
