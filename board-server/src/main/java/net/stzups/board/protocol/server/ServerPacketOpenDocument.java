@@ -1,9 +1,9 @@
 package net.stzups.board.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.protocol.Point;
-import net.stzups.board.room.Document;
-import net.stzups.board.room.User;
+import net.stzups.board.data.objects.Point;
+import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.User;
 
 import java.util.List;
 import java.util.Map;

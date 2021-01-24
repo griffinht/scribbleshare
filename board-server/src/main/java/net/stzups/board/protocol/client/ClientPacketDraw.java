@@ -1,6 +1,6 @@
 package net.stzups.board.protocol.client;
 
-import net.stzups.board.protocol.Point;
+import net.stzups.board.data.objects.Point;
 
 public class ClientPacketDraw extends ClientPacket {
     private Point[] points;

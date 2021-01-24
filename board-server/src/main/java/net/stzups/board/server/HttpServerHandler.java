@@ -22,10 +22,11 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
-import io.netty.util.internal.SystemPropertyUtil;
+import net.stzups.board.Board;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,6 +43,14 @@ import java.util.regex.Pattern;
  * modified from https://netty.io/4.1/xref/io/netty/example/http/file/HttpStaticFileServerHandler.html
  */
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private static final File HTTP_ROOT = new File(Board.getConfig().get("document.root.path", "documentRoot"));
+    static {
+        if (!HTTP_ROOT.exists()) {
+            if (!HTTP_ROOT.mkdirs()) {
+                throw new RuntimeException(new IOException("Failed to create directory at " + HTTP_ROOT.getPath()));
+            }
+        }
+    }
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     private static final int HTTP_CACHE_SECONDS = 0; //todo change
@@ -93,7 +102,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        File file = new File(path);
+        File file = new File(HTTP_ROOT, path);
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
@@ -207,8 +216,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return null;
         }
 
-        // Convert to absolute path.
-        return SystemPropertyUtil.get("user.dir") + uri;
+        return uri;
     }
 
     private void sendRedirect(ChannelHandlerContext ctx, String newUri) {

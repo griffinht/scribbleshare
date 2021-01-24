@@ -1,8 +1,8 @@
 package net.stzups.board.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.protocol.Point;
-import net.stzups.board.room.User;
+import net.stzups.board.data.objects.Point;
+import net.stzups.board.data.objects.User;
 
 public class ServerPacketDraw extends ServerPacketUser {
     private Point[] points;

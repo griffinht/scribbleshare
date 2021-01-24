@@ -13,11 +13,17 @@ class WebSocketHandler {
             this.events[type] = [];
         })
 
-        this.socket = new WebSocket('ws://localhost/websocket');
+        let webSocketUrl;
+        if (window.location.protocol === 'https:') {
+            webSocketUrl = 'wss://localhost/websocket';
+        } else {
+            webSocketUrl = 'ws://localhost/websocket';
+        }
+        this.socket = new WebSocket(webSocketUrl);
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection opened');
+            console.log('WebSocket connection to ' + webSocketUrl + ' opened');
             this.dispatchEvent('socket.open');
         });
 

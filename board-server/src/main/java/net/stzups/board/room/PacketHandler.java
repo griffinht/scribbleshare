@@ -2,19 +2,19 @@ package net.stzups.board.room;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.protocol.client.ClientPacketDraw;
 import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.server.ServerPacketAddDocument;
 import net.stzups.board.protocol.server.ServerPacketDraw;
-import net.stzups.board.protocol.server.ServerPacketOpenDocument;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
-    private static int TODO = 0;
     private static Map<Document, Room> documents = new HashMap<>();//todo move somewhere
     private Room room;
     private Client client;
@@ -27,7 +27,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
+    public void handlerAdded(ChannelHandlerContext ctx) {
         client = new Client(new User(), ctx.channel());
     }
 
@@ -60,7 +60,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(Document.createDocument("Untitled " + TODO++));
+                    room = getRoom(Document.createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

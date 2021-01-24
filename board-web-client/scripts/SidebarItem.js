@@ -1,4 +1,4 @@
-const items = new Map();
+const items = [];
 const sidebar = document.getElementById('side');
 
 export default class SidebarItem {
@@ -19,14 +19,14 @@ export default class SidebarItem {
             this.setActive(true);
         });
         sidebar.appendChild(this.button);
-        items.set(display, this);
+        items.push(this);
         //todo this.setActive();
     }
 
     setActive(open) {
         items.forEach(item => {
-            if (this.button.innerHTML === item.button.innerHTML) {
-                item.button.classList.add('active');
+            if (this === item) {
+                this.button.classList.add('active');
                 if (open) {
                     this.open();
                 }

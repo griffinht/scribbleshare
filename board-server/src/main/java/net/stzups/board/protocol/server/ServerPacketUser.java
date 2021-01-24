@@ -1,7 +1,7 @@
 package net.stzups.board.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.room.User;
+import net.stzups.board.data.objects.User;
 
 public abstract class ServerPacketUser extends ServerPacket {
     private int id;

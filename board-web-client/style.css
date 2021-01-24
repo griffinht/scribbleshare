@@ -3,6 +3,10 @@
     padding: 0;
 }
 
+.noselect {
+    user-select: none;
+}
+
 html, body {
     height: 100%;
 }
