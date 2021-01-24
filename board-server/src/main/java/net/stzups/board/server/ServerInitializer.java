@@ -46,15 +46,30 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private static SSLEngine sslEngine;
 
     static {
-        char[] passphrase = Board.getConfig().getCharArray("ssl.passphrase");
         String keystorePath = Board.getConfig().get("ssl.keystore");
 
-        if (passphrase != null && keystorePath != null) {
-            try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
-                sslEngine = sslContextFactory(passphrase, fileInputStream).createSSLEngine();
-            } catch (IOException | GeneralSecurityException e) {
-                e.printStackTrace();
+        if (keystorePath != null) {//must not be null
+            //char[] passphrase = Board.getConfig().getCharArray("ssl.passphrase"); todo use this instead of below lines, passphrase should be put in an immutable string
+            char[] passphrase;
+            String todo = Board.getConfig().get("ssl.passphrase");
+            if (todo != null) {
+                passphrase = todo.toCharArray();
+            } else {
+                passphrase = null;
             }
+            if (passphrase != null) {//can be null if value of keystore is http
+                try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
+                    sslEngine = sslContextFactory(passphrase, fileInputStream).createSSLEngine();
+                } catch (IOException | GeneralSecurityException e) {
+                    throw new RuntimeException("Exception while getting SSL context", e);
+                }
+            } else {
+                if (!keystorePath.equals("http")) {
+                    throw new RuntimeException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
+                }//otherwise sslEngine is null and program continues with unencrypted sockets
+            }
+        } else {
+            throw new RuntimeException("Failed to set required flag --ssl.keystore. Perhaps you meant to explicitly disable encrypted sockets and use http:// with --ssl.keystore http");
         }
     }
 
