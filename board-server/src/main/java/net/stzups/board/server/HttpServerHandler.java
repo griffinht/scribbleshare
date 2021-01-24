@@ -282,7 +282,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
             response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
         } else {
-            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store"); //todo re-enable caching
+            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store");
         }
     }
 
