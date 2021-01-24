@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private static final String WEB_SOCKET_PATH = "/websocket";
-    private static final boolean DEBUG_LOG_TRAFFIC = false;
+    private static final boolean DEBUG_LOG_TRAFFIC = Boolean.parseBoolean(System.getProperty("DEBUG_LOG_TRAFFIC"));
 
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override

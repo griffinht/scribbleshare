@@ -39,6 +39,7 @@ public class Board {
         System.setProperty("DOCUMENT_ROOT_PATH", flags.getOrDefault("document_root_path", "document_root"));
         System.setProperty("DATA_PATH", flags.getOrDefault("data_path", "data"));
         System.setProperty("AUTOSAVE_INTERVAL", flags.getOrDefault("autosave_interval", "-1"));
+        System.setProperty("DEBUG_LOG_TRAFFIC", flags.getOrDefault("debug_log_traffic", "false"));
         logger.info("Starting Board server...");
 
         long start = System.currentTimeMillis();

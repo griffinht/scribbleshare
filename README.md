@@ -42,3 +42,6 @@ Once you have built `board-server`, you may run it using using the following com
 - autosave_interval
   - default: -1 (integer in seconds, negative values will disable autosave)
   - Sets how often flat file storage will be saved to disk
+- debug\_log\_traffic
+	- default: false (boolean)
+	- Will print network throughput (read/write) into the console
