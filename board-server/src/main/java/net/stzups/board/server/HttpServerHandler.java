@@ -20,7 +20,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.cookie.Cookie;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
@@ -31,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -75,14 +75,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        System.out.println("START================================================================");
-        System.out.println(request.uri());
-        for (Map.Entry<String, String> entry : request.headers()) {
-            System.out.println(entry.getKey() + ":" + entry.getValue());
+        if (request.uri().equals("/index.html")) {
+
+            System.out.println("START================================================================");
+            System.out.println(request.uri());
+            for (Map.Entry<String, String> entry : request.headers()) {
+                System.out.println(entry.getKey() + ":" + entry.getValue());
+            }
+            System.out.println();
+            System.out.println(request.content().toString(StandardCharsets.UTF_8));
+            System.out.println("END==================================================================");
         }
-        System.out.println();
-        System.out.println(request.content().toString(StandardCharsets.UTF_8));
-        System.out.println("END==================================================================");
         this.request = request;
         if (!request.decoderResult().isSuccess()) {
             sendError(ctx, HttpResponseStatus.BAD_REQUEST);
@@ -111,6 +114,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             path = uri + "index.html";
         } else {
             path = uri;
+        }
+
+        Cookie cookie = null;
+        if (path.equals("/index.html")) {
+            HttpSession httpSession = HttpSession.getSession(request, ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
+            cookie = httpSession.getCookie();
         }
 
         File file = new File(HTTP_ROOT, path.replace('/', File.separatorChar));
@@ -154,8 +163,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        Cookie cookie = new DefaultCookie("type", "check");
-        response.headers().set(HttpHeaderNames.SET_COOKIE, cookie);
+        if (cookie != null) {
+            response.headers().set(HttpHeaderNames.SET_COOKIE, cookie.name()+"="+cookie.value());
+        }
         HttpUtil.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);
         setDateAndCacheHeaders(response, file);
