@@ -7,16 +7,13 @@ import java.util.List;
  */
 public class ConfigProvider {//todo probably needs a better name
     private List<StringConfig> stringConfigs;
-    private List<CharArrayConfig> charArrayConfigs;
 
     /**
      * Constructs a new ConfigProvider from its builder
      * @param stringConfigs configs for String
-     * @param charArrayConfigs configs for char[]
      */
-    ConfigProvider(List<StringConfig> stringConfigs, List<CharArrayConfig> charArrayConfigs) {
+    ConfigProvider(List<StringConfig> stringConfigs) {
         this.stringConfigs = stringConfigs;
-        this.charArrayConfigs = charArrayConfigs;
     }
 
     /**
@@ -43,36 +40,6 @@ public class ConfigProvider {//todo probably needs a better name
      */
     public String get(String key, String defaultValue) {
         String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * Searches all configs that provide a char[] value for key
-     * @param key the key to match
-     * @return the value for the key, or null if none of the char[] configs have the key
-     */
-    public char[] getCharArray(String key) {
-        for (Config<char[]> charArrayConfig : charArrayConfigs) {
-            char[] value = charArrayConfig.get(key);
-            if (value != null) {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Searches all configs that provide a char[] value for a key, which if not found will instead return the defaultValue
-     * @param key the key to match
-     * @param defaultValue the value to return if a value for the key is not found
-     * @return the value for key, or the defaultValue
-     */
-    public char[] getCharArray(String key, char[] defaultValue) {
-        char[] value = getCharArray(key);
         if (value == null) {
             return defaultValue;
         }

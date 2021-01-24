@@ -8,7 +8,6 @@ import java.util.List;
  */
 public class ConfigProviderBuilder {
     private List<StringConfig> stringConfig = new ArrayList<>();
-    private List<CharArrayConfig> charArrayConfig = new ArrayList<>();
 
     public ConfigProviderBuilder() {}
 
@@ -17,12 +16,7 @@ public class ConfigProviderBuilder {
         return this;
     }
 
-    public ConfigProviderBuilder addConfig(CharArrayConfig config) {
-        charArrayConfig.add(config);
-        return this;
-    }
-
     public ConfigProvider build() {
-        return new ConfigProvider(stringConfig, charArrayConfig);
+        return new ConfigProvider(stringConfig);
     }
 }
