@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
@@ -14,6 +15,13 @@ import net.stzups.board.Board;
 import net.stzups.board.protocol.PacketEncoder;
 import net.stzups.board.protocol.PacketDecoder;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.concurrent.Executors;
 
 /**
@@ -35,14 +43,40 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private PacketEncoder packetEncoder = new PacketEncoder();
     private PacketDecoder packetDecoder = new PacketDecoder();
     private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
+    private static SSLEngine sslEngine;
+
+    static {
+        char[] passphrase = Board.getConfig().getCharArray("ssl.passphrase");
+        String keystorePath = Board.getConfig().get("ssl.keystore");
+
+        if (passphrase != null && keystorePath != null) {
+            try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
+                sslEngine = sslContextFactory(passphrase, fileInputStream).createSSLEngine();
+            } catch (IOException | GeneralSecurityException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static SSLContext sslContextFactory(char[] passphrase, FileInputStream keystore) throws IOException, GeneralSecurityException {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(keystore, passphrase);
+
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(keyStore, passphrase);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+        return sslContext;
+    }
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
-        //todo ssl
-        pipeline.addLast(globalTrafficShapingHandler)
-                .addLast(new HttpServerCodec())
+        pipeline.addLast(globalTrafficShapingHandler);
+        if (sslEngine != null) pipeline.addLast(new SslHandler(sslEngine));
+        pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new WebSocketServerCompressionHandler())
