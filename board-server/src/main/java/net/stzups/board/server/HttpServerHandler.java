@@ -57,7 +57,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    private static final int HTTP_CACHE_SECONDS = 0; //todo change
+    private static final int HTTP_CACHE_SECONDS = Integer.parseInt(Board.getConfig().get("http.cache.seconds", "0"));
     private static final String JOIN_PATH = "d";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -271,16 +271,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
-        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store"); //todo re-enable caching
-        /*// Date header
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+        if (HTTP_CACHE_SECONDS > 0) {
+            // Date header
+            Calendar time = new GregorianCalendar();
+            response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
 
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));*/
+            // Add cache headers
+            time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
+            response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
+            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
+            response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+        } else {
+            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store"); //todo re-enable caching
+        }
     }
 
     private static void setContentTypeHeader(HttpResponse response, File file) {

@@ -64,3 +64,7 @@ Create a file called `board.properties` in the working directory of the server a
 - autosave.interval
   - default: -1 (integer in seconds, negative values will disable autosave)
   - Sets how often flat file storage will be saved to disk
+- http.cache.seconds
+	- default: 0 (integer, seconds)
+	- How long before a cached item expires
+	- Set to 0 for development purposes so refreshing the page will always load your new changes (equivalent of `crtl+f5`)
