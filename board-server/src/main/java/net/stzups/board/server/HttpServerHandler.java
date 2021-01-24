@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
+import net.stzups.board.Board;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,7 +35,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * modified from https://netty.io/4.1/xref/io/netty/example/http/file/HttpStaticFileServerHandler.html
  */
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final File HTTP_ROOT = new File(System.getProperty("DOCUMENT_ROOT_PATH"));
+    private static final File HTTP_ROOT = new File(Board.getConfig().get("document.root.path", "documentRoot"));
     static {
         if (!HTTP_ROOT.exists()) {
             if (!HTTP_ROOT.mkdirs()) {

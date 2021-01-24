@@ -16,13 +16,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DataAccessObject<K extends Serializable, V extends Serializable> extends HashMap<K, V> {
-    private static final int SAVE_INTERVAL = Integer.parseInt(System.getProperty("AUTOSAVE_INTERVAL"));//in seconds, -1 to disable
+    private static final int SAVE_INTERVAL = Integer.parseInt(Board.getConfig().get("autosave.interval", "-1"));//in seconds, -1 to disable
     private static final String FILE_EXTENSION = "data";
 
     private File file;
 
     public DataAccessObject(String name) throws IOException {
-        File directory = new File(System.getProperty("DATA_PATH"));
+        File directory = new File(Board.getConfig().get("data.root.path", "data"));
         if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Error while making directory at " + directory.getPath());
         }
