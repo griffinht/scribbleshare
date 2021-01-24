@@ -19,6 +19,8 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
@@ -73,6 +75,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+        System.out.println("START================================================================");
+        System.out.println(request.uri());
+        for (Map.Entry<String, String> entry : request.headers()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        }
+        System.out.println();
+        System.out.println(request.content().toString(StandardCharsets.UTF_8));
+        System.out.println("END==================================================================");
         this.request = request;
         if (!request.decoderResult().isSuccess()) {
             sendError(ctx, HttpResponseStatus.BAD_REQUEST);
