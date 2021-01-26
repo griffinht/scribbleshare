@@ -67,9 +67,6 @@ public class HttpSession {
         cookie.setPath("index.html");//todo
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
-        System.out.println(cookie.value());
-        System.out.println(cookie.toString());
-        System.out.println("add " + sessionToken);
         sessions.put(sessionToken, this);
     }
 
