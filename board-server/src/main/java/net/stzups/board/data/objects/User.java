@@ -8,21 +8,21 @@ import java.util.Random;
 public class User implements Serializable {
     private static Random random = new Random();
 
+    private HttpSession httpSession;
     private int id;
     private List<String> ownedDocuments;
     private List<String> sharedDocuments;
 
-    public User() {
+    public User(HttpSession httpSession) {
+        this.httpSession = httpSession;
         id = random.nextInt();
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();
     }
 
-    public User(int id, List<String> ownedDocuments, List<String> sharedDocuments) {
-        this.id = id;
-        this.ownedDocuments = ownedDocuments;
-        this.sharedDocuments = sharedDocuments;
+    public HttpSession getHttpSession() {
+        return httpSession;
     }
 
     public int getId() {

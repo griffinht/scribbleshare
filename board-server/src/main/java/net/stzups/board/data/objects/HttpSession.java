@@ -1,4 +1,4 @@
-package net.stzups.board.server;
+package net.stzups.board.data.objects;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class HttpSession {
+public class HttpSession implements Serializable {
     private static final int SESSION_TOKEN_LENGTH = 16;
     private static final long SESSION_TOKEN_MAX_AGE = 2314;
 
@@ -52,7 +53,7 @@ public class HttpSession {
         regenerate();
     }
 
-    Cookie getCookie() {
+    public Cookie getCookie() {
         return cookie;
     }
 

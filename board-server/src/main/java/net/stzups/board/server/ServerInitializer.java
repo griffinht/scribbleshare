@@ -1,5 +1,9 @@
 package net.stzups.board.server;
 
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -46,7 +50,15 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel socketChannel) {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
-        pipeline.addLast(globalTrafficShapingHandler);
+        pipeline
+                .addLast(new ChannelDuplexHandler() {
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
+                        Board.getLogger().warning("Uncaught exception");
+                        throwable.printStackTrace();
+                    }
+                })
+                .addLast(globalTrafficShapingHandler);
         if (sslContext != null) {
             pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
         }

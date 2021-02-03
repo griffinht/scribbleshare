@@ -2,7 +2,10 @@ package net.stzups.board.room;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
+import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.HttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.protocol.client.ClientPacket;
 import net.stzups.board.protocol.client.ClientPacketCreateDocument;
@@ -15,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
-    private static Map<Document, Room> documents = new HashMap<>();//todo move somewhere
+    private static Map<Document, Room> documents = new HashMap<>();
     private Room room;
     private Client client;
 
@@ -28,7 +31,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        client = new Client(new User(), ctx.channel());
+        client = new Client(new User((HttpSession) ctx.channel().attr(AttributeKey.valueOf("HTTP_SESSION")).get()), ctx.channel());
     }
 
     @Override
@@ -42,7 +45,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             }
             case OPEN_DOCUMENT: {
                 ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
-                Document document = Document.getDocument(clientPacketOpenDocument.getId());
+                Document document = Board.getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
                     if (room != null) {
                         room.removeClient(client);
@@ -60,7 +63,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(Document.createDocument(client.getUser()));
+                    room = getRoom(Board.createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,7 +72,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case HANDSHAKE: {
-                for (Document document : Document.getDocuments()) {//todo if user has no documents then make a blank one
+                for (Document document : Board.getDocuments()) {//todo if user has no documents then make a blank one
                     client.sendPacket(new ServerPacketAddDocument(document));//todo this should only send one web socket message down the pipe
                 }
                 break;

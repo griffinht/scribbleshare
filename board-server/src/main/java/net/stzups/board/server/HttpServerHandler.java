@@ -22,8 +22,10 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.Board;
+import net.stzups.board.data.objects.HttpSession;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -120,6 +122,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (path.equals("/index.html")) {
             HttpSession httpSession = HttpSession.getSession(request, ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
             cookie = httpSession.getCookie();
+            ctx.channel().attr(AttributeKey.valueOf("HTTP_SESSION")).set(httpSession);
         }
 
         File file = new File(HTTP_ROOT, path.replace('/', File.separatorChar));
