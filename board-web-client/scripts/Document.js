@@ -92,7 +92,7 @@ socket.addEventListener('protocol.draw', (event) => {
     });
 });
 socket.addEventListener('protocol.adddocument', (event) => {
-    documents.get(event.id, new Document(event.name, event.id));
+    documents.set(event.id, new Document(event.name, event.id));
 });
 socket.addEventListener('protocol.opendocument', (event) => {
     if (activeDocument != null) {

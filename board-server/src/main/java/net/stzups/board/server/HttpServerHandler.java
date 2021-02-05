@@ -120,9 +120,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         Cookie cookie = null;
         if (path.equals("/index.html")) {
-            HttpSession httpSession = HttpSession.getSession(request, ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
-            cookie = httpSession.getCookie();
-            ctx.channel().attr(AttributeKey.valueOf("HTTP_SESSION")).set(httpSession);
+            cookie = HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
         }
 
         File file = new File(HTTP_ROOT, path.replace('/', File.separatorChar));

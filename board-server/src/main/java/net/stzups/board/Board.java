@@ -28,8 +28,12 @@ public class Board {
     public static User getUser(HttpSession httpSession) {
         User user = users.get(httpSession);
         if (user == null) {
+            System.out.println("new user " + httpSession);
             user = new User(httpSession);
             users.put(httpSession, user);
+        } else {
+            System.out.println("good user " + httpSession);
+
         }
         return user;
     }

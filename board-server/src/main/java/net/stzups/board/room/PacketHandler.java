@@ -13,8 +13,12 @@ import net.stzups.board.protocol.client.ClientPacketDraw;
 import net.stzups.board.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.protocol.server.ServerPacketAddDocument;
 import net.stzups.board.protocol.server.ServerPacketDraw;
+import net.stzups.board.server.HttpServerHandler;
+import net.stzups.board.server.WebSocketInitializer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
@@ -31,7 +35,9 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        client = new Client(new User((HttpSession) ctx.channel().attr(AttributeKey.valueOf("HTTP_SESSION")).get()), ctx.channel());
+        System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
+        System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
+        client = new Client(Board.getUser(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get()), ctx.channel());
     }
 
     @Override
@@ -72,9 +78,15 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case HANDSHAKE: {
-                for (Document document : Board.getDocuments()) {//todo if user has no documents then make a blank one
-                    client.sendPacket(new ServerPacketAddDocument(document));//todo this should only send one web socket message down the pipe
+                if (client.getUser().getOwnedDocuments().size() == 0) {
+                    client.queuePacket(new ServerPacketAddDocument(Board.createDocument(client.getUser())));
+                } else {
+                    for (String id : client.getUser().getOwnedDocuments()) {
+                        client.queuePacket(new ServerPacketAddDocument(Board.getDocument(id)));
+                    }
                 }
+                client.flushPackets();
+
                 break;
             }
             default:

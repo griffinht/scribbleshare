@@ -1,7 +1,7 @@
 package net.stzups.board.data.objects;
 
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
@@ -23,45 +23,50 @@ public class HttpSession implements Serializable {
     private static Map<String, HttpSession> sessions = new HashMap<>();
 
 
-    public static HttpSession getSession(FullHttpRequest fullHttpRequest, InetAddress address) {
-        String cookieString = fullHttpRequest.headers().get(HttpHeaderNames.COOKIE);
+    public static Cookie getCookie(HttpHeaders httpHeaders, InetAddress address) {
+        HttpSession httpSession = getSession(httpHeaders, address);
+        if (httpSession == null) {
+            return new HttpSession(address).regenerate();
+        }
+        return httpSession.regenerate();
+    }
+
+    public static HttpSession getSession(HttpHeaders httpHeaders, InetAddress address) {
+        String cookieString = httpHeaders.get(HttpHeaderNames.COOKIE);
         if (cookieString != null) {
             Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
             for (Cookie cookie : cookies) {
                 if (cookie.name().equals("session-token")) {
                     String sessionToken = cookie.value();
-                    HttpSession httpSession = sessions.remove(sessionToken);
+                    HttpSession httpSession = sessions.get(sessionToken);
                     if (httpSession != null && httpSession.validate(cookie, address)) {
-                        httpSession.regenerate();
-                        return httpSession;//good session
+                        System.out.println("good session");
+                        return httpSession;
                     }
                     //bad session
+                    System.out.println("bad session");
                     break;
                 }
             }
         }
         //new session
-        return new HttpSession(address);
+        System.out.println("no session");
+        return null;
     }
 
     private String sessionToken;
     private InetAddress address;
-    private Cookie cookie;
 
     private HttpSession(InetAddress address) {
         this.address = address;
-        regenerate();
     }
 
-    public Cookie getCookie() {
-        return cookie;
-    }
-
-    private void regenerate() {
+    private Cookie regenerate() {
+        sessions.remove(sessionToken);
         byte[] bytes = new byte[SESSION_TOKEN_LENGTH];
         secureRandom.nextBytes(bytes);
         sessionToken = Base64.getEncoder().encodeToString(bytes);
-        cookie = new DefaultCookie("session-token", sessionToken);
+        Cookie cookie = new DefaultCookie("session-token", sessionToken);
         cookie.setHttpOnly(true);
         cookie.setDomain("localhost");//todo
         cookie.setMaxAge(SESSION_TOKEN_MAX_AGE);
@@ -69,6 +74,7 @@ public class HttpSession implements Serializable {
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
         sessions.put(sessionToken, this);
+        return cookie;
     }
 
     private boolean validate(Cookie cookie, InetAddress address) {

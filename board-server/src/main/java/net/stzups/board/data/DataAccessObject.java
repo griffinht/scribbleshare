@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -65,7 +66,7 @@ public class DataAccessObject<K extends Serializable, V extends Serializable> ex
                 try {
                     key = objectInputStream.readObject();
                     value = objectInputStream.readObject();
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException | InvalidClassException e) {
                     e.printStackTrace();
                     continue;//maybe just one bad entry, so keep going
                 } catch (EOFException e) {
