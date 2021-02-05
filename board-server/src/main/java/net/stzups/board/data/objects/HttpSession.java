@@ -10,7 +10,10 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +24,13 @@ public class HttpSession implements Serializable {
     private static SecureRandom secureRandom = new SecureRandom();
 
     private static Map<String, HttpSession> sessions = new HashMap<>();
+
+    //todo singleton????
+    public static void init(Collection<User> users) {
+        for (User user : users) {
+            sessions.put(user.getHttpSession().sessionToken, user.getHttpSession());
+        }
+    }
 
 
     public static Cookie getCookie(HttpHeaders httpHeaders, InetAddress address) {

@@ -79,6 +79,7 @@ public class Board {
 
         try {
             users = new DataAccessObject<>("users");
+            HttpSession.init(users.values());
             documents = new DataAccessObject<>("documents");
         } catch (IOException e) {
             e.printStackTrace();
