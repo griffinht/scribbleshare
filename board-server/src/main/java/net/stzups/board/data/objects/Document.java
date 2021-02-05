@@ -17,6 +17,7 @@ public class Document implements Serializable {
     public Document(String id, User owner, String name) {
         this.id = id;
         this.owner = owner;
+        owner.getOwnedDocuments().add(id);
         this.name = name;
     }
 
