@@ -1,4 +1,4 @@
-package net.stzups.board.protocol.client;
+package net.stzups.board.server.websocket.protocol.client;
 
 /**
  * Represents a packet sent by the client

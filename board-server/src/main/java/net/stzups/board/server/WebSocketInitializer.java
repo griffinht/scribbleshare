@@ -6,7 +6,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.AttributeKey;
 import net.stzups.board.data.objects.HttpSession;
-import net.stzups.board.room.PacketHandler;
+import net.stzups.board.server.websocket.PacketHandler;
 
 import java.net.InetSocketAddress;
 

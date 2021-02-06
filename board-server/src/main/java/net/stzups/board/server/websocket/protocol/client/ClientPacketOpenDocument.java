@@ -1,4 +1,4 @@
-package net.stzups.board.protocol.client;
+package net.stzups.board.server.websocket.protocol.client;
 
 public class ClientPacketOpenDocument extends ClientPacket {
     private String id;

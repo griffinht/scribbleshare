@@ -1,12 +1,12 @@
-package net.stzups.board.room;
+package net.stzups.board.server.websocket;
 
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.protocol.server.ServerPacket;
-import net.stzups.board.protocol.server.ServerPacketAddUser;
-import net.stzups.board.protocol.server.ServerPacketOpenDocument;
-import net.stzups.board.protocol.server.ServerPacketRemoveUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacket;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveUser;
 
 import java.util.ArrayList;
 import java.util.List;

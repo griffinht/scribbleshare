@@ -1,11 +1,11 @@
-package net.stzups.board.protocol;
+package net.stzups.board.server.websocket.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import net.stzups.board.protocol.server.ServerPacket;
+import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 
 import java.util.List;
 

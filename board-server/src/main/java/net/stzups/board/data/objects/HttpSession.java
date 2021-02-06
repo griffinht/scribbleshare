@@ -17,26 +17,16 @@ import java.util.Set;
 
 public class HttpSession implements Serializable {
     private static final int SESSION_TOKEN_LENGTH = 16;
-    private static final long SESSION_TOKEN_MAX_AGE = 2314;
-
-    private static SecureRandom secureRandom = new SecureRandom();
+    private static final long SESSION_TOKEN_MAX_AGE = 2314;//todo
 
     private static Map<String, HttpSession> sessions = new HashMap<>();
-
-    //todo singleton????
-    public static void init(Collection<User> users) {
-        for (User user : users) {
-            sessions.put(user.getHttpSession().sessionToken, user.getHttpSession());
-        }
-    }
-
 
     public static Cookie getCookie(HttpHeaders httpHeaders, InetAddress address) {
         HttpSession httpSession = getSession(httpHeaders, address);
         if (httpSession == null) {
             return new HttpSession(address).regenerate();
         }
-        return httpSession.regenerate();
+        return null;
     }
 
     public static HttpSession getSession(HttpHeaders httpHeaders, InetAddress address) {
@@ -71,14 +61,12 @@ public class HttpSession implements Serializable {
 
     private Cookie regenerate() {
         sessions.remove(sessionToken);
-        byte[] bytes = new byte[SESSION_TOKEN_LENGTH];
-        secureRandom.nextBytes(bytes);
-        sessionToken = Base64.getEncoder().encodeToString(bytes);
+        sessionToken = TokenGenerator.generate(SESSION_TOKEN_LENGTH);
         Cookie cookie = new DefaultCookie("session-token", sessionToken);
         cookie.setHttpOnly(true);
         cookie.setDomain("localhost");//todo
         cookie.setMaxAge(SESSION_TOKEN_MAX_AGE);
-        cookie.setPath("index.html");//todo
+        cookie.setPath("/");//todo
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
         sessions.put(sessionToken, this);

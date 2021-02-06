@@ -1,24 +1,18 @@
-package net.stzups.board.room;
+package net.stzups.board.server.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.AttributeKey;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.HttpSession;
-import net.stzups.board.data.objects.User;
-import net.stzups.board.protocol.client.ClientPacket;
-import net.stzups.board.protocol.client.ClientPacketCreateDocument;
-import net.stzups.board.protocol.client.ClientPacketDraw;
-import net.stzups.board.protocol.client.ClientPacketOpenDocument;
-import net.stzups.board.protocol.server.ServerPacketAddDocument;
-import net.stzups.board.protocol.server.ServerPacketDraw;
-import net.stzups.board.server.HttpServerHandler;
+import net.stzups.board.server.websocket.protocol.client.ClientPacket;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketAddDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketDraw;
 import net.stzups.board.server.WebSocketInitializer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {

@@ -1,4 +1,4 @@
-package net.stzups.board.protocol.client;
+package net.stzups.board.server.websocket.protocol.client;
 
 import net.stzups.board.data.objects.Point;
 

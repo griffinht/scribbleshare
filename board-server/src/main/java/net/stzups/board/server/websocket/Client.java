@@ -1,8 +1,8 @@
-package net.stzups.board.room;
+package net.stzups.board.server.websocket;
 
 import io.netty.channel.Channel;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.protocol.server.ServerPacket;
+import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 
 import java.util.ArrayList;
 import java.util.Collections;

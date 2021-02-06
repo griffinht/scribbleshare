@@ -1,4 +1,4 @@
-package net.stzups.board.server;
+package net.stzups.board.server.http;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -22,7 +22,6 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
-import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.HttpSession;
@@ -118,11 +117,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             path = uri;
         }
 
-        Cookie cookie = null;
-        if (path.equals("/index.html")) {
-            cookie = HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
-        }
-
         File file = new File(HTTP_ROOT, path.replace('/', File.separatorChar));
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
@@ -164,8 +158,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        if (cookie != null) {
-            response.headers().set(HttpHeaderNames.SET_COOKIE, cookie.name()+"="+cookie.value());
+        if (path.equals("/index.html")) {
+            response.headers().set(HttpHeaderNames.SET_COOKIE, HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()));
         }
         HttpUtil.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);

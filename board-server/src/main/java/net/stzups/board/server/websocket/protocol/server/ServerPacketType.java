@@ -1,4 +1,4 @@
-package net.stzups.board.protocol.server;
+package net.stzups.board.server.websocket.protocol.server;
 
 import io.netty.util.collection.IntObjectHashMap;
 
