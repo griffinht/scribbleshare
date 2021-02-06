@@ -29,7 +29,7 @@ public class Board {
         User user = users.get(httpSession);
         if (user == null) {
             System.out.println("new user " + httpSession);
-            user = new User(httpSession);
+            user = new User();
             users.put(httpSession, user);
         } else {
             System.out.println("good user " + httpSession);
@@ -79,7 +79,6 @@ public class Board {
 
         try {
             users = new DataAccessObject<>("users");
-            HttpSession.init(users.values());
             documents = new DataAccessObject<>("documents");
         } catch (IOException e) {
             e.printStackTrace();

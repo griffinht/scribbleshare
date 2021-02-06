@@ -19,6 +19,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
@@ -159,7 +160,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         if (path.equals("/index.html")) {
-            response.headers().set(HttpHeaderNames.SET_COOKIE, HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()));
+            Cookie cookie = HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
+            if (cookie != null) {
+                response.headers().set(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+            }
         }
         HttpUtil.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);

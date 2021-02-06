@@ -9,13 +9,11 @@ public class User implements Serializable {
     private static Random random = new Random();
 
     private int id;
-    private byte[] hash;
     private List<String> ownedDocuments;
     private List<String> sharedDocuments;
 
-    public User(byte[] hash) {
+    public User() {
         id = random.nextInt();
-        this.hash = hash;
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();
