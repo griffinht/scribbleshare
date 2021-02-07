@@ -19,7 +19,7 @@ public class ServerPacketOpenDocument extends ServerPacket {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        writeString(document.getId(), byteBuf);
+        byteBuf.writeLong(document.getId());
         //OPEN_DOCUMENT is serialized, now serialize the other things
         Map<User, List<Point>> pointsMap = document.getPoints();
         for (Map.Entry<User, List<Point>> entry : pointsMap.entrySet()) {

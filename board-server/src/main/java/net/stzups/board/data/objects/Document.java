@@ -8,24 +8,20 @@ import java.util.List;
 import java.util.Map;
 
 public class Document implements Serializable {
-    private String id;
+    private long id;
     private User owner;
     private String name;
     private String inviteCode;
     private Map<User, List<Point>> points = new HashMap<>();
 
-    public Document(String id, User owner, String name) {
+    public Document(long id, User owner, String name) {
         this.id = id;
         this.owner = owner;
         owner.getOwnedDocuments().add(id);
         this.name = name;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
-    public String getId() {
+    public long getId() {
         return id;
     }
 

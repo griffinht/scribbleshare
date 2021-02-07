@@ -4,14 +4,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.server.websocket.protocol.client.ClientPacket;
 import net.stzups.board.server.websocket.protocol.client.ClientPacketCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketHandshake;
 import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketAddDocument;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketDraw;
 import net.stzups.board.server.WebSocketInitializer;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketHandshake;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +36,6 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     public void handlerAdded(ChannelHandlerContext ctx) {
         System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
         System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
-        client = new Client(Board.getUser(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get()), ctx.channel());
     }
 
     @Override
@@ -72,10 +76,29 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case HANDSHAKE: {
+                ClientPacketHandshake clientPacketHandshake = (ClientPacketHandshake) packet;
+                if (client == null) {
+                    if (clientPacketHandshake.getToken() == 0) {
+                        System.out.println("user authed with empty session");
+                        client = new Client(new User(), ctx.channel());
+                        client.queuePacket(new ServerPacketHandshake(new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()).getToken()));
+                    } else {
+                        UserSession userSession = Board.getUserSessions().get(clientPacketHandshake.getToken());
+                        if (userSession == null || !userSession.validate(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress())) {
+                            System.out.println("user tried authenticating with bad session" + userSession);
+                            //todo this is just copied from above
+                            client = new Client(new User(), ctx.channel());
+                            client.queuePacket(new ServerPacketHandshake(new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()).getToken()));
+                        } else {
+                            System.out.println("good user session");
+                            client = new Client(Board.getUser(userSession.getUserId()), ctx.channel());
+                        }
+                    }
+                }
                 if (client.getUser().getOwnedDocuments().size() == 0) {
                     client.queuePacket(new ServerPacketAddDocument(Board.createDocument(client.getUser())));
                 } else {
-                    for (String id : client.getUser().getOwnedDocuments()) {
+                    for (long id : client.getUser().getOwnedDocuments()) {
                         client.queuePacket(new ServerPacketAddDocument(Board.getDocument(id)));
                     }
                 }

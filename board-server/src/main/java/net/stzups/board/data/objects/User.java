@@ -1,33 +1,32 @@
 package net.stzups.board.data.objects;
 
+import net.stzups.board.data.TokenGenerator;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class User implements Serializable {
-    private static Random random = new Random();
-
-    private int id;
-    private List<String> ownedDocuments;
-    private List<String> sharedDocuments;
+    private long id;
+    private List<Long> ownedDocuments;
+    private List<Long> sharedDocuments;
 
     public User() {
-        id = random.nextInt();
+        id = TokenGenerator.getSecureRandom().nextLong();
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public List<String> getOwnedDocuments() {
+    public List<Long> getOwnedDocuments() {
         return ownedDocuments;
     }
 
-    public List<String> getSharedDocuments() {
+    public List<Long> getSharedDocuments() {
         return sharedDocuments;
     }
 

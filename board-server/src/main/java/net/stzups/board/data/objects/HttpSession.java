@@ -1,30 +1,28 @@
 package net.stzups.board.data.objects;
 
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import net.stzups.board.Board;
+import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class HttpSession implements Serializable {
-    private static final int SESSION_TOKEN_LENGTH = 16;
     private static final long SESSION_TOKEN_MAX_AGE = 2314;//todo
-
-    private static Map<String, HttpSession> sessions = new HashMap<>();
 
     public static Cookie getCookie(HttpHeaders httpHeaders, InetAddress address) {
         HttpSession httpSession = getSession(httpHeaders, address);
         if (httpSession == null) {
-            return new HttpSession(address).regenerate();
+            return new HttpSession(address).generate();
         }
         return null;
     }
@@ -35,8 +33,7 @@ public class HttpSession implements Serializable {
             Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
             for (Cookie cookie : cookies) {
                 if (cookie.name().equals("session-token")) {
-                    String sessionToken = cookie.value();
-                    HttpSession httpSession = sessions.get(sessionToken);
+                    HttpSession httpSession = Board.getHttpSessions().get(Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes())).getLong(0));
                     if (httpSession != null && httpSession.validate(cookie, address)) {
                         System.out.println("good session");
                         return httpSession;
@@ -52,24 +49,23 @@ public class HttpSession implements Serializable {
         return null;
     }
 
-    private String sessionToken;
+    private long token;
     private InetAddress address;
 
     private HttpSession(InetAddress address) {
         this.address = address;
     }
 
-    private Cookie regenerate() {
-        sessions.remove(sessionToken);
-        sessionToken = TokenGenerator.generate(SESSION_TOKEN_LENGTH);
-        Cookie cookie = new DefaultCookie("session-token", sessionToken);
+    private Cookie generate() {//todo make sure this is only called once
+        token = TokenGenerator.getSecureRandom().nextLong();
+        Cookie cookie = new DefaultCookie("session-token", Base64.encode(Unpooled.copyLong(token)).toString(StandardCharsets.US_ASCII));//todo allocation
         cookie.setHttpOnly(true);
         cookie.setDomain("localhost");//todo
         cookie.setMaxAge(SESSION_TOKEN_MAX_AGE);
         cookie.setPath("/");//todo
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
-        sessions.put(sessionToken, this);
+        Board.getHttpSessions().put(token, this);
         return cookie;
     }
 

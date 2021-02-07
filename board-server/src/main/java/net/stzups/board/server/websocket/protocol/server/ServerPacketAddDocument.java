@@ -14,7 +14,7 @@ public class ServerPacketAddDocument extends ServerPacket {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        writeString(document.getId(), byteBuf);
+        byteBuf.writeLong(document.getId());
         writeString(document.getName(), byteBuf);
     }
 }

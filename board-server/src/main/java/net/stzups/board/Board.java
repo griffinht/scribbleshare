@@ -5,14 +5,18 @@ import net.stzups.board.config.ConfigProvider;
 import net.stzups.board.config.ConfigProviderBuilder;
 import net.stzups.board.config.configs.ArgumentConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
-import net.stzups.board.data.DataAccessObject;
+import net.stzups.board.data.TokenGenerator;
+import net.stzups.board.data.database.flatfile.FlatFileStorage;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.HttpSession;
 import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.server.Server;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class Board {
@@ -22,41 +26,29 @@ public class Board {
     private static final int DOCUMENT_ID_LENGTH = 6;
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
-    private static DataAccessObject<HttpSession, User> users;
-    private static DataAccessObject<String, Document> documents;
+    private static FlatFileStorage<Long, User> users;//user id -> user
+    private static FlatFileStorage<Long, Document> documents;//document id -> document
+    private static FlatFileStorage<Long, HttpSession> httpSessions;//http session id -> http session
+    private static FlatFileStorage<Long, UserSession> userSessions;//user session id -> user session
 
-    public static User getUser(HttpSession httpSession) {
-        User user = users.get(httpSession);
-        if (user == null) {
-            System.out.println("new user " + httpSession);
-            user = new User();
-            users.put(httpSession, user);
-        } else {
-            System.out.println("good user " + httpSession);
-
-        }
-        return user;
-    }
-
-    public static Document getDocument(String id) {
+    public static Document getDocument(long id) {
         return documents.get(id);
     }
 
-    public static Collection<Document> getDocuments() {
-        return documents.values();
+    public static User getUser(long id) {
+        return users.get(id);
+    }
+
+    public static Map<Long, UserSession> getUserSessions() {
+        return userSessions;
+    }
+
+    public static Map<Long, HttpSession> getHttpSessions() {
+        return httpSessions;
     }
 
     public static Document createDocument(User owner) {
-        String id;
-        int a = 0;
-        do {
-            if (a++ > 1000) {
-                Board.getLogger().warning("Infinite loop while getting document name for " + owner);
-                return null;
-            }
-            id = RandomString.randomString(DOCUMENT_ID_LENGTH, RandomString.NUMERIC);
-        } while (documents.containsKey(id));
-        Document document = new Document(id, owner, DEFAULT_DOCUMENT_NAME);
+        Document document = new Document(TokenGenerator.getSecureRandom().nextLong(), owner, DEFAULT_DOCUMENT_NAME);
         documents.put(document.getId(), document);
         return document;
     }
@@ -78,8 +70,10 @@ public class Board {
         ChannelFuture channelFuture = server.start();
 
         try {
-            users = new DataAccessObject<>("users");
-            documents = new DataAccessObject<>("documents");
+            users = new FlatFileStorage<>("users");
+            documents = new FlatFileStorage<>("documents");
+            httpSessions = new FlatFileStorage<>("httpSessions");
+            userSessions = new FlatFileStorage<>("userSessions");
         } catch (IOException e) {
             e.printStackTrace();
             return;

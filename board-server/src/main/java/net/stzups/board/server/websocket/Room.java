@@ -1,6 +1,7 @@
 package net.stzups.board.server.websocket;
 
 import io.netty.util.collection.IntObjectHashMap;
+import io.netty.util.collection.LongObjectHashMap;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
@@ -31,7 +32,7 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
+    private Map<Long, Client> clients = new LongObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
 
     private Document document;
     private Room(Document document) {

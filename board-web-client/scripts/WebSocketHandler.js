@@ -9,6 +9,7 @@ class WebSocketHandler {
             'protocol.draw',
             'protocol.opendocument',
             'protocol.adddocument',
+            'protocol.handshake',
         ].forEach((type) => {
             this.events[type] = [];
         })
@@ -46,22 +47,22 @@ class WebSocketHandler {
                     switch (type) {
                         case 0: {
                             let e = {};
-                            e.id = dataView.getInt32(offset);
-                            offset += 4;
+                            e.id = dataView.getBigInt64(offset);
+                            offset += 8;
                             this.dispatchEvent('protocol.addclient', e);
                             break;
                         }
                         case 1: {
                             let e = {};
-                            e.id = dataView.getInt32(offset);
-                            offset += 4;
+                            e.id = dataView.getBigInt64(offset);
+                            offset += 8;
                             this.dispatchEvent('protocol.removeclient', e);
                             break;
                         }
                         case 2: {
                             let e = {};
-                            e.id = dataView.getInt32(offset);
-                            offset += 4;
+                            e.id = dataView.getBigInt64(offset);
+                            offset += 8;
                             let size = dataView.getUint16(offset);
                             offset += 2;
                             e.points = [];
@@ -81,24 +82,27 @@ class WebSocketHandler {
                         }
                         case 3: {
                             let e = {};
-                            let length = dataView.getUint8(offset);
-                            offset += 1;
-                            e.id = new TextDecoder().decode(event.data.slice(offset, offset + length));
-                            offset += length;
+                            e.id = dataView.getBigInt64(offset);
+                            offset += 8;
                             this.dispatchEvent('protocol.opendocument', e);
                             break;
                         }
                         case 4: {
                             let e = {};
-                            let length = dataView.getUint8(offset);
-                            offset += 1;
-                            e.id = new TextDecoder().decode(event.data.slice(offset, offset + length));
-                            offset += length;
+                            e.id = dataView.getBigInt64(offset);
+                            offset += 8;
                             length = dataView.getUint8(offset);
                             offset += 1;
                             e.name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
                             this.dispatchEvent('protocol.adddocument', e);
+                            break;
+                        }
+                        case 5: {
+                            let e = {};
+                            e.token = dataView.getBigInt64(offset);
+                            offset += 8;
+                            this.dispatchEvent('protocol.handshake', e);
                             break;
                         }
                         default:
@@ -131,22 +135,18 @@ class WebSocketHandler {
         }
     }
 
-    sendOpen(id) {//todo improve this garbage javascript string encoding
-        let encoded = new TextEncoder().encode(id);
-        let buffer = new ArrayBuffer(2 + encoded.length);
+    sendOpen(id) {
+        let buffer = new ArrayBuffer(1 + 8);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 0);
         offset += 1;
         
-        dataView.setUint8(offset, encoded.byteLength);
+        dataView.setBigInt64(offset, id);
         offset += 1;
 
-        let newBuffer = new Uint8Array(buffer);
-        newBuffer.set(encoded, offset);
-
-        this.send(newBuffer);
+        this.send(buffer);
     }
 
     sendCreate() {
@@ -188,13 +188,16 @@ class WebSocketHandler {
         this.send(buffer);
     }
 
-    sendHandshake() {
-        let buffer = new ArrayBuffer(1);
+    sendHandshake(token) {
+        let buffer = new ArrayBuffer(9);
         let dataView = new DataView(buffer);
         let offset = 0;
 
         dataView.setUint8(offset, 3);
         offset += 1;
+
+        dataView.setBigInt64(offset, token);
+        offset += 8;
 
         this.send(buffer);
     }

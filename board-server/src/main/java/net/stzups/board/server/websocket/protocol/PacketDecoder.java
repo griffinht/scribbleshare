@@ -42,13 +42,13 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     packet = new ClientPacketDraw(points);
                     break;
                 case OPEN_DOCUMENT:
-                    packet = new ClientPacketOpenDocument(readString(byteBuf));
+                    packet = new ClientPacketOpenDocument(byteBuf.readLong());
                     break;
                 case CREATE_DOCUMENT:
                     packet = new ClientPacketCreateDocument();
                     break;
                 case HANDSHAKE:
-                    packet = new ClientPacketHandshake();
+                    packet = new ClientPacketHandshake(byteBuf.readLong());
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");
