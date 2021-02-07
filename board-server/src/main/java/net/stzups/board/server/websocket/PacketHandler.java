@@ -80,18 +80,23 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
                         System.out.println("user authed with empty session");
-                        client = new Client(new User(), ctx.channel());
-                        client.queuePacket(new ServerPacketHandshake(new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()).getToken()));
+                        client = createUserSession(ctx);
                     } else {
-                        UserSession userSession = Board.getUserSessions().get(clientPacketHandshake.getToken());
-                        if (userSession == null || !userSession.validate(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress())) {
-                            System.out.println("user tried authenticating with bad session" + userSession);
-                            //todo this is just copied from above
-                            client = new Client(new User(), ctx.channel());
-                            client.queuePacket(new ServerPacketHandshake(new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()).getToken()));
-                        } else {
+                        UserSession userSession = Board.getUserSession(clientPacketHandshake.getToken());
+                        if (userSession == null) {
+                            System.out.println("user tried authenticating with nonexistant* session");
+                            client = createUserSession(ctx);
+                        } else if (!userSession.validate(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress())) {
+                            System.out.println("user tried authenticating with invalid session" + userSession);
+                            Board.removeUserSession(userSession);
+                            client = createUserSession(ctx);
+                        } else{
                             System.out.println("good user session");
-                            client = new Client(Board.getUser(userSession.getUserId()), ctx.channel());
+                            User user = Board.getUser(userSession.getUserId());
+                            if (user == null) {
+                                System.out.println("very bad user does not exist");
+                            }
+                            client = new Client(user, ctx.channel());
                         }
                     }
                 }
@@ -109,6 +114,15 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             default:
                 throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
         }
+    }
+
+    private static Client createUserSession(ChannelHandlerContext ctx) {
+        Client client = new Client(new User(), ctx.channel());
+        Board.addUser(client.getUser());
+        UserSession userSession = new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
+        Board.addUserSession(userSession);
+        client.queuePacket(new ServerPacketHandshake(userSession.getToken()));
+        return client;
     }
 
     /**

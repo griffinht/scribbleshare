@@ -32,7 +32,7 @@ public class HttpSession implements Serializable {
             Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
             for (Cookie cookie : cookies) {
                 if (cookie.name().equals("session-token")) {
-                    HttpSession httpSession = Board.getHttpSessions().get(Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes())).getLong(0));
+                    HttpSession httpSession = Board.getHttpSession(Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes())).getLong(0));
                     if (httpSession != null && httpSession.validate(cookie, address)) {
                         System.out.println("good session");
                         return httpSession;
@@ -64,8 +64,12 @@ public class HttpSession implements Serializable {
         cookie.setPath("/");//todo
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
-        Board.getHttpSessions().put(token, this);
+        Board.addHttpSession(this);
         return cookie;
+    }
+
+    public long getToken() {
+        return token;
     }
 
     private boolean validate(Cookie cookie, InetAddress address) {

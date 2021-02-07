@@ -13,6 +13,7 @@ public class ServerPacketHandshake extends ServerPacket {
     @Override
     public void serialize(ByteBuf bytebuf) {
         super.serialize(bytebuf);
+        System.out.println(token + "posdgsdg");
         bytebuf.writeLong(token);
     }
 }

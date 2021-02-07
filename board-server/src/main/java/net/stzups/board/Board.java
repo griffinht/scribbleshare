@@ -14,37 +14,50 @@ import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.server.Server;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class Board {
     private static Logger logger;
     private static ConfigProvider config;
 
-    private static final int DOCUMENT_ID_LENGTH = 6;
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
     private static FlatFileStorage<Long, User> users;//user id -> user
     private static FlatFileStorage<Long, Document> documents;//document id -> document
-    private static FlatFileStorage<Long, HttpSession> httpSessions;//http session id -> http session
+    private static FlatFileStorage<Long, HttpSession> httpSessions;//http session id -> http session todo unused
     private static FlatFileStorage<Long, UserSession> userSessions;//user session id -> user session
 
     public static Document getDocument(long id) {
         return documents.get(id);
     }
 
+
+    public static void addUser(User user) {
+        users.put(user.getId(), user);
+    }
+
     public static User getUser(long id) {
         return users.get(id);
     }
 
-    public static Map<Long, UserSession> getUserSessions() {
-        return userSessions;
+    public static UserSession getUserSession(long token) {
+        return userSessions.get(token);
     }
 
-    public static Map<Long, HttpSession> getHttpSessions() {
-        return httpSessions;
+    public static void addUserSession(UserSession userSession) {
+        userSessions.put(userSession.getToken(), userSession);
+    }
+
+    public static void removeUserSession(UserSession userSession) {
+        userSessions.remove(userSession.getToken());
+    }
+
+    public static HttpSession getHttpSession(long token) {
+        return httpSessions.get(token);
+    }
+
+    public static void addHttpSession(HttpSession httpSession) {
+        httpSessions.put(httpSession.getToken(), httpSession);
     }
 
     public static Document createDocument(User owner) {
