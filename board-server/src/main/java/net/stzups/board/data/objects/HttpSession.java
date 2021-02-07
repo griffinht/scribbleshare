@@ -72,4 +72,9 @@ public class HttpSession implements Serializable {
     private boolean validate(Cookie cookie, InetAddress address) {
         return this.address.equals(address);
     }
+
+    @Override
+    public String toString() {
+        return "HttpSession{address=" + address + "}";
+    }
 }

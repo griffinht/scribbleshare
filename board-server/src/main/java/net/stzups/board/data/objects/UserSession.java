@@ -31,4 +31,9 @@ public class UserSession implements Serializable {
     public boolean validate(InetAddress inetAddress) {
         return (System.currentTimeMillis() - creationDate) < MAX_USER_SESSION_AGE && this.inetAddress.equals(inetAddress);
     }
+
+    @Override
+    public String toString() {
+        return "UserSession{userId=" + userId + ",token=" + token+ "}";
+    }
 }

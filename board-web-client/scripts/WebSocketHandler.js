@@ -196,6 +196,7 @@ class WebSocketHandler {
         dataView.setUint8(offset, 3);
         offset += 1;
 
+        console.log(token);
         dataView.setBigInt64(offset, token);
         offset += 8;
 
