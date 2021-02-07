@@ -2,7 +2,7 @@ welcome to the board project
 
 name pending
 
-This project is separates into the server (`board-server`) and the client (`board-web-client`). All files inside `board-web-client` can be served to the browser and are therefore public.
+This project is separated into the server (`board-server`) and the client (`board-web-client`). All files inside `board-web-client` can be served to the browser and are therefore public.
 
 You will need to build and run the `board-server` project before using or contributing to the client or server.
 
