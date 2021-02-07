@@ -12,7 +12,6 @@ import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
