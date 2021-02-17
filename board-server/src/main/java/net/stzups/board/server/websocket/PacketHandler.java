@@ -80,23 +80,22 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
                         System.out.println("user authed with empty session");
-                        client = createUserSession(ctx);
+                        client = createUserSession(ctx, null);
                     } else {
-                        UserSession userSession = Board.getUserSession(clientPacketHandshake.getToken());
+                        UserSession userSession = Board.removeUserSession(clientPacketHandshake.getToken());
                         if (userSession == null) {
-                            System.out.println("user tried authenticating with nonexistant* session");
-                            client = createUserSession(ctx);
+                            System.out.println("user tried authenticating with nonexistant session");
+                            client = createUserSession(ctx, null);
                         } else if (!userSession.validate(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress())) {
                             System.out.println("user tried authenticating with invalid session" + userSession);
-                            Board.removeUserSession(userSession);
-                            client = createUserSession(ctx);
-                        } else{
+                            client = createUserSession(ctx, null);
+                        } else {
                             System.out.println("good user session");
                             User user = Board.getUser(userSession.getUserId());
                             if (user == null) {
                                 System.out.println("very bad user does not exist");
                             }
-                            client = new Client(user, ctx.channel());
+                            client = createUserSession(ctx, user);
                         }
                     }
                 }
@@ -116,9 +115,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         }
     }
 
-    private static Client createUserSession(ChannelHandlerContext ctx) {
-        Client client = new Client(new User(), ctx.channel());
-        Board.addUser(client.getUser());
+    private static Client createUserSession(ChannelHandlerContext ctx, User user) {
+        Client client;
+        if (user == null) {
+            client = new Client(new User(), ctx.channel());
+            Board.addUser(client.getUser());
+        } else {
+            client = new Client(user, ctx.channel());
+        }
         UserSession userSession = new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
         Board.addUserSession(userSession);
         client.queuePacket(new ServerPacketHandshake(userSession.getToken()));
