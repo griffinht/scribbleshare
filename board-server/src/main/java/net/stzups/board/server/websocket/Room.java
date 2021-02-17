@@ -2,15 +2,16 @@ package net.stzups.board.server.websocket;
 
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveUser;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,7 +24,7 @@ class Room {
             @Override
             public void run() {
                 for (Room room : rooms) {
-                    for (Client client : room.clients) {
+                    for (Client client : room.clients.values()) {
                         client.flushPackets();
                     }
                 }
@@ -31,7 +32,7 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Set<Client> clients = new HashSet<>(); //probably faster with smaller memory footprint for long keys
+    private Map<User, Client> clients = new HashMap<>();
 
     private Document document;
     private Room(Document document) {
@@ -54,15 +55,16 @@ class Room {
     }
 
     /**
-     * Creates a new client using its channel
+     * Creates a new client using its channel.
      * todo
      */
     void addClient(Client client) {
+
         //for the new client
         client.sendPacket(new ServerPacketOpenDocument(document));
         //for the existing clients
         sendPacket(new ServerPacketAddUser(client.getUser()));
-        clients.add(client);
+        clients.put(client.getUser(), client);
         Board.getLogger().info("Added " + client + " to " + this);
     }
 
@@ -72,7 +74,7 @@ class Room {
      * @param client client to remove
      */
     void removeClient(Client client) {
-        clients.remove(client);
+        clients.remove(client.getUser());
         sendPacket(new ServerPacketRemoveUser(client.getUser()));
         Board.getLogger().info("Removed " + client + " to " + this);
     }
@@ -84,7 +86,7 @@ class Room {
      * @param except client to exclude
      */
     void sendPacketExcept(ServerPacket serverPacket, Client except) {
-        for (Client client : clients) {
+        for (Client client : clients.values()) {
             if (except != client) {
                 client.sendPacket(serverPacket);
             }
@@ -97,13 +99,13 @@ class Room {
      * @param serverPacket the packet to send
      */
     void sendPacket(ServerPacket serverPacket) {
-        for (Client client : clients) {
+        for (Client client : clients.values()) {
             client.sendPacket(serverPacket);
         }
     }
 
     void queuePacketExcept(ServerPacket serverPacket, Client except) {
-        for (Client client : clients) {
+        for (Client client : clients.values()) {
             if (except != client) {
                 client.queuePacket(serverPacket);
             }
@@ -111,7 +113,7 @@ class Room {
     }
 
     void queuePacket(ServerPacket serverPacket) {
-        for (Client client : clients) {
+        for (Client client : clients.values()) {
             client.queuePacket(serverPacket);
         }
     }

@@ -38,6 +38,14 @@ public class Client {
         }
     }
 
+    void disconnect() {
+        try {
+            channel.close().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public String toString() {
         return "Client{user=" + user + ",address=" + channel.remoteAddress() + "}";
