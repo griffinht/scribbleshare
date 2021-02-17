@@ -1,14 +1,15 @@
-package net.stzups.board.room;
+package net.stzups.board.server.websocket;
 
-import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.protocol.server.ServerPacket;
-import net.stzups.board.protocol.server.ServerPacketAddUser;
-import net.stzups.board.protocol.server.ServerPacketOpenDocument;
-import net.stzups.board.protocol.server.ServerPacketRemoveUser;
+import net.stzups.board.data.objects.User;
+import net.stzups.board.server.websocket.protocol.server.ServerPacket;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -31,7 +32,7 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Map<Integer, Client> clients = new IntObjectHashMap<>(); //probably faster with smaller memory footprint for long keys
+    private Map<User, Client> clients = new HashMap<>();
 
     private Document document;
     private Room(Document document) {
@@ -54,15 +55,16 @@ class Room {
     }
 
     /**
-     * Creates a new client using its channel
+     * Creates a new client using its channel.
      * todo
      */
     void addClient(Client client) {
+
         //for the new client
         client.sendPacket(new ServerPacketOpenDocument(document));
         //for the existing clients
         sendPacket(new ServerPacketAddUser(client.getUser()));
-        clients.put(client.getUser().getId(), client);
+        clients.put(client.getUser(), client);
         Board.getLogger().info("Added " + client + " to " + this);
     }
 
@@ -72,7 +74,8 @@ class Room {
      * @param client client to remove
      */
     void removeClient(Client client) {
-        sendPacket(new ServerPacketRemoveUser(clients.remove(client.getUser().getId()).getUser()));
+        clients.remove(client.getUser());
+        sendPacket(new ServerPacketRemoveUser(client.getUser()));
         Board.getLogger().info("Removed " + client + " to " + this);
     }
 

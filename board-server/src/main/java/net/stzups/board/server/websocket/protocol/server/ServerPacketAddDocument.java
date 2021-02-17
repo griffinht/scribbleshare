@@ -1,4 +1,4 @@
-package net.stzups.board.protocol.server;
+package net.stzups.board.server.websocket.protocol.server;
 
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.Document;
@@ -14,7 +14,7 @@ public class ServerPacketAddDocument extends ServerPacket {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        writeString(document.getId(), byteBuf);
+        byteBuf.writeLong(document.getId());
         writeString(document.getName(), byteBuf);
     }
 }

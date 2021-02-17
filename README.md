@@ -2,7 +2,7 @@ welcome to the board project
 
 name pending
 
-This project is separates into the server (`board-server`) and the client (`board-web-client`). All files inside `board-web-client` can be served to the browser and are therefore public.
+This project is separated into the server (`board-server`) and the client (`board-web-client`). All files inside `board-web-client` can be served to the browser and are therefore public.
 
 You will need to build and run the `board-server` project before using or contributing to the client or server.
 
@@ -64,3 +64,7 @@ Create a file called `board.properties` in the working directory of the server a
 - autosave.interval
   - default: -1 (integer in seconds, negative values will disable autosave)
   - Sets how often flat file storage will be saved to disk
+- http.cache.seconds
+	- default: 0 (integer, seconds)
+	- How long before a cached item expires
+	- Set to 0 for development purposes so refreshing the page will always load your new changes (equivalent of `crtl+f5`)

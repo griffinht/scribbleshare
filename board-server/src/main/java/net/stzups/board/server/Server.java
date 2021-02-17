@@ -65,7 +65,7 @@ public class Server {
                 }
             }
         } else {
-            throw new RuntimeException("Failed to set required flag --ssl.keystore. Perhaps you meant to explicitly disable encrypted sockets and use http:// with --ssl.keystore http");
+            throw new RuntimeException("Failed to set required flag --ssl.keystore. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl.keystore http");
         }
 
         bossGroup = new NioEventLoopGroup();

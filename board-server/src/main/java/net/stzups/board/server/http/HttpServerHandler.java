@@ -1,4 +1,4 @@
-package net.stzups.board.server;
+package net.stzups.board.server.http;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -19,22 +19,28 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
+import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.Board;
+import net.stzups.board.data.objects.HttpSession;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -53,7 +59,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    private static final int HTTP_CACHE_SECONDS = 0; //todo change
+    private static final int HTTP_CACHE_SECONDS = Integer.parseInt(Board.getConfig().get("http.cache.seconds", "0"));
     private static final String JOIN_PATH = "d";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -71,6 +77,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+        if (request.uri().equals("/index.html")) {
+
+            System.out.println("START================================================================");
+            System.out.println(request.uri());
+            for (Map.Entry<String, String> entry : request.headers()) {
+                System.out.println(entry.getKey() + ":" + entry.getValue());
+            }
+            System.out.println();
+            System.out.println(request.content().toString(StandardCharsets.UTF_8));
+            System.out.println("END==================================================================");
+        }
         this.request = request;
         if (!request.decoderResult().isSuccess()) {
             sendError(ctx, HttpResponseStatus.BAD_REQUEST);
@@ -83,26 +100,25 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
-        String uri = request.uri();
-        /*if (uri.equals("/")) { //default directory
-            sendRedirect(ctx, uri + "index.html");
+
+        final String uri = sanitizeUri(request.uri());
+        if (uri == null) {
+            sendError(ctx, HttpResponseStatus.FORBIDDEN);
             return;
-        }*/
-        if (uri.startsWith("/" + JOIN_PATH + "/")) {
-            //client will join a room, just serve the default page todo change to php style url format?
-            uri = "/index.html";
-        } else if (!uri.endsWith("/") && !uri.contains(".")) {
-            uri += ".html";
-        } else if (uri.endsWith("/")) {
-            uri += "index.html";
         }
-        final String path = sanitizeUri(uri);
-        if (path == null) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN); //todo return not found instead
-            return;
+        final String path;
+        // special cases
+        if (uri.startsWith("/" + JOIN_PATH + "/")) {// /JOIN_PATH/123456 -> index.html
+            path = "/index.html";
+        } else if (!uri.endsWith("/") && !uri.contains(".")) {// /file -> /file.html
+            path = uri + ".html";
+        } else if (uri.endsWith("/")) {// /directory/ -> /directory/index.html
+            path = uri + "index.html";
+        } else {
+            path = uri;
         }
 
-        File file = new File(HTTP_ROOT, path);
+        File file = new File(HTTP_ROOT, path.replace('/', File.separatorChar));
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
@@ -110,12 +126,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         if (file.isDirectory()) {
             sendError(ctx, HttpResponseStatus.FORBIDDEN);
-            //sendRedirect(ctx, uri + ((uri.endsWith("/") ? "" : "/") + "index.html"));
             return;
         }
 
         if (!file.isFile()) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN); //todo return not found instead
+            sendError(ctx, HttpResponseStatus.FORBIDDEN);
             return;
         }
 
@@ -144,6 +159,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        if (path.equals("/index.html")) {
+            Cookie cookie = HttpSession.getCookie(request.headers(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
+            if (cookie != null) {
+                System.out.println(cookie.value());
+                response.headers().set(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+            }
+        }
         HttpUtil.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);
         setDateAndCacheHeaders(response, file);
@@ -188,7 +210,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * Simplistic dumb security check for client request uris
      * Will also replace file separators (/ or \) with the system specific separator
-     * todo thoroughly test before deploying to production environment.
      *
      * @param uri request uri from client
      * @return sanitized uri or null if the uri is unsafe and should not be handled
@@ -198,19 +219,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             uri = URLDecoder.decode(uri, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new Error(e);
+            return null;
         }
 
         if (uri.isEmpty() || uri.charAt(0) != '/') {
             return null;
         }
 
-        // Convert file separators.
-        uri = uri.replace('/', File.separatorChar);
-
-
-        if (uri.contains(File.separator + '.') ||
-                uri.contains('.' + File.separator) ||
+        if (uri.contains("/.") || uri.contains("./") ||
                 uri.charAt(0) == '.' || uri.charAt(uri.length() - 1) == '.' ||
                 INSECURE_URI.matcher(uri).matches()) {
             return null;
@@ -226,7 +242,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendAndCleanupConnection(ctx, response);
     }
 
-    private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
+    private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {//todo fail2ban system where bad clients get blocked
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(status + "\r\n", CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
@@ -265,16 +281,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
-        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store"); //todo re-enable caching
-        /*// Date header
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+        if (HTTP_CACHE_SECONDS > 0) {
+            // Date header
+            Calendar time = new GregorianCalendar();
+            response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
 
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));*/
+            // Add cache headers
+            time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
+            response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
+            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
+            response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+        } else {
+            response.headers().set(HttpHeaderNames.CACHE_CONTROL, "no-store");
+        }
     }
 
     private static void setContentTypeHeader(HttpResponse response, File file) {

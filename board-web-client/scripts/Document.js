@@ -92,7 +92,7 @@ socket.addEventListener('protocol.draw', (event) => {
     });
 });
 socket.addEventListener('protocol.adddocument', (event) => {
-    documents.get(event.id, new Document(event.name, event.id));
+    documents.set(event.id, new Document(event.name, event.id));
 });
 socket.addEventListener('protocol.opendocument', (event) => {
     if (activeDocument != null) {
@@ -101,9 +101,20 @@ socket.addEventListener('protocol.opendocument', (event) => {
     activeDocument = documents.get(event.id);
     activeDocument.open();
 });
+socket.addEventListener('protocol.handshake', (event) => {
+    if (event.token != null) {
+        window.localStorage.setItem('token', event.token.toString());
+    }
+})
 socket.addEventListener('socket.open', (event) => {
-    socket.sendHandshake();
-    var invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
+    let token = window.localStorage.getItem('token');
+    if (token != null) {
+        token = BigInt(window.localStorage.getItem('token'));
+    } else {
+        token = BigInt(0);
+    }
+    socket.sendHandshake(token);
+    let invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite !== '') {
         socket.sendOpen(invite);
     }

@@ -1,5 +1,7 @@
 package net.stzups.board.server;
 
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -12,8 +14,9 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.board.Board;
-import net.stzups.board.protocol.PacketEncoder;
-import net.stzups.board.protocol.PacketDecoder;
+import net.stzups.board.server.websocket.protocol.PacketEncoder;
+import net.stzups.board.server.websocket.protocol.PacketDecoder;
+import net.stzups.board.server.http.HttpServerHandler;
 
 import java.util.concurrent.Executors;
 
@@ -46,7 +49,15 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel socketChannel) {
         Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
-        pipeline.addLast(globalTrafficShapingHandler);
+        pipeline
+                .addLast(new ChannelDuplexHandler() {
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
+                        Board.getLogger().warning("Uncaught exception");
+                        throwable.printStackTrace();
+                    }
+                })
+                .addLast(globalTrafficShapingHandler);
         if (sslContext != null) {
             pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
         }

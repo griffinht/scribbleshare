@@ -1,4 +1,4 @@
-package net.stzups.board.protocol;
+package net.stzups.board.server.websocket.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -8,12 +8,12 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.data.objects.Point;
-import net.stzups.board.protocol.client.ClientPacket;
-import net.stzups.board.protocol.client.ClientPacketCreateDocument;
-import net.stzups.board.protocol.client.ClientPacketDraw;
-import net.stzups.board.protocol.client.ClientPacketHandshake;
-import net.stzups.board.protocol.client.ClientPacketOpenDocument;
-import net.stzups.board.protocol.client.ClientPacketType;
+import net.stzups.board.server.websocket.protocol.client.ClientPacket;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketHandshake;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientPacketType;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;
@@ -42,13 +42,13 @@ public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                     packet = new ClientPacketDraw(points);
                     break;
                 case OPEN_DOCUMENT:
-                    packet = new ClientPacketOpenDocument(readString(byteBuf));
+                    packet = new ClientPacketOpenDocument(byteBuf.readLong());
                     break;
                 case CREATE_DOCUMENT:
                     packet = new ClientPacketCreateDocument();
                     break;
                 case HANDSHAKE:
-                    packet = new ClientPacketHandshake();
+                    packet = new ClientPacketHandshake(byteBuf.readLong());
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");

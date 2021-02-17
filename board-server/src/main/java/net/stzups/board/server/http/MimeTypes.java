@@ -1,4 +1,4 @@
-package net.stzups.board.server;
+package net.stzups.board.server.http;
 
 import java.io.BufferedReader;
 import java.io.File;
