@@ -10,7 +10,7 @@ import './InviteButton.js'
 const documents = new Map();
 var activeDocument = null;
 
-export default class Document {
+class Document {
     constructor(name, id, points) {
         this.clients = new Map();
         this.name = name;
@@ -21,7 +21,7 @@ export default class Document {
                 socket.sendOpen(this.id)
             } else {
                 console.log('id was null', this);
-            };
+            }
         });
         documents.set(this.id, this);
         this.points = points;
@@ -61,10 +61,11 @@ function resizeCanvas() {
     canvas.height = canvas.parentElement.offsetHeight;
     ctx.putImageData(imageData, 0, 0);
     //todo redraw?
-};
+}
 resizeCanvas();
 
-var last = performance.now();
+let last = performance.now();
+
 function draw(now) {
     let dt = (now - last);
     last = now;
@@ -106,7 +107,7 @@ socket.addEventListener('protocol.handshake', (event) => {
         window.localStorage.setItem('token', event.token.toString());
     }
 })
-socket.addEventListener('socket.open', (event) => {
+socket.addEventListener('socket.open', () => {
     let token = window.localStorage.getItem('token');
     if (token != null) {
         token = BigInt(window.localStorage.getItem('token'));
