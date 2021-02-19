@@ -12,7 +12,8 @@ import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
 import net.stzups.board.server.websocket.protocol.client.ClientPacketHandshake;
 import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketAddDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketDraw;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketDrawClient;
 import net.stzups.board.server.WebSocketInitializer;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketHandshake;
 
@@ -44,7 +45,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             case DRAW: {
                 ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
                 room.getDocument().addPoints(client.getUser(), clientPacketDraw.getPoints());
-                room.queuePacketExcept(new ServerPacketDraw(client.getUser(), clientPacketDraw.getPoints()), client);//todo this has tons of latency
+                room.queuePacketExcept(new ServerPacketDrawClient(client, clientPacketDraw.getPoints()), client);//todo this has tons of latency
                 break;
             }
             case OPEN_DOCUMENT: {
@@ -99,6 +100,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                         }
                     }
                 }
+                client.queuePacket(new ServerPacketAddUser(client.getUser()));
                 if (client.getUser().getOwnedDocuments().size() == 0) {
                     client.queuePacket(new ServerPacketAddDocument(Board.createDocument(client.getUser())));
                 } else {

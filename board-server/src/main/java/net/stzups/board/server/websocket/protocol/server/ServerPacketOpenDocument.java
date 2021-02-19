@@ -21,18 +21,19 @@ public class ServerPacketOpenDocument extends ServerPacket {
         super.serialize(byteBuf);
         byteBuf.writeLong(document.getId());
         //OPEN_DOCUMENT is serialized, now serialize the other things
-        Map<User, List<Point>> pointsMap = document.getPoints();
-        for (Map.Entry<User, List<Point>> entry : pointsMap.entrySet()) {
-            new ServerPacketAddUser(entry.getKey()).serialize(byteBuf);//todo this might be bad design/break some things
-            Point[] points = new Point[entry.getValue().size()];
-            int i = 0;
+        byteBuf.writeShort((short) document.getPoints().size());
+        for (Map.Entry<User, List<Point>> entry : document.getPoints().entrySet()) {
+            byteBuf.writeLong(entry.getKey().getId());
+            byteBuf.writeShort((short) entry.getValue().size());
             for (Point point : entry.getValue()) {
-                if (point.dt != 0) {
-                    point.dt = -1;
+                int dt = point.dt;
+                if (dt != 0) {
+                    dt = -1;
                 }
-                points[i++] = point;
+                byteBuf.writeByte((byte) dt);
+                byteBuf.writeShort(point.x);
+                byteBuf.writeShort(point.y);
             }
-            new ServerPacketDraw(entry.getKey(), points).serialize(byteBuf);
         }
     }
 }

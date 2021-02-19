@@ -6,6 +6,7 @@ import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
 import './InviteButton.js'
+import * as User from "./User.js";
 
 const documents = new Map();
 var activeDocument = null;
@@ -79,7 +80,7 @@ function draw(now) {
 window.requestAnimationFrame(draw);
 
 socket.addEventListener('protocol.addclient', (event) => {
-    let client = new Client(event.id);
+    let client = new Client(event.id, User.getUser(event.userId));
     activeDocument.clients.set(client.id, client);
     console.log('Add client ', client);
 });
@@ -99,8 +100,12 @@ socket.addEventListener('protocol.opendocument', (event) => {
     if (activeDocument != null) {
         activeDocument.close();
     }
-    activeDocument = documents.get(event.id);
+
+    activeDocument = documents.get(event.document.id);
+    Object.assign(activeDocument, event.document);
+    console.log(activeDocument.points);
     activeDocument.open();
+
 });
 socket.addEventListener('protocol.handshake', (event) => {
     if (event.token != null) {

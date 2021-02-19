@@ -22,6 +22,10 @@ public class Client {
         regenerateId();
     }
 
+    private Client(User user) {
+        this.user = user;
+    }
+
     public User getUser() {
         return user;
     }
@@ -32,7 +36,11 @@ public class Client {
 
     public short regenerateId() {
         id = (short) TokenGenerator.getRandom().nextInt(); //todo is this cast less random
-        return id;
+        if (id == 0) {//indicates fake client, should not be used by real clients
+            return regenerateId();
+        } else {
+            return id;
+        }
     }
 
     void queuePacket(ServerPacket serverPacket) {

@@ -4,9 +4,9 @@ import net.stzups.board.Board;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketAddClient;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveUser;
+import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ class Room {
         //for the new client
         client.sendPacket(new ServerPacketOpenDocument(document));
         //for the existing clients
-        sendPacket(new ServerPacketAddUser(client.getUser()));
+        sendPacket(new ServerPacketAddClient(client));
         clients.put(client.getUser(), client);
         Board.getLogger().info("Added " + client + " to " + this);
     }
@@ -75,7 +75,7 @@ class Room {
      */
     void removeClient(Client client) {
         clients.remove(client.getUser());
-        sendPacket(new ServerPacketRemoveUser(client.getUser()));
+        sendPacket(new ServerPacketRemoveClient(client));
         Board.getLogger().info("Removed " + client + " to " + this);
     }
 
