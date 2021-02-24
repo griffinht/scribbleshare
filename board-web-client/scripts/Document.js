@@ -12,7 +12,7 @@ const documents = new Map();
 var activeDocument = null;
 
 class Document {
-    constructor(name, id, points) {
+    constructor(name, id) {
         this.clients = new Map();
         this.name = name;
         this.id = id;
@@ -25,10 +25,7 @@ class Document {
             }
         });
         documents.set(this.id, this);
-        this.points = points;
-        //if (activeDocument == null) {
-        //    this.open();
-        //}
+        this.points = {};
     }
 
     open() {
@@ -36,6 +33,18 @@ class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
+        this.points.forEach((points, id) => {
+            ctx.beginPath();
+            points.forEach((point) => {
+                if (point.dt === 0) {
+                    ctx.stroke();//todo only do this at the end
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            })
+            ctx.stroke();
+        });
     }
 
     close() {
@@ -46,7 +55,7 @@ class Document {
     draw(dt) {
         this.clients.forEach((client) => {
             client.draw(dt);
-        });
+        })
     }
 }
 
@@ -103,7 +112,6 @@ socket.addEventListener('protocol.opendocument', (event) => {
 
     activeDocument = documents.get(event.document.id);
     Object.assign(activeDocument, event.document);
-    console.log(activeDocument.points);
     activeDocument.open();
 
 });

@@ -90,16 +90,15 @@ class WebSocketHandler {
                             e.document = {};
                             e.document.id = dataView.getBigInt64(offset);
                             offset += 8;
-                            e.document.points = [];
+                            e.document.points = new Map();
                             let length = dataView.getUint16(offset);
                             offset += 2;
                             for (let i = 0; i < length; i++) {
-                                let draw = {};
-                                draw.id = dataView.getBigInt64(offset);
+                                let id = dataView.getBigInt64(offset);
                                 offset += 8;
                                 let size = dataView.getUint16(offset);
                                 offset += 2;
-                                draw.points = [];
+                                let points = [];
                                 for (let i = 0; i < size; i++) {
                                     let point = {};
                                     point.dt = dataView.getUint8(offset);
@@ -109,9 +108,9 @@ class WebSocketHandler {
                                     point.y = dataView.getInt16(offset);
                                     offset += 2;
                                     point.usedDt = 0;
-                                    draw.points.push(point);
+                                    points.push(point);
                                 }
-                                e.document.points.push(draw);
+                                e.document.points.set(id, points);
                             }
                             this.dispatchEvent('protocol.opendocument', e);
                             break;
@@ -165,7 +164,7 @@ class WebSocketHandler {
 
     send(payload) {
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('sending');
+            console.log('sending', payload);
             this.socket.send(payload);
         } else {
             console.error('tried to send payload while websocket was closed', payload);
