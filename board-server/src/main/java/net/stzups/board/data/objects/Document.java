@@ -46,4 +46,9 @@ public class Document implements Serializable {
     public String toString() {
         return "Document{id=" + id + ",name=" + name + "}";
     }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
 }

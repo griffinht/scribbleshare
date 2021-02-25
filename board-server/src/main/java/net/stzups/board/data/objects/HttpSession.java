@@ -80,4 +80,9 @@ public class HttpSession implements Serializable {
     public String toString() {
         return "HttpSession{address=" + address + "}";
     }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(token);
+    }
 }

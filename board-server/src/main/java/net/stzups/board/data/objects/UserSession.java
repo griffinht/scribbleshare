@@ -36,4 +36,9 @@ public class UserSession implements Serializable {
     public String toString() {
         return "UserSession{userId=" + userId + ",@" + hashCode()+ "}";
     }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(userId);
+    }
 }
