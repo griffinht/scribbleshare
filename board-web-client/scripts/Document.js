@@ -98,6 +98,7 @@ socket.addEventListener('protocol.removeclient', (event) => {
 });
 socket.addEventListener('protocol.draw', (event) => {
     let client = activeDocument.clients.get(event.id);
+    console.log(activeDocument.clients, event.id);
     event.points.forEach((point) => {
         client.points.push(point);
     });

@@ -8,6 +8,7 @@ public class ServerPacketAddClient extends ServerPacketClient {
 
     public ServerPacketAddClient(Client client) {
         super(ServerPacketType.ADD_CLIENT, client);
+        this.client = client;
     }
 
     @Override
