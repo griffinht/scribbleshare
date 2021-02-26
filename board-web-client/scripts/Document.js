@@ -6,12 +6,13 @@ import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
 import './InviteButton.js'
+import * as User from "./User.js";
 
 const documents = new Map();
 var activeDocument = null;
 
-export default class Document {
-    constructor(name, id, points) {
+class Document {
+    constructor(name, id) {
         this.clients = new Map();
         this.name = name;
         this.id = id;
@@ -21,13 +22,10 @@ export default class Document {
                 socket.sendOpen(this.id)
             } else {
                 console.log('id was null', this);
-            };
+            }
         });
         documents.set(this.id, this);
-        this.points = points;
-        //if (activeDocument == null) {
-        //    this.open();
-        //}
+        this.points = {};
     }
 
     open() {
@@ -35,6 +33,18 @@ export default class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
+        this.points.forEach((points, id) => {
+            ctx.beginPath();
+            points.forEach((point) => {
+                if (point.dt === 0) {
+                    ctx.stroke();//todo only do this at the end
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            })
+            ctx.stroke();
+        });
     }
 
     close() {
@@ -45,7 +55,7 @@ export default class Document {
     draw(dt) {
         this.clients.forEach((client) => {
             client.draw(dt);
-        });
+        })
     }
 }
 
@@ -61,10 +71,11 @@ function resizeCanvas() {
     canvas.height = canvas.parentElement.offsetHeight;
     ctx.putImageData(imageData, 0, 0);
     //todo redraw?
-};
+}
 resizeCanvas();
 
-var last = performance.now();
+let last = performance.now();
+
 function draw(now) {
     let dt = (now - last);
     last = now;
@@ -78,7 +89,7 @@ function draw(now) {
 window.requestAnimationFrame(draw);
 
 socket.addEventListener('protocol.addclient', (event) => {
-    let client = new Client(event.id);
+    let client = new Client(event.id, User.getUser(event.userId));
     activeDocument.clients.set(client.id, client);
     console.log('Add client ', client);
 });
@@ -87,6 +98,7 @@ socket.addEventListener('protocol.removeclient', (event) => {
 });
 socket.addEventListener('protocol.draw', (event) => {
     let client = activeDocument.clients.get(event.id);
+    console.log(activeDocument.clients, event.id);
     event.points.forEach((point) => {
         client.points.push(point);
     });
@@ -98,15 +110,18 @@ socket.addEventListener('protocol.opendocument', (event) => {
     if (activeDocument != null) {
         activeDocument.close();
     }
-    activeDocument = documents.get(event.id);
+
+    activeDocument = documents.get(event.document.id);
+    Object.assign(activeDocument, event.document);
     activeDocument.open();
+
 });
 socket.addEventListener('protocol.handshake', (event) => {
     if (event.token != null) {
         window.localStorage.setItem('token', event.token.toString());
     }
 })
-socket.addEventListener('socket.open', (event) => {
+socket.addEventListener('socket.open', () => {
     let token = window.localStorage.getItem('token');
     if (token != null) {
         token = BigInt(window.localStorage.getItem('token'));

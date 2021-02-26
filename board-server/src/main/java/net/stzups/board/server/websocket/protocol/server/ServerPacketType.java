@@ -11,7 +11,8 @@ public enum ServerPacketType {
     DRAW(2),
     OPEN_DOCUMENT(3),
     ADD_DOCUMENT(4),
-    HANDSHAKE(5)
+    HANDSHAKE(5),
+    ADD_USER(6)
     ;
 
     private static Map<Integer, ServerPacketType> packetTypeMap = new IntObjectHashMap<>();

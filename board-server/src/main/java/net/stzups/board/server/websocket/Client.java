@@ -1,6 +1,7 @@
 package net.stzups.board.server.websocket;
 
 import io.netty.channel.Channel;
+import net.stzups.board.data.TokenGenerator;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 
@@ -11,16 +12,35 @@ import java.util.List;
 public class Client {
     private User user;
     private Channel channel;
+    private short id;
 
     private List<ServerPacket> packets = new ArrayList<>();
 
     Client(User user, Channel channel) {
         this.user = user;
         this.channel = channel;
+        regenerateId();
+    }
+
+    private Client(User user) {
+        this.user = user;
     }
 
     public User getUser() {
         return user;
+    }
+
+    public short getId() {
+        return id;
+    }
+
+    public short regenerateId() {
+        id = (short) TokenGenerator.getRandom().nextInt(); //todo is this cast less random
+        if (id == 0) {//indicates fake client, should not be used by real clients
+            return regenerateId();
+        } else {
+            return id;
+        }
     }
 
     void queuePacket(ServerPacket serverPacket) {

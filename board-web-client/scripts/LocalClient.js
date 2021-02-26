@@ -1,11 +1,11 @@
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
-import {ctx} from './Document.js'
+import {canvas, ctx} from './Document.js'
 
 const UPDATE_INTERVAL = 1000;
 
 export default class LocalClient extends Client {
-    constructor(id) {
+    constructor() {
         super(-1);
         this.point = null;
         this.lastTime = 0;

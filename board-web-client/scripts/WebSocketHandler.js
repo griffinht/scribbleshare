@@ -5,6 +5,7 @@ class WebSocketHandler {
             'socket.open',
             'socket.close',
             'protocol.addclient',
+            'protocol.adduser',
             'protocol.removeclient',
             'protocol.draw',
             'protocol.opendocument',
@@ -18,13 +19,15 @@ class WebSocketHandler {
         if (window.location.protocol === 'https:') {
             webSocketUrl = 'wss://localhost/websocket';
         } else {
+            console.warn('Insecure connection, this better be a development environment');//todo disable/disallow
             webSocketUrl = 'ws://localhost/websocket';
         }
+        console.log('Opening WebSocket connection to ' + webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection to ' + webSocketUrl + ' opened');
+            console.log('WebSocket connection opened');
             this.dispatchEvent('socket.open');
         });
 
@@ -47,22 +50,24 @@ class WebSocketHandler {
                     switch (type) {
                         case 0: {
                             let e = {};
-                            e.id = dataView.getBigInt64(offset);
+                            e.id = dataView.getInt16(offset);
+                            offset += 2;
+                            e.userId = dataView.getBigInt64(offset);
                             offset += 8;
                             this.dispatchEvent('protocol.addclient', e);
                             break;
                         }
                         case 1: {
                             let e = {};
-                            e.id = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.id = dataView.getInt16(offset);
+                            offset += 2;
                             this.dispatchEvent('protocol.removeclient', e);
                             break;
                         }
                         case 2: {
                             let e = {};
-                            e.id = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.id = dataView.getInt16(offset);
+                            offset += 2;
                             let size = dataView.getUint16(offset);
                             offset += 2;
                             e.points = [];
@@ -82,8 +87,31 @@ class WebSocketHandler {
                         }
                         case 3: {
                             let e = {};
-                            e.id = dataView.getBigInt64(offset);
+                            e.document = {};
+                            e.document.id = dataView.getBigInt64(offset);
                             offset += 8;
+                            e.document.points = new Map();
+                            let length = dataView.getUint16(offset);
+                            offset += 2;
+                            for (let i = 0; i < length; i++) {
+                                let id = dataView.getBigInt64(offset);
+                                offset += 8;
+                                let size = dataView.getUint16(offset);
+                                offset += 2;
+                                let points = [];
+                                for (let i = 0; i < size; i++) {
+                                    let point = {};
+                                    point.dt = dataView.getUint8(offset);
+                                    offset += 1;
+                                    point.x = dataView.getInt16(offset);
+                                    offset += 2;
+                                    point.y = dataView.getInt16(offset);
+                                    offset += 2;
+                                    point.usedDt = 0;
+                                    points.push(point);
+                                }
+                                e.document.points.set(id, points);
+                            }
                             this.dispatchEvent('protocol.opendocument', e);
                             break;
                         }
@@ -103,6 +131,14 @@ class WebSocketHandler {
                             e.token = dataView.getBigInt64(offset);
                             offset += 8;
                             this.dispatchEvent('protocol.handshake', e);
+                            break;
+                        }
+                        case 6: {
+                            let e = {};
+                            e.user = {};
+                            e.user.id = dataView.getBigInt64(offset);
+                            offset += 8;
+                            this.dispatchEvent('protocol.adduser', e);
                             break;
                         }
                         default:
@@ -128,7 +164,7 @@ class WebSocketHandler {
 
     send(payload) {
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('sending');
+            console.log('sending', payload);
             this.socket.send(payload);
         } else {
             console.error('tried to send payload while websocket was closed', payload);
@@ -144,7 +180,7 @@ class WebSocketHandler {
         offset += 1;
         
         dataView.setBigInt64(offset, id);
-        offset += 1;
+        offset += 8;
 
         this.send(buffer);
     }

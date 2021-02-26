@@ -3,12 +3,13 @@ package net.stzups.board.server.websocket.protocol.server;
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.Point;
 import net.stzups.board.data.objects.User;
+import net.stzups.board.server.websocket.Client;
 
-public class ServerPacketDraw extends ServerPacketUser {
+public class ServerPacketDrawClient extends ServerPacketClient {
     private Point[] points;
 
-    public ServerPacketDraw(User user, Point[] points) {
-        super(ServerPacketType.DRAW, user);
+    public ServerPacketDrawClient(Client client, Point[] points) {
+        super(ServerPacketType.DRAW, client);
         this.points = points;
     }
 

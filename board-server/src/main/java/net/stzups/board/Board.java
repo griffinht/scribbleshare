@@ -40,16 +40,12 @@ public class Board {
         return users.get(id);
     }
 
-    public static UserSession getUserSession(long token) {
-        return userSessions.get(token);
+    public static UserSession removeUserSession(long token) {
+        return userSessions.remove(token);
     }
 
     public static void addUserSession(UserSession userSession) {
         userSessions.put(userSession.getToken(), userSession);
-    }
-
-    public static void removeUserSession(UserSession userSession) {
-        userSessions.remove(userSession.getToken());
     }
 
     public static HttpSession getHttpSession(long token) {

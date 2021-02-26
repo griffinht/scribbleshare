@@ -34,4 +34,9 @@ public class User implements Serializable {
     public String toString() {
         return "User{id=" + id + "}";
     }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
 }

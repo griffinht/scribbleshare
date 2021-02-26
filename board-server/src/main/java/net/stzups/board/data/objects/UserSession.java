@@ -27,13 +27,18 @@ public class UserSession implements Serializable {
         return userId;
     }
 
-    /** User session should be invalidated if this returns false */
     public boolean validate(InetAddress inetAddress) {
+        token = 0;
         return (System.currentTimeMillis() - creationDate) < MAX_USER_SESSION_AGE && this.inetAddress.equals(inetAddress);
     }
 
     @Override
     public String toString() {
-        return "UserSession{userId=" + userId + ",token=" + token+ "}";
+        return "UserSession{userId=" + userId + ",@" + hashCode()+ "}";
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(userId);
     }
 }
