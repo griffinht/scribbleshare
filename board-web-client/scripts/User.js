@@ -1,9 +1,14 @@
 import socket from "./WebSocketHandler.js";
 
 const users = new Map();
+let user = null;
 
 export function getUser(id) {
-    return users.get(id);
+    if (id == null) {
+        return user;
+    } else {
+        return users.get(id);
+    }
 }
 
 class User {
@@ -13,6 +18,9 @@ class User {
     }
 }
 
+socket.addEventListener('protocol.handshake', (event) => {
+    user = new User(event.userId);
+})
 socket.addEventListener('protocol.adduser', (event) => {
     let user = users.get(event.user.id);
     if (user == null) {

@@ -7,6 +7,8 @@ export default class Client {
         this.x = 0;
         this.y = 0;
         this.points = [];
+        this.icon = document.createElement("img");
+        this.icon.setAttribute("src", "/bin/default.png");
     }
 
     draw(dt) {

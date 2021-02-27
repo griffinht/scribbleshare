@@ -8,7 +8,8 @@ import socket from './WebSocketHandler.js'
 import * as User from "./User.js";
 
 const documents = new Map();
-var activeDocument = null;
+let activeDocument = null;
+const clientsToolbar = document.getElementById("clientsToolbar");
 
 class Document {
     constructor(name, id) {
@@ -44,17 +45,31 @@ class Document {
             })
             ctx.stroke();
         });
+        this.addClient(localClient);
     }
 
     close() {
         localClient.update();
         ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
+        this.clients.forEach((client) => {
+            this.removeClient(client.id);
+        })
     }
 
     draw(dt) {
         this.clients.forEach((client) => {
             client.draw(dt);
         })
+    }
+
+    addClient(client) {
+        this.clients.set(client.id, client);
+        clientsToolbar.appendChild(client.icon);
+    }
+
+    removeClient(id) {
+        this.clients.get(id).icon.remove();
+        this.clients.delete(id);
     }
 }
 
@@ -90,11 +105,11 @@ window.requestAnimationFrame(draw);
 
 socket.addEventListener('protocol.addclient', (event) => {
     let client = new Client(event.id, User.getUser(event.userId));
-    activeDocument.clients.set(client.id, client);
+    activeDocument.addClient(client);
     console.log('Add client ', client);
 });
 socket.addEventListener('protocol.removeclient', (event) => {
-    console.log('Remove client ', activeDocument.clients.delete(event.id));
+    console.log('Remove client ', activeDocument.removeClient(event.id));
 });
 socket.addEventListener('protocol.draw', (event) => {
     let client = activeDocument.clients.get(event.id);

@@ -3,14 +3,6 @@ const sidebar = document.getElementById('side');
 
 export default class SidebarItem {
     constructor(display, open) {
-        /*
-        if (items.has(display)) {
-            this.button.addEventListener('click', event => {
-                this.setActive(event.target);
-                onclick();
-            })
-            return;
-        }*/
         this.open = open;
         this.button = document.createElement("button");
         let inner = document.createTextNode(display);
@@ -20,7 +12,6 @@ export default class SidebarItem {
         });
         sidebar.appendChild(this.button);
         items.push(this);
-        //todo this.setActive();
     }
 
     setActive(open) {

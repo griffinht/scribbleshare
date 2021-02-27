@@ -67,7 +67,7 @@ aside button:active {
 
 #clientsToolbar {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     position: absolute;
     top: 12px;
     right: 12px;
