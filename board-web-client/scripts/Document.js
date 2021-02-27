@@ -5,7 +5,6 @@ import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
-import './InviteButton.js'
 import * as User from "./User.js";
 
 const documents = new Map();
@@ -67,8 +66,9 @@ document.getElementById('add').addEventListener('click', () => {
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    canvas.width = canvas.parentElement.offsetWidth;
-    canvas.height = canvas.parentElement.offsetHeight;
+    let rect = canvas.parentNode.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
     ctx.putImageData(imageData, 0, 0);
     //todo redraw?
 }

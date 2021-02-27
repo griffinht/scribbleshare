@@ -50,3 +50,10 @@ Multiple clients per user
 - Change how sessions are handled
 - Clean up script loading
 - Fix hashcode issues
+
+###v0.2.6
+Design
+- Clean up CSS
+- Add changelog
+- Move invite button
+- Fix canvas resize

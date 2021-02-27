@@ -3,57 +3,6 @@
     padding: 0;
 }
 
-.noselect {
-    user-select: none;
-}
-
-html, body {
-    height: 100%;
-}
-
-a {
-    color: white;
-    text-decoration: none;
-}
-
-a:hover {
-    color: lightgray;
-}
-
-a:active {
-    color: gray;
-}
-
-
-body {
-    display: flex;
-    flex-flow: column;
-}
-
-header {
-    background-color: black;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    height: 5em;
-    width: 100%;
-}
-
-header * {
-    padding: .2em;
-    font-size: 2.5em;
-    font-family: serif;
-}
-
-header p {
-    color: white;
-}
-
-header button {
-    height: 100%;
-}
-
 button {
     border: .08em solid gray;
 }
@@ -64,11 +13,4 @@ button:focus {
 
 button:active {
     box-shadow: inset 0 0 .5em #c1c1c1;
-}
-
-.wrapper {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
 }
