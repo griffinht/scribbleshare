@@ -37,6 +37,7 @@ class WebSocketHandler {
         });
     
         this.socket.addEventListener('message', (event) => {
+            console.log('recv', event.data);
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
@@ -130,6 +131,8 @@ class WebSocketHandler {
                             let e = {};
                             e.token = dataView.getBigInt64(offset);
                             offset += 8;
+                            e.userId = dataView.getBigInt64(offset);
+                            offset += 8;
                             this.dispatchEvent('protocol.handshake', e);
                             break;
                         }
@@ -164,7 +167,7 @@ class WebSocketHandler {
 
     send(payload) {
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('sending', payload);
+            console.log('send', payload);
             this.socket.send(payload);
         } else {
             console.error('tried to send payload while websocket was closed', payload);

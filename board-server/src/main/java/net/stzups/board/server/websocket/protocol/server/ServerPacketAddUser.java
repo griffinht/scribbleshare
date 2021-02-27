@@ -4,8 +4,6 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.User;
 
 public class ServerPacketAddUser extends ServerPacketUser {
-    private User user;
-
     public ServerPacketAddUser(User user) {
         super(ServerPacketType.ADD_USER, user);
     }
