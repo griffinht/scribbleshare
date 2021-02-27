@@ -117,9 +117,7 @@ socket.addEventListener('protocol.opendocument', (event) => {
 
 });
 socket.addEventListener('protocol.handshake', (event) => {
-    if (event.token != null) {
-        window.localStorage.setItem('token', event.token.toString());
-    }
+    window.localStorage.setItem('token', event.token.toString());
 })
 socket.addEventListener('socket.open', () => {
     let token = window.localStorage.getItem('token');

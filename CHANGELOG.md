@@ -55,6 +55,8 @@ Multiple clients per user
 Design
 - Clean up CSS
 - Add changelog
-- Move invite button
-- Fix canvas resize
+- Add invite/connected users toolbar
+- "Fix" canvas resize
 - Change/clean up config system
+- Improve client debug
+- Better local user with different handshake
