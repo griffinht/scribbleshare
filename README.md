@@ -41,30 +41,14 @@ Create a file called `board.properties` in the working directory of the server a
 ##### Command line arguments
 
     java -jar board-server-xxx.jar --key value --other.key "value with spaces"
+File indicates a relative (<working directory>/folder/file.ext) or absolute path (C:/folder/file.ext)
 
-
-- ssl.keystore:
-	- Path to the PKCS12 `mykeystore.pfx` containing the private key for the server
-	- Required, set to `http` to disable encryption and use `http://` for connecting to the server
-- ssl.passphrase:
-	- Optional
-	- Passphrase for `mykeystore.pfx`
-- document.root.path:
-  - default: documentRoot (file path, relative paths start from the working directory)
-  - Sets the folder location of where the HTTP server should look to serve files. If the directory does not exist, one will be made.
-  - Should be set to where `board-web-client` is. 
-  - HTTP requests to a directory (`localhost` or `localhost/folder/`) will be served the `index.html` file of those directories
-  - HTTP requests to a file that do not specify an extension (`localhost/file`) will be served a `.html` that corresponds to the requested name
-- data.root.path
-  - default: data (file path, relative paths start from the working directory)
-  - Sets the folder location of the flat file storage
-- debug.log.traffic
-	- default: false (boolean)
-	- Will print network throughput (read/write) into the console
-- autosave.interval
-  - default: -1 (integer in seconds, negative values will disable autosave)
-  - Sets how often flat file storage will be saved to disk
-- http.cache.seconds
-	- default: 0 (integer, seconds)
-	- How long before a cached item expires
-	- Set to 0 for development purposes so refreshing the page will always load your new changes (equivalent of `crtl+f5`)
+| Flag | Type | Default | Description |
+| --- | ---- | ------- | ----------- |
+| ssl.keystore.path | file | (required) |  Path to the PKCS12 `mykeystore.pfx` containing the private key for the server. Set to `http` to use HTTP without SSL encryption |
+| ssl.passphrase | string | (optional) | Passphrase for `mykeystore.pfx` |
+| document.root.path | file | documentRoot | Should be set to where `board-web-client` is. HTTP requests to a directory (`localhost` or `localhost/folder/`) will be served the `index.html` file of those directories HTTP requests to a file that do not specify an extension (`localhost/file`) will be served a `.html` that corresponds to the requested name
+| data.root.path | file | data | Sets the folder location of the flat file storage |
+| debug.log.traffic | boolean | false | Will print network throughput (read/write) into the console |
+| autosave.interval | integer (seconds) | -1 | Sets how often flat file storage will be saved to disk, or negative value to disable |
+| http.cache.time | integer (seconds) | 0 | How long before a cached item expires. Set to 0 for development purposes so refreshing the page will always load your new changes (equivalent of `crtl+f5`) |
