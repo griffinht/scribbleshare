@@ -37,7 +37,6 @@ class WebSocketHandler {
         });
     
         this.socket.addEventListener('message', (event) => {
-            console.log('recv', event.data);
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
@@ -47,7 +46,6 @@ class WebSocketHandler {
                 while (offset < dataView.byteLength) {
                     let type = dataView.getUint8(offset);
                     offset += 1;
-                    console.log('got ' + type);
                     switch (type) {
                         case 0: {
                             let e = {};
@@ -161,7 +159,7 @@ class WebSocketHandler {
     }
     
     dispatchEvent(type, event) {
-        console.log(type, event);
+        console.log('recv', type, event);
         this.events[type].forEach(onevent => onevent(event));
     }
 
