@@ -59,7 +59,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    private static final int HTTP_CACHE_SECONDS = Integer.parseInt(Board.getConfig().get("http.cache.seconds", "0"));
+    private static final int HTTP_CACHE_SECONDS = Board.getConfig().getInt("http.cache.time", 0);
     private static final String JOIN_PATH = "d";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);

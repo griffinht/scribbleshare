@@ -1,6 +1,6 @@
 package net.stzups.board.config.configs;
 
-import net.stzups.board.config.StringConfig;
+import net.stzups.board.config.ConfigProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Takes arguments from the console and parses them as key value pairs.
  */
-public class ArgumentConfig implements StringConfig {
+public class ArgumentConfig implements ConfigProvider {
     private Map<String, String> flags = new HashMap<>();
 
     /**

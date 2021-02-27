@@ -57,3 +57,4 @@ Design
 - Add changelog
 - Move invite button
 - Fix canvas resize
+- Change/clean up config system

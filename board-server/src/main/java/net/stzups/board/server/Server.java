@@ -36,7 +36,7 @@ public class Server {
         SslContext sslContext;
         int port;
 
-        String keystorePath = Board.getConfig().get("ssl.keystore");
+        String keystorePath = Board.getConfig().get("ssl.keystore.path");
         if (keystorePath != null) {//must not be null
             if (keystorePath.equals("http")) {
                 Board.getLogger().warning("Starting server using insecure http:// protocol without SSL");
@@ -65,7 +65,7 @@ public class Server {
                 }
             }
         } else {
-            throw new RuntimeException("Failed to set required flag --ssl.keystore. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl.keystore http");
+            throw new RuntimeException("Failed to set required flag --ssl.keystore.path. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl.keystore.path http");
         }
 
         bossGroup = new NioEventLoopGroup();

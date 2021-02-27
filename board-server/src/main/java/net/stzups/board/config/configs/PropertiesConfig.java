@@ -1,6 +1,6 @@
 package net.stzups.board.config.configs;
 
-import net.stzups.board.config.StringConfig;
+import net.stzups.board.config.ConfigProvider;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.util.Properties;
  * Loads a file that should be formatted as a Java {@link Properties} file, and adds any values defined in that value.
  * This still works if the file does not exist or no values are present in the file.
  */
-public class PropertiesConfig implements StringConfig {
+public class PropertiesConfig implements ConfigProvider {
     private Properties properties;
 
     /**
