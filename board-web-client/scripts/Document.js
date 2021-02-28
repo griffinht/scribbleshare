@@ -9,7 +9,7 @@ import * as User from "./User.js";
 
 const documents = new Map();
 let activeDocument = null;
-const clientsToolbar = document.getElementById("clientsToolbar");
+export const clientsToolbar = document.getElementById("clientsToolbar");
 
 class Document {
     constructor(name, id) {
