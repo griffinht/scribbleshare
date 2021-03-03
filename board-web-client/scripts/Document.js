@@ -5,11 +5,11 @@ import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './WebSocketHandler.js'
-import './InviteButton.js'
 import * as User from "./User.js";
 
 const documents = new Map();
-var activeDocument = null;
+let activeDocument = null;
+export const clientsToolbar = document.getElementById("clientsToolbar");
 
 class Document {
     constructor(name, id) {
@@ -45,17 +45,31 @@ class Document {
             })
             ctx.stroke();
         });
+        this.addClient(localClient);
     }
 
     close() {
         localClient.update();
         ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
+        this.clients.forEach((client) => {
+            this.removeClient(client.id);
+        })
     }
 
     draw(dt) {
         this.clients.forEach((client) => {
             client.draw(dt);
         })
+    }
+
+    addClient(client) {
+        this.clients.set(client.id, client);
+        clientsToolbar.appendChild(client.icon);
+    }
+
+    removeClient(id) {
+        this.clients.get(id).icon.remove();
+        this.clients.delete(id);
     }
 }
 
@@ -67,8 +81,9 @@ document.getElementById('add').addEventListener('click', () => {
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    canvas.width = canvas.parentElement.offsetWidth;
-    canvas.height = canvas.parentElement.offsetHeight;
+    let rect = canvas.parentNode.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
     ctx.putImageData(imageData, 0, 0);
     //todo redraw?
 }
@@ -90,11 +105,11 @@ window.requestAnimationFrame(draw);
 
 socket.addEventListener('protocol.addclient', (event) => {
     let client = new Client(event.id, User.getUser(event.userId));
-    activeDocument.clients.set(client.id, client);
+    activeDocument.addClient(client);
     console.log('Add client ', client);
 });
 socket.addEventListener('protocol.removeclient', (event) => {
-    console.log('Remove client ', activeDocument.clients.delete(event.id));
+    console.log('Remove client ', activeDocument.removeClient(event.id));
 });
 socket.addEventListener('protocol.draw', (event) => {
     let client = activeDocument.clients.get(event.id);
@@ -117,9 +132,7 @@ socket.addEventListener('protocol.opendocument', (event) => {
 
 });
 socket.addEventListener('protocol.handshake', (event) => {
-    if (event.token != null) {
-        window.localStorage.setItem('token', event.token.toString());
-    }
+    window.localStorage.setItem('token', event.token.toString());
 })
 socket.addEventListener('socket.open', () => {
     let token = window.localStorage.getItem('token');

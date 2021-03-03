@@ -5,22 +5,22 @@
         <title>Board | Empty board</title>
         <link rel="stylesheet" href="/style.css">
         <link rel="stylesheet" href="/index.css">
-        <script src="scripts/main.js"></script>
+        <script src="/scripts/main.js"></script>
     </head>
     <body>
-        <div class="wrapper">
+        <aside>
             <header>
-                <a href="/">board</a>
-                <a href="/about-board">about</a>
-                <a href="https://youtu.be/dQw4w9WgXcQ">this website might use cookies so no one is allowed to use it!!!</a>
-                <button id="inviteButton">Connecting...</button>
+                <h1>board</h1>
             </header>
-            <aside id="side">
+            <div id="side">
                 <button id="add">+</button>
-            </aside>
-            <section id="canvasWrapper">
-                <canvas id="canvas"></canvas>
-            </section>
+            </div>
+        </aside>
+        <div id="canvasWrapper">
+            <canvas id="canvas"></canvas>
+            <div id="clientsToolbar">
+                <button id="inviteButton">+</button>
+            </div>
         </div>
     </body>
 </html>

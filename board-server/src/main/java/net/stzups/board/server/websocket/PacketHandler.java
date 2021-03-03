@@ -127,7 +127,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         }
         UserSession userSession = new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
         Board.addUserSession(userSession);
-        client.queuePacket(new ServerPacketHandshake(userSession.getToken()));
+        client.queuePacket(new ServerPacketHandshake(userSession));
         return client;
     }
 

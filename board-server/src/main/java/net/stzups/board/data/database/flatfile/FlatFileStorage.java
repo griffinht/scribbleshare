@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class FlatFileStorage<K extends Serializable, V extends Serializable> extends HashMap<K, V> {
-    private static final int SAVE_INTERVAL = Integer.parseInt(Board.getConfig().get("autosave.interval", "-1"));//in seconds, -1 to disable
+    private static final int SAVE_INTERVAL = Board.getConfig().getInt("autosave.interval", -1);//in seconds, -1 to disable
     private static final String FILE_EXTENSION = "data";
 
     private File file;

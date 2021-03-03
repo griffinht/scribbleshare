@@ -1,4 +1,4 @@
-import {ctx} from './Document.js'
+import {clientsToolbar, ctx} from './Document.js'
 
 export default class Client {
     constructor(id, user) {
@@ -7,6 +7,26 @@ export default class Client {
         this.x = 0;
         this.y = 0;
         this.points = [];
+        this.icon = document.createElement('img');
+        this.icon.setAttribute('src', '/bin/default.png');
+        this.icon.addEventListener('mouseenter', (event) => {
+            let rect = this.icon.getBoundingClientRect();
+            this.iconTooltip.style.visibility = 'visible';
+            this.iconTooltip.style.top = rect.top + 'px';
+            this.iconTooltip.style.left = rect.left + -50 + 'px';
+        })
+        this.icon.addEventListener('mouseleave', (event) => {
+            this.iconTooltip.style.visibility = 'hidden';
+        })
+        this.iconTooltip = document.createElement('div');
+        if (user != null) {
+            this.iconTooltip.innerText = user.id;
+        }
+        this.iconTooltip.style.position = 'absolute';
+        this.iconTooltip.style.visibility = 'hidden';
+        this.iconTooltip.style.zIndex = '1000';
+        this.iconTooltip.style.color = 'black';
+        document.getElementsByTagName('body')[0].parentNode.appendChild(this.iconTooltip);
     }
 
     draw(dt) {

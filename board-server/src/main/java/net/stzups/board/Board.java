@@ -1,8 +1,8 @@
 package net.stzups.board;
 
 import io.netty.channel.ChannelFuture;
-import net.stzups.board.config.ConfigProvider;
-import net.stzups.board.config.ConfigProviderBuilder;
+import net.stzups.board.config.Config;
+import net.stzups.board.config.ConfigBuilder;
 import net.stzups.board.config.configs.ArgumentConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.TokenGenerator;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class Board {
     private static Logger logger;
-    private static ConfigProvider config;
+    private static Config config;
 
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
@@ -70,7 +70,7 @@ public class Board {
 
         long start = System.currentTimeMillis();
 
-        config = new ConfigProviderBuilder()
+        config = new ConfigBuilder()
                 .addConfig(new ArgumentConfig(args))
                 .addConfig(new PropertiesConfig("board.properties"))
                 .build();
@@ -105,7 +105,7 @@ public class Board {
         return logger;
     }
 
-    public static ConfigProvider getConfig() {
+    public static Config getConfig() {
         return config;
     }
 }

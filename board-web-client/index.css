@@ -1,27 +1,56 @@
-#canvas {
-    display: block;
+.noselect {
+    user-select: none;
 }
 
-#canvasWrapper {
-    flex: 1 1 auto;
-    height: calc(100vh - 5em);
+html, body {
+    height: 100%;
+    color: white;
 }
 
-#inviteButton {
-    margin-left: auto;
+body {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+header {
+    background-color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    height: 5em;
+}
+
+header * {
+    padding: .2em;
 }
 
 aside {
     display: flex;
-    align-items: left;
     flex-direction: column;
-    width: 20em;
     background-color: lightgray;
-    height: calc(100vh - 5em);
+    flex: 0;
+}
+#side * {
+    padding: .2em;
+}
+
+#canvasWrapper {
+    flex: 2
+}
+
+aside * {
+    font-size: 2.5em;
+    font-family: serif;
+    text-align: left;
 }
 
 aside button {
     background-color: lightgray;
+    border: 0;
+    font-size: 2.5rem;
 }
 
 aside button:hover {
@@ -36,14 +65,16 @@ aside button:active {
     background-color: red;
 }
 
-aside * {
-    padding: .2em;
-    font-size: 2.5em;
-    font-family: serif;
-    text-align: left;
+#clientsToolbar {
+    display: flex;
+    flex-direction: column-reverse;
+    position: absolute;
+    top: 12px;
+    right: 12px;
 }
 
-aside button {
-    width: 100%;
-    border: 0;
+#clientsToolbar * {
+    width: 50px;
+    height: 50px;
+    margin: .5em;
 }

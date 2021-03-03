@@ -46,7 +46,6 @@ class WebSocketHandler {
                 while (offset < dataView.byteLength) {
                     let type = dataView.getUint8(offset);
                     offset += 1;
-                    console.log('got ' + type);
                     switch (type) {
                         case 0: {
                             let e = {};
@@ -130,6 +129,8 @@ class WebSocketHandler {
                             let e = {};
                             e.token = dataView.getBigInt64(offset);
                             offset += 8;
+                            e.userId = dataView.getBigInt64(offset);
+                            offset += 8;
                             this.dispatchEvent('protocol.handshake', e);
                             break;
                         }
@@ -158,13 +159,13 @@ class WebSocketHandler {
     }
     
     dispatchEvent(type, event) {
-        console.log(type, event);
+        console.log('recv', type, event);
         this.events[type].forEach(onevent => onevent(event));
     }
 
     send(payload) {
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('sending', payload);
+            console.log('send', payload);
             this.socket.send(payload);
         } else {
             console.error('tried to send payload while websocket was closed', payload);

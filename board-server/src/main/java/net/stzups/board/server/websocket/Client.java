@@ -22,10 +22,6 @@ public class Client {
         regenerateId();
     }
 
-    private Client(User user) {
-        this.user = user;
-    }
-
     public User getUser() {
         return user;
     }
