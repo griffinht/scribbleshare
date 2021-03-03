@@ -7,6 +7,9 @@ Add real time drawing
 
 ## v0.2
 Basic functionality to allow for more features to be added
+- Instant live documents
+- Data persistence
+- User identity, separation between browser client and user
 
 ### v0.2.1
 Room to document based model
