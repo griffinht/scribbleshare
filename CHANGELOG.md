@@ -53,6 +53,7 @@ Multiple clients per user
 
 ###v0.2.6
 Design
+
 - Clean up CSS
 - Add changelog
 - Add invite/connected users toolbar
@@ -60,3 +61,8 @@ Design
 - Change/clean up config system
 - Improve client debug
 - Better local user with different handshake
+
+###
+Proper data persistence
+
+- Dockerized server with Maven dependencies

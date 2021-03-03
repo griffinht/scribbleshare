@@ -1,0 +1,5 @@
+services:
+    board-server:
+        build: board-server
+        ports:
+            - "80:80"
