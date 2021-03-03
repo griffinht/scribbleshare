@@ -36,13 +36,18 @@ public class Server {
         SslContext sslContext;
         int port;
 
-        String keystorePath = Board.getConfig().get("ssl.keystore.path");
-        if (keystorePath != null) {//must not be null
-            if (keystorePath.equals("http")) {
-                Board.getLogger().warning("Starting server using insecure http:// protocol without SSL");
-                sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
-                port = HTTP_PORT;
-            } else {
+        Boolean ssl = Board.getConfig().getBoolean("ssl");
+        if (ssl == null) {
+            throw new RuntimeException("Failed to set required flag --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
+        }
+
+        if (!ssl) {
+            Board.getLogger().warning("Starting server using insecure http:// protocol without SSL");
+            sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
+            port = HTTP_PORT;
+        } else {
+            String keystorePath = Board.getConfig().get("ssl.keystore.path");
+            if (keystorePath != null) {//must not be null
                 String passphrase = Board.getConfig().get("ssl.passphrase");
                 if (passphrase != null) {//can be null if value of keystore is http
                     try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
@@ -63,9 +68,9 @@ public class Server {
                 } else {
                     throw new RuntimeException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
                 }
+            } else {
+                throw new RuntimeException("Failed to set specify SSL keystore path from --ssl.keystore.path flag.");
             }
-        } else {
-            throw new RuntimeException("Failed to set required flag --ssl.keystore.path. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl.keystore.path http");
         }
 
         bossGroup = new NioEventLoopGroup();

@@ -69,3 +69,4 @@ Design
 SQL data persistence
 
 - Dockerized server with Maven dependencies
+- Add environment variable config method

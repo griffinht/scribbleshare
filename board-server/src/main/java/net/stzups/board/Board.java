@@ -4,6 +4,7 @@ import io.netty.channel.ChannelFuture;
 import net.stzups.board.config.Config;
 import net.stzups.board.config.ConfigBuilder;
 import net.stzups.board.config.configs.ArgumentConfig;
+import net.stzups.board.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.TokenGenerator;
 import net.stzups.board.data.database.flatfile.FlatFileStorage;
@@ -73,6 +74,7 @@ public class Board {
         config = new ConfigBuilder()
                 .addConfig(new ArgumentConfig(args))
                 .addConfig(new PropertiesConfig("board.properties"))
+                .addConfig(new EnvironmentVariableConfig("board."))
                 .build();
 
         Server server = new Server();

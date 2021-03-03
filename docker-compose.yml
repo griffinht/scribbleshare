@@ -1,5 +1,9 @@
 services:
     board-server:
-        build: board-server
+        image: board-server:0.2
+        build:
+            context: board-server
         ports:
             - "80:80"
+        environment:
+            board.ssl: "false"

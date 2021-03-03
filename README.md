@@ -20,7 +20,7 @@ Modifying `board-web-client` only requires you to refresh your browser. If you d
 
 ## Running `board-server`
 
-Once you have built `board-server`, you may run it using using the following command:
+Once you have built `board-server`, you may run it using the following command:
 
     java -jar board-server-xxx.jar --ssl.keystore http
 
@@ -28,11 +28,11 @@ Once you have built `board-server`, you may run it using using the following com
 - All WebSocket connections run on the same port as the HTTP server, and should connect to [ws://localhost/websocket](ws://localhost/websocket). 
 - Stop the server gracefully to save persistent data (`ctrl+c` on Windows terminals). Killing the process may result in data loss from any unsaved persistent data.
 
-### Properties
+### Runtime variables
 
-These can be set in several different ways:
+These can be set in several ways:
 
-##### `board.properties`
+##### Properties file
 Create a file called `board.properties` in the working directory of the server and format as the following
 
     key=value
@@ -43,9 +43,15 @@ Create a file called `board.properties` in the working directory of the server a
     java -jar board-server-xxx.jar --key value --other.key "value with spaces"
 File indicates a relative (<working directory>/folder/file.ext) or absolute path (C:/folder/file.ext)
 
+
+##### Environment variables
+
+Prefix each flag with `board.`. For example, you can set the environment variable `board.ssl` to `false`.
+
 | Flag | Type | Default | Description |
 | --- | ---- | ------- | ----------- |
-| ssl.keystore.path | file | (required) |  Path to the PKCS12 `mykeystore.pfx` containing the private key for the server. Set to `http` to use HTTP without SSL encryption |
+| ssl | boolean | (required) | Whether SSL will be used (HTTPS/WSS, port 443) instead of unencrypted sockets (HTTP/WS, port 80) |
+| ssl.keystore.path | file | (optional) |  Path to the PKCS12 `mykeystore.pfx` containing the private key for the server. Set to `http` to use HTTP without SSL encryption |
 | ssl.passphrase | string | (optional) | Passphrase for `mykeystore.pfx` |
 | document.root.path | file | documentRoot | Should be set to where `board-web-client` is. HTTP requests to a directory (`localhost` or `localhost/folder/`) will be served the `index.html` file of those directories HTTP requests to a file that do not specify an extension (`localhost/file`) will be served a `.html` that corresponds to the requested name
 | data.root.path | file | data | Sets the folder location of the flat file storage |

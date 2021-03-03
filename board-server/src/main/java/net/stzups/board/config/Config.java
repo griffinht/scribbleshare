@@ -1,6 +1,5 @@
 package net.stzups.board.config;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -30,11 +29,12 @@ public class Config {//todo probably needs a better name
         return null;
     }
 
-    public int getInt(String key) {
+    //todo @Nullable annotations?
+    public Integer getInt(String key) {
         try {
             return Integer.parseInt(get(key));
         } catch (NumberFormatException e) {
-            return 0;
+            return null;
         }
     }
 
@@ -46,8 +46,16 @@ public class Config {//todo probably needs a better name
         }
     }
 
-    public boolean getBoolean(String key) {
-        return Boolean.parseBoolean(get(key));
+    public Boolean getBoolean(String key) {
+        String value = get(key);
+        if (value != null) {
+            if (value.equalsIgnoreCase("true")) {
+                return true;
+            } else if (value.equalsIgnoreCase("false")) {
+                return false;
+            }
+        }
+        return null;
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {

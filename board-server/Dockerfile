@@ -21,4 +21,7 @@ WORKDIR /usr/app
 
 COPY --from=build /usr/src/app/target/board-server-0.2.jar .
 
-CMD java -jar board-server-0.2.jar
+# This environment variable must be set to true or false.
+# Using the default value here ("required") will make the server crash.
+ENV board.ssl=required
+ENTRYPOINT ["java", "-jar", "board-server-0.2.jar"]
