@@ -30,6 +30,7 @@ class Document {
 
     open() {
         activeDocument = this;
+        inviteButton.style.visibility = 'visible';
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         window.history.pushState(document.name, document.title, '/d/' + this.id);
@@ -149,3 +150,9 @@ socket.addEventListener('socket.open', () => {
 });
 
 const localClient = new LocalClient();
+
+const inviteButton = document.getElementById("inviteButton");
+
+inviteButton.addEventListener('click', (event) => {
+
+})
