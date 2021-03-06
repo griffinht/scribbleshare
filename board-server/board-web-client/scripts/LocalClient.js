@@ -50,7 +50,6 @@ export default class LocalClient extends Client {
 
     draw(dt) {
         this.lastSend = performance.now();
-        socket.sendDraw(this.points);
     }
     
     update() {
