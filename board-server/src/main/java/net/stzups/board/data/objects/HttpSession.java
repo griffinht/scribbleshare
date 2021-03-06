@@ -8,7 +8,6 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import net.stzups.board.Board;
-import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;

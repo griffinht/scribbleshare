@@ -7,6 +7,7 @@ import net.stzups.board.config.configs.ArgumentConfig;
 import net.stzups.board.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.database.Database;
+import net.stzups.board.data.database.postgres.PostgresDatabase;
 import net.stzups.board.data.database.runtime.RuntimeDatabase;
 import net.stzups.board.server.Server;
 
@@ -35,7 +36,19 @@ public class Board {
                 .addConfig(new EnvironmentVariableConfig("board."))
                 .build();
 
-        database = new RuntimeDatabase();
+        Boolean postgres = config.getBoolean("postgres");
+        if (postgres == null) {
+            throw new RuntimeException("Failed to specify required runtime variable --postgres");
+        } else {
+            if (postgres) {
+                logger.info("Connecting to Postgres database...");
+                database = new PostgresDatabase(Board.getConfig().get("postgres.url"), Board.getConfig().get("postgres.user"), Board.getConfig().get("postgres.password"));
+                logger.info("Connected to Postgres database");
+            } else {
+                logger.warning("Using debug only runtime database. No data will be persisted.");
+                database = new RuntimeDatabase();
+            }
+        }
 
         Server server = new Server();
         ChannelFuture channelFuture = server.start();

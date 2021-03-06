@@ -1,7 +1,6 @@
 package net.stzups.board.data.objects;
 
 import net.stzups.board.Board;
-import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;

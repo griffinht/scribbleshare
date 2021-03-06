@@ -32,8 +32,8 @@ COPY --from=board-server /usr/src/app/target/board-server-0.2.jar .
 
 COPY --from=board-web-client /usr/src/app/board-web-client board-web-client
 
-# This environment variable must be set to true or false.
-# Using the default value here ("required") will make the server crash.
+# Failure to set required environment variables will cause the server to crash
 ENV board.ssl=required
+ENV board.postgres=required
 ENV board.document.root.path=board-web-client
 ENTRYPOINT ["java", "-jar", "board-server-0.2.jar"]

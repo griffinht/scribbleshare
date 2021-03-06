@@ -38,7 +38,7 @@ public class Server {
 
         Boolean ssl = Board.getConfig().getBoolean("ssl");
         if (ssl == null) {
-            throw new RuntimeException("Failed to set required flag --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
+            throw new RuntimeException("Failed to set required runtime variable --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
         }
 
         if (!ssl) {

@@ -1,4 +1,4 @@
-package net.stzups.board.data.database.postgresql;
+package net.stzups.board.data.database.postgres;
 
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
@@ -9,10 +9,10 @@ import net.stzups.board.data.objects.UserSession;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class PostgresSQLDatabase implements Database {
+public class PostgresDatabase implements Database {
     private Connection connection;
 
-    public PostgresSQLDatabase(String url, String user, String password) throws Exception {
+    public PostgresDatabase(String url, String user, String password) throws Exception {
         Class.forName("org.postgresql.Driver");
         connection = DriverManager.getConnection(url, user, password);
     }

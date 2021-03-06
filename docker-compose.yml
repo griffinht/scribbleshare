@@ -7,9 +7,13 @@ services:
             - "80:80"
         environment:
             board.ssl: "false"
+            board.postgres: "true"
+            board.postgres.url: "jdbc:postgresql://localhost:5432/postgres"
+            board.postgres.user: "postgres"
+            board.postgres.password: "changeme"
     database:
         image: postgres
         environment:
-            POSTGRES_PASSWORD: changeme
+            POSTGRES_PASSWORD: "changeme"
         ports:
             - "5432:5432"

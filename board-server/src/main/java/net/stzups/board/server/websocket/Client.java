@@ -2,7 +2,6 @@ package net.stzups.board.server.websocket;
 
 import io.netty.channel.Channel;
 import net.stzups.board.Board;
-import net.stzups.board.data.TokenGenerator;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 
