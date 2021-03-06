@@ -3,20 +3,19 @@ package net.stzups.board.data.objects;
 import net.stzups.board.Board;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 
 public class UserSession implements Serializable {
     private static final int MAX_USER_SESSION_AGE = 10000000;//todo
     private long userId;
     private long token;
-    private long creationDate;
-    private InetAddress inetAddress;//todo hash?
+    private long creation_time;
+    private long hash;
 
-    public UserSession(User user, InetAddress inetAddress) {
+    public UserSession(User user, long hash) {//todo hash
         this.userId = user.getId();
         this.token = Board.getSecureRandom().nextLong();
-        this.creationDate = System.currentTimeMillis();
-        this.inetAddress = inetAddress;
+        this.creation_time = System.currentTimeMillis();//todo security issue? round/fuzz by a few seconds?
+        this.hash = hash;
     }
 
     public long getToken() {
@@ -27,9 +26,9 @@ public class UserSession implements Serializable {
         return userId;
     }
 
-    public boolean validate(InetAddress inetAddress) {
+    public boolean validate(long hash) {
         token = 0;
-        return (System.currentTimeMillis() - creationDate) < MAX_USER_SESSION_AGE && this.inetAddress.equals(inetAddress);
+        return (System.currentTimeMillis() - creation_time) < MAX_USER_SESSION_AGE && this.hash == hash;
     }
 
     @Override

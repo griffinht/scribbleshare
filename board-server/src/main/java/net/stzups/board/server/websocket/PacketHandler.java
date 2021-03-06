@@ -87,7 +87,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                         if (userSession == null) {
                             System.out.println("user tried authenticating with nonexistant session");
                             client = createUserSession(ctx, null);
-                        } else if (!userSession.validate(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress())) {
+                        } else if (!userSession.validate(0)) {
                             System.out.println("user tried authenticating with invalid session" + userSession);
                             client = createUserSession(ctx, null);
                         } else {
@@ -125,7 +125,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         } else {
             client = new Client(user, ctx.channel());
         }
-        UserSession userSession = new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
+        UserSession userSession = new UserSession(client.getUser(), 0);
         Board.getDatabase().addUserSession(userSession);
         client.queuePacket(new ServerPacketHandshake(userSession));
         return client;

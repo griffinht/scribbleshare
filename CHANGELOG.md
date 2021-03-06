@@ -65,7 +65,10 @@ Design
 - Improve client debug
 - Better local user with different handshake
 
-### v0.2.7
+## v0.3
+Architecture rework
+
+### v0.3.1
 SQL data persistence
 
 - Dockerized server with Maven dependencies
