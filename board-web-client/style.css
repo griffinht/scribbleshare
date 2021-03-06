@@ -3,57 +3,14 @@
     padding: 0;
 }
 
-html, body {
-    height: 100%;
-}
-
-a {
-    color: white;
-    text-decoration: none;
-}
-
-a:hover {
-    color: lightgray;
-}
-
-a:active {
-    color: gray;
-}
-
-
-body {
-    display: flex;
-    flex-flow: column;
-}
-
-.header {
-    background-color: black;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    height: 5em;
-}
-
-.header * {
-    padding: .2em;
-    font-size: 2.5em;
-    font-family: serif;
-}
-
-.header p {
-    color: white;
-}
-
-.header button {
+button {
     border: .08em solid gray;
-    height: 100%;
 }
 
-.header button:focus {
+button:focus {
     outline: none;
 }
 
-.header button:active {
+button:active {
     box-shadow: inset 0 0 .5em #c1c1c1;
 }

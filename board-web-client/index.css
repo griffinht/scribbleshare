@@ -1,11 +1,80 @@
-#canvas {
-    display: block;
+.noselect {
+    user-select: none;
+}
+
+html, body {
+    height: 100%;
+    color: white;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+header {
+    background-color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    height: 5em;
+}
+
+header * {
+    padding: .2em;
+}
+
+aside {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgray;
+    flex: 0;
+}
+#side * {
+    padding: .2em;
 }
 
 #canvasWrapper {
-    flex: 1 1 auto;
+    flex: 2
 }
 
-#inviteButton {
-    margin-left: auto;
+aside * {
+    font-size: 2.5em;
+    font-family: serif;
+    text-align: left;
+}
+
+aside button {
+    background-color: lightgray;
+    border: 0;
+    font-size: 2.5rem;
+}
+
+aside button:hover {
+    color: darkgray;
+}
+
+aside button:active {
+    box-shadow: none;
+}
+
+.active {
+    background-color: red;
+}
+
+#clientsToolbar {
+    display: flex;
+    flex-direction: column-reverse;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+#clientsToolbar * {
+    width: 50px;
+    height: 50px;
+    margin: .5em;
 }
