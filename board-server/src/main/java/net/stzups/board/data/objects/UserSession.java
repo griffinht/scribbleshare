@@ -1,5 +1,6 @@
 package net.stzups.board.data.objects;
 
+import net.stzups.board.Board;
 import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
@@ -14,7 +15,7 @@ public class UserSession implements Serializable {
 
     public UserSession(User user, InetAddress inetAddress) {
         this.userId = user.getId();
-        this.token = TokenGenerator.getSecureRandom().nextLong();
+        this.token = Board.getSecureRandom().nextLong();
         this.creationDate = System.currentTimeMillis();
         this.inetAddress = inetAddress;
     }

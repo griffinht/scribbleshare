@@ -1,5 +1,6 @@
 package net.stzups.board.data.objects;
 
+import net.stzups.board.Board;
 import net.stzups.board.data.TokenGenerator;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ public class User implements Serializable {
     private List<Long> sharedDocuments;
 
     public User() {
-        id = TokenGenerator.getSecureRandom().nextLong();
+        id = Board.getSecureRandom().nextLong();
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();

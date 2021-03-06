@@ -72,5 +72,10 @@
             <version>4.1.55.Final</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.13</version>
+        </dependency>
     </dependencies>
 </project>

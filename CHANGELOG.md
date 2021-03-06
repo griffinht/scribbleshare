@@ -70,3 +70,5 @@ SQL data persistence
 
 - Dockerized server with Maven dependencies
 - Add environment variable config method
+- Fix send rate of client
+- Remove flatfile, add runtime (in memory only) and PostgresSQL database

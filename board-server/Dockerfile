@@ -1,7 +1,7 @@
 #
 # Build server with maven
 #
-FROM maven:3.6.0-jdk-11-slim AS build-server
+FROM maven:3.6.0-jdk-11-slim AS board-server
 WORKDIR /usr/src/app
 
 # Fetch and cache dependencies
@@ -15,7 +15,7 @@ RUN mvn package
 #
 # Add HTTP code
 #
-FROM scratch AS build-web-client
+FROM scratch AS board-web-client
 
 WORKDIR /usr/src/app
 
@@ -28,9 +28,9 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /usr/app
 
-COPY --from=build-server /usr/src/app/target/board-server-0.2.jar .
+COPY --from=board-server /usr/src/app/target/board-server-0.2.jar .
 
-COPY --from=build-web-client /usr/src/app/board-web-client board-web-client
+COPY --from=board-web-client /usr/src/app/board-web-client board-web-client
 
 # This environment variable must be set to true or false.
 # Using the default value here ("required") will make the server crash.

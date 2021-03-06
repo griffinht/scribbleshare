@@ -50,7 +50,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
             }
             case OPEN_DOCUMENT: {
                 ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
-                Document document = Board.getDocument(clientPacketOpenDocument.getId());
+                Document document = Board.getDatabase().getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
                     if (room != null) {
                         room.removeClient(client);
@@ -68,7 +68,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(Board.createDocument(client.getUser()));
+                    room = getRoom(Board.getDatabase().createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -83,7 +83,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                         System.out.println("user authed with empty session");
                         client = createUserSession(ctx, null);
                     } else {
-                        UserSession userSession = Board.removeUserSession(clientPacketHandshake.getToken());
+                        UserSession userSession = Board.getDatabase().removeUserSession(clientPacketHandshake.getToken());
                         if (userSession == null) {
                             System.out.println("user tried authenticating with nonexistant session");
                             client = createUserSession(ctx, null);
@@ -92,7 +92,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                             client = createUserSession(ctx, null);
                         } else {
                             System.out.println("good user session");
-                            User user = Board.getUser(userSession.getUserId());
+                            User user = Board.getDatabase().getUser(userSession.getUserId());
                             if (user == null) {
                                 System.out.println("very bad user does not exist");
                             }
@@ -102,10 +102,10 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 }
                 client.queuePacket(new ServerPacketAddUser(client.getUser()));
                 if (client.getUser().getOwnedDocuments().size() == 0) {
-                    client.queuePacket(new ServerPacketAddDocument(Board.createDocument(client.getUser())));
+                    client.queuePacket(new ServerPacketAddDocument(Board.getDatabase().createDocument(client.getUser())));
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
-                        client.queuePacket(new ServerPacketAddDocument(Board.getDocument(id)));
+                        client.queuePacket(new ServerPacketAddDocument(Board.getDatabase().getDocument(id)));
                     }
                 }
                 client.flushPackets();
@@ -121,12 +121,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         Client client;
         if (user == null) {
             client = new Client(new User(), ctx.channel());
-            Board.addUser(client.getUser());
+            Board.getDatabase().addUser(client.getUser());
         } else {
             client = new Client(user, ctx.channel());
         }
         UserSession userSession = new UserSession(client.getUser(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
-        Board.addUserSession(userSession);
+        Board.getDatabase().addUserSession(userSession);
         client.queuePacket(new ServerPacketHandshake(userSession));
         return client;
     }

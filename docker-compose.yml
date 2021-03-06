@@ -7,3 +7,9 @@ services:
             - "80:80"
         environment:
             board.ssl: "false"
+    database:
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: changeme
+        ports:
+            - "5432:5432"

@@ -1,6 +1,7 @@
 package net.stzups.board.server.websocket;
 
 import io.netty.channel.Channel;
+import net.stzups.board.Board;
 import net.stzups.board.data.TokenGenerator;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
@@ -31,7 +32,7 @@ public class Client {
     }
 
     public short regenerateId() {
-        id = (short) TokenGenerator.getRandom().nextInt(); //todo is this cast less random
+        id = (short) Board.getRandom().nextInt(); //todo is this cast less random
         if (id == 0) {//indicates fake client, should not be used by real clients
             return regenerateId();
         } else {
