@@ -12,10 +12,10 @@ public enum ClientMessageType {
     HANDSHAKE(3),
     ;
 
-    private static Map<Integer, ClientMessageType> packetTypeMap = new IntObjectHashMap<>();
+    private static Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();
     static {
-        for (ClientMessageType packetType : EnumSet.allOf(ClientMessageType.class)) {
-            packetTypeMap.put(packetType.id, packetType);
+        for (ClientMessageType messageType : EnumSet.allOf(ClientMessageType.class)) {
+            messageTypeMap.put(messageType.id, messageType);
         }
     }
 
@@ -30,10 +30,10 @@ public enum ClientMessageType {
     }
 
     public static ClientMessageType valueOf(int id) {
-        ClientMessageType packetType = packetTypeMap.get(id);
-        if (packetType == null) {
+        ClientMessageType messageType = messageTypeMap.get(id);
+        if (messageType == null) {
             throw new IllegalArgumentException("Unknown PacketType for given id " + id);
         }
-        return packetType;
+        return messageType;
     }
 }

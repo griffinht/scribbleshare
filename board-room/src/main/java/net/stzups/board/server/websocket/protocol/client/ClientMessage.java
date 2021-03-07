@@ -10,7 +10,7 @@ public abstract class ClientMessage {
         this.packetType = packetType;
     }
 
-    public ClientMessageType getPacketType() {
+    public ClientMessageType getMessageType() {
         return packetType;
     }
 }

@@ -24,7 +24,7 @@ class Room {
             public void run() {
                 for (Room room : rooms) {
                     for (Client client : room.clients) {
-                        client.flushPackets();
+                        client.sendMessages();
                     }
                 }
             }
@@ -60,9 +60,9 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        client.sendPacket(new ServerMessageOpenDocument(document));
+        client.sendMessage(new ServerMessageOpenDocument(document));
         //for the existing clients
-        sendPacket(new ServerMessageAddClient(client));
+        sendMessage(new ServerMessageAddClient(client));
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
@@ -74,46 +74,46 @@ class Room {
      */
     void removeClient(Client client) {
         clients.remove(client);
-        sendPacket(new ServerMessageRemoveClient(client));
+        sendMessage(new ServerMessageRemoveClient(client));
         BoardRoom.getLogger().info("Removed " + client + " to " + this);
     }
 
     /**
-     * Send given packet to all members of the room except for the specified client
+     * Send given message to all members of the room except for the specified client
      *
-     * @param serverMessage packet to send
+     * @param serverMessage message to send
      * @param except client to exclude
      */
     void sendPacketExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
-                client.sendPacket(serverMessage);
+                client.sendMessage(serverMessage);
             }
         }
     }
 
     /**
-     * Send given packet to all clients of this room
+     * Send given message to all clients of this room
      *
-     * @param serverMessage the packet to send
+     * @param serverMessage the message to send
      */
-    void sendPacket(ServerMessage serverMessage) {
+    void sendMessage(ServerMessage serverMessage) {
         for (Client client : clients) {
-            client.sendPacket(serverMessage);
+            client.sendMessage(serverMessage);
         }
     }
 
-    void queuePacketExcept(ServerMessage serverMessage, Client except) {
+    void queueMessageExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
-                client.queuePacket(serverMessage);
+                client.queueMessage(serverMessage);
             }
         }
     }
 
-    void queuePacket(ServerMessage serverMessage) {
+    void queueMessage(ServerMessage serverMessage) {
         for (Client client : clients) {
-            client.queuePacket(serverMessage);
+            client.queueMessage(serverMessage);
         }
     }
 

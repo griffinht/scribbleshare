@@ -14,7 +14,7 @@ public class Client {
     private Channel channel;
     private short id;
 
-    private List<ServerMessage> packets = new ArrayList<>();
+    private List<ServerMessage> messages = new ArrayList<>();
 
     Client(User user, Channel channel) {
         this.user = user;
@@ -39,18 +39,18 @@ public class Client {
         }
     }
 
-    void queuePacket(ServerMessage serverMessage) {
-        packets.add(serverMessage);
+    void queueMessage(ServerMessage serverMessage) {
+        messages.add(serverMessage);
     }
 
-    void sendPacket(ServerMessage serverMessage) {
+    void sendMessage(ServerMessage serverMessage) {
         channel.writeAndFlush(Collections.singletonList(serverMessage));
     }
 
-    void flushPackets() {
-        if (packets.size() > 0) {
-            channel.writeAndFlush(packets);
-            packets = new ArrayList<>();
+    void sendMessages() {
+        if (messages.size() > 0) {
+            channel.writeAndFlush(messages);
+            messages = new ArrayList<>();
         }
     }
 

@@ -27,10 +27,10 @@ public enum CanvasObjectType {
     }
 
     public static CanvasObjectType valueOf(int id) {
-        CanvasObjectType packetType = objectTypeMap.get(id);
-        if (packetType == null) {
+        CanvasObjectType objectType = objectTypeMap.get(id);
+        if (objectType == null) {
             throw new IllegalArgumentException("Unknown CanvasObjectType for given id " + id);
         }
-        return packetType;
+        return objectType;
     }
 }

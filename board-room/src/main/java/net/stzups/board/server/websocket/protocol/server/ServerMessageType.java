@@ -15,10 +15,10 @@ public enum ServerMessageType {
     ADD_USER(6)
     ;
 
-    private static Map<Integer, ServerMessageType> packetTypeMap = new IntObjectHashMap<>();
+    private static Map<Integer, ServerMessageType> messageTypeMap = new IntObjectHashMap<>();
     static {
         for (ServerMessageType packetType : EnumSet.allOf(ServerMessageType.class)) {
-            packetTypeMap.put(packetType.id, packetType);
+            messageTypeMap.put(packetType.id, packetType);
         }
     }
 
@@ -33,10 +33,10 @@ public enum ServerMessageType {
     }
 
     public static ServerMessageType valueOf(int id) {
-        ServerMessageType packetType = packetTypeMap.get(id);
-        if (packetType == null) {
+        ServerMessageType messageType = messageTypeMap.get(id);
+        if (messageType == null) {
             throw new IllegalArgumentException("Unknown PacketTypeServer for given id " + id);
         }
-        return packetType;
+        return messageType;
     }
 }

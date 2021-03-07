@@ -38,16 +38,16 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ClientMessage packet) {
-        switch (packet.getPacketType()) {
+    protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
+        switch (message.getMessageType()) {
             case DRAW: {
-                ClientMessageDraw clientPacketDraw = (ClientMessageDraw) packet;
-                room.getDocument().addPoints(client.getUser(), clientPacketDraw.getPoints());
-                room.queuePacketExcept(new ServerMessageDrawClient(client, clientPacketDraw.getPoints()), client);//todo this has tons of latency
+                ClientMessageDraw clientMessageDraw = (ClientMessageDraw) message;
+                room.getDocument().addPoints(client.getUser(), clientMessageDraw.getPoints());
+                room.queueMessageExcept(new ServerMessageDrawClient(client, clientMessageDraw.getPoints()), client);//todo this has tons of latency
                 break;
             }
             case OPEN_DOCUMENT: {
-                ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) packet;
+                ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) message;
                 Document document = BoardRoom.getDatabase().getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
                     if (room != null) {
@@ -61,7 +61,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 break;
             }
             case CREATE_DOCUMENT: {
-                ClientMessageCreateDocument clientPacketCreateDocument = (ClientMessageCreateDocument) packet;
+                ClientMessageCreateDocument clientPacketCreateDocument = (ClientMessageCreateDocument) message;
                 if (room != null) {
                     room.removeClient(client);
                 }
@@ -70,12 +70,12 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                client.sendPacket(new ServerMessageAddDocument(room.getDocument()));
+                client.sendMessage(new ServerMessageAddDocument(room.getDocument()));
                 room.addClient(client);
                 break;
             }
             case HANDSHAKE: {
-                ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) packet;
+                ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
                         System.out.println("user authed with empty session");
@@ -98,20 +98,20 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                         }
                     }
                 }
-                client.queuePacket(new ServerMessageAddUser(client.getUser()));
+                client.queueMessage(new ServerMessageAddUser(client.getUser()));
                 if (client.getUser().getOwnedDocuments().size() == 0) {
-                    client.queuePacket(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
+                    client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
-                        client.queuePacket(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
+                        client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
                     }
                 }
-                client.flushPackets();
+                client.sendMessages();
 
                 break;
             }
             default:
-                throw new UnsupportedOperationException("Unsupported packet type " + packet.getPacketType() + " sent by " + client);
+                throw new UnsupportedOperationException("Unsupported message type " + message.getMessageType() + " sent by " + client);
         }
     }
 
@@ -125,7 +125,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
         }
         UserSession userSession = new UserSession(client.getUser(), 0);
         BoardRoom.getDatabase().addUserSession(userSession);
-        client.queuePacket(new ServerMessageHandshake(userSession));
+        client.queueMessage(new ServerMessageHandshake(userSession));
         return client;
     }
 
