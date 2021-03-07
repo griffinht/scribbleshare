@@ -2,9 +2,7 @@ package net.stzups.board.data.objects;
 
 import net.stzups.board.BoardRoom;
 
-import java.io.Serializable;
-
-public class UserSession implements Serializable {
+public class UserSession {
     private static final int MAX_USER_SESSION_AGE = 10000000;//todo
     private long token;
     private long userId;

@@ -3,7 +3,7 @@ package net.stzups.board.server.websocket;
 import io.netty.channel.Channel;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.server.websocket.protocol.server.ServerPacket;
+import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +14,7 @@ public class Client {
     private Channel channel;
     private short id;
 
-    private List<ServerPacket> packets = new ArrayList<>();
+    private List<ServerMessage> packets = new ArrayList<>();
 
     Client(User user, Channel channel) {
         this.user = user;
@@ -39,12 +39,12 @@ public class Client {
         }
     }
 
-    void queuePacket(ServerPacket serverPacket) {
-        packets.add(serverPacket);
+    void queuePacket(ServerMessage serverMessage) {
+        packets.add(serverMessage);
     }
 
-    void sendPacket(ServerPacket serverPacket) {
-        channel.writeAndFlush(Collections.singletonList(serverPacket));
+    void sendPacket(ServerMessage serverMessage) {
+        channel.writeAndFlush(Collections.singletonList(serverMessage));
     }
 
     void flushPackets() {

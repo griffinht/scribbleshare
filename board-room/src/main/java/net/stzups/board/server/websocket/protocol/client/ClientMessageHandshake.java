@@ -1,10 +1,10 @@
 package net.stzups.board.server.websocket.protocol.client;
 
-public class ClientPacketHandshake extends ClientPacket {
+public class ClientMessageHandshake extends ClientMessage {
     private long token;
 
-    public ClientPacketHandshake(long token) {
-        super(ClientPacketType.HANDSHAKE);
+    public ClientMessageHandshake(long token) {
+        super(ClientMessageType.HANDSHAKE);
         this.token = token;
     }
 

@@ -4,11 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.util.AttributeKey;
-import net.stzups.board.data.objects.HttpSession;
-import net.stzups.board.server.websocket.PacketHandler;
-
-import java.net.InetSocketAddress;
+import net.stzups.board.server.websocket.MessageHandler;
 
 @ChannelHandler.Sharable
 public class WebSocketInitializer extends ChannelInboundHandlerAdapter {
@@ -19,7 +15,7 @@ public class WebSocketInitializer extends ChannelInboundHandlerAdapter {
         if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
             WebSocketServerProtocolHandler.HandshakeComplete handshakeComplete = (WebSocketServerProtocolHandler.HandshakeComplete) event;
             //ctx.channel().attr(HTTP_SESSION_KEY).set(HttpSession.getSession(handshakeComplete.requestHeaders(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()));
-            ctx.pipeline().addLast(new PacketHandler());//todo give this a different executor https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+            ctx.pipeline().addLast(new MessageHandler());//todo give this a different executor https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
         }
     }
 }

@@ -6,21 +6,20 @@ import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
-import net.stzups.board.server.websocket.protocol.client.ClientPacket;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketHandshake;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketAddDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketAddUser;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketDrawClient;
-import net.stzups.board.server.WebSocketInitializer;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketHandshake;
+import net.stzups.board.server.websocket.protocol.client.ClientMessage;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageDraw;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageHandshake;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageAddDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageAddUser;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageDrawClient;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageHandshake;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
+public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static Map<Document, Room> documents = new HashMap<>();
     private Room room;
     private Client client;
@@ -39,16 +38,16 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ClientPacket packet) {
+    protected void channelRead0(ChannelHandlerContext ctx, ClientMessage packet) {
         switch (packet.getPacketType()) {
             case DRAW: {
-                ClientPacketDraw clientPacketDraw = (ClientPacketDraw) packet;
+                ClientMessageDraw clientPacketDraw = (ClientMessageDraw) packet;
                 room.getDocument().addPoints(client.getUser(), clientPacketDraw.getPoints());
-                room.queuePacketExcept(new ServerPacketDrawClient(client, clientPacketDraw.getPoints()), client);//todo this has tons of latency
+                room.queuePacketExcept(new ServerMessageDrawClient(client, clientPacketDraw.getPoints()), client);//todo this has tons of latency
                 break;
             }
             case OPEN_DOCUMENT: {
-                ClientPacketOpenDocument clientPacketOpenDocument = (ClientPacketOpenDocument) packet;
+                ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) packet;
                 Document document = BoardRoom.getDatabase().getDocument(clientPacketOpenDocument.getId());
                 if (document != null) {
                     if (room != null) {
@@ -62,7 +61,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 break;
             }
             case CREATE_DOCUMENT: {
-                ClientPacketCreateDocument clientPacketCreateDocument = (ClientPacketCreateDocument) packet;
+                ClientMessageCreateDocument clientPacketCreateDocument = (ClientMessageCreateDocument) packet;
                 if (room != null) {
                     room.removeClient(client);
                 }
@@ -71,12 +70,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                client.sendPacket(new ServerPacketAddDocument(room.getDocument()));
+                client.sendPacket(new ServerMessageAddDocument(room.getDocument()));
                 room.addClient(client);
                 break;
             }
             case HANDSHAKE: {
-                ClientPacketHandshake clientPacketHandshake = (ClientPacketHandshake) packet;
+                ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) packet;
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
                         System.out.println("user authed with empty session");
@@ -99,12 +98,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
                         }
                     }
                 }
-                client.queuePacket(new ServerPacketAddUser(client.getUser()));
+                client.queuePacket(new ServerMessageAddUser(client.getUser()));
                 if (client.getUser().getOwnedDocuments().size() == 0) {
-                    client.queuePacket(new ServerPacketAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
+                    client.queuePacket(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
-                        client.queuePacket(new ServerPacketAddDocument(BoardRoom.getDatabase().getDocument(id)));
+                        client.queuePacket(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
                     }
                 }
                 client.flushPackets();
@@ -126,7 +125,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
         }
         UserSession userSession = new UserSession(client.getUser(), 0);
         BoardRoom.getDatabase().addUserSession(userSession);
-        client.queuePacket(new ServerPacketHandshake(userSession));
+        client.queuePacket(new ServerMessageHandshake(userSession));
         return client;
     }
 

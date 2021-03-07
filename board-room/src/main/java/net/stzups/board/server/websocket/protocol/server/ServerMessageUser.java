@@ -3,11 +3,11 @@ package net.stzups.board.server.websocket.protocol.server;
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.User;
 
-public abstract class ServerPacketUser extends ServerPacket {
+public abstract class ServerMessageUser extends ServerMessage {
     private User user;
 
-    ServerPacketUser(ServerPacketType serverPacketType, User user) {
-        super(serverPacketType);
+    ServerMessageUser(ServerMessageType serverMessageType, User user) {
+        super(serverMessageType);
         this.user = user;
     }
 

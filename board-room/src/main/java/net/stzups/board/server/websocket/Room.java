@@ -2,10 +2,10 @@ package net.stzups.board.server.websocket;
 
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.server.websocket.protocol.server.ServerPacket;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketAddClient;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveClient;
+import net.stzups.board.server.websocket.protocol.server.ServerMessage;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageAddClient;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.ServerMessageRemoveClient;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,9 +60,9 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        client.sendPacket(new ServerPacketOpenDocument(document));
+        client.sendPacket(new ServerMessageOpenDocument(document));
         //for the existing clients
-        sendPacket(new ServerPacketAddClient(client));
+        sendPacket(new ServerMessageAddClient(client));
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
@@ -74,20 +74,20 @@ class Room {
      */
     void removeClient(Client client) {
         clients.remove(client);
-        sendPacket(new ServerPacketRemoveClient(client));
+        sendPacket(new ServerMessageRemoveClient(client));
         BoardRoom.getLogger().info("Removed " + client + " to " + this);
     }
 
     /**
      * Send given packet to all members of the room except for the specified client
      *
-     * @param serverPacket packet to send
+     * @param serverMessage packet to send
      * @param except client to exclude
      */
-    void sendPacketExcept(ServerPacket serverPacket, Client except) {
+    void sendPacketExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
-                client.sendPacket(serverPacket);
+                client.sendPacket(serverMessage);
             }
         }
     }
@@ -95,25 +95,25 @@ class Room {
     /**
      * Send given packet to all clients of this room
      *
-     * @param serverPacket the packet to send
+     * @param serverMessage the packet to send
      */
-    void sendPacket(ServerPacket serverPacket) {
+    void sendPacket(ServerMessage serverMessage) {
         for (Client client : clients) {
-            client.sendPacket(serverPacket);
+            client.sendPacket(serverMessage);
         }
     }
 
-    void queuePacketExcept(ServerPacket serverPacket, Client except) {
+    void queuePacketExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
-                client.queuePacket(serverPacket);
+                client.queuePacket(serverMessage);
             }
         }
     }
 
-    void queuePacket(ServerPacket serverPacket) {
+    void queuePacket(ServerMessage serverMessage) {
         for (Client client : clients) {
-            client.queuePacket(serverPacket);
+            client.queuePacket(serverMessage);
         }
     }
 

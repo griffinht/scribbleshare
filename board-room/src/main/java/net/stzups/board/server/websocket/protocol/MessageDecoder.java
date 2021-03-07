@@ -7,13 +7,13 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import net.stzups.board.data.objects.Point;
-import net.stzups.board.server.websocket.protocol.client.ClientPacket;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketDraw;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketHandshake;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketOpenDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientPacketType;
+import net.stzups.board.data.objects.canvas.Point;
+import net.stzups.board.server.websocket.protocol.client.ClientMessage;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageDraw;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageHandshake;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageOpenDocument;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;
@@ -23,32 +23,32 @@ import java.util.List;
  * Decodes a WebSocketFrame sent by the client to a ClientPacket
  */
 @ChannelHandler.Sharable
-public class PacketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
+public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
         if (webSocketFrame instanceof TextWebSocketFrame) {
             System.out.println(((TextWebSocketFrame) webSocketFrame).text());
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
-            ClientPacketType packetType = ClientPacketType.valueOf(byteBuf.readUnsignedByte());
+            ClientMessageType packetType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
             System.out.println("recv " + packetType);
-            ClientPacket packet;
+            ClientMessage packet;
             switch (packetType) {
                 case DRAW:
                     Point[] points = new Point[byteBuf.readUnsignedByte()];
                     for (int i = 0; i < points.length; i++) {
                         points[i] = new Point(byteBuf.readUnsignedByte(), byteBuf.readShort(), byteBuf.readShort());
                     }
-                    packet = new ClientPacketDraw(points);
+                    packet = new ClientMessageDraw(points);
                     break;
                 case OPEN_DOCUMENT:
-                    packet = new ClientPacketOpenDocument(byteBuf.readLong());
+                    packet = new ClientMessageOpenDocument(byteBuf.readLong());
                     break;
                 case CREATE_DOCUMENT:
-                    packet = new ClientPacketCreateDocument();
+                    packet = new ClientMessageCreateDocument();
                     break;
                 case HANDSHAKE:
-                    packet = new ClientPacketHandshake(byteBuf.readLong());
+                    packet = new ClientMessageHandshake(byteBuf.readLong());
                     break;
                 default:
                     throw new OperationNotSupportedException("Unsupported packet type " + packetType+ " while decoding");

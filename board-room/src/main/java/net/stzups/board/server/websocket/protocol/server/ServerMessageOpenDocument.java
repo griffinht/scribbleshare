@@ -1,18 +1,18 @@
 package net.stzups.board.server.websocket.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.data.objects.Point;
+import net.stzups.board.data.objects.canvas.Point;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 
 import java.util.List;
 import java.util.Map;
 
-public class ServerPacketOpenDocument extends ServerPacket {
+public class ServerMessageOpenDocument extends ServerMessage {
     private Document document;
 
-    public ServerPacketOpenDocument(Document document) {
-        super(ServerPacketType.OPEN_DOCUMENT);
+    public ServerMessageOpenDocument(Document document) {
+        super(ServerMessageType.OPEN_DOCUMENT);
         this.document = document;
     }
 

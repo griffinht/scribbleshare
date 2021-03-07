@@ -7,10 +7,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * Represents a packet sent by the server
  */
-public abstract class ServerPacket {
-    private ServerPacketType packetType;
+public abstract class ServerMessage {
+    private ServerMessageType packetType;
 
-    ServerPacket(ServerPacketType packetType) {
+    ServerMessage(ServerMessageType packetType) {
         this.packetType = packetType;
     }
 

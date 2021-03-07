@@ -3,14 +3,14 @@ package net.stzups.board.server.websocket.protocol.client;
 /**
  * Represents a packet sent by the client
  */
-public abstract class ClientPacket {
-    private ClientPacketType packetType;
+public abstract class ClientMessage {
+    private ClientMessageType packetType;
 
-    ClientPacket(ClientPacketType packetType) {
+    ClientMessage(ClientMessageType packetType) {
         this.packetType = packetType;
     }
 
-    public ClientPacketType getPacketType() {
+    public ClientMessageType getPacketType() {
         return packetType;
     }
 }

@@ -3,11 +3,11 @@ package net.stzups.board.server.websocket.protocol.server;
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.Document;
 
-public class ServerPacketAddDocument extends ServerPacket {
+public class ServerMessageAddDocument extends ServerMessage {
     private Document document;
 
-    public ServerPacketAddDocument(Document document) {
-        super(ServerPacketType.ADD_DOCUMENT);
+    public ServerMessageAddDocument(Document document) {
+        super(ServerMessageType.ADD_DOCUMENT);
         this.document = document;
     }
 

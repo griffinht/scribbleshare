@@ -9,12 +9,11 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import net.stzups.board.BoardRoom;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-public class HttpSession implements Serializable {
+public class HttpSession {
     private static final long SESSION_TOKEN_MAX_AGE = 2314;//todo
 
     public static Cookie getCookie(HttpHeaders httpHeaders, InetAddress address) {

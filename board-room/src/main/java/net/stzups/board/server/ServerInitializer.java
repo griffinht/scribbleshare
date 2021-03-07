@@ -14,8 +14,8 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.server.websocket.protocol.PacketEncoder;
-import net.stzups.board.server.websocket.protocol.PacketDecoder;
+import net.stzups.board.server.websocket.protocol.MessageEncoder;
+import net.stzups.board.server.websocket.protocol.MessageDecoder;
 
 import java.util.concurrent.Executors;
 
@@ -35,8 +35,8 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     };
 
-    private PacketEncoder packetEncoder = new PacketEncoder();
-    private PacketDecoder packetDecoder = new PacketDecoder();
+    private MessageEncoder messageEncoder = new MessageEncoder();
+    private MessageDecoder messageDecoder = new MessageDecoder();
     private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
     private SslContext sslContext;
 
@@ -65,8 +65,8 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
-                .addLast(packetEncoder)
-                .addLast(packetDecoder)
+                .addLast(messageEncoder)
+                .addLast(messageDecoder)
                 .addLast(webSocketInitializer);
     }
 }

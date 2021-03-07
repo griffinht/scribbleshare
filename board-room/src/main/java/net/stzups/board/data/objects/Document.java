@@ -1,15 +1,15 @@
 package net.stzups.board.data.objects;
 
 import net.stzups.board.BoardRoom;
+import net.stzups.board.data.objects.canvas.Point;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Document implements Serializable {
+public class Document {
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
     private long id;

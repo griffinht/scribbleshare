@@ -5,7 +5,7 @@ import io.netty.util.collection.IntObjectHashMap;
 import java.util.EnumSet;
 import java.util.Map;
 
-public enum ServerPacketType {
+public enum ServerMessageType {
     ADD_CLIENT(0),
     REMOVE_CLIENT(1),
     DRAW(2),
@@ -15,16 +15,16 @@ public enum ServerPacketType {
     ADD_USER(6)
     ;
 
-    private static Map<Integer, ServerPacketType> packetTypeMap = new IntObjectHashMap<>();
+    private static Map<Integer, ServerMessageType> packetTypeMap = new IntObjectHashMap<>();
     static {
-        for (ServerPacketType packetType : EnumSet.allOf(ServerPacketType.class)) {
+        for (ServerMessageType packetType : EnumSet.allOf(ServerMessageType.class)) {
             packetTypeMap.put(packetType.id, packetType);
         }
     }
 
     private int id;
 
-    ServerPacketType(int id) {
+    ServerMessageType(int id) {
         this.id = id;
     }
 
@@ -32,8 +32,8 @@ public enum ServerPacketType {
         return id;
     }
 
-    public static ServerPacketType valueOf(int id) {
-        ServerPacketType packetType = packetTypeMap.get(id);
+    public static ServerMessageType valueOf(int id) {
+        ServerMessageType packetType = packetTypeMap.get(id);
         if (packetType == null) {
             throw new IllegalArgumentException("Unknown PacketTypeServer for given id " + id);
         }

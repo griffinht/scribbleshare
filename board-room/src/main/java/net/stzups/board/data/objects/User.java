@@ -2,11 +2,10 @@ package net.stzups.board.data.objects;
 
 import net.stzups.board.BoardRoom;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User implements Serializable {
+public class User {
     private long id;
     private List<Long> ownedDocuments;
     private List<Long> sharedDocuments;

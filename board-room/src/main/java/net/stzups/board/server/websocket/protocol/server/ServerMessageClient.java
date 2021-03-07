@@ -1,13 +1,12 @@
 package net.stzups.board.server.websocket.protocol.server;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.Client;
 
-public abstract class ServerPacketClient extends ServerPacket {
+public abstract class ServerMessageClient extends ServerMessage {
     private short id;
 
-    ServerPacketClient(ServerPacketType packetType, Client client) {
+    ServerMessageClient(ServerMessageType packetType, Client client) {
         super(packetType);
         this.id = client == null ? 0 : client.getId();
     }
