@@ -1,6 +1,6 @@
 package net.stzups.board.data.database.runtime;
 
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.HttpSession;
@@ -56,7 +56,7 @@ public class RuntimeDatabase implements Database {
 
     @Override
     public Document createDocument(User owner) {
-        Document document = new Document(Board.getSecureRandom().nextLong(), owner, DEFAULT_DOCUMENT_NAME);
+        Document document = new Document(BoardRoom.getSecureRandom().nextLong(), owner, DEFAULT_DOCUMENT_NAME);
         documents.put(document.getId(), document);
         return document;
     }

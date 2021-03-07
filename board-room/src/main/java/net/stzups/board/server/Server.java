@@ -10,7 +10,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 import net.stzups.board.LogFactory;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -23,7 +23,7 @@ import java.security.KeyStore;
  * Uses netty to create an HTTP/WebSocket server on the specified port
  */
 public class Server {
-    private static final int HTTP_PORT = 8080;
+    private static final int HTTP_PORT = 80;
     private static final int HTTPS_PORT = 443;
 
     private EventLoopGroup bossGroup;
@@ -36,19 +36,19 @@ public class Server {
         SslContext sslContext;
         int port;
 
-        Boolean ssl = Board.getConfig().getBoolean("ssl");
+        Boolean ssl = BoardRoom.getConfig().getBoolean("ssl");
         if (ssl == null) {
             throw new RuntimeException("Failed to set required runtime variable --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
         }
 
         if (!ssl) {
-            Board.getLogger().warning("Starting server using insecure http:// protocol without SSL");
+            BoardRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
             port = HTTP_PORT;
         } else {
-            String keystorePath = Board.getConfig().get("ssl.keystore.path");
+            String keystorePath = BoardRoom.getConfig().get("ssl.keystore.path");
             if (keystorePath != null) {//must not be null
-                String passphrase = Board.getConfig().get("ssl.passphrase");
+                String passphrase = BoardRoom.getConfig().get("ssl.passphrase");
                 if (passphrase != null) {//can be null if value of keystore is http
                     try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
                         KeyStore keyStore = KeyStore.getInstance("PKCS12");
@@ -80,7 +80,7 @@ public class Server {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer(sslContext));
-        Board.getLogger().info("Binding to port " + port);
+        BoardRoom.getLogger().info("Binding to port " + port);
         return serverBootstrap.bind(port).sync().channel().closeFuture();
     }
 

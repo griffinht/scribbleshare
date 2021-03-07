@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.stzups.board</groupId>
-    <artifactId>board-server</artifactId>
-    <version>0.2</version>
+    <artifactId>board-room</artifactId>
+    <version>0.3</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,7 +39,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>net.stzups.board.Board</mainClass>
+                            <mainClass>net.stzups.board.BoardRoom</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

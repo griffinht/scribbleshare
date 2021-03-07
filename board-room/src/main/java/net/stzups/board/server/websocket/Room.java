@@ -1,18 +1,15 @@
 package net.stzups.board.server.websocket;
 
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.server.websocket.protocol.server.ServerPacket;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketAddClient;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.ServerPacketRemoveClient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,7 +64,7 @@ class Room {
         //for the existing clients
         sendPacket(new ServerPacketAddClient(client));
         clients.add(client);
-        Board.getLogger().info("Added " + client + " to " + this);
+        BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
 
     /**
@@ -78,7 +75,7 @@ class Room {
     void removeClient(Client client) {
         clients.remove(client);
         sendPacket(new ServerPacketRemoveClient(client));
-        Board.getLogger().info("Removed " + client + " to " + this);
+        BoardRoom.getLogger().info("Removed " + client + " to " + this);
     }
 
     /**

@@ -1,6 +1,6 @@
 package net.stzups.board.data.objects;
 
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class User implements Serializable {
     private List<Long> sharedDocuments;
 
     public User() {
-        id = Board.getSecureRandom().nextLong();
+        id = BoardRoom.getSecureRandom().nextLong();
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();

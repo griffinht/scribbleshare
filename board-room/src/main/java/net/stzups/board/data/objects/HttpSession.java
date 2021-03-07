@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -31,7 +31,7 @@ public class HttpSession implements Serializable {
             Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
             for (Cookie cookie : cookies) {
                 if (cookie.name().equals("session-token")) {
-                    HttpSession httpSession = Board.getDatabase().getHttpSession(Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes())).getLong(0));
+                    HttpSession httpSession = BoardRoom.getDatabase().getHttpSession(Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes())).getLong(0));
                     if (httpSession != null && httpSession.validate(cookie, address)) {
                         System.out.println("good session");
                         return httpSession;
@@ -55,7 +55,7 @@ public class HttpSession implements Serializable {
     }
 
     private Cookie generate() {//todo make sure this is only called once
-        token = Board.getSecureRandom().nextLong();
+        token = BoardRoom.getSecureRandom().nextLong();
         Cookie cookie = new DefaultCookie("session-token", Base64.encode(Unpooled.copyLong(token)).toString(StandardCharsets.US_ASCII));//todo allocation
         cookie.setHttpOnly(true);
         cookie.setDomain("localhost");//todo
@@ -63,7 +63,7 @@ public class HttpSession implements Serializable {
         cookie.setPath("/");//todo
         //cookie.setSecure(true); cant be done over http
         cookie.setWrap(true);//todo
-        Board.getDatabase().addHttpSession(this);
+        BoardRoom.getDatabase().addHttpSession(this);
         return cookie;
     }
 

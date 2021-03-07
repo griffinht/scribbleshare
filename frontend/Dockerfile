@@ -1,9 +1,10 @@
 #
 # Nginx
 #
-FROM nginx AS board-web-client
+FROM nginx
+
+COPY nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /user/share/nginx/html
 
 COPY html .
-COPY html/assets bin

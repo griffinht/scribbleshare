@@ -1,6 +1,6 @@
 package net.stzups.board.data.objects;
 
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 
 import java.io.Serializable;
 
@@ -13,7 +13,7 @@ public class UserSession implements Serializable {
 
     public UserSession(User user, long hash) {//todo hash
         this.userId = user.getId();
-        this.token = Board.getSecureRandom().nextLong();
+        this.token = BoardRoom.getSecureRandom().nextLong();
         this.creation_time = System.currentTimeMillis();//todo security issue? round/fuzz by a few seconds?
         this.hash = hash;
     }

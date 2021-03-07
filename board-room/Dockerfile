@@ -1,10 +1,11 @@
 #
 # Build server with maven
 #
-FROM maven:3.6.0-jdk-11-slim AS board-server
-WORKDIR /usr/src/app
+FROM maven:3.6.0-jdk-11-slim AS board-room
 
 # Fetch and cache dependencies
+WORKDIR /usr/src/app
+
 COPY pom.xml .
 RUN mvn dependency:resolve
 
@@ -19,12 +20,9 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /usr/app
 
-COPY --from=board-server /usr/src/app/target/board-server-0.2.jar .
-
-COPY --from=board-web-client /usr/src/app/board-web-client board-web-client
+COPY --from=board-room /usr/src/app/target/board-room-0.3.jar .
 
 # Failure to set required environment variables will cause the server to crash
 ENV board.ssl=required
 ENV board.postgres=required
-ENV board.document.root.path=board-web-client
-ENTRYPOINT ["java", "-jar", "board-server-0.2.jar"]
+ENTRYPOINT ["java", "-jar", "board-room-0.3.jar"]

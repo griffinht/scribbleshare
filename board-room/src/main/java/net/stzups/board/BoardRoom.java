@@ -15,7 +15,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 import java.util.logging.Logger;
 
-public class Board {
+public class BoardRoom {
     private static Logger logger;
     private static Config config;
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -24,9 +24,9 @@ public class Board {
     private static Database database;//user id -> user
 
     public static void main(String[] args) throws Exception {
-        logger = LogFactory.getLogger("Board Server");
+        logger = LogFactory.getLogger("Board Room");
 
-        logger.info("Starting Board server...");
+        logger.info("Starting Board Room server...");
 
         long start = System.currentTimeMillis();
 
@@ -42,7 +42,7 @@ public class Board {
         } else {
             if (postgres) {
                 logger.info("Connecting to Postgres database...");
-                database = new PostgresDatabase(Board.getConfig().get("postgres.url"), Board.getConfig().get("postgres.user"), Board.getConfig().get("postgres.password"));
+                database = new PostgresDatabase(BoardRoom.getConfig().get("postgres.url"), BoardRoom.getConfig().get("postgres.user"), BoardRoom.getConfig().get("postgres.password"));
                 logger.info("Connected to Postgres database");
             } else {
                 logger.warning("Using debug only runtime database. No data will be persisted.");
@@ -53,17 +53,17 @@ public class Board {
         Server server = new Server();
         ChannelFuture channelFuture = server.start();
 
-        logger.info("Started Board server in " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Started Board Room server in " + (System.currentTimeMillis() - start) + "ms");
 
         channelFuture.sync();
 
         start = System.currentTimeMillis();
 
-        logger.info("Stopping Board Server");
+        logger.info("Stopping Board Room server");
 
         server.stop();
 
-        logger.info("Stopped Board Server in " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Stopped Board Room server in " + (System.currentTimeMillis() - start) + "ms");
     }
 
     public static Logger getLogger() {

@@ -13,7 +13,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
-import net.stzups.board.Board;
+import net.stzups.board.BoardRoom;
 import net.stzups.board.server.websocket.protocol.PacketEncoder;
 import net.stzups.board.server.websocket.protocol.PacketDecoder;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private static final String WEB_SOCKET_PATH = "/websocket";
-    private static final boolean DEBUG_LOG_TRAFFIC = Board.getConfig().getBoolean("debug.log.traffic", false);
+    private static final boolean DEBUG_LOG_TRAFFIC = BoardRoom.getConfig().getBoolean("debug.log.traffic", false);
 
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
@@ -46,13 +46,13 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
-        Board.getLogger().info("New connection from " + socketChannel.remoteAddress());
+        BoardRoom.getLogger().info("New connection from " + socketChannel.remoteAddress());
         ChannelPipeline pipeline = socketChannel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        Board.getLogger().warning("Uncaught exception");
+                        BoardRoom.getLogger().warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })

@@ -1,18 +1,20 @@
 services:
-    board-server:
-        image: board-server:0.2
+    board-room:
+        image: board-room:0.3
         build:
-            context: board-server
+            context: board-room
         ports:
-            - "8081:80"
+            - "8080:80"
         environment:
             board.ssl: "false"
             board.postgres: "true"
             board.postgres.url: "jdbc:postgresql://localhost:5432/postgres"
             board.postgres.user: "postgres"
             board.postgres.password: "changeme"
-    nginx:
-        image: frontend
+    board-frontend:
+        image: board-frontend
+        build:
+            context: frontend
         ports:
             - "80:80"
     database:
