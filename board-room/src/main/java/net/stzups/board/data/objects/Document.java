@@ -1,7 +1,7 @@
 package net.stzups.board.data.objects;
 
 import net.stzups.board.BoardRoom;
-import net.stzups.board.data.objects.canvas.Point;
+import net.stzups.board.data.objects.canvas.objects.Point;
 
 import java.util.ArrayList;
 import java.util.Arrays;

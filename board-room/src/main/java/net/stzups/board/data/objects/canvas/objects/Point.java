@@ -1,6 +1,8 @@
-package net.stzups.board.data.objects.canvas;
+package net.stzups.board.data.objects.canvas.objects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.board.data.objects.canvas.CanvasObject;
+import net.stzups.board.data.objects.canvas.CanvasObjectType;
 
 public class Point extends CanvasObject {
     public int dt;

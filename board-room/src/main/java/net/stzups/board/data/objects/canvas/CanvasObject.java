@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 public class CanvasObject {
     private CanvasObjectType type;
 
-    CanvasObject(CanvasObjectType type) {
+    protected CanvasObject(CanvasObjectType type) {
         this.type = type;
     }
 
@@ -13,6 +13,6 @@ public class CanvasObject {
      * Subclasses need to call this method
      */
     public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeByte((byte) type.getId());
+
     }
 }
