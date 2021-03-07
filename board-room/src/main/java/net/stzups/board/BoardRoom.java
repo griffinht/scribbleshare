@@ -8,7 +8,7 @@ import net.stzups.board.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.database.postgres.PostgresDatabase;
-import net.stzups.board.data.database.runtime.MemoryDatabase;
+import net.stzups.board.data.database.memory.MemoryDatabase;
 import net.stzups.board.server.Server;
 
 import java.security.SecureRandom;

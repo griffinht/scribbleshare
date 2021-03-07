@@ -1,4 +1,4 @@
-package net.stzups.board.data.database.runtime;
+package net.stzups.board.data.database.memory;
 
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
