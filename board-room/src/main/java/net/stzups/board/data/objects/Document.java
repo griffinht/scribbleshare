@@ -1,5 +1,7 @@
 package net.stzups.board.data.objects;
 
+import net.stzups.board.BoardRoom;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,16 +10,24 @@ import java.util.List;
 import java.util.Map;
 
 public class Document implements Serializable {
+    private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
+
     private long id;
     private User owner;
     private String name;
     private String inviteCode;
     private Map<User, List<Point>> points = new HashMap<>();
 
+    public Document(User owner) {
+        this.id = BoardRoom.getSecureRandom().nextLong();
+        this.owner = owner;
+        owner.getOwnedDocuments().add(id);
+        this.name = DEFAULT_DOCUMENT_NAME;
+    }
+
     public Document(long id, User owner, String name) {
         this.id = id;
         this.owner = owner;
-        owner.getOwnedDocuments().add(id);
         this.name = name;
     }
 
@@ -27,6 +37,10 @@ public class Document implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public User getOwner() {
+        return owner;
     }
 
     public Map<User, List<Point>> getPoints() {

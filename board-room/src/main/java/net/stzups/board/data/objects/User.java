@@ -18,6 +18,12 @@ public class User implements Serializable {
         sharedDocuments = new ArrayList<>();
     }
 
+    public User(long id, List<Long> ownedDocuments, List<Long> sharedDocuments) {
+        this.id = id;
+        this.ownedDocuments = ownedDocuments;
+        this.sharedDocuments = sharedDocuments;
+    }
+
     public long getId() {
         return id;
     }

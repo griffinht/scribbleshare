@@ -15,7 +15,6 @@ import java.util.Map;
  */
 public class RuntimeDatabase implements Database {
     private Map<Long, Document> documents = new HashMap<>();
-    private Map<Long, HttpSession> httpSessions = new HashMap<>();
     private Map<Long, UserSession> userSessions = new HashMap<>();
     private Map<Long, User> users = new HashMap<>();
 
@@ -45,18 +44,8 @@ public class RuntimeDatabase implements Database {
     }
 
     @Override
-    public HttpSession getHttpSession(long token) {
-        return httpSessions.get(token);
-    }
-
-    @Override
-    public void addHttpSession(HttpSession httpSession) {
-        httpSessions.put(httpSession.getToken(), httpSession);
-    }
-
-    @Override
     public Document createDocument(User owner) {
-        Document document = new Document(BoardRoom.getSecureRandom().nextLong(), owner, DEFAULT_DOCUMENT_NAME);
+        Document document = new Document(owner);
         documents.put(document.getId(), document);
         return document;
     }

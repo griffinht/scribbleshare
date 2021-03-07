@@ -34,8 +34,8 @@ public class PacketHandler extends SimpleChannelInboundHandler<ClientPacket> {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
-        System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
+        //System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
+        //System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
     }
 
     @Override

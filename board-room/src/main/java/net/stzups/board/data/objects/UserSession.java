@@ -6,15 +6,22 @@ import java.io.Serializable;
 
 public class UserSession implements Serializable {
     private static final int MAX_USER_SESSION_AGE = 10000000;//todo
-    private long userId;
     private long token;
-    private long creation_time;
+    private long userId;
+    private long creationTime;
     private long hash;
 
     public UserSession(User user, long hash) {//todo hash
-        this.userId = user.getId();
         this.token = BoardRoom.getSecureRandom().nextLong();
-        this.creation_time = System.currentTimeMillis();//todo security issue? round/fuzz by a few seconds?
+        this.userId = user.getId();
+        this.creationTime = System.currentTimeMillis();//todo security issue? round/fuzz by a few seconds?
+        this.hash = hash;
+    }
+
+    public UserSession(long token, long userId, long creationTime, long hash) {
+        this.token = token;
+        this.userId = userId;
+        this.creationTime = creationTime;
         this.hash = hash;
     }
 
@@ -26,9 +33,17 @@ public class UserSession implements Serializable {
         return userId;
     }
 
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public long getHash() {
+        return hash;
+    }
+
     public boolean validate(long hash) {
         token = 0;
-        return (System.currentTimeMillis() - creation_time) < MAX_USER_SESSION_AGE && this.hash == hash;
+        return (System.currentTimeMillis() - creationTime) < MAX_USER_SESSION_AGE && this.hash == hash;
     }
 
     @Override
