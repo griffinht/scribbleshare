@@ -5,11 +5,11 @@ import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 
-public class ClientMessageCanvas extends ClientMessage {
+public class ClientMessageUpdateDocument extends ClientMessage {
     private Canvas canvas;
 
-    public ClientMessageCanvas(ByteBuf byteBuf) {
-        super(ClientMessageType.CANVAS);
+    public ClientMessageUpdateDocument(ByteBuf byteBuf) {
+        super(ClientMessageType.UPDATE_DOCUMENT);
         this.canvas = new Canvas(byteBuf);
     }
 

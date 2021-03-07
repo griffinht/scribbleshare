@@ -17,6 +17,5 @@ public class ServerMessageOpenDocument extends ServerMessage {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeLong(document.getId());
-        document.getCanvas().serialize(byteBuf);
     }
 }

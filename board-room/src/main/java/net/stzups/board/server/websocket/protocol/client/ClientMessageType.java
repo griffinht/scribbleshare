@@ -7,7 +7,7 @@ import java.util.Map;
 
 public enum ClientMessageType {
     OPEN_DOCUMENT(0),
-    CANVAS(1),
+    UPDATE_DOCUMENT(1),
     CREATE_DOCUMENT(2),
     HANDSHAKE(3),
     ;

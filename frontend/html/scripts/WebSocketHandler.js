@@ -4,12 +4,12 @@ class WebSocketHandler {
         [
             'socket.open',
             'socket.close',
-            'protocol.addclient',
+            'protocol.addClient',
             'protocol.adduser',
-            'protocol.removeclient',
-            'protocol.draw',
-            'protocol.opendocument',
-            'protocol.adddocument',
+            'protocol.removeClient',
+            'protocol.updateDocument',
+            'protocol.openDocument',
+            'protocol.addDocument',
             'protocol.handshake',
         ].forEach((type) => {
             this.events[type] = [];
@@ -53,14 +53,14 @@ class WebSocketHandler {
                             offset += 2;
                             e.userId = dataView.getBigInt64(offset);
                             offset += 8;
-                            this.dispatchEvent('protocol.addclient', e);
+                            this.dispatchEvent('protocol.addClient', e);
                             break;
                         }
                         case 1: {
                             let e = {};
                             e.id = dataView.getInt16(offset);
                             offset += 2;
-                            this.dispatchEvent('protocol.removeclient', e);
+                            this.dispatchEvent('protocol.removeClient', e);
                             break;
                         }
                         case 2: {
@@ -111,7 +111,7 @@ class WebSocketHandler {
                                 }
                                 e.document.points.set(id, points);
                             }
-                            this.dispatchEvent('protocol.opendocument', e);
+                            this.dispatchEvent('protocol.openDocument', e);
                             break;
                         }
                         case 4: {
@@ -122,7 +122,7 @@ class WebSocketHandler {
                             offset += 1;
                             e.name = new TextDecoder().decode(event.data.slice(offset, offset + length));
                             offset += length;
-                            this.dispatchEvent('protocol.adddocument', e);
+                            this.dispatchEvent('protocol.addDocument', e);
                             break;
                         }
                         case 5: {
@@ -238,6 +238,10 @@ class WebSocketHandler {
         offset += 8;
 
         this.send(buffer);
+    }
+
+    sendUpdateDocument(document) {
+
     }
 }
 export default new WebSocketHandler();

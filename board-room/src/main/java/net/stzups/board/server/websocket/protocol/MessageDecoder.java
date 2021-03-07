@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCanvas;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
@@ -33,8 +33,8 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             System.out.println("recv " + packetType);
             ClientMessage message;
             switch (packetType) {
-                case CANVAS:
-                    message = new ClientMessageCanvas(byteBuf);
+                case UPDATE_DOCUMENT:
+                    message = new ClientMessageUpdateDocument(byteBuf);
                     break;
                 case OPEN_DOCUMENT:
                     message = new ClientMessageOpenDocument(byteBuf);

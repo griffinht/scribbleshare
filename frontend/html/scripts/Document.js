@@ -104,25 +104,26 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-socket.addEventListener('protocol.addclient', (event) => {
+socket.addEventListener('protocol.addClient', (event) => {
     let client = new Client(event.id, User.getUser(event.userId));
     activeDocument.addClient(client);
     console.log('Add client ', client);
 });
-socket.addEventListener('protocol.removeclient', (event) => {
+socket.addEventListener('protocol.removeClient', (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
 });
-socket.addEventListener('protocol.draw', (event) => {
+socket.addEventListener('protocol.updateDocument', (event) => {
+    /*
     let client = activeDocument.clients.get(event.id);
     console.log(activeDocument.clients, event.id);
     event.points.forEach((point) => {
         client.points.push(point);
-    });
+    });*/
 });
-socket.addEventListener('protocol.adddocument', (event) => {
+socket.addEventListener('protocol.addDocument', (event) => {
     documents.set(event.id, new Document(event.name, event.id));
 });
-socket.addEventListener('protocol.opendocument', (event) => {
+socket.addEventListener('protocol.openDocument', (event) => {
     if (activeDocument != null) {
         activeDocument.close();
     }
