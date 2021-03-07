@@ -35,23 +35,19 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             ClientMessage message;
             switch (packetType) {
                 case DRAW:
-                    Point[] points = new Point[byteBuf.readUnsignedByte()];
-                    for (int i = 0; i < points.length; i++) {
-                        points[i] = new Point(byteBuf.readUnsignedByte(), byteBuf.readShort(), byteBuf.readShort());
-                    }
-                    message = new ClientMessageDraw(points);
+                    message = new ClientMessageDraw(byteBuf);
                     break;
                 case OPEN_DOCUMENT:
-                    message = new ClientMessageOpenDocument(byteBuf.readLong());
+                    message = new ClientMessageOpenDocument(byteBuf);
                     break;
                 case CREATE_DOCUMENT:
                     message = new ClientMessageCreateDocument();
                     break;
                 case HANDSHAKE:
-                    message = new ClientMessageHandshake(byteBuf.readLong());
+                    message = new ClientMessageHandshake(byteBuf);
                     break;
                 default:
-                    throw new OperationNotSupportedException("Unsupported message type " + packetType+ " while decoding");
+                    throw new OperationNotSupportedException("Unsupported message type " + packetType + " while decoding");
             }
             list.add(message);
         }
