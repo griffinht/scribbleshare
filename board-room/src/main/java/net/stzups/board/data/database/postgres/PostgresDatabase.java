@@ -1,5 +1,6 @@
 package net.stzups.board.data.database.postgres;
 
+import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
@@ -99,7 +100,7 @@ public class PostgresDatabase implements Database {
                     System.out.println("no owner for document");
                     return null;
                 }
-                document = new Document(id, user, resultSet.getString("name"));//todo binary data
+                document = new Document(id, user, resultSet.getString("name"), Unpooled.buffer(0));//todo binary data
                 documents.put(document.getId(), document);
             }
             return document;

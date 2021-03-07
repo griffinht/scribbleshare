@@ -1,13 +1,8 @@
 package net.stzups.board.data.objects;
 
+import io.netty.buffer.ByteBuf;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.data.objects.canvas.objects.Point;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import net.stzups.board.data.objects.canvas.Canvas;
 
 public class Document {
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
@@ -16,7 +11,7 @@ public class Document {
     private User owner;
     private String name;
     private String inviteCode;
-    private Map<User, List<Point>> points = new HashMap<>();
+    private Canvas canvas;
 
     public Document(User owner) {
         this.id = BoardRoom.getSecureRandom().nextLong();
@@ -25,10 +20,11 @@ public class Document {
         this.name = DEFAULT_DOCUMENT_NAME;
     }
 
-    public Document(long id, User owner, String name) {
+    public Document(long id, User owner, String name, ByteBuf byteBuf) {
         this.id = id;
         this.owner = owner;
         this.name = name;
+        this.canvas = new Canvas(byteBuf);
     }
 
     public long getId() {
@@ -43,17 +39,8 @@ public class Document {
         return owner;
     }
 
-    public Map<User, List<Point>> getPoints() {
-        return points;
-    }
-
-    public void addPoints(User user, Point[] points) {
-        List<Point> pts = this.points.get(user);
-        if (pts == null) {
-            pts = new ArrayList<>();
-        }
-        pts.addAll(Arrays.asList(points));
-        this.points.put(user, pts);
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     @Override

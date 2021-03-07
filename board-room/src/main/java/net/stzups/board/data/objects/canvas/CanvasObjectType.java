@@ -6,7 +6,7 @@ import java.util.EnumSet;
 import java.util.Map;
 
 public enum CanvasObjectType {
-    POINT(0),
+    POINTS(0),
     ;
 
     private static Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();

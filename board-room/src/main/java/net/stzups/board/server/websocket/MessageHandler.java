@@ -6,14 +6,14 @@ import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDraw;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
-import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageDrawClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageHandshake;
 
 import java.util.HashMap;
@@ -40,10 +40,8 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
         switch (message.getMessageType()) {
-            case DRAW: {
-                ClientMessageDraw clientMessageDraw = (ClientMessageDraw) message;
-                room.getDocument().addPoints(client.getUser(), clientMessageDraw.getPoints());
-                room.queueMessageExcept(new ServerMessageDrawClient(client, clientMessageDraw.getPoints()), client);//todo this has tons of latency
+            case CANVAS: {
+                room.getDocument().getCanvas().update(client, ((ClientMessageCanvas) message).getCanvas());
                 break;
             }
             case OPEN_DOCUMENT: {
