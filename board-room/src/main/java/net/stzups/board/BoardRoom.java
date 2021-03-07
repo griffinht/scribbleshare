@@ -8,7 +8,7 @@ import net.stzups.board.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.database.postgres.PostgresDatabase;
-import net.stzups.board.data.database.runtime.RuntimeDatabase;
+import net.stzups.board.data.database.runtime.MemoryDatabase;
 import net.stzups.board.server.Server;
 
 import java.security.SecureRandom;
@@ -46,7 +46,7 @@ public class BoardRoom {
                 logger.info("Connected to Postgres database");
             } else {
                 logger.warning("Using debug only runtime database. No data will be persisted.");
-                database = new RuntimeDatabase();
+                database = new MemoryDatabase();
             }
         }
 

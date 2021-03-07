@@ -8,8 +8,11 @@ import net.stzups.board.data.objects.UserSession;
 public interface Database {
     void addUser(User user);
     User getUser(long id);
+
+    Document createDocument(User owner);
     Document getDocument(long id);
+    void saveDocument(Document document);
+
     UserSession removeUserSession(long token);
     void addUserSession(UserSession userSession);
-    Document createDocument(User owner);
 }

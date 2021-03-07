@@ -1,9 +1,7 @@
 package net.stzups.board.data.database.runtime;
 
-import net.stzups.board.BoardRoom;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.HttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
 
@@ -13,7 +11,7 @@ import java.util.Map;
 /**
  * In memory database, for debug only
  */
-public class RuntimeDatabase implements Database {
+public class MemoryDatabase implements Database {
     private Map<Long, Document> documents = new HashMap<>();
     private Map<Long, UserSession> userSessions = new HashMap<>();
     private Map<Long, User> users = new HashMap<>();
@@ -31,6 +29,11 @@ public class RuntimeDatabase implements Database {
     @Override
     public Document getDocument(long id) {
         return documents.get(id);
+    }
+
+    @Override
+    public void saveDocument(Document document) {
+        documents.put(document.getId(), document);
     }
 
     @Override
