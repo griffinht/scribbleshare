@@ -3,9 +3,9 @@ package net.stzups.board.server.websocket;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
-import net.stzups.board.server.websocket.protocol.server.ServerMessageAddClient;
-import net.stzups.board.server.websocket.protocol.server.ServerMessageOpenDocument;
-import net.stzups.board.server.websocket.protocol.server.ServerMessageRemoveClient;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 
 import java.util.ArrayList;
 import java.util.HashSet;

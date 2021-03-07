@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 public abstract class ServerMessage {
     private ServerMessageType packetType;
 
-    ServerMessage(ServerMessageType packetType) {
+    protected ServerMessage(ServerMessageType packetType) {
         this.packetType = packetType;
     }
 
@@ -20,7 +20,7 @@ public abstract class ServerMessage {
     }
 
     /** poorly encodes strings as utf 8 preceded by a one byte unsigned length */
-    static void writeString(String string, ByteBuf byteBuf) {
+    protected static void writeString(String string, ByteBuf byteBuf) {
         if (string.length() > 0xff) {
             throw new UnsupportedOperationException("String too long");
         }

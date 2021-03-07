@@ -6,7 +6,7 @@ import net.stzups.board.server.websocket.Client;
 public abstract class ServerMessageClient extends ServerMessage {
     private short id;
 
-    ServerMessageClient(ServerMessageType packetType, Client client) {
+    protected ServerMessageClient(ServerMessageType packetType, Client client) {
         super(packetType);
         this.id = client == null ? 0 : client.getId();
     }

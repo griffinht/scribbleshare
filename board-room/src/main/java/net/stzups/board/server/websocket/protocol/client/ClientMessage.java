@@ -6,7 +6,7 @@ package net.stzups.board.server.websocket.protocol.client;
 public abstract class ClientMessage {
     private ClientMessageType packetType;
 
-    ClientMessage(ClientMessageType packetType) {
+    protected ClientMessage(ClientMessageType packetType) {
         this.packetType = packetType;
     }
 

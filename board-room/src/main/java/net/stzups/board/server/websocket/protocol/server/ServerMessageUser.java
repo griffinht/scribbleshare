@@ -6,7 +6,7 @@ import net.stzups.board.data.objects.User;
 public abstract class ServerMessageUser extends ServerMessage {
     private User user;
 
-    ServerMessageUser(ServerMessageType serverMessageType, User user) {
+    protected ServerMessageUser(ServerMessageType serverMessageType, User user) {
         super(serverMessageType);
         this.user = user;
     }

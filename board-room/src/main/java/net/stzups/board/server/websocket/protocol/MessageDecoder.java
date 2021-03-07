@@ -9,10 +9,10 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.data.objects.canvas.Point;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageDraw;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageHandshake;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageOpenDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDraw;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 
 import javax.naming.OperationNotSupportedException;
