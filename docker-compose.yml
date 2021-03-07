@@ -4,13 +4,17 @@ services:
         build:
             context: board-server
         ports:
-            - "80:80"
+            - "8081:80"
         environment:
             board.ssl: "false"
             board.postgres: "true"
             board.postgres.url: "jdbc:postgresql://localhost:5432/postgres"
             board.postgres.user: "postgres"
             board.postgres.password: "changeme"
+    nginx:
+        image: frontend
+        ports:
+            - "80:80"
     database:
         image: postgres
         environment:

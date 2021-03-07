@@ -33,7 +33,7 @@ class Document {
         inviteButton.style.visibility = 'visible';
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
-        window.history.pushState(document.name, document.title, '/d/' + this.id);
+        //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
         this.points.forEach((points, id) => {
             ctx.beginPath();
             points.forEach((point) => {
@@ -145,7 +145,12 @@ socket.addEventListener('socket.open', () => {
     socket.sendHandshake(token);
     let invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite !== '') {
-        socket.sendOpen(invite);
+        try {
+            let bigint = BigInt(invite);
+            socket.sendOpen(bigint);
+        } catch(e) {
+            console.error('improper invite', invite);
+        }
     }
 });
 

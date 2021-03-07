@@ -8,7 +8,7 @@ export default class Client {
         this.y = 0;
         this.points = [];
         this.icon = document.createElement('img');
-        this.icon.setAttribute('src', '/bin/default.png');
+        this.icon.setAttribute('src', 'assets/default.png');
         this.icon.addEventListener('mouseenter', (event) => {
             let rect = this.icon.getBoundingClientRect();
             this.iconTooltip.style.visibility = 'visible';

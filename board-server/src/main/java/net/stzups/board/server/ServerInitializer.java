@@ -16,12 +16,11 @@ import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.board.Board;
 import net.stzups.board.server.websocket.protocol.PacketEncoder;
 import net.stzups.board.server.websocket.protocol.PacketDecoder;
-import net.stzups.board.server.http.HttpServerHandler;
 
 import java.util.concurrent.Executors;
 
 /**
- * Creates pipeline to handle HTTP requests and WebSocket connections on the same port
+ * Creates pipeline to handle Websocket connections
  * WebSocket connections should be made to the specified WebSocket path
  * Connections not made to the WebSocket path go to ServerHandler
  */
@@ -66,7 +65,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
-                .addLast(new HttpServerHandler())
                 .addLast(packetEncoder)
                 .addLast(packetDecoder)
                 .addLast(webSocketInitializer);

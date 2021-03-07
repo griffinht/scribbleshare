@@ -13,15 +13,6 @@ COPY src src
 RUN mvn package
 
 #
-# Add HTTP code
-#
-FROM scratch AS board-web-client
-
-WORKDIR /usr/src/app
-
-COPY board-web-client board-web-client
-
-#
 # Runtime (alpine)
 #
 FROM adoptopenjdk/openjdk11:alpine-jre
