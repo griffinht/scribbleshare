@@ -1,5 +1,5 @@
 import Client from './Client.js'
-import socket from './WebSocketHandler.js'
+import socket from './protocol/WebSocketHandler.js'
 import {canvas, ctx} from './Document.js'
 
 const UPDATE_INTERVAL = 1000;
@@ -55,7 +55,7 @@ export default class LocalClient extends Client {
     update() {
         this.lastSend = performance.now();
         if (this.points.length > 0) {
-            socket.sendDraw(this.points);
+            socket.sendDraw(this.points);//todo
             this.points.length = 0;
         }
     }

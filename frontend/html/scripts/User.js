@@ -1,4 +1,4 @@
-import socket from "./WebSocketHandler.js";
+import socket from "./protocol/WebSocketHandler.js";
 
 const users = new Map();
 let user = null;

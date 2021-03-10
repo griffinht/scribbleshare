@@ -6,8 +6,11 @@ export const ctx = canvas.getContext('2d');
 import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
-import socket from './WebSocketHandler.js'
+import socket from './protocol/WebSocketHandler.js'
 import * as User from "./User.js";
+import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageOpenDocument.js";
+import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
+import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 
 const documents = new Map();
 let activeDocument = null;
@@ -25,7 +28,7 @@ class Document {
                 activeDocument = this.id;
                 activeDocument.open();
 
-                socket.sendOpen(this.id);
+                socket.send(new ClientMessageOpenDocument());
             } else {
                 console.log('id was null', this);
             }
@@ -65,7 +68,7 @@ class Document {
 
 document.getElementById('add').addEventListener('click', () => {
     if (activeDocument != null) activeDocument.close();
-    socket.sendCreate();
+    socket.send(new ClientMessageCreateDocument());
 });
 
 window.addEventListener('resize', resizeCanvas);
@@ -117,7 +120,7 @@ socket.addEventListener('socket.open', () => {
     } else {
         token = BigInt(0);
     }
-    socket.sendHandshake(token);
+    socket.send(new ClientMessageHandshake(token));
     let invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite !== '') {
         try {

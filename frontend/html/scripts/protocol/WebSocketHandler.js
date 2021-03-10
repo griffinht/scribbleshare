@@ -125,60 +125,15 @@ class WebSocketHandler {
         this.events[type].forEach(onevent => onevent(event));
     }
 
-    send(payload) {
+    send(message) {
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('send', payload);
-            this.socket.send(payload);
+            console.log('send', message);
+            let buffer = new ArrayBuffer(message.getBufferSize());
+            message.serialize(new BufferWriter(buffer))
+            this.socket.send(buffer);
         } else {
-            console.error('tried to send payload while websocket was closed', payload);
+            console.error('tried to send message while websocket was closed', message);
         }
-    }
-
-    sendOpen(id) {
-        let writer = new BufferWriter(new ArrayBuffer(1 + 8));
-
-        writer.writeUint8(0);
-        writer.writeBigInt64(id);
-
-        this.send(writer.view.buffer);
-    }
-
-    sendCreate() {
-        let writer = new BufferWriter(new ArrayBuffer(1));
-
-        writer.writeUint8(2);
-
-        this.send(writer.view.buffer);
-    }
-
-    sendDraw(points) {
-        let writer = new BufferWriter(new ArrayBuffer(1 + 1 + points.length * 5));
-
-        writer.writeUint8(1);
-        writer.writeUint8(points.length);
-
-        points.forEach(point => {
-            writer.writeUint8(point.dt);
-            writer.writeInt16(point.x);
-            writer.writeInt16(point.y);
-        });
-
-        this.send(writer.view.buffer);
-    }
-
-    sendHandshake(token) {
-        let writer = new BufferWriter(new ArrayBuffer(9));
-
-        writer.writeUint8(3);
-
-        console.log(token);
-        writer.writeBigInt64(token);
-
-        this.send(writer.view.buffer);
-    }
-
-    sendUpdateDocument(document) {
-
     }
 }
 export default new WebSocketHandler();
