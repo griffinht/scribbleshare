@@ -1,4 +1,5 @@
 import BufferReader from './BufferReader.js'
+import BufferWriter from "./BufferWriter.js";
 
 class WebSocketHandler {
     constructor() {
@@ -134,71 +135,52 @@ class WebSocketHandler {
     }
 
     sendOpen(id) {
-        let buffer = new ArrayBuffer(1 + 8);
-        let dataView = new DataView(buffer);
-        let offset = 0;
+        let writer = new BufferWriter(new ArrayBuffer(1 + 8));
 
-        dataView.setUint8(offset, 0);
-        offset += 1;
-        
-        dataView.setBigInt64(offset, id);
-        offset += 8;
+        writer.writeUint8(0);
+        writer.writeBigInt64(id);
 
-        this.send(buffer);
+        this.send(writer.view.buffer);
     }
 
     sendCreate() {
-        let buffer = new ArrayBuffer(1);
-        let dataView = new DataView(buffer);
-        let offset = 0;
+        let writer = new BufferWriter(new ArrayBuffer(1));
 
-        dataView.setUint8(offset, 2);
-        offset += 1;
+        writer.writeUint8(2);
 
-        this.send(buffer);
+        this.send(writer.view.buffer);
     }
 
     sendDraw(points) {
         if (points.length === 0) {
             return;
         }
-        let buffer = new ArrayBuffer(1 + 1 + points.length * 5);
-        let dataView = new DataView(buffer);
-        let offset = 0;
 
-        dataView.setUint8(offset, 1);
-        offset += 1;
+        let writer = new BufferWriter(new ArrayBuffer(1 + 1 + points.length * 5));
 
-        dataView.setUint8(offset, points.length);
-        offset += 1;
+        writer.writeUint8(1);
+        writer.writeUint8(points.length);
 
         points.forEach(point => {
-            dataView.setUint8(offset, point.dt);
-            offset += 1;
-            dataView.setInt16(offset, point.x);
-            offset += 2;
-            dataView.setInt16(offset, point.y);
-            offset += 2;
+            writer.writeUint8(point.dt);
+            writer.writeInt16(point.x);
+            writer.writeInt16(point.y);
         });
 
         points.length = 0;//clear
 
-        this.send(buffer);
+        this.send(writer.view.buffer);
     }
 
     sendHandshake(token) {
-        let buffer = new ArrayBuffer(9);
-        let dataView = new DataView(buffer);
-        let offset = 0;
+        let writer = new BufferWriter(new ArrayBuffer(9));
 
-        dataView.setUint8(offset, 3);
-        offset += 1;
+        writer.writeUint8(3);
 
         console.log(token);
-        dataView.setBigInt64(offset, token);
-        offset += 8;
+        writer.writeBigInt64(token);
 
-        this.send(buffer);
+        this.send(writer.view.buffer);
     }
 
     sendUpdateDocument(document) {
