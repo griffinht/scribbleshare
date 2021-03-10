@@ -1,3 +1,5 @@
+import BufferReader from './BufferReader.js'
+
 class WebSocketHandler {
     constructor() {
         this.events = {};
@@ -40,44 +42,34 @@ class WebSocketHandler {
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
-                let dataView = new DataView(event.data);
-                let offset = 0;
+                let reader = new BufferReader(event.data);
 
-                while (offset < dataView.byteLength) {
-                    let type = dataView.getUint8(offset);
-                    offset += 1;
+                while (reader.hasNext()) {
+                    let type = reader.readUint8();
                     switch (type) {
                         case 0: {
                             let e = {};
-                            e.id = dataView.getInt16(offset);
-                            offset += 2;
-                            e.userId = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.id = reader.readInt16();
+                            e.userId = reader.readBigInt64();
                             this.dispatchEvent('protocol.addClient', e);
                             break;
                         }
                         case 1: {
                             let e = {};
-                            e.id = dataView.getInt16(offset);
-                            offset += 2;
+                            e.id = reader.readInt16();
                             this.dispatchEvent('protocol.removeClient', e);
                             break;
                         }
                         case 2: {
                             let e = {};
-                            e.id = dataView.getInt16(offset);
-                            offset += 2;
-                            let size = dataView.getUint16(offset);
-                            offset += 2;
+                            e.id = reader.readInt16();
+                            let size = reader.readUint16();
                             e.points = [];
                             for (let i = 0; i < size; i++) {
                                 let point = {};
-                                point.dt = dataView.getUint8(offset);
-                                offset += 1;
-                                point.x = dataView.getInt16(offset);
-                                offset += 2;
-                                point.y = dataView.getInt16(offset);
-                                offset += 2;
+                                point.dt = reader.readUint8();
+                                point.x = reader.readInt16();
+                                point.y = reader.readInt16();
                                 point.usedDt = 0;
                                 e.points.push(point);
                             }
@@ -86,41 +78,33 @@ class WebSocketHandler {
                         }
                         case 3: {
                             let e = {};
-                            e.documentId = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.documentId = reader.readBigInt64();
                             this.dispatchEvent('protocol.openDocument', e);
                             break;
                         }
                         case 4: {
                             let e = {};
-                            e.id = dataView.getBigInt64(offset);
-                            offset += 8;
-                            length = dataView.getUint8(offset);
-                            offset += 1;
-                            e.name = new TextDecoder().decode(event.data.slice(offset, offset + length));
-                            offset += length;
+                            e.id = reader.readBigInt64();
+                            e.name = reader.readString();
                             this.dispatchEvent('protocol.addDocument', e);
                             break;
                         }
                         case 5: {
                             let e = {};
-                            e.token = dataView.getBigInt64(offset);
-                            offset += 8;
-                            e.userId = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.token = reader.readBigInt64();
+                            e.userId = reader.readBigInt64();
                             this.dispatchEvent('protocol.handshake', e);
                             break;
                         }
                         case 6: {
                             let e = {};
                             e.user = {};
-                            e.user.id = dataView.getBigInt64(offset);
-                            offset += 8;
+                            e.user.id = reader.readBigInt64();
                             this.dispatchEvent('protocol.adduser', e);
                             break;
                         }
                         default:
-                            console.error('unknown payload type ' + type + ', offset ' + offset + ', event ', event);
+                            console.error('unknown payload type ' + type + ', offset ' + reader.position + ', event ', event);
                     }
                 }
             }

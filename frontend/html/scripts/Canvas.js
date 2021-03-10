@@ -1,4 +1,4 @@
-import {canvas, ctx} from "./Document";
+import {canvas, ctx} from "./Document.js";
 
 export class Canvas {
     constructor() {

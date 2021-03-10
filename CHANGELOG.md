@@ -82,3 +82,4 @@ Rework protocol, document serialization
 
 - Canvas objects instead of points
 - Rename packets to messages
+- Add better serialization/deserialization methods
