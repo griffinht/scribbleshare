@@ -152,10 +152,6 @@ class WebSocketHandler {
     }
 
     sendDraw(points) {
-        if (points.length === 0) {
-            return;
-        }
-
         let writer = new BufferWriter(new ArrayBuffer(1 + 1 + points.length * 5));
 
         writer.writeUint8(1);
@@ -166,8 +162,6 @@ class WebSocketHandler {
             writer.writeInt16(point.x);
             writer.writeInt16(point.y);
         });
-
-        points.length = 0;//clear
 
         this.send(writer.view.buffer);
     }

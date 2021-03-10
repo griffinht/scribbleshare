@@ -54,7 +54,10 @@ export default class LocalClient extends Client {
     
     update() {
         this.lastSend = performance.now();
-        socket.sendDraw(this.points);
+        if (this.points.length > 0) {
+            socket.sendDraw(this.points);
+            this.points.length = 0;
+        }
     }
 
     mousedown(event) {
