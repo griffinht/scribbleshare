@@ -47,10 +47,10 @@ public class Client {
         channel.writeAndFlush(Collections.singletonList(serverMessage));
     }
 
-    void sendMessages() {
+    void flushMessages() {
         if (messages.size() > 0) {
             channel.writeAndFlush(messages);
-            messages = new ArrayList<>();
+            messages.clear();
         }
     }
 

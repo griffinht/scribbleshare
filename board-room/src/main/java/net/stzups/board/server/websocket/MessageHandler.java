@@ -103,7 +103,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                         client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
                     }
                 }
-                client.sendMessages();
+                client.flushMessages();
 
                 break;
             }

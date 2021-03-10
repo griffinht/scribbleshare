@@ -81,36 +81,13 @@ class WebSocketHandler {
                                 point.usedDt = 0;
                                 e.points.push(point);
                             }
-                            this.dispatchEvent('protocol.draw', e);
+                            this.dispatchEvent('protocol.updateDocument', e);
                             break;
                         }
                         case 3: {
                             let e = {};
-                            e.document = {};
-                            e.document.id = dataView.getBigInt64(offset);
+                            e.documentId = dataView.getBigInt64(offset);
                             offset += 8;
-                            e.document.points = new Map();
-                            let length = dataView.getUint16(offset);
-                            offset += 2;
-                            for (let i = 0; i < length; i++) {
-                                let id = dataView.getBigInt64(offset);
-                                offset += 8;
-                                let size = dataView.getUint16(offset);
-                                offset += 2;
-                                let points = [];
-                                for (let i = 0; i < size; i++) {
-                                    let point = {};
-                                    point.dt = dataView.getUint8(offset);
-                                    offset += 1;
-                                    point.x = dataView.getInt16(offset);
-                                    offset += 2;
-                                    point.y = dataView.getInt16(offset);
-                                    offset += 2;
-                                    point.usedDt = 0;
-                                    points.push(point);
-                                }
-                                e.document.points.set(id, points);
-                            }
                             this.dispatchEvent('protocol.openDocument', e);
                             break;
                         }

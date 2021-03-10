@@ -6,6 +6,7 @@ import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,14 +19,12 @@ class Room {
     private static final int SEND_PERIOD = 1000;
 
     private static List<Room> rooms = new ArrayList<>();
-    static {//todo send some packets instantly and refactor to somewhere?
+    static {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 for (Room room : rooms) {
-                    for (Client client : room.clients) {
-                        client.sendMessages();
-                    }
+                    room.update();
                 }
             }
         }, 0, SEND_PERIOD);
@@ -60,8 +59,9 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        client.sendMessage(new ServerMessageOpenDocument(document));
+        //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
+        client.sendMessage(new ServerMessageOpenDocument(document));
         sendMessage(new ServerMessageAddClient(client));
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);
@@ -115,6 +115,18 @@ class Room {
         for (Client client : clients) {
             client.queueMessage(serverMessage);
         }
+    }
+
+    void flushMessages() {
+        for (Client client : clients) {
+            client.flushMessages();
+        }
+    }
+
+    private void update() {
+        ServerMessageUpdateDocument serverMessageUpdateDocument = new ServerMessageUpdateDocument(document);
+        queueMessage(serverMessageUpdateDocument);
+        flushMessages();
     }
 
     @Override

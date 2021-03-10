@@ -1,3 +1,5 @@
+import {Canvas} from "./Canvas";
+
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
@@ -19,13 +21,17 @@ class Document {
         this.sidebarItem = new SidebarItem(this.name, () => {
             if (this.id != null) {
                 if (activeDocument != null) activeDocument.close();
-                socket.sendOpen(this.id)
+
+                activeDocument = this.id;
+                activeDocument.open();
+
+                socket.sendOpen(this.id);
             } else {
                 console.log('id was null', this);
             }
         });
         documents.set(this.id, this);
-        this.points = {};
+        this.canvas = new Canvas();
     }
 
     open() {
@@ -34,32 +40,15 @@ class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
-        this.points.forEach((points, id) => {
-            ctx.beginPath();
-            points.forEach((point) => {
-                if (point.dt === 0) {
-                    ctx.stroke();//todo only do this at the end
-                    ctx.moveTo(point.x, point.y);
-                } else {
-                    ctx.lineTo(point.x, point.y);
-                }
-            })
-            ctx.stroke();
-        });
+        this.canvas.draw(-1);
         this.addClient(localClient);
     }
 
     close() {
         localClient.update();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
+        this.canvas.clear();
         this.clients.forEach((client) => {
             this.removeClient(client.id);
-        })
-    }
-
-    draw(dt) {
-        this.clients.forEach((client) => {
-            client.draw(dt);
         })
     }
 
@@ -97,7 +86,7 @@ function draw(now) {
     last = now;
 
     if (activeDocument != null) {
-        activeDocument.draw(dt);
+        activeDocument.canvas.draw(dt);
     }
 
     window.requestAnimationFrame(draw);
@@ -113,25 +102,10 @@ socket.addEventListener('protocol.removeClient', (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
 });
 socket.addEventListener('protocol.updateDocument', (event) => {
-    /*
-    let client = activeDocument.clients.get(event.id);
-    console.log(activeDocument.clients, event.id);
-    event.points.forEach((point) => {
-        client.points.push(point);
-    });*/
+    Object.assign(documents.get(event.document.id), event.document);
 });
 socket.addEventListener('protocol.addDocument', (event) => {
     documents.set(event.id, new Document(event.name, event.id));
-});
-socket.addEventListener('protocol.openDocument', (event) => {
-    if (activeDocument != null) {
-        activeDocument.close();
-    }
-
-    activeDocument = documents.get(event.document.id);
-    Object.assign(activeDocument, event.document);
-    activeDocument.open();
-
 });
 socket.addEventListener('protocol.handshake', (event) => {
     window.localStorage.setItem('token', event.token.toString());
@@ -148,7 +122,7 @@ socket.addEventListener('socket.open', () => {
     if (invite !== '') {
         try {
             let bigint = BigInt(invite);
-            socket.sendOpen(bigint);
+            //socket.sendOpen(bigint); todo
         } catch(e) {
             console.error('improper invite', invite);
         }
