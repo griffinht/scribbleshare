@@ -11,6 +11,8 @@ import * as User from "./User.js";
 import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageOpenDocument.js";
 import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
+import ServerMessageType from "./protocol/server/ServerMessageType.js";
+import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
 
 const documents = new Map();
 let activeDocument = null;
@@ -96,24 +98,24 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-socket.addEventListener('protocol.addClient', (event) => {
+socket.addMessageListener(ServerMessageType.ADD_CLIENT, (event) => {
     let client = new Client(event.id, User.getUser(event.userId));
     activeDocument.addClient(client);
     console.log('Add client ', client);
 });
-socket.addEventListener('protocol.removeClient', (event) => {
+socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
 });
-socket.addEventListener('protocol.updateDocument', (event) => {
+socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (event) => {
     Object.assign(documents.get(event.document.id), event.document);
 });
-socket.addEventListener('protocol.addDocument', (event) => {
+socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {
     documents.set(event.id, new Document(event.name, event.id));
 });
-socket.addEventListener('protocol.handshake', (event) => {
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
     window.localStorage.setItem('token', event.token.toString());
 })
-socket.addEventListener('socket.open', () => {
+socket.addEventListener(WebSocketHandlerType.OPEN, () => {
     let token = window.localStorage.getItem('token');
     if (token != null) {
         token = BigInt(window.localStorage.getItem('token'));

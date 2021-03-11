@@ -10,7 +10,8 @@ export default class BufferReader {
 
     readString() {//todo improve performance
         let length = this.readUint8();
-        return new TextDecoder().decode(this.view.buffer.slice(this.position, this.position + length));
+        this.position += length;
+        return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
     }
 
     readInt8() {
