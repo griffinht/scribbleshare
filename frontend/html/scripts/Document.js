@@ -1,7 +1,4 @@
-import {Canvas} from "./Canvas.js";
-
-export const canvas = document.getElementById('canvas');
-export const ctx = canvas.getContext('2d');
+import {canvas, Canvas, ctx} from "./Canvas.js";
 
 import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
