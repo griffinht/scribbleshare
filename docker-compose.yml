@@ -1,0 +1,26 @@
+services:
+    board-room:
+        image: board-room:0.3
+        build:
+            context: board-room
+            network: host
+        ports:
+            - "8080:8080"
+        environment:
+            board.ssl: "false"
+            board.postgres: "true"
+            board.postgres.url: "jdbc:postgresql://database:5432/postgres"
+            board.postgres.user: "postgres"
+            board.postgres.password: "changeme"
+    board-frontend:
+        image: board-frontend
+        build:
+            context: frontend
+        ports:
+            - "80:80"
+    database:
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: "changeme"
+        ports:
+            - "5432:5432"
