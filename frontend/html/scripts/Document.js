@@ -38,7 +38,9 @@ class Document {
     }
 
     update() {
-        socket.send(new ClientMessageUpdateDocument(this.canvas))
+        if (this.canvas.updatedObjects.size > 0) {
+            socket.send(new ClientMessageUpdateDocument(this.canvas))
+        }
     }
 
     open() {

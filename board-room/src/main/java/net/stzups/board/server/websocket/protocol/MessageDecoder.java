@@ -33,11 +33,11 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             System.out.println("recv " + packetType);
             ClientMessage message;
             switch (packetType) {
-                case UPDATE_DOCUMENT:
-                    message = new ClientMessageUpdateDocument(byteBuf);
-                    break;
                 case OPEN_DOCUMENT:
                     message = new ClientMessageOpenDocument(byteBuf);
+                    break;
+                case UPDATE_DOCUMENT:
+                    message = new ClientMessageUpdateDocument(byteBuf);
                     break;
                 case CREATE_DOCUMENT:
                     message = new ClientMessageCreateDocument();

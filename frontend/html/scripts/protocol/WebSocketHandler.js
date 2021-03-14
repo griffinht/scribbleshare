@@ -104,7 +104,7 @@ class WebSocketHandler {
     }
 
     dispatchMessageEvent(type, event) {
-        console.log(type);
+        console.log('recv', type, event);
         this.messageEvents[type].forEach(onevent => onevent(event));
     }
 

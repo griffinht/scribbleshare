@@ -1,5 +1,5 @@
 import Client from './Client.js'
-import {canvas} from "./canvas/Canvas.js";
+import {canvas, ctx} from "./canvas/Canvas.js";
 
 export default class LocalClient extends Client {
     constructor() {
@@ -12,6 +12,7 @@ export default class LocalClient extends Client {
         this.lastY = 0;
         this.refresh = true;
         this.points = [];
+        console.log('drawing');
         canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
         canvas.addEventListener('mouseup', (event) => {
             document.getElementsByTagName('body')[0].classList.remove('noselect');
@@ -23,6 +24,7 @@ export default class LocalClient extends Client {
         canvas.addEventListener('mouseenter', (event) => {this.mousedown(event)});
         canvas.addEventListener('mousemove', (event) => {
             if (event.buttons & 1 && this.point !== null) {
+                console.log('drawing');
                 ctx.beginPath();
                 ctx.moveTo(event.offsetX - event.movementX, event.offsetY - event.movementY);
                 ctx.lineTo(event.offsetX, event.offsetY);
@@ -48,6 +50,7 @@ export default class LocalClient extends Client {
     mousedown(event) {
         document.getElementsByTagName('body')[0].classList.add('noselect');
         if (event.buttons & 1) {
+            console.log('sdf');
             this.lastTime = performance.now();
             this.points.push({
                 dt:0,
