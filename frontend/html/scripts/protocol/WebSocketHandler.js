@@ -55,25 +55,25 @@ class WebSocketHandler {
                     let type = reader.readUint8();
                     let message;
                     switch (type) {
-                        case 0:
+                        case ServerMessageType.ADD_CLIENT:
                             message = new ServerMessageAddClient(reader);
                             break;
-                        case 1:
+                        case ServerMessageType.REMOVE_CLIENT:
                             message = new ServerMessageRemoveClient(reader);
                             break;
-                        case 2:
+                        case ServerMessageType.UPDATE_DOCUMENT:
                             message = new ServerMessageUpdateDocument(reader);
                             break;
-                        case 3:
+                        case ServerMessageType.OPEN_DOCUMENT:
                             message = new ServerMessageOpenDocument(reader);
                             break;
-                        case 4:
+                        case ServerMessageType.ADD_DOCUMENT:
                             message = new ServerMessageAddDocument(reader);
                             break;
-                        case 5:
+                        case ServerMessageType.HANDSHAKE:
                             message = new ServerMessageHandshake(reader);
                             break;
-                        case 6:
+                        case ServerMessageType.ADD_USER:
                             message = new ServerMessageAddUser(reader)
                             break;
                         default:
