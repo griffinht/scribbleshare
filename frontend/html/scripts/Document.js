@@ -1,4 +1,4 @@
-import {canvas, Canvas, ctx} from "./Canvas.js";
+import {canvas, Canvas, ctx} from "./canvas/Canvas.js";
 
 import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
@@ -24,7 +24,7 @@ class Document {
             if (this.id != null) {
                 if (activeDocument != null) activeDocument.close();
 
-                activeDocument = this.id;
+                activeDocument = this;
                 activeDocument.open();
 
                 socket.send(new ClientMessageOpenDocument());
@@ -72,12 +72,9 @@ document.getElementById('add').addEventListener('click', () => {
 
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
-    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let rect = canvas.parentNode.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    ctx.putImageData(imageData, 0, 0);
-    //todo redraw?
+    if (activeDocument != null) {
+        activeDocument.canvas.resize();
+    }
 }
 resizeCanvas();
 

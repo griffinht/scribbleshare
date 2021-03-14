@@ -1,5 +1,4 @@
-let ServerMessageType;
-export default ServerMessageType = {
+const ServerMessageType = {
     ADD_CLIENT:0,
     REMOVE_CLIENT:1,
     UPDATE_DOCUMENT:2,
@@ -8,3 +7,4 @@ export default ServerMessageType = {
     HANDSHAKE:5,
     ADD_USER:6,
 };
+export default ServerMessageType;

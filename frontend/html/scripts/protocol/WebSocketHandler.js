@@ -25,8 +25,6 @@ class WebSocketHandler {
             this.messageEvents[value] = [];
         });
 
-        console.log(this.events, this.messageEvents);
-
         let webSocketUrl;
         if (window.location.protocol === 'https:') {
             webSocketUrl = 'wss://localhost:' + HTTPS_PORT + '/websocket';

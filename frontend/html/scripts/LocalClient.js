@@ -1,6 +1,6 @@
 import Client from './Client.js'
 import socket from './protocol/WebSocketHandler.js'
-import {canvas, ctx} from "./Canvas.js";
+import {canvas, ctx} from "./canvas/Canvas.js";
 
 const UPDATE_INTERVAL = 1000;
 

@@ -13,13 +13,20 @@ public class Document {
     private String inviteCode;
     private Canvas canvas;
 
+    /**
+     * New document
+     */
     public Document(User owner) {
         this.id = BoardRoom.getSecureRandom().nextLong();
         this.owner = owner;
         owner.getOwnedDocuments().add(id);
         this.name = DEFAULT_DOCUMENT_NAME;
+        this.canvas = new Canvas();
     }
 
+    /**
+     * Serialize document from db
+     */
     public Document(long id, User owner, String name, ByteBuf byteBuf) {
         this.id = id;
         this.owner = owner;

@@ -1,6 +1,7 @@
 package net.stzups.board.data.objects.canvas.objects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.CanvasObject;
 import net.stzups.board.data.objects.canvas.CanvasObjectType;
 
@@ -20,8 +21,7 @@ public class Points extends CanvasObject {
     private Point[] points;
 
     public Points(ByteBuf byteBuf) {
-        super(CanvasObjectType.POINTS);
-        super.serialize(byteBuf);
+        super(CanvasObjectType.POINTS, byteBuf);
         points = new Point[byteBuf.readShort()];
         for (int i = 0; i < points.length; i++) {
             points[i] = new Point(byteBuf.readByte(), byteBuf.readShort(), byteBuf.readShort());

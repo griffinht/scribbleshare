@@ -13,12 +13,16 @@ public class Canvas {
     private Map<CanvasObjectType, List<CanvasObject>> canvasObjectsMap = new HashMap<>();
     private Map<CanvasObjectType, List<CanvasObject>> updatedCanvasObjectMap = new HashMap<>();
 
+    public Canvas() {
+
+    }
+
     public Canvas(ByteBuf byteBuf) {
-        for (int i = 0; i < byteBuf.readShort(); i++) {
-            CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readShort());
+        for (int i = 0; i < byteBuf.readUnsignedByte(); i++) {
+            CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
+            List<CanvasObject> objects = updatedCanvasObjectMap.computeIfAbsent(canvasObjectType, k -> new ArrayList<>());//get or initialize
             switch (canvasObjectType) {
                 case POINTS:
-                    List<CanvasObject> objects = updatedCanvasObjectMap.computeIfAbsent(canvasObjectType, k -> new ArrayList<>());//get or initialize
                     for (int j = 0; j < byteBuf.readShort(); i++) {
                         objects.add(new Points(byteBuf));
                     }
@@ -27,13 +31,13 @@ public class Canvas {
                     throw new IllegalArgumentException("Unknown canvas object type ");
             }
         }
-        for (Map.Entry<CanvasObjectType, List<CanvasObject>> canvasObjects : canvasObjectsMap.entrySet()) {
+        /*for (Map.Entry<CanvasObjectType, List<CanvasObject>> canvasObjects : canvasObjectsMap.entrySet()) {
             byteBuf.writeByte((byte) canvasObjects.getKey().getId());
             byteBuf.writeShort(canvasObjects.getValue().size());
             for (CanvasObject canvasObject : canvasObjects.getValue()) {
-                canvasObject.serialize(byteBuf);
+                canvasObject.serialize(byteBuf);.
             }
-        }
+        }*/
     }
 
     public void update(Client client, Canvas canvas) {//canvas will be discarded
@@ -43,9 +47,10 @@ public class Canvas {
     }
 
     public void serialize(ByteBuf byteBuf, Map<CanvasObjectType, List<CanvasObject>> canvasObjectsMap) {
-        byteBuf.writeShort((short) canvasObjectsMap.size());
+        byteBuf.writeByte(canvasObjectsMap.size());
         for (Map.Entry<CanvasObjectType, List<CanvasObject>> canvasObjects : canvasObjectsMap.entrySet()) {
-            byteBuf.writeShort((short) canvasObjects.getKey().getId());
+            byteBuf.writeShort((short) canvasObjects.getValue().size());
+            byteBuf.writeByte((short) canvasObjects.getKey().getId());
             byteBuf.writeShort(canvasObjects.getValue().size());
             for (CanvasObject canvasObject : canvasObjects.getValue()) {
                 canvasObject.serialize(byteBuf);
