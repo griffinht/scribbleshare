@@ -111,9 +111,9 @@ class WebSocketHandler {
     send(message) {
         if (this.socket.readyState === WebSocket.OPEN) {
             console.log('send', message);
-            let buffer = new ArrayBuffer(message.getBufferSize());
-            message.serialize(new BufferWriter(buffer))
-            this.socket.send(buffer);
+            let writer = new BufferWriter(message.getBufferSize());
+            message.serialize(writer);
+            this.socket.send(writer.getBuffer());
         } else {
             console.error('tried to send message while websocket was closed', message);
         }

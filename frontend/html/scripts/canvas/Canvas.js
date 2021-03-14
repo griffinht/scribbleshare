@@ -1,4 +1,5 @@
 import {CanvasObjectType} from "./CanvasObjectType.js";
+import Points from "./canvasObjects/Points.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -27,8 +28,8 @@ export class Canvas {
 
     draw(dt) {
         //todo
-        this.objects.forEach((objectType, objs) => {
-            objs.forEach((object) => {
+        this.objects.forEach((type, objects) => {
+            objects.forEach((object) => {
                 object.draw(dt);
             })
             /*ctx.beginPath();
@@ -103,6 +104,10 @@ export class Canvas {
 
     }
 
+    updateObject(object) {
+
+    }
+
     clear() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
     }
@@ -117,13 +122,18 @@ export class Canvas {
     }
 
     serialize(writer) {
+        writer.writeUint8(this.updatedObjects.size);
         this.updatedObjects.forEach((type, objects) => {
-            writer.writeUint16(objects.size());
             writer.writeUint8(type);
+            writer.writeUint16(objects.size());
             objects.forEach((object) => {
                 object.serialize(writer);
             })
         })
+        this.objects.forEach((type, objects) => {
+
+        })
+        this.updatedObjects.clear();
     }
 }
 

@@ -1,8 +1,5 @@
 import Client from './Client.js'
-import socket from './protocol/WebSocketHandler.js'
-import {canvas, ctx} from "./canvas/Canvas.js";
-
-const UPDATE_INTERVAL = 1000;
+import {canvas} from "./canvas/Canvas.js";
 
 export default class LocalClient extends Client {
     constructor() {
@@ -45,19 +42,7 @@ export default class LocalClient extends Client {
                 this.lastTime = now;
             }
         });
-        setInterval(() => this.update(), UPDATE_INTERVAL);
-    }
 
-    draw(dt) {
-        this.lastSend = performance.now();
-    }
-    
-    update() {
-        this.lastSend = performance.now();
-        if (this.points.length > 0) {
-            socket.sendDraw(this.points);//todo
-            this.points.length = 0;
-        }
     }
 
     mousedown(event) {

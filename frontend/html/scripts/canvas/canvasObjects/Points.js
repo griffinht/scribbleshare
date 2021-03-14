@@ -1,9 +1,8 @@
 import {CanvasObjectType} from "../CanvasObjectType.js";
 import CanvasObject from "../CanvasObject.js";
-import {ctx} from "./Canvas.js";
 
 
-class Points extends CanvasObject {
+export default class Points extends CanvasObject {
     constructor(reader) {
         super(CanvasObjectType.POINTS, reader);
         this.points = [];

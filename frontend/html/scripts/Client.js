@@ -2,9 +2,7 @@ export default class Client {
     constructor(id, user) {
         this.id = id;
         this.user = user;
-        this.x = 0;
-        this.y = 0;
-        this.points = [];
+        //tooltip
         this.icon = document.createElement('img');
         this.icon.setAttribute('src', 'assets/default.png');
         this.icon.addEventListener('mouseenter', (event) => {

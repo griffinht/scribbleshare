@@ -1,5 +1,4 @@
-import {canvas, Canvas, ctx} from "./canvas/Canvas.js";
-
+import {Canvas} from "./canvas/Canvas.js";
 import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
@@ -10,7 +9,9 @@ import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessag
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
+import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 
+const UPDATE_INTERVAL = 1000;
 const documents = new Map();
 let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
@@ -27,13 +28,17 @@ class Document {
                 activeDocument = this;
                 activeDocument.open();
 
-                socket.send(new ClientMessageOpenDocument());
+                socket.send(new ClientMessageOpenDocument(this.id));
             } else {
                 console.log('id was null', this);
             }
         });
         documents.set(this.id, this);
         this.canvas = new Canvas();
+    }
+
+    update() {
+        socket.send(new ClientMessageUpdateDocument(this.canvas))
     }
 
     open() {
@@ -109,6 +114,9 @@ socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {
 socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
     window.localStorage.setItem('token', event.token.toString());
 })
+socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (event) => {
+
+})
 socket.addEventListener(WebSocketHandlerType.OPEN, () => {
     let token = window.localStorage.getItem('token');
     if (token != null) {
@@ -133,5 +141,11 @@ const localClient = new LocalClient();
 const inviteButton = document.getElementById("inviteButton");
 
 inviteButton.addEventListener('click', (event) => {
-
+    console.log('invite');
 })
+
+setInterval(() => {
+    if (activeDocument != null) {
+        activeDocument.update()
+    }
+}, UPDATE_INTERVAL);
