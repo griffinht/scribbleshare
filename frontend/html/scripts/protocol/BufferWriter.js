@@ -75,9 +75,9 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
     checkResize(extraLength) {//todo not very efficient
         let targetLength = this.position + extraLength;
         if (targetLength > this.view.byteLength) {
-            let buffer = new Uint8Array(targetLength);
-            buffer.set(this.view.buffer);
-            this.view = new DataView(buffer.buffer);
+            let buffer = new ArrayBuffer(targetLength);
+            copy(this.view.buffer, buffer)
+            this.view = new DataView(buffer);
         }
     }
 
@@ -88,4 +88,10 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
             return this.view.buffer;
         }
     }
+}
+
+function copy(sourceBuffer, destinationBuffer) {
+    let sourceArray = new Uint8Array(sourceBuffer);
+    let destinationArray = new Uint8Array(destinationBuffer);
+    destinationArray.set(sourceArray);
 }
