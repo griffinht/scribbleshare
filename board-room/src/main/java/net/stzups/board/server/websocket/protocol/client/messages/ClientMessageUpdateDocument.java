@@ -1,19 +1,24 @@
 package net.stzups.board.server.websocket.protocol.client.messages;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.data.objects.canvas.Canvas;
+import net.stzups.board.data.objects.canvas.object.wrappers.CanvasObjectsStateWrapper;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 
+import java.util.Map;
+
 public class ClientMessageUpdateDocument extends ClientMessage {
-    private Canvas canvas;
+    private Map<Short, CanvasObjectsStateWrapper> map;
 
     public ClientMessageUpdateDocument(ByteBuf byteBuf) {
         super(ClientMessageType.UPDATE_DOCUMENT);
-        this.canvas = new Canvas(byteBuf);
+        for (int i = 0; i < byteBuf.readUnsignedShort(); i++) {
+            CanvasObjectsStateWrapper canvasObjectsStateWrapper = new CanvasObjectsStateWrapper(byteBuf);
+            map.put(canvasObjectsStateWrapper.getId(), canvasObjectsStateWrapper);
+        }
     }
 
-    public Canvas getCanvas() {
-        return canvas;
+    public Map<Short, CanvasObjectsStateWrapper> getMap() {
+        return map;
     }
 }

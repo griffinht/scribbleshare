@@ -40,7 +40,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
         switch (message.getMessageType()) {
             case UPDATE_DOCUMENT: {
-                room.getDocument().getCanvas().update(client, ((ClientMessageUpdateDocument) message).getCanvas());
+                room.getDocument().getCanvas().update(client.getUser(), ((ClientMessageUpdateDocument) message).getMap());
                 break;
             }
             case OPEN_DOCUMENT: {
