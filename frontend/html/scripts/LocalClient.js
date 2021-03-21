@@ -3,6 +3,7 @@ import {canvas, ctx} from "./canvas/Canvas.js";
 import socket from "./protocol/WebSocketHandler.js"
 import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 import Shape from "./canvas/canvasObjects/Shape.js";
+import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 
 export default class LocalClient extends Client {
     constructor() {
@@ -48,9 +49,12 @@ export default class LocalClient extends Client {
             }
         });*/
         canvas.addEventListener('click', (event) => {
-            let shape = new Shape(event.offsetX, event.offsetY, 50, 50);
-
-            socket.send(new ClientMessageUpdateDocument(shape));
+            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+            let canvasObjects = new Map();
+            let map = new Map();
+            map.set((Math.random() - 0.5) * 32000, shape);
+            canvasObjects.set(CanvasObjectType.SHAPE, map);
+            socket.send(new ClientMessageUpdateDocument(canvasObjects));
         })
 
     }

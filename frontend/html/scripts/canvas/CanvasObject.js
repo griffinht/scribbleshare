@@ -1,9 +1,9 @@
 import {ctx} from "./Canvas.js";
 
 export default class CanvasObject {
-    constructor(props) {
-        this.x = props.readInt16();
-        this.y = props.readInt16();
+    constructor(reader) {
+        this.x = reader.readInt16();
+        this.y = reader.readInt16();
     }
 
     draw() {

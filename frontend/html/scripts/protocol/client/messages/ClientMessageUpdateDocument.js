@@ -10,6 +10,7 @@ export default class ClientMessageUpdateDocument extends ClientMessage {
     serialize(writer) {
         super.serialize(writer);
         writer.writeUint8(this.canvasObjects.size);
+        console.log(this.canvasObjects);
         this.canvasObjects.forEach((value, key) => {
             writer.writeUint8(key);
             writer.writeUint8(value.size);
