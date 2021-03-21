@@ -35,32 +35,20 @@ public class Canvas {
                 canvasObjects.put(entry.getKey(), entry.getValue());
             } else {
                 for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
-                    CanvasObject canvasObject = map.replace(entry1.getKey(), entry1.getValue());
-                    if (canvasObject != null) {
-                        //todo update with new value
-                    }
+                    map.put(entry1.getKey(), entry1.getValue());
                 }
             }
         }
     }
 
     public void delete(Map<CanvasObjectType, Map<Short, CanvasObject>> deleteCanvasObjects) {
-        //Map<CanvasObjectType, Map<Short, CanvasObject>> updatedCanvasObjects = null;
-
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : deleteCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
             if (map == null) {
                 System.out.println("cant delete " + entry.getKey() + ", its already gone");
             } else {
                 for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
-                    CanvasObject canvasObject = map.remove(entry1.getKey());
-                    if (canvasObject != null) {
-                        /*if (updatedCanvasObjects == null) {//lazy allocation only if there are values to be updated
-                            updatedCanvasObjects = new HashMap<>();
-                        }*/
-
-                        //todo delete and update
-                    }
+                    map.remove(entry1.getKey());
                 }
             }
         }

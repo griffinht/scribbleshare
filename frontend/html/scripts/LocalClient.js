@@ -1,10 +1,13 @@
 import Client from './Client.js'
 import {canvas, ctx} from "./canvas/Canvas.js";
+import socket from "./protocol/WebSocketHandler.js"
+import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
+import Shape from "./canvas/canvasObjects/Shape.js";
 
 export default class LocalClient extends Client {
     constructor() {
         super(-1);
-        this.point = null;
+        /*this.point = null;
         this.lastTime = 0;
         this.lastSend = 0;
         this.lastDirection = 0;
@@ -12,8 +15,8 @@ export default class LocalClient extends Client {
         this.lastY = 0;
         this.refresh = true;
         this.points = [];
-        console.log('drawing');
-        canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
+        console.log('drawing');*/
+        /*canvas.addEventListener('mousedown', (event) => {this.mousedown(event)});
         canvas.addEventListener('mouseup', (event) => {
             document.getElementsByTagName('body')[0].classList.remove('noselect');
             if (this.point !== null) {
@@ -43,11 +46,16 @@ export default class LocalClient extends Client {
                 }
                 this.lastTime = now;
             }
-        });
+        });*/
+        canvas.addEventListener('click', (event) => {
+            let shape = new Shape(event.offsetX, event.offsetY, 50, 50);
+
+            socket.send(new ClientMessageUpdateDocument(shape));
+        })
 
     }
 
-    mousedown(event) {
+    /*mousedown(event) {
         document.getElementsByTagName('body')[0].classList.add('noselect');
         if (event.buttons & 1) {
             console.log('sdf');
@@ -74,5 +82,5 @@ export default class LocalClient extends Client {
             this.points.push(this.point);
             this.lastDirection = Math.atan2(this.point.y, this.point.x);
         }
-    }
+    }*/
 }

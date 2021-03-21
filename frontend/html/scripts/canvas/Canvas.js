@@ -1,6 +1,5 @@
+import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
-import Points from "./canvasObjects/Points.js";
-import CanvasObject from "./CanvasObject.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -8,14 +7,14 @@ export const ctx = canvas.getContext('2d');
 
 export class Canvas {
     constructor(reader) {
-        this.objects = new Map();
+        this.canvasObjects = new Map();
         if (reader != null) {
             for (let i = 0; i < reader.readUint8(); i++) {
                 let type = reader.readUint8();
                 let map = new Map();
-                this.objects.set(type, map);
+                this.canvasObjects.set(type, map);
                 for (let j = 0; j < reader.readUint16(); j++) {
-                    map.set(reader.readInt16(), CanvasObjectUtil.getCanvasObject(type, reader));
+                    map.set(reader.readInt16(), getCanvasObject(type, reader));
                 }
             }
         }
@@ -23,10 +22,10 @@ export class Canvas {
 
     draw(dt) {
         //todo
-        this.objects.forEach((type, objects) => {
+        /*this.objects.forEach((type, objects) => {
             objects.forEach((object) => {
                 object.draw(dt);
-            })
+            })*/
             /*ctx.beginPath();
             points.forEach((point) => {
                 if (point.dt === 0) {
@@ -37,7 +36,7 @@ export class Canvas {
                 }
             })
             ctx.stroke();*/
-        });
+        //});
         /*client draw
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
@@ -95,12 +94,30 @@ export class Canvas {
         this.dispatchEvent('protocol.updateDocument', e);*/
     }
 
-    update(canvas) {
-
+    update(updateCanvasObjects) {
+        updateCanvasObjects.forEach((value, key) => {
+            let map = this.canvasObjects.get(key);
+            if (map == null) {
+                this.canvasObjects.set(key, value);
+            } else {
+                value.forEach((v, k) => {
+                    map.set(k, v);
+                });
+            }
+        });
     }
 
-    updateObject(object) {
-
+    delete(deleteCanvasObjects) {
+        deleteCanvasObjects.forEach((value, key) => {
+            let map = this.canvasObjects.get(key);
+            if (map == null) {
+                console.warn('cant delete ' + key + ' its already gone');
+            } else {
+                value.forEach((v, k) => {
+                    map.remove(k);
+                });
+            }
+        });
     }
 
     clear() {
@@ -115,23 +132,20 @@ export class Canvas {
         ctx.putImageData(imageData, 0, 0);
         //todo redraw?
     }
-
-    serialize(writer) {
-        writer.writeUint8(this.updatedObjects.size);
-        this.updatedObjects.forEach((type, objects) => {
-            writer.writeUint8(type);
-            writer.writeUint16(objects.size());
-            objects.forEach((object) => {
-                object.serialize(writer);
-            })
-        })
-        this.objects.forEach((type, objects) => {
-
-        })
-        this.updatedObjects.clear();
-    }
 }
 
 function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t;
+}
+
+
+function getCanvasObject(type, reader) {
+    let object;
+    switch (type) {
+        case CanvasObjectType.SHAPE:
+            object = new Shape(reader);
+        default:
+            console.error('unknown type ' + type);
+    }
+    return object;
 }

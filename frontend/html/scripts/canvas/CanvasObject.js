@@ -1,13 +1,12 @@
 import {ctx} from "./Canvas.js";
 
 export default class CanvasObject {
-    constructor(type, reader) {
-        this.type = type;
-        this.x = reader.readInt16();
-        this.y = reader.readInt16();
+    constructor(props) {
+        this.x = props.readInt16();
+        this.y = props.readInt16();
     }
 
-    draw(dt) {
+    draw() {
         ctx.fillRect(this.x, this.y, 10, 10);
     }
 

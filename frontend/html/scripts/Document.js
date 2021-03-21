@@ -38,9 +38,7 @@ class Document {
     }
 
     update() {
-        if (this.canvas.updatedObjects.size > 0) {
-            socket.send(new ClientMessageUpdateDocument(this.canvas))
-        }
+
     }
 
     open() {
@@ -145,7 +143,6 @@ const inviteButton = document.getElementById("inviteButton");
 inviteButton.addEventListener('click', (event) => {
     console.log('invite');
 })
-
 setInterval(() => {
     if (activeDocument != null) {
         activeDocument.update()
