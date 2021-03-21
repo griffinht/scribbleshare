@@ -18,6 +18,6 @@ public class ServerMessageUpdateDocument extends ServerMessage {
 
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        document.getCanvas().serialize(user, byteBuf);
+        //document.getCanvas().serialize(user, byteBuf);
     }
 }

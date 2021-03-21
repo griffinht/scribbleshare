@@ -1,5 +1,6 @@
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import Points from "./canvasObjects/Points.js";
+import CanvasObject from "./CanvasObject.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -8,19 +9,13 @@ export const ctx = canvas.getContext('2d');
 export class Canvas {
     constructor(reader) {
         this.objects = new Map();
-        this.updatedObjects = new Map();
         if (reader != null) {
             for (let i = 0; i < reader.readUint8(); i++) {
                 let type = reader.readUint8();
-                if (this.objects.get(CanvasObjectType.POINTS) == null) {
-                    this.objects.set(CanvasObjectType.POINTS, []);
-                }
-                switch (type) {
-                    case CanvasObjectType.POINTS:
-                        let objects = this.objects.get(CanvasObjectType.POINTS);
-                        for (let j = 0; j < reader.readUint8(); j++) {
-                            objects.push(new Points(reader));
-                        }
+                let map = new Map();
+                this.objects.set(type, map);
+                for (let j = 0; j < reader.readUint16(); j++) {
+                    map.set(reader.readInt16(), CanvasObjectUtil.getCanvasObject(type, reader));
                 }
             }
         }

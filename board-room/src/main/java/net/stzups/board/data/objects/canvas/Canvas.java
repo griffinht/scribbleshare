@@ -1,74 +1,80 @@
 package net.stzups.board.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.BoardRoom;
-import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.canvas.object.wrappers.CanvasObjectsStateWrapper;
-import net.stzups.board.data.objects.canvas.object.wrappers.CanvasObjectsWrapper;
+import net.stzups.board.data.objects.canvas.object.CanvasObject;
+import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Canvas {
-    private Map<User, List<CanvasObjectsWrapper>> canvasObjects = new LinkedHashMap<>();
-    private CanvasState canvasState = new CanvasState();
+    private Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
     public Canvas() {
 
     }
 
     /**
-     * Deserializes canvas from db or client i guess?
+     * Deserializes canvas from db
      */
     public Canvas(ByteBuf byteBuf) {
-        for (int i = 0; i < byteBuf.readUnsignedShort(); i++) {
-            User user = BoardRoom.getDatabase().getUser(byteBuf.readLong());//todo slow and blocking probably
-            List<CanvasObjectsWrapper> list = new ArrayList<>();
-            canvasObjects.put(user, list);
+        for (int i = 0; i < byteBuf.readUnsignedByte(); i++) {
+            CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
+            Map<Short, CanvasObject> map = new HashMap<>();
+            canvasObjects.put(canvasObjectType, map);
             for (int j = 0; j < byteBuf.readUnsignedShort(); j++) {
-                list.add(new CanvasObjectsWrapper(byteBuf));
+                map.put(byteBuf.readShort(), CanvasObject.getCanvasObject(canvasObjectType, byteBuf));
             }
         }
     }
 
-    /**
-     * Adds a partial canvas from a client to this canvas, will then be updated
-     */
-    public void update(User user, Map<Short, CanvasObjectsStateWrapper> map) {//canvas will be discarded
-        canvasState.update(user, map);
-    }
-
-    /**
-     * Write everything to buffer
-     */
-    public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeShort((short) canvasObjects.size());
-        for (Map.Entry<User, List<CanvasObjectsWrapper>> entry : canvasObjects.entrySet()) {
-            serialize(entry, byteBuf);
+    public void update(Map<CanvasObjectType, Map<Short, CanvasObject>> updateCanvasObjects) {
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : updateCanvasObjects.entrySet()) {
+            Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
+            if (map == null) {
+                canvasObjects.put(entry.getKey(), entry.getValue());
+            } else {
+                for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
+                    CanvasObject canvasObject = map.replace(entry1.getKey(), entry1.getValue());
+                    if (canvasObject != null) {
+                        //todo update with new value
+                    }
+                }
+            }
         }
     }
 
-    /**
-     * Write only updated objects, should only be called once per update and shared
-     */
-    public void serialize(User user, ByteBuf byteBuf) {
-        canvasState.serialize(user, byteBuf);
+    public void delete(Map<CanvasObjectType, Map<Short, CanvasObject>> deleteCanvasObjects) {
+        //Map<CanvasObjectType, Map<Short, CanvasObject>> updatedCanvasObjects = null;
+
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : deleteCanvasObjects.entrySet()) {
+            Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
+            if (map == null) {
+                System.out.println("cant delete " + entry.getKey() + ", its already gone");
+            } else {
+                for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
+                    CanvasObject canvasObject = map.remove(entry1.getKey());
+                    if (canvasObject != null) {
+                        /*if (updatedCanvasObjects == null) {//lazy allocation only if there are values to be updated
+                            updatedCanvasObjects = new HashMap<>();
+                        }*/
+
+                        //todo delete and update
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * Flushes the updates or something
-     */
-    public void flush() {
-        canvasState.clear();
-    }
-
-    public void serialize(Map.Entry<User, List<CanvasObjectsWrapper>> entry, ByteBuf byteBuf) {
-        byteBuf.writeLong(entry.getKey().getId());
-        byteBuf.writeShort((short) entry.getValue().size());
-        for (CanvasObjectsWrapper canvasObjectWrapper : entry.getValue()) {
-            canvasObjectWrapper.serialize(byteBuf);
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeByte((byte) canvasObjects.size());
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : canvasObjects.entrySet()) {
+            byteBuf.writeByte((byte) entry.getKey().getId());
+            byteBuf.writeShort((short) entry.getValue().size());
+            for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
+                byteBuf.writeShort(entry1.getKey());
+                entry1.getValue().serialize(byteBuf);
+            }
         }
     }
 }

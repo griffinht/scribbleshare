@@ -1,6 +1,9 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import {Canvas} from "../../../canvas/Canvas.js"
+import {CanvasObjectType} from "../../../canvas/CanvasObjectType.js";
+import Points from "../../../canvas/canvasObjects/Points.js";
+import CanvasObject from "../../../canvas/CanvasObject.js";
 
 export default class ServerMessageOpenDocument extends ServerMessage {
     constructor(reader) {

@@ -124,10 +124,6 @@ class Room {
     }
 
     private void update() {
-        for (Client client : clients) {
-            client.queueMessage(new ServerMessageUpdateDocument(client.getUser(), document));
-        }
-        document.getCanvas().flush();
         flushMessages();
     }
 

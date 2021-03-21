@@ -8,7 +8,7 @@ export default class ShapeTool extends Tool {
     onEvent(document, event) {
         switch (event.type) {
             case 'click':
-                document.canvas.addObject(new ShapeObject());
+                document.canvas.addObject(new Shape());
                 break;
         }
     }
