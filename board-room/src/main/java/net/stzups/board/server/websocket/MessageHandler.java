@@ -7,7 +7,6 @@ import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
@@ -39,7 +38,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
         switch (message.getMessageType()) {
-            case UPDATE_DOCUMENT: {
+            case UPDATE_CANVAS: {
                 //room.getDocument().getCanvas().update(client.getUser(), ((ClientMessageUpdateDocument) message).getCanvasState());
                 break;
             }

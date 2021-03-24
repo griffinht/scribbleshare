@@ -9,7 +9,7 @@ import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessag
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
-import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
+import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
 
 const UPDATE_INTERVAL = 1000;
 const documents = new Map();
@@ -105,7 +105,7 @@ socket.addMessageListener(ServerMessageType.ADD_CLIENT, (event) => {
 socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
 });
-socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (event) => {
+socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
     Object.assign(documents.get(event.document.id), event.document);
 });
 socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {

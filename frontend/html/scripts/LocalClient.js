@@ -1,7 +1,7 @@
 import Client from './Client.js'
 import {canvas, ctx} from "./canvas/Canvas.js";
 import socket from "./protocol/WebSocketHandler.js"
-import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
+import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
 import Shape from "./canvas/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 
@@ -54,7 +54,7 @@ export default class LocalClient extends Client {
             let map = new Map();
             map.set((Math.random() - 0.5) * 32000, shape);
             canvasObjects.set(CanvasObjectType.SHAPE, map);
-            socket.send(new ClientMessageUpdateDocument(canvasObjects));
+            socket.send(new ClientMessageUpdateCanvas(canvasObjects));
         })
 
     }

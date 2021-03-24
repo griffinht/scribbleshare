@@ -1,9 +1,9 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
 
-export default class ClientMessageUpdateDocument extends ClientMessage {
+export default class ClientMessageUpdateCanvas extends ClientMessage {
     constructor(canvasObjects) {
-        super(ClientMessageType.UPDATE_DOCUMENT);
+        super(ClientMessageType.UPDATE_CANVAS);
         this.canvasObjects = canvasObjects;
     }
 

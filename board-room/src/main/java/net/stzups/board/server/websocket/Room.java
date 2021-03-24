@@ -7,7 +7,7 @@ import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
-import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,7 +133,7 @@ class Room {
                 if (c == client) continue;
                 canvasMap.put(client, client.getCanvas());
             }
-            client.queueMessage(new ServerMessageUpdateDocument(canvasMap));
+            client.queueMessage(new ServerMessageUpdateCanvas(canvasMap));
         }
         flushMessages();
         for (Client client : clients) {

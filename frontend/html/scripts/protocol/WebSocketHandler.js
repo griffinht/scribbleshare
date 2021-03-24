@@ -3,7 +3,7 @@ import BufferWriter from "./BufferWriter.js";
 import ServerMessageAddClient from "./server/messages/ServerMessageAddClient.js";
 import ServerMessageRemoveClient from "./server/messages/ServerMessageRemoveClient.js";
 import ServerMessageOpenDocument from "./server/messages/ServerMessageOpenDocument.js";
-import ServerMessageUpdateDocument from "./server/messages/ServerMessageUpdateDocument.js";
+import ServerMessageUpdateCanvas from "./server/messages/ServerMessageUpdateCanvas.js";
 import ServerMessageAddDocument from "./server/messages/ServerMessageAddDocument.js";
 import ServerMessageHandshake from "./server/messages/ServerMessageHandshake.js";
 import ServerMessageAddUser from "./server/messages/ServerMessageAddUser.js";
@@ -61,8 +61,8 @@ class WebSocketHandler {
                         case ServerMessageType.REMOVE_CLIENT:
                             message = new ServerMessageRemoveClient(reader);
                             break;
-                        case ServerMessageType.UPDATE_DOCUMENT:
-                            message = new ServerMessageUpdateDocument(reader);
+                        case ServerMessageType.UPDATE_CANVAS:
+                            message = new ServerMessageUpdateCanvas(reader);
                             break;
                         case ServerMessageType.OPEN_DOCUMENT:
                             message = new ServerMessageOpenDocument(reader);
