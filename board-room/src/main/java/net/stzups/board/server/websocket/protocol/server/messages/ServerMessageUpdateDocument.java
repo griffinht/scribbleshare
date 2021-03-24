@@ -3,21 +3,30 @@ package net.stzups.board.server.websocket.protocol.server.messages;
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.canvas.Canvas;
+import net.stzups.board.data.objects.canvas.object.CanvasObject;
+import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
+import net.stzups.board.server.websocket.Client;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.ServerMessageType;
 
-public class ServerMessageUpdateDocument extends ServerMessage {
-    private User user;
-    private Document document;
+import java.util.HashMap;
+import java.util.Map;
 
-    public ServerMessageUpdateDocument(User user, Document document) {
+public class ServerMessageUpdateDocument extends ServerMessage {
+    private Map<Client, Canvas> canvasMap;
+
+    public ServerMessageUpdateDocument(Map<Client, Canvas> canvasMap) {
         super(ServerMessageType.UPDATE_DOCUMENT);
-        this.user = user;
-        this.document = document;
+        this.canvasMap = canvasMap;
     }
 
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        //document.getCanvas().serialize(user, byteBuf);
+        byteBuf.writeShort((short) canvasMap.size());
+        for (Map.Entry<Client, Canvas> entry : canvasMap.entrySet()) {
+            byteBuf.writeShort(entry.getKey().getId());
+            entry.getValue().serialize(byteBuf);
+        }
     }
 }

@@ -2,6 +2,7 @@ package net.stzups.board.server.websocket;
 
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
@@ -9,8 +10,10 @@ import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageR
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -124,7 +127,18 @@ class Room {
     }
 
     private void update() {
+        for (Client client : clients) {
+            Map<Client, Canvas> canvasMap = new HashMap<>();
+            for (Client c : clients) {
+                if (c == client) continue;
+                canvasMap.put(client, client.getCanvas());
+            }
+            client.queueMessage(new ServerMessageUpdateDocument(canvasMap));
+        }
         flushMessages();
+        for (Client client : clients) {
+            client.getCanvas().clear();
+        }
     }
 
     @Override

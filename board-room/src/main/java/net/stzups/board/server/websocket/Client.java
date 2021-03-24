@@ -3,6 +3,7 @@ package net.stzups.board.server.websocket;
 import io.netty.channel.Channel;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class Client {
     private User user;
     private Channel channel;
     private short id;
+    private Canvas canvas = new Canvas();
 
     private List<ServerMessage> messages = new ArrayList<>();
 
@@ -61,6 +63,10 @@ public class Client {
             e.printStackTrace();
         }
     }
+
+     public Canvas getCanvas() {
+        return canvas;
+     }
 
     @Override
     public String toString() {
