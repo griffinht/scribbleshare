@@ -106,7 +106,6 @@ export class Canvas {
     }
 
     update(updateCanvasObjects) {
-        console.log(updateCanvasObjects);
         updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
             if (map == null) {
@@ -117,7 +116,6 @@ export class Canvas {
                 });
             }
         });
-        console.log(this.canvasObjects);
     }
 
     delete(deleteCanvasObjects) {
@@ -138,11 +136,7 @@ export class Canvas {
     }
 
     resize() {
-        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let rect = canvas.parentNode.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        ctx.putImageData(imageData, 0, 0);
+
         //todo redraw?
     }
 }
