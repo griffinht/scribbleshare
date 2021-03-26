@@ -52,7 +52,7 @@ public class Client {
     void flushMessages() {
         if (messages.size() > 0) {
             channel.writeAndFlush(messages);
-            messages.clear();
+            messages = new ArrayList<>();//clear() won't work here as the above line does not block and writes later
         }
     }
 
@@ -68,8 +68,17 @@ public class Client {
         return canvas;
      }
 
+     public void test() {
+        canvas = new Canvas();
+     }
+
     @Override
     public String toString() {
         return "Client{user=" + user + ",address=" + channel.remoteAddress() + "}";
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

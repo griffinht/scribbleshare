@@ -77,4 +77,8 @@ public class Canvas {
             }
         }
     }
+
+    public boolean isEmpty() {
+        return canvasObjects.isEmpty();
+    }
 }

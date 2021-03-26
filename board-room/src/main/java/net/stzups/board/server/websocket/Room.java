@@ -135,16 +135,21 @@ class Room {
 
     private void update() {
         for (Client client : clients) {
-            Map<Client, Canvas> canvasMap = new HashMap<>();
+            Map<Client, Canvas> canvasMap = new HashMap<>();//todo lazy allocate
             for (Client c : clients) {
                 if (c == client) continue;
-                canvasMap.put(client, client.getCanvas());
+
+                if (!c.getCanvas().isEmpty()) {
+                    canvasMap.put(c, c.getCanvas());
+                }
             }
-            client.queueMessage(new ServerMessageUpdateCanvas(canvasMap));
+            if (canvasMap.size() > 0) {
+                client.queueMessage(new ServerMessageUpdateCanvas(canvasMap));
+            }
         }
         flushMessages();
         for (Client client : clients) {
-            client.getCanvas().clear();
+            client.test();
         }
     }
 
