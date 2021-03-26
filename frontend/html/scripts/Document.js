@@ -127,7 +127,7 @@ socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
     window.localStorage.setItem('token', event.token.toString());
 })
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (event) => {
-
+    activeDocument.canvas.update(event.canvas.canvasObjects);
 })
 socket.addEventListener(WebSocketHandlerType.OPEN, () => {
     let token = window.localStorage.getItem('token');
