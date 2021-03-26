@@ -9,11 +9,13 @@ export class Canvas {
     constructor(reader) {
         this.canvasObjects = new Map();
         if (reader != null) {
-            for (let i = 0; i < reader.readUint8(); i++) {
+            let length = reader.readUint8();
+            for (let i = 0; i < length; i++) {
                 let type = reader.readUint8();
                 let map = new Map();
                 this.canvasObjects.set(type, map);
-                for (let j = 0; j < reader.readUint16(); j++) {
+                let lengthJ = reader.readUint16();
+                for (let j = 0; j < lengthJ; j++) {
                     map.set(reader.readInt16(), getCanvasObject(type, reader));
                 }
             }
@@ -144,6 +146,7 @@ function getCanvasObject(type, reader) {
     switch (type) {
         case CanvasObjectType.SHAPE:
             object = new Shape(reader);
+            break;
         default:
             console.error('unknown type ' + type);
     }

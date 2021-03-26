@@ -6,7 +6,8 @@ export default class ServerMessageUpdateCanvas extends ServerMessage {
     constructor(reader) {
         super(ServerMessageType.UPDATE_CANVAS);
         this.canvasMap = new Map();
-        for (let i = 0; i < reader.readUint16(); i++) {
+        let length = reader.readUint16();
+        for (let i = 0; i < length; i++) {
             this.canvasMap.put(reader.readInt16(), new Canvas(reader));
         }
     }

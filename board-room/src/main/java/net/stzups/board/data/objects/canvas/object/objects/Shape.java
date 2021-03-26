@@ -14,6 +14,7 @@ public class Shape extends CanvasObject {
     }
 
     public void serialize(ByteBuf byteBuf) {
+        super.serialize(byteBuf);
         byteBuf.writeShort((short) width);
         byteBuf.writeShort((short) height);
     }
