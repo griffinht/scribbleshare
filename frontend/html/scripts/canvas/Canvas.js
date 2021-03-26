@@ -106,6 +106,7 @@ export class Canvas {
     }
 
     update(updateCanvasObjects) {
+        console.log(updateCanvasObjects);
         updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
             if (map == null) {
