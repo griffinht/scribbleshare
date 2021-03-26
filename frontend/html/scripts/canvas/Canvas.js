@@ -22,7 +22,16 @@ export class Canvas {
         }
     }
 
-    draw(dt) {
+    draw() {
+        //console.log('draw1', this.canvasObjects);
+        this.canvasObjects.forEach((value, key) => {
+            value.forEach((v, k) => {
+                ctx.save();
+                ctx.translate(value.x, value.y);
+                v.draw();
+                ctx.restore();
+            })
+        })
         //todo
         /*this.objects.forEach((type, objects) => {
             objects.forEach((object) => {
@@ -107,6 +116,7 @@ export class Canvas {
                 });
             }
         });
+        console.log(this.canvasObjects);
     }
 
     delete(deleteCanvasObjects) {

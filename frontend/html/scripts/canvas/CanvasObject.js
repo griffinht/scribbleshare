@@ -7,7 +7,7 @@ export default class CanvasObject {
     }
 
     draw() {
-        ctx.fillRect(this.x, this.y, 10, 10);
+        ctx.fillRect(0, 0, 3, 3);
     }
 
     serialize(writer) {

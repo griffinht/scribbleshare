@@ -90,7 +90,7 @@ function draw(now) {
     last = now;
 
     if (activeDocument != null) {
-        activeDocument.canvas.draw(dt);
+        activeDocument.canvas.draw();
     }
 
     window.requestAnimationFrame(draw);
@@ -106,7 +106,11 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
 });
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
-    Object.assign(documents.get(event.document.id), event.document);
+    if (activeDocument != null) {
+        activeDocument.canvas.update(event.canvasMap);
+    } else {
+        console.warn('oops');
+    }
 });
 socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {
     documents.set(event.id, new Document(event.name, event.id));
@@ -143,8 +147,9 @@ const inviteButton = document.getElementById("inviteButton");
 inviteButton.addEventListener('click', (event) => {
     console.log('invite');
 })
+/*
 setInterval(() => {
     if (activeDocument != null) {
         activeDocument.update()
     }
-}, UPDATE_INTERVAL);
+}, UPDATE_INTERVAL);*/
