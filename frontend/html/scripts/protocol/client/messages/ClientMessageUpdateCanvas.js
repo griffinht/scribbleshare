@@ -13,7 +13,7 @@ export default class ClientMessageUpdateCanvas extends ClientMessage {
         console.log(this.canvasObjects);
         this.canvasObjects.forEach((value, key) => {
             writer.writeUint8(key);
-            writer.writeUint8(value.size);
+            writer.writeUint16(value.size);
             value.forEach((v, k) => {
                 writer.writeInt16(k);
                 v.serialize(writer);

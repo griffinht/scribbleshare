@@ -3,6 +3,8 @@ package net.stzups.board.server.websocket;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.Canvas;
+import net.stzups.board.data.objects.canvas.object.CanvasObject;
+import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
@@ -53,6 +55,11 @@ class Room {
 
     Document getDocument() {
         return document;
+    }
+
+    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects) {
+        client.getCanvas().update(canvasObjects);
+        document.getCanvas().update(canvasObjects);
     }
 
     /**
