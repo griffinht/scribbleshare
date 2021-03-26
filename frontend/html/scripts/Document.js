@@ -1,5 +1,4 @@
 import {canvas, Canvas, ctx} from "./canvas/Canvas.js";
-import LocalClient from './LocalClient.js';
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './protocol/WebSocketHandler.js'
@@ -10,6 +9,8 @@ import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHand
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
 import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
+import Shape from "./canvas/canvasObjects/Shape.js";
+import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 
 const UPDATE_INTERVAL = 1000;
 const documents = new Map();
@@ -48,11 +49,11 @@ class Document {
         this.sidebarItem.setActive(false);
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
         this.canvas.draw(-1);
-        this.addClient(localClient);
+        //this.addClient(localClient);
     }
 
     close() {
-        localClient.update();
+        //localClient.update();
         this.canvas.clear();
         this.clients.forEach((client) => {
             this.removeClient(client.id);
@@ -147,8 +148,6 @@ socket.addEventListener(WebSocketHandlerType.OPEN, () => {
     }
 });
 
-const localClient = new LocalClient();
-
 const inviteButton = document.getElementById("inviteButton");
 
 inviteButton.addEventListener('click', (event) => {
@@ -160,3 +159,13 @@ setInterval(() => {
         activeDocument.update()
     }
 }, UPDATE_INTERVAL);*/
+
+canvas.addEventListener('click', (event) => {
+    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+    let canvasObjects = new Map();
+    let map = new Map();
+    map.set((Math.random() - 0.5) * 32000, shape);
+    canvasObjects.set(CanvasObjectType.SHAPE, map);
+    socket.send(new ClientMessageUpdateCanvas(canvasObjects));
+    activeDocument.canvas.update(canvasObjects);
+})
