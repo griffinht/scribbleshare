@@ -109,10 +109,10 @@ export class Canvas {
         updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
             if (map == null) {
-                this.canvasObjects.set(key, value);
+                map = new Map();
             } else {
                 value.forEach((v, k) => {
-                    map.set(k, v);
+                    map.set(k, v.canvasObject);//todo v.dt
                 });
             }
         });
@@ -146,7 +146,7 @@ function lerp(v0, v1, t) {
 }
 
 
-function getCanvasObject(type, reader) {
+export function getCanvasObject(type, reader) {
     let object;
     switch (type) {
         case CanvasObjectType.SHAPE:

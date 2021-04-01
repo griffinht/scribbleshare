@@ -5,6 +5,7 @@ import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
+import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
@@ -57,9 +58,12 @@ class Room {
         return document;
     }
 
-    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects) {
-        client.getCanvas().update(canvasObjects);
+    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
         document.getCanvas().update(canvasObjects);
+        ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
+        for (Client c : clients) {
+            c.queueMessage(serverMessageUpdateCanvas);
+        }
     }
 
     /**
@@ -134,23 +138,7 @@ class Room {
     }
 
     private void update() {
-        for (Client client : clients) {
-            Map<Client, Canvas> canvasMap = new HashMap<>();//todo lazy allocate
-            for (Client c : clients) {
-                if (c == client) continue;
-
-                if (!c.getCanvas().isEmpty()) {
-                    canvasMap.put(c, c.getCanvas());
-                }
-            }
-            if (canvasMap.size() > 0) {
-                client.queueMessage(new ServerMessageUpdateCanvas(canvasMap));
-            }
-        }
         flushMessages();
-        for (Client client : clients) {
-            client.test();
-        }
     }
 
     @Override

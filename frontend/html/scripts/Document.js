@@ -11,6 +11,7 @@ import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
 import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
 import Shape from "./canvas/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
+import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 
 const UPDATE_INTERVAL = 1000;
 const documents = new Map();
@@ -113,7 +114,7 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
 });
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
     if (activeDocument != null) {
-        event.canvasMap.forEach((value, key) => {
+        event.canvasObjectWrappers.forEach((value, key) => {
             activeDocument.canvas.update(value.canvasObjects);
         })
     } else {
@@ -127,7 +128,7 @@ socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
     window.localStorage.setItem('token', event.token.toString());
 })
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (event) => {
-    activeDocument.canvas.update(event.canvas.canvasObjects);
+    activeDocument.canvas = event.canvas;
 })
 socket.addEventListener(WebSocketHandlerType.OPEN, () => {
     let token = window.localStorage.getItem('token');
@@ -164,7 +165,7 @@ canvas.addEventListener('click', (event) => {
     let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
     let canvasObjects = new Map();
     let map = new Map();
-    map.set((Math.random() - 0.5) * 32000, shape);
+    map.set((Math.random() - 0.5) * 32000, CanvasObjectWrapper.create(0, shape));
     canvasObjects.set(CanvasObjectType.SHAPE, map);
     socket.send(new ClientMessageUpdateCanvas(canvasObjects));
     activeDocument.canvas.update(canvasObjects);

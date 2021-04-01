@@ -3,6 +3,7 @@ package net.stzups.board.data.objects.canvas;
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
+import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,19 +29,14 @@ public class Canvas {
         }
     }
 
-    public void update(Canvas canvas) {
-        update(canvas.canvasObjects);
-    }
-
-    public void update(Map<CanvasObjectType, Map<Short, CanvasObject>> updateCanvasObjects) {
-        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : updateCanvasObjects.entrySet()) {
+    public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
             if (map == null) {
-                canvasObjects.put(entry.getKey(), entry.getValue());
-            } else {
-                for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
-                    map.put(entry1.getKey(), entry1.getValue());
-                }
+                map = new HashMap<>();
+            }
+            for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
+                map.put(entry1.getKey(), entry1.getValue().getCanvasObject());
             }
         }
     }

@@ -14,7 +14,6 @@ public class Client {
     private User user;
     private Channel channel;
     private short id;
-    private Canvas canvas = new Canvas();
 
     private List<ServerMessage> messages = new ArrayList<>();
 
@@ -63,14 +62,6 @@ public class Client {
             e.printStackTrace();
         }
     }
-
-     public Canvas getCanvas() {
-        return canvas;
-     }
-
-     public void test() {
-        canvas = new Canvas();
-     }
 
     @Override
     public String toString() {
