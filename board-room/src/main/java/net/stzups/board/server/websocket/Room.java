@@ -61,9 +61,7 @@ class Room {
     void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
         document.getCanvas().update(canvasObjects);
         ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
-        for (Client c : clients) {
-            c.queueMessage(serverMessageUpdateCanvas);
-        }
+        queueMessageExcept(serverMessageUpdateCanvas, client);
     }
 
     /**
