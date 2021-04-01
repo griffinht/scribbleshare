@@ -110,11 +110,10 @@ export class Canvas {
             let map = this.canvasObjects.get(key);
             if (map == null) {
                 map = new Map();
-            } else {
-                value.forEach((v, k) => {
-                    map.set(k, v.canvasObject);//todo v.dt
-                });
             }
+            value.forEach((v, k) => {
+                map.set(k, v.canvasObject);//todo v.dt
+            });
         });
     }
 

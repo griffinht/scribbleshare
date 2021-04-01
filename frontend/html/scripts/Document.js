@@ -114,9 +114,7 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
 });
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
     if (activeDocument != null) {
-        event.canvasObjectWrappers.forEach((value, key) => {
-            activeDocument.canvas.update(value.canvasObjects);
-        })
+        activeDocument.canvas.update(event.canvasObjectWrappers);
     } else {
         console.warn('oops');
     }
