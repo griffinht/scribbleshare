@@ -106,14 +106,20 @@ export class Canvas {
     }
 
     update(updateCanvasObjects) {
+        console.log(this.canvasObjects);
         updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
+            let insert;
             if (map == null) {
                 map = new Map();
+                insert = true;
+            } else {
+                insert = false;
             }
             value.forEach((v, k) => {
                 map.set(k, v.canvasObject);//todo v.dt
             });
+            if (insert) this.canvasObjects.set(key, map);
         });
     }
 
