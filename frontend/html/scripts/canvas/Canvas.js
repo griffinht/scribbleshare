@@ -4,10 +4,12 @@ import {CanvasObjectType} from "./CanvasObjectType.js";
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
+const MAX_TIME = 2000;
 
 export class Canvas {
     constructor(reader) {
         this.canvasObjects = new Map();
+        this.updateCanvasObjects = new Map();
         if (reader != null) {
             let length = reader.readUint8();
             for (let i = 0; i < length; i++) {
@@ -22,7 +24,21 @@ export class Canvas {
         }
     }
 
-    draw() {
+    draw(dt) {
+        this.updateCanvasObjects.forEach((value, key) => {
+            let map = this.canvasObjects.get(key);
+            if (map == null) {
+                map = new Map();
+                this.canvasObjects.set(key, map);
+            }
+            value.forEach((v, key) => {
+                v.dt -= dt;
+                if (v.dt <= 0) {
+                    map.set(key, v.canvasObject);
+                }
+                value.delete(key);//is this bad? (concurrent modification???)
+            })
+        });
         //console.log('draw1', this.canvasObjects);
         this.canvasObjects.forEach((value, key) => {
             value.forEach((v, k) => {
@@ -106,21 +122,21 @@ export class Canvas {
     }
 
     update(updateCanvasObjects) {
-        console.log(this.canvasObjects);
+        console.log(this.updateCanvasObjects);
         updateCanvasObjects.forEach((value, key) => {
-            let map = this.canvasObjects.get(key);
-            let insert;
+            let map = this.updateCanvasObjects.get(key);
             if (map == null) {
                 map = new Map();
-                insert = true;
-            } else {
-                insert = false;
+                this.updateCanvasObjects.set(key, map);
             }
             value.forEach((v, k) => {
-                map.set(k, v.canvasObject);//todo v.dt
+                map.set(k, v);
             });
-            if (insert) this.canvasObjects.set(key, map);
         });
+    }
+
+    insert(canvasObjectWrapper) {
+
     }
 
     delete(deleteCanvasObjects) {

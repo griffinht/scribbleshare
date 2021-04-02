@@ -39,10 +39,6 @@ class Document {
         this.canvas = new Canvas();
     }
 
-    update() {
-
-    }
-
     open() {
         activeDocument = this;
         inviteButton.style.visibility = 'visible';
@@ -97,7 +93,7 @@ function draw(now) {
     last = now;
 
     if (activeDocument != null) {
-        activeDocument.canvas.draw();
+        activeDocument.canvas.draw(dt);
     }
 
     window.requestAnimationFrame(draw);

@@ -16,17 +16,13 @@ import java.util.List;
 public class MessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
     @Override
     protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf b) {
-        System.out.println(serverMessages.size());
-        try {
-            BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
-            ByteBuf byteBuf = binaryWebSocketFrame.content();
-            for (ServerMessage serverMessage : serverMessages) {
-                System.out.println("send " + serverMessage.getClass().getSimpleName());
-                serverMessage.serialize(byteBuf);
-            }
-            ctx.writeAndFlush(binaryWebSocketFrame);
-        } catch (Throwable t) {
-            System.out.println(t);
+        System.out.println("encoding " + serverMessages.size());
+        BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
+        ByteBuf byteBuf = binaryWebSocketFrame.content();
+        for (ServerMessage serverMessage : serverMessages) {
+            System.out.println("send " + serverMessage.getClass().getSimpleName());
+            serverMessage.serialize(byteBuf);
         }
+        ctx.writeAndFlush(binaryWebSocketFrame);
     }
 }
