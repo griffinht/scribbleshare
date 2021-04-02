@@ -76,3 +76,10 @@ SQL data persistence
 - Fix send rate of client
 - Remove flatfile, add runtime (in memory only) and PostgresSQL database
 - Move frontend to independent HTTP server (nginx)
+
+### v0.3.2
+Rework protocol, document serialization
+
+- Canvas objects instead of points
+- Rename packets to messages
+- Add better serialization/deserialization methods

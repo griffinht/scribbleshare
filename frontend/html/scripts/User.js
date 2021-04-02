@@ -1,4 +1,5 @@
-import socket from "./WebSocketHandler.js";
+import socket from "./protocol/WebSocketHandler.js";
+import ServerMessageType from "./protocol/server/ServerMessageType.js";
 
 const users = new Map();
 let user = null;
@@ -18,10 +19,10 @@ class User {
     }
 }
 
-socket.addEventListener('protocol.handshake', (event) => {
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
     user = new User(event.userId);
 })
-socket.addEventListener('protocol.adduser', (event) => {
+socket.addMessageListener(ServerMessageType.ADD_USER, (event) => {
     let user = users.get(event.user.id);
     if (user == null) {
         user = new User(event.user.id);

@@ -1,4 +1,4 @@
-package net.stzups.board.data.objects.canvas;
+package net.stzups.board.data.objects.canvas.object;
 
 import io.netty.util.collection.IntObjectHashMap;
 
@@ -6,7 +6,7 @@ import java.util.EnumSet;
 import java.util.Map;
 
 public enum CanvasObjectType {
-    POINT(0),
+    SHAPE(0),
     ;
 
     private static Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();

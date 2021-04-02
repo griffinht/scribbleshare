@@ -10,7 +10,7 @@ public class UserSession {
     private long hash;
 
     public UserSession(User user, long hash) {//todo hash
-        this.token = BoardRoom.getSecureRandom().nextLong();
+        this.token = BoardRoom.getSecureRandom().nextLong();//https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
         this.userId = user.getId();
         this.creationTime = System.currentTimeMillis();//todo security issue? round/fuzz by a few seconds?
         this.hash = hash;

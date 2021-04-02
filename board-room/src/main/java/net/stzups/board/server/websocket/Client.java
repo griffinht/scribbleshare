@@ -3,6 +3,7 @@ package net.stzups.board.server.websocket;
 import io.netty.channel.Channel;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 
 import java.util.ArrayList;
@@ -47,10 +48,10 @@ public class Client {
         channel.writeAndFlush(Collections.singletonList(serverMessage));
     }
 
-    void sendMessages() {
+    void flushMessages() {
         if (messages.size() > 0) {
             channel.writeAndFlush(messages);
-            messages = new ArrayList<>();
+            messages = new ArrayList<>();//clear() won't work here as the above line does not block and writes later
         }
     }
 
@@ -65,5 +66,10 @@ public class Client {
     @Override
     public String toString() {
         return "Client{user=" + user + ",address=" + channel.remoteAddress() + "}";
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

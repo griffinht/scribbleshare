@@ -7,10 +7,9 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import net.stzups.board.data.objects.canvas.Point;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDraw;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
@@ -34,24 +33,20 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             System.out.println("recv " + packetType);
             ClientMessage message;
             switch (packetType) {
-                case DRAW:
-                    Point[] points = new Point[byteBuf.readUnsignedByte()];
-                    for (int i = 0; i < points.length; i++) {
-                        points[i] = new Point(byteBuf.readUnsignedByte(), byteBuf.readShort(), byteBuf.readShort());
-                    }
-                    message = new ClientMessageDraw(points);
-                    break;
                 case OPEN_DOCUMENT:
-                    message = new ClientMessageOpenDocument(byteBuf.readLong());
+                    message = new ClientMessageOpenDocument(byteBuf);
+                    break;
+                case UPDATE_CANVAS:
+                    message = new ClientMessageUpdateCanvas(byteBuf);
                     break;
                 case CREATE_DOCUMENT:
                     message = new ClientMessageCreateDocument();
                     break;
                 case HANDSHAKE:
-                    message = new ClientMessageHandshake(byteBuf.readLong());
+                    message = new ClientMessageHandshake(byteBuf);
                     break;
                 default:
-                    throw new OperationNotSupportedException("Unsupported message type " + packetType+ " while decoding");
+                    throw new OperationNotSupportedException("Unsupported message type " + packetType + " while decoding");
             }
             list.add(message);
         }
