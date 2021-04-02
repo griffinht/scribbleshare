@@ -169,10 +169,6 @@ export class Canvas {
         });
     }
 
-    clear() {
-        this.canvasObjects.clear();
-    }
-
     resize() {
 
         //todo redraw?

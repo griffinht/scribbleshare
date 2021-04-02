@@ -156,7 +156,7 @@ setInterval(() => {
     lastUpdate = window.performance.now();
     if (updateCanvas.updateCanvasObjects.size > 0) {
         socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
-        updateCanvas.clear();
+        updateCanvas.updateCanvasObjects.clear();
     }
 }, UPDATE_INTERVAL);
 
