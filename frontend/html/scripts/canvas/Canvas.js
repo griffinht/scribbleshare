@@ -124,7 +124,6 @@ export class Canvas {
 
     //for remote drawing, places into queue for being updated
     updateMultiple(updateCanvasObjectWrappers) {
-        console.log(this.updateCanvasObjects);
         updateCanvasObjectWrappers.forEach((value, key) => {
             let map = this.updateCanvasObjects.get(key);
             if (map == null) {
