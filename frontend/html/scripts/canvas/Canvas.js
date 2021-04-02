@@ -35,8 +35,8 @@ export class Canvas {
                 v.dt -= dt;
                 if (v.dt <= 0) {
                     map.set(key, v.canvasObject);
+                    value.delete(key);//is this bad? (concurrent modification???)
                 }
-                value.delete(key);//is this bad? (concurrent modification???)
             })
         });
         //console.log('draw1', this.canvasObjects);
