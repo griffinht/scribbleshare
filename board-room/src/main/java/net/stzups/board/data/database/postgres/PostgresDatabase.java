@@ -72,7 +72,7 @@ public class PostgresDatabase implements Database {
     public Document createDocument(User owner) {
         Document document = new Document(owner);
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents VALUES (?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)");
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getOwner().getId());
             preparedStatement.setString(3, document.getName());
@@ -133,7 +133,7 @@ public class PostgresDatabase implements Database {
     @Override
     public void saveCanvas(Canvas canvas) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases VALUES(?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?)");
             preparedStatement.setLong(1, canvas.getDocument().getId());
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
@@ -152,7 +152,7 @@ public class PostgresDatabase implements Database {
     @Override
     public void addUserSession(UserSession userSession) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions VALUES (?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions(token, \"user\", creation_time, hash) VALUES (?, ?, ?, ?)");
             preparedStatement.setLong(1, userSession.getToken());
             preparedStatement.setLong(2, userSession.getUser());
             preparedStatement.setLong(3, userSession.getCreationTime());
