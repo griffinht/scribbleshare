@@ -11,7 +11,6 @@ public class Document {
     private User owner;
     private String name;
     private String inviteCode;
-    private Canvas canvas;
 
     /**
      * New document
@@ -21,17 +20,15 @@ public class Document {
         this.owner = owner;
         owner.getOwnedDocuments().add(id);
         this.name = DEFAULT_DOCUMENT_NAME;
-        this.canvas = new Canvas();
     }
 
     /**
      * Serialize document from db
      */
-    public Document(long id, User owner, String name, ByteBuf byteBuf) {
+    public Document(long id, User owner, String name) {
         this.id = id;
         this.owner = owner;
         this.name = name;
-        this.canvas = new Canvas(byteBuf);
     }
 
     public long getId() {
@@ -44,10 +41,6 @@ public class Document {
 
     public User getOwner() {
         return owner;
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
     }
 
     @Override

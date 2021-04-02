@@ -4,6 +4,7 @@ import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,11 @@ public class MemoryDatabase implements Database {
     @Override
     public Document getDocument(long id) {
         return documents.get(id);
+    }
+
+    @Override
+    public Canvas getCanvas(Document document) {
+        return new Canvas();
     }
 
     @Override

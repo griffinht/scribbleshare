@@ -39,8 +39,11 @@ class Room {
     private Set<Client> clients = new HashSet<>();
 
     private Document document;
+    private Canvas canvas;
+
     private Room(Document document) {
         this.document = document;
+        this.canvas = BoardRoom.getDatabase().getCanvas(document);
     }
 
     /**
@@ -59,7 +62,7 @@ class Room {
     }
 
     void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
-        document.getCanvas().update(canvasObjects);
+        canvas.update(canvasObjects);
         ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
         queueMessageExcept(serverMessageUpdateCanvas, client);
     }
@@ -73,7 +76,7 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.sendMessage(new ServerMessageOpenDocument(document));
+        client.sendMessage(new ServerMessageOpenDocument(document, canvas));
         sendMessage(new ServerMessageAddClient(client));
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);

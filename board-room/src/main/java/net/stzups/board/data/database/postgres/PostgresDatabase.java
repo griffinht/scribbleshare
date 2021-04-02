@@ -5,6 +5,7 @@ import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
@@ -100,7 +101,7 @@ public class PostgresDatabase implements Database {
                     System.out.println("no owner for document");
                     return null;
                 }
-                document = new Document(id, user, resultSet.getString("name"), Unpooled.buffer(0));//todo binary data
+                document = new Document(id, user, resultSet.getString("name"));
                 documents.put(document.getId(), document);
             }
             return document;
@@ -108,6 +109,11 @@ public class PostgresDatabase implements Database {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public Canvas getCanvas(Document document) {
+        return new Canvas();
     }
 
     @Override
