@@ -87,7 +87,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             client = createUserSession(ctx, null);
                         } else {
                             System.out.println("good user session");
-                            User user = BoardRoom.getDatabase().getUser(userSession.getUserId());
+                            User user = BoardRoom.getDatabase().getUser(userSession.getUser());
                             if (user == null) {
                                 System.out.println("very bad user does not exist");
                             }

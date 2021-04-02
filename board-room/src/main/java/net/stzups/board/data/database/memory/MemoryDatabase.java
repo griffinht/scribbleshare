@@ -34,7 +34,12 @@ public class MemoryDatabase implements Database {
 
     @Override
     public Canvas getCanvas(Document document) {
-        return new Canvas();
+        return new Canvas(document);
+    }
+
+    @Override
+    public void saveCanvas(Canvas canvas) {
+
     }
 
     @Override

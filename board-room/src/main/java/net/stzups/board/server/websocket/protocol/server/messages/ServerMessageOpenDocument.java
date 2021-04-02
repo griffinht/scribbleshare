@@ -7,19 +7,17 @@ import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageOpenDocument extends ServerMessage {
-    private Document document;
     private Canvas canvas;
 
-    public ServerMessageOpenDocument(Document document, Canvas canvas) {
+    public ServerMessageOpenDocument(Canvas canvas) {
         super(ServerMessageType.OPEN_DOCUMENT);
-        this.document = document;
         this.canvas = canvas;
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeLong(document.getId());
+        byteBuf.writeLong(this.canvas.getDocument().getId());
         this.canvas.serialize(byteBuf);
     }
 }

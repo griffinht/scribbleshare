@@ -12,7 +12,7 @@ public class ServerMessageHandshake extends ServerMessage {
     public ServerMessageHandshake(UserSession userSession) {
         super(ServerMessageType.HANDSHAKE);
         this.token = userSession.getToken();
-        this.userId = userSession.getUserId();
+        this.userId = userSession.getUser();
     }
 
     @Override

@@ -13,6 +13,7 @@ public interface Database {
     Document createDocument(User owner);
     Document getDocument(long id);
     Canvas getCanvas(Document document);
+    void saveCanvas(Canvas canvas);
     void saveDocument(Document document);
 
     UserSession removeUserSession(long token);

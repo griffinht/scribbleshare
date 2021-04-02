@@ -1,13 +1,11 @@
 package net.stzups.board.data.database.postgres;
 
-import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -70,11 +68,10 @@ public class PostgresDatabase implements Database {
     public Document createDocument(User owner) {
         Document document = new Document(owner);
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents VALUES (?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents VALUES (?, ?, ?)");
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getOwner().getId());
             preparedStatement.setString(3, document.getName());
-            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(new byte[0]));
             preparedStatement.execute();
             documents.put(document.getId(), document);
             return document;
@@ -96,7 +93,7 @@ public class PostgresDatabase implements Database {
                     System.out.println("document does not exist");
                     return null;
                 }
-                User user = getUser(resultSet.getLong("owner_id"));
+                User user = getUser(resultSet.getLong("owner"));
                 if (user == null) {
                     System.out.println("no owner for document");
                     return null;
@@ -113,7 +110,12 @@ public class PostgresDatabase implements Database {
 
     @Override
     public Canvas getCanvas(Document document) {
-        return new Canvas();
+        return new Canvas(document);
+    }
+
+    @Override
+    public void saveCanvas(Canvas canvas) {
+
     }
 
     @Override
@@ -126,11 +128,11 @@ public class PostgresDatabase implements Database {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions VALUES (?, ?, ?, ?)");
             preparedStatement.setLong(1, userSession.getToken());
-            preparedStatement.setLong(2, userSession.getUserId());
+            preparedStatement.setLong(2, userSession.getUser());
             preparedStatement.setLong(3, userSession.getCreationTime());
             preparedStatement.setLong(4, userSession.getHash());
             preparedStatement.execute();
-            userSessions.put(userSession.getUserId(), userSession);
+            userSessions.put(userSession.getUser(), userSession);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -151,7 +153,7 @@ public class PostgresDatabase implements Database {
                     System.out.println("user session does not exist in db");
                     return null;
                 }
-                userSession = new UserSession(token, resultSet.getLong("user_id"), resultSet.getLong("creation_time"), resultSet.getLong("hash"));
+                userSession = new UserSession(token, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getLong("hash"));
             }
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM user_sessions WHERE token=?");
             preparedStatement.setLong(1, token);
