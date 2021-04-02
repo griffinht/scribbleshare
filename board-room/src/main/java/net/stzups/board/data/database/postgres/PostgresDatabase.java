@@ -133,11 +133,13 @@ public class PostgresDatabase implements Database {
     @Override
     public void saveCanvas(Canvas canvas) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=?");
             preparedStatement.setLong(1, canvas.getDocument().getId());
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
-            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(byteBuf.array()));
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteBuf.array());
+            preparedStatement.setBinaryStream(2, byteArrayInputStream);
+            preparedStatement.setBinaryStream(3, byteArrayInputStream);//todo is this duplicate bad?
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
