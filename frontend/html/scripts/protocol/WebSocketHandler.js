@@ -86,7 +86,7 @@ class WebSocketHandler {
         });
 
         this.socket.addEventListener('error', (event) => {
-            console.log('socket error', event);
+            console.error('socket error', event);
         });
     }
 

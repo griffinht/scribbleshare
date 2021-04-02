@@ -50,7 +50,7 @@ class Document {
 
     close() {
         //localClient.update();
-        this.canvas.clear();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);
         })
@@ -109,7 +109,7 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
 });
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
     if (activeDocument != null) {
-        activeDocument.canvas.update(event.canvasObjectWrappers);
+        activeDocument.canvas.updateMultiple(event.canvasObjectWrappers);
     } else {
         console.warn('oops');
     }
@@ -151,25 +151,22 @@ inviteButton.addEventListener('click', (event) => {
 const MAX_TIME = 2000;
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
-let canvasObjects = new Map();
+let updateCanvas = new Canvas();
 setInterval(() => {
     lastUpdate = window.performance.now();
-    if (canvasObjects.size > 0) {
-        socket.send(new ClientMessageUpdateCanvas(canvasObjects));//todo breaks the server when the size is 0
-        canvasObjects = new Map();//todo i should be able to do .clear() assuming the above thing blocks
+    if (updateCanvas.updateCanvasObjects.size > 0) {
+        socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
+        updateCanvas.clear();
     }
 }, UPDATE_INTERVAL);
+
 function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
 
 canvas.addEventListener('click', (event) => {
     let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    let map = canvasObjects.get(CanvasObjectType.SHAPE);
-    if (map == null) {
-        map = new Map();
-        canvasObjects.set(CanvasObjectType.SHAPE, map);
-    }
-    map.set((Math.random() - 0.5) * 32000, CanvasObjectWrapper.create(getDt(), shape));
-    activeDocument.canvas.insert(canvasObjects);
+    let id = (Math.random() - 0.5) * 32000;
+    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
+    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
 })

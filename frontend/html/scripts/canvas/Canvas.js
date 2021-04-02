@@ -123,9 +123,9 @@ export class Canvas {
     }
 
     //for remote drawing, places into queue for being updated
-    update(updateCanvasObjects) {
+    updateMultiple(updateCanvasObjectWrappers) {
         console.log(this.updateCanvasObjects);
-        updateCanvasObjects.forEach((value, key) => {
+        updateCanvasObjectWrappers.forEach((value, key) => {
             let map = this.updateCanvasObjects.get(key);
             if (map == null) {
                 map = new Map();
@@ -137,18 +137,23 @@ export class Canvas {
         });
     }
 
+    update(canvasObjectType, id, canvasObjectWrapper) {
+        let map = this.updateCanvasObjects.get(canvasObjectType);
+        if (map == null) {
+            map = new Map();
+            this.updateCanvasObjects.set(canvasObjectType, map);
+        }
+        map.set(id, canvasObjectWrapper);
+    }
+
     //for local drawing, updates canvas instantly
-    insert(updateCanvasObjects) {
-        updateCanvasObjects.forEach((value, key) => {
-            let map = this.canvasObjects.get(key);
-            if (map == null) {
-                map = new Map();
-                this.canvasObjects.set(key, map);
-            }
-            value.forEach((v, k) => {
-                map.set(k, v.canvasObject);
-            });
-        });
+    insert(type, id, canvasObject) {
+        let map = this.canvasObjects.get(type);
+        if (map == null) {
+            map = new Map();
+            this.canvasObjects.set(type, map);
+        }
+        map.set(id, canvasObject);//todo random id is bad
     }
 
     delete(deleteCanvasObjects) {
@@ -165,7 +170,7 @@ export class Canvas {
     }
 
     clear() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
+        this.canvasObjects.clear();
     }
 
     resize() {
