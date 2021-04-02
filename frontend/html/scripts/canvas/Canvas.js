@@ -121,6 +121,7 @@ export class Canvas {
         this.dispatchEvent('protocol.updateDocument', e);*/
     }
 
+    //for remote drawing, places into queue for being updated
     update(updateCanvasObjects) {
         console.log(this.updateCanvasObjects);
         updateCanvasObjects.forEach((value, key) => {
@@ -135,6 +136,7 @@ export class Canvas {
         });
     }
 
+    //for local drawing, updates canvas instantly
     insert(updateCanvasObjects) {
         updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
