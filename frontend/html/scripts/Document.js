@@ -148,6 +148,7 @@ inviteButton.addEventListener('click', (event) => {
     console.log('invite');
 })
 
+const MAX_TIME = 2000;
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
 let canvasObjects = new Map();
@@ -159,7 +160,7 @@ setInterval(() => {
     }
 }, UPDATE_INTERVAL);
 function getDt() {
-    return (window.performance.now() - lastUpdate) / UPDATE_INTERVAL * 255;
+    return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
 
 canvas.addEventListener('click', (event) => {

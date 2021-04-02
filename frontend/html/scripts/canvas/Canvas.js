@@ -4,7 +4,7 @@ import {CanvasObjectType} from "./CanvasObjectType.js";
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
-const MAX_TIME = 2000;
+const MAX_TIME = 2000;//todo copied from document.js
 
 export class Canvas {
     constructor(reader) {
@@ -25,6 +25,7 @@ export class Canvas {
     }
 
     draw(dt) {
+        dt = dt / 2000 * 255;
         this.updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
             if (map == null) {
