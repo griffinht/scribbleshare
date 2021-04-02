@@ -30,11 +30,9 @@ public class Canvas {
     }
 
     public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
+        System.out.println(canvasObjects.size());
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
-            Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
-            if (map == null) {
-                map = new HashMap<>();
-            }
+            Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
             for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
                 map.put(entry1.getKey(), entry1.getValue().getCanvasObject());
             }
