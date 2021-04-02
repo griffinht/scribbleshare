@@ -135,8 +135,17 @@ export class Canvas {
         });
     }
 
-    insert(canvasObjectWrapper) {
-
+    insert(updateCanvasObjects) {
+        updateCanvasObjects.forEach((value, key) => {
+            let map = this.canvasObjects.get(key);
+            if (map == null) {
+                map = new Map();
+                this.canvasObjects.set(key, map);
+            }
+            value.forEach((v, k) => {
+                map.set(k, v.canvasObject);
+            });
+        });
     }
 
     delete(deleteCanvasObjects) {

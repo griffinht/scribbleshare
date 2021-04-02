@@ -13,7 +13,6 @@ import Shape from "./canvas/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 
-const UPDATE_INTERVAL = 1000;
 const documents = new Map();
 let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
@@ -148,19 +147,28 @@ const inviteButton = document.getElementById("inviteButton");
 inviteButton.addEventListener('click', (event) => {
     console.log('invite');
 })
-/*
+
+const UPDATE_INTERVAL = 1000;
+let lastUpdate = 0;
+let canvasObjects = new Map();
 setInterval(() => {
-    if (activeDocument != null) {
-        activeDocument.update()
+    lastUpdate = window.performance.now();
+    if (canvasObjects.size > 0) {
+        socket.send(new ClientMessageUpdateCanvas(canvasObjects));//todo breaks the server when the size is 0
+        canvasObjects = new Map();//todo i should be able to do .clear() assuming the above thing blocks
     }
-}, UPDATE_INTERVAL);*/
+}, UPDATE_INTERVAL);
+function getDt() {
+    return (window.performance.now() - lastUpdate) / UPDATE_INTERVAL * 255;
+}
 
 canvas.addEventListener('click', (event) => {
     let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    let canvasObjects = new Map();
-    let map = new Map();
-    map.set((Math.random() - 0.5) * 32000, CanvasObjectWrapper.create(0, shape));
-    canvasObjects.set(CanvasObjectType.SHAPE, map);
-    socket.send(new ClientMessageUpdateCanvas(canvasObjects));
-    activeDocument.canvas.update(canvasObjects);
+    let map = canvasObjects.get(CanvasObjectType.SHAPE);
+    if (map == null) {
+        map = new Map();
+        canvasObjects.set(CanvasObjectType.SHAPE, map);
+    }
+    map.set((Math.random() - 0.5) * 32000, CanvasObjectWrapper.create(getDt(), shape));
+    activeDocument.canvas.insert(canvasObjects);
 })
