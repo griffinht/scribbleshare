@@ -1,11 +1,15 @@
 package net.stzups.board.data.database.postgres;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.UserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
+import java.io.ByteArrayInputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -110,12 +114,34 @@ public class PostgresDatabase implements Database {
 
     @Override
     public Canvas getCanvas(Document document) {
-        return new Canvas(document);
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?");
+            preparedStatement.setLong(1, document.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Blob blob = resultSet.getBlob("data");
+                return new Canvas(document, Unpooled.wrappedBuffer(blob.getBytes(1, (int) blob.length())));
+            } else {
+                return new Canvas(document);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;//todo error handling??
     }
 
     @Override
     public void saveCanvas(Canvas canvas) {
-
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases VALUES(?, ?)");
+            preparedStatement.setLong(1, canvas.getDocument().getId());
+            ByteBuf byteBuf = Unpooled.buffer();
+            canvas.serialize(byteBuf);
+            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(byteBuf.array()));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

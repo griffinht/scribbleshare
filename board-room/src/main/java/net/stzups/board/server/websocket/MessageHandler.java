@@ -135,7 +135,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static Room getRoom(Document document) {
         Room r = documents.get(document);
         if (r == null) {
-            r =  Room.createRoom(document);
+            r =  Room.startRoom(document);
             documents.put(r.getDocument(), r);
         }
         return r;

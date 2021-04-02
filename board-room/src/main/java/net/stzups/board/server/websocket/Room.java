@@ -3,7 +3,6 @@ package net.stzups.board.server.websocket;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.Canvas;
-import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
@@ -13,7 +12,6 @@ import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageR
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +47,17 @@ class Room {
      *
      * @return the created room
      */
-    static Room createRoom(Document document) {
+    static Room startRoom(Document document) {
         Room room = new Room(document);
         rooms.add(room);
         return room;
+    }
+
+    void end() {
+        rooms.remove(this);
+        BoardRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
+        //todo
+        BoardRoom.getLogger().info("Destroyed room for canvas " + canvas);
     }
 
     Document getDocument() {
@@ -89,6 +94,9 @@ class Room {
         clients.remove(client);
         sendMessage(new ServerMessageRemoveClient(client));
         BoardRoom.getLogger().info("Removed " + client + " to " + this);
+        if (clients.isEmpty()) {
+            end();
+        }
     }
 
     /**
