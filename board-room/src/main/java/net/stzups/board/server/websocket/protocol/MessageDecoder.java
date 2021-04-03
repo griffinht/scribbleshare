@@ -7,14 +7,13 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import net.stzups.board.BoardRoom;
 import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;

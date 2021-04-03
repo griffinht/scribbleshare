@@ -10,14 +10,13 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.LogFactory;
-import net.stzups.board.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.server.websocket.protocol.MessageDecoder;
+import net.stzups.board.server.websocket.protocol.MessageEncoder;
 
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;

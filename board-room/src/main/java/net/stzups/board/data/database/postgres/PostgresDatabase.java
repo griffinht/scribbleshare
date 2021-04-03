@@ -4,15 +4,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

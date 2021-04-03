@@ -4,8 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
@@ -15,9 +15,6 @@ import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageU
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageHandshake;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private Room room;

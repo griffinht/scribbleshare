@@ -2,9 +2,7 @@ package net.stzups.board.server.websocket.protocol.server;
 
 import io.netty.buffer.ByteBuf;
 
-import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 /**
  * Represents a packet sent by the server

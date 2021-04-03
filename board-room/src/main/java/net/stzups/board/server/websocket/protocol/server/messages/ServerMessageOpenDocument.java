@@ -1,7 +1,6 @@
 package net.stzups.board.server.websocket.protocol.server.messages;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.ServerMessageType;

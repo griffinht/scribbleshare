@@ -1,6 +1,7 @@
 package net.stzups.board.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
@@ -40,7 +41,6 @@ public class Canvas {
     }
 
     public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
-        System.out.println(canvasObjects.size());
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
             for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
@@ -57,7 +57,7 @@ public class Canvas {
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : deleteCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
             if (map == null) {
-                System.out.println("cant delete " + entry.getKey() + ", its already gone");
+                BoardRoom.getLogger().warning("Tried to delete canvas object that does not exist");
             } else {
                 for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
                     map.remove(entry1.getKey());

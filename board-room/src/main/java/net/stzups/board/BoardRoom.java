@@ -7,12 +7,11 @@ import net.stzups.board.config.configs.ArgumentConfig;
 import net.stzups.board.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.config.configs.PropertiesConfig;
 import net.stzups.board.data.database.Database;
-import net.stzups.board.data.database.postgres.PostgresDatabase;
 import net.stzups.board.data.database.memory.MemoryDatabase;
+import net.stzups.board.data.database.postgres.PostgresDatabase;
 import net.stzups.board.server.Server;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.logging.Logger;
