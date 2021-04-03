@@ -62,7 +62,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                .addLast(new ChunkedWriteHandler())
+                //.addLast(new ChunkedWriteHandler())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
                 .addLast(messageEncoder)

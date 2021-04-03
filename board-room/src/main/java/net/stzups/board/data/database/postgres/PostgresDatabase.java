@@ -1,12 +1,16 @@
 package net.stzups.board.data.database.postgres;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -22,7 +26,6 @@ public class PostgresDatabase implements Database {
 
     private Map<Long, User> users = new HashMap<>();
     private Map<Long, Document> documents = new HashMap<>();
-    private Map<Long, UserSession> userSessions = new HashMap<>();
 
     public PostgresDatabase(String url, String user, String password) throws Exception {
         Class.forName("org.postgresql.Driver");
@@ -69,11 +72,10 @@ public class PostgresDatabase implements Database {
     public Document createDocument(User owner) {
         Document document = new Document(owner);
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents VALUES (?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)");
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getOwner().getId());
             preparedStatement.setString(3, document.getName());
-            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(new byte[0]));
             preparedStatement.execute();
             documents.put(document.getId(), document);
             return document;
@@ -95,12 +97,12 @@ public class PostgresDatabase implements Database {
                     System.out.println("document does not exist");
                     return null;
                 }
-                User user = getUser(resultSet.getLong("owner_id"));
+                User user = getUser(resultSet.getLong("owner"));
                 if (user == null) {
                     System.out.println("no owner for document");
                     return null;
                 }
-                document = new Document(id, user, resultSet.getString("name"), Unpooled.buffer(0));//todo binary data
+                document = new Document(id, user, resultSet.getString("name"));
                 documents.put(document.getId(), document);
             }
             return document;
@@ -111,20 +113,53 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
+    public Canvas getCanvas(Document document) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?");
+            preparedStatement.setLong(1, document.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Blob blob = resultSet.getBlob("data");
+                return new Canvas(document, Unpooled.wrappedBuffer(blob.getBytes(1, (int) blob.length())));
+            } else {
+                return new Canvas(document);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;//todo error handling??
+    }
+
+    @Override
+    public void saveCanvas(Canvas canvas) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=?");
+            preparedStatement.setLong(1, canvas.getDocument().getId());
+            ByteBuf byteBuf = Unpooled.buffer();
+            canvas.serialize(byteBuf);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteBuf.array());
+            preparedStatement.setBinaryStream(2, byteArrayInputStream);
+            preparedStatement.setBinaryStream(3, byteArrayInputStream);//todo is this duplicate bad?
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void saveDocument(Document document) {
 
     }
 
     @Override
-    public void addUserSession(UserSession userSession) {
+    public void addUserSession(PersistentUserSession persistentUserSession) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions VALUES (?, ?, ?, ?)");
-            preparedStatement.setLong(1, userSession.getToken());
-            preparedStatement.setLong(2, userSession.getUserId());
-            preparedStatement.setLong(3, userSession.getCreationTime());
-            preparedStatement.setLong(4, userSession.getHash());
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)");
+            preparedStatement.setLong(1, persistentUserSession.getId());
+            preparedStatement.setLong(2, persistentUserSession.getUser());
+            preparedStatement.setLong(3, persistentUserSession.getCreationTime());
+            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentUserSession.getHashedToken()));
             preparedStatement.execute();
-            userSessions.put(userSession.getUserId(), userSession);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -134,24 +169,20 @@ public class PostgresDatabase implements Database {
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public UserSession removeUserSession(long token) {
+    public PersistentUserSession removeUserSession(long id) {
         try {
-            UserSession userSession = userSessions.remove(token);
-            if (userSession == null) {
-                PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE token=?");
-                preparedStatement.setLong(1, token);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (!resultSet.next()) {
-                    System.out.println("user session does not exist in db");
-                    return null;
-                }
-                userSession = new UserSession(token, resultSet.getLong("user_id"), resultSet.getLong("creation_time"), resultSet.getLong("hash"));
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?");
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
             }
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM user_sessions WHERE token=?");
-            preparedStatement.setLong(1, token);
+            PersistentUserSession persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+            preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?");
+            preparedStatement.setLong(1, id);
             preparedStatement.execute();
-            return userSession;
-        } catch (SQLException e) {
+            return persistentUserSession;
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             return null;
         }

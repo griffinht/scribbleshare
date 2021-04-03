@@ -1,6 +1,7 @@
 package net.stzups.board.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
@@ -11,14 +12,17 @@ import java.util.Map;
 public class Canvas {
     private Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
-    public Canvas() {
+    private Document document;
 
+    public Canvas(Document document) {
+        this.document = document;
     }
 
     /**
      * Deserializes canvas from db
      */
-    public Canvas(ByteBuf byteBuf) {
+    public Canvas(Document document, ByteBuf byteBuf) {
+        this.document = document;
         for (int i = 0; i < byteBuf.readUnsignedByte(); i++) {
             CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
             Map<Short, CanvasObject> map = new HashMap<>();
@@ -29,12 +33,14 @@ public class Canvas {
         }
     }
 
+    public Document getDocument() {
+        return document;
+    }
+
     public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
+        System.out.println(canvasObjects.size());
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
-            Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
-            if (map == null) {
-                map = new HashMap<>();
-            }
+            Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
             for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
                 map.put(entry1.getKey(), entry1.getValue().getCanvasObject());
             }
@@ -76,5 +82,10 @@ public class Canvas {
 
     public boolean isEmpty() {
         return canvasObjects.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "Canvas{document=" + document + "}";
     }
 }

@@ -3,7 +3,6 @@ package net.stzups.board.server.websocket;
 import io.netty.channel.Channel;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.canvas.Canvas;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 
 import java.util.ArrayList;

@@ -3,7 +3,6 @@ package net.stzups.board.server.websocket;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.canvas.Canvas;
-import net.stzups.board.data.objects.canvas.object.CanvasObject;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectType;
 import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
@@ -13,7 +12,6 @@ import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageR
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +36,10 @@ class Room {
 
     private Set<Client> clients = new HashSet<>();
 
-    private Document document;
+    private Canvas canvas;
+
     private Room(Document document) {
-        this.document = document;
+        this.canvas = BoardRoom.getDatabase().getCanvas(document);
     }
 
     /**
@@ -48,18 +47,25 @@ class Room {
      *
      * @return the created room
      */
-    static Room createRoom(Document document) {
+    static Room startRoom(Document document) {
         Room room = new Room(document);
         rooms.add(room);
         return room;
     }
 
+    void end() {
+        rooms.remove(this);
+        BoardRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
+        //todo
+        BoardRoom.getLogger().info("Destroyed room for canvas " + canvas);
+    }
+
     Document getDocument() {
-        return document;
+        return canvas.getDocument();
     }
 
     void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
-        document.getCanvas().update(canvasObjects);
+        canvas.update(canvasObjects);
         ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
         queueMessageExcept(serverMessageUpdateCanvas, client);
     }
@@ -73,7 +79,7 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.sendMessage(new ServerMessageOpenDocument(document));
+        client.sendMessage(new ServerMessageOpenDocument(canvas));
         sendMessage(new ServerMessageAddClient(client));
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);
@@ -88,6 +94,9 @@ class Room {
         clients.remove(client);
         sendMessage(new ServerMessageRemoveClient(client));
         BoardRoom.getLogger().info("Removed " + client + " to " + this);
+        if (clients.isEmpty()) {
+            end();
+        }
     }
 
     /**
@@ -141,6 +150,6 @@ class Room {
 
     @Override
     public String toString() {
-        return "Room{document=" + document + "}";
+        return "Room{canvas=" + canvas + "}";
     }
 }
