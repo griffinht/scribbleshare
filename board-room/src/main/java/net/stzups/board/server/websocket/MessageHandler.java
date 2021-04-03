@@ -74,7 +74,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
-                        System.out.println("user authed with empty session");
+                        BoardRoom.getLogger().info(ctx.channel().remoteAddress() + " authenticated with blank session");
                         client = createUserSession(ctx, null);
                     } else {
                         PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
@@ -97,10 +97,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 }
                 client.queueMessage(new ServerMessageAddUser(client.getUser()));
                 if (client.getUser().getOwnedDocuments().size() == 0) {
-                    client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
+                    client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));//todo
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
-                        client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
+                        client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
                     }
                 }
                 client.flushMessages();

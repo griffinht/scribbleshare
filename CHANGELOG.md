@@ -93,3 +93,5 @@ Rework db, implement document persistence
 ### v0.3.4
 
 - Fix changes not being saved on canvas close
+- Fix canvas serialization
+- Fix connected clients list
