@@ -63,7 +63,7 @@ public class Config {//todo probably needs a better name
         if (value == null) {
             return defaultValue;
         } else {
-            return Boolean.parseBoolean(key);
+            return Boolean.parseBoolean(value);
         }
     }
 
