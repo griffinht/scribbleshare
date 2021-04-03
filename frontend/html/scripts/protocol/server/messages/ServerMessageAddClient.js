@@ -4,7 +4,10 @@ import ServerMessageType from "../ServerMessageType.js";
 export default class ServerMessageAddClient extends ServerMessage {
     constructor(reader) {
         super(ServerMessageType.ADD_CLIENT);
-        this.id = reader.readInt16();
-        this.userId = reader.readBigInt64();
+        this.clients = [];
+        let length = reader.readUint16();
+        for (let i = 0; i < length; i++) {
+            this.clients[i] = {id:reader.readInt16(), userId:reader.readBigInt64()};
+        }
     }
 }

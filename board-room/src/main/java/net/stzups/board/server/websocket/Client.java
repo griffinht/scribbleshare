@@ -1,5 +1,6 @@
 package net.stzups.board.server.websocket;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.User;
@@ -60,6 +61,11 @@ public class Client {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeShort(id);
+        byteBuf.writeLong(user.getId());
     }
 
     @Override

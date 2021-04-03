@@ -5,18 +5,23 @@ import net.stzups.board.server.websocket.Client;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.server.websocket.protocol.server.ServerMessageType;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class ServerMessageAddClient extends ServerMessage {
-    private Client client;
+    private Set<Client> clients;
 
     public ServerMessageAddClient(Client client) {
         super(ServerMessageType.ADD_CLIENT);
-        this.client = client;
+        this.clients = Collections.singleton(client);
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeShort(client.getId());
-        byteBuf.writeLong(client.getUser().getId());
+        byteBuf.writeShort((short) clients.size());
+        for (Client client : clients) {
+            client.serialize(byteBuf);
+        }
     }
 }

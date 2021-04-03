@@ -100,9 +100,11 @@ function draw(now) {
 window.requestAnimationFrame(draw);
 
 socket.addMessageListener(ServerMessageType.ADD_CLIENT, (event) => {
-    let client = new Client(event.id, User.getUser(event.userId));
-    activeDocument.addClient(client);
-    console.log('Add client ', client);
+    event.clients.forEach((value) => {
+        let client = new Client(value.id, User.getUser(value.userId));
+        activeDocument.addClient(client);
+        console.log('Add client ', client);
+    })
 });
 socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
     console.log('Remove client ', activeDocument.removeClient(event.id));
