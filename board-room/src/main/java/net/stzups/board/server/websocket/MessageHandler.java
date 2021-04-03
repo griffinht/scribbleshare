@@ -80,16 +80,16 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     } else {
                         PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
                         if (persistentUserSession == null) {
-                            System.out.println("user tried authenticating with nonexistant session");
+                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with non existent persistent user session");
                             client = createUserSession(ctx, null);
                         } else if (!persistentUserSession.validate(clientPacketHandshake.getToken())) {
-                            System.out.println("user tried authenticating with invalid session" + persistentUserSession);
+                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with invalid persistent user session " + persistentUserSession);
                             client = createUserSession(ctx, null);
                         } else {
-                            System.out.println("good user session");
                             User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
                             if (user == null) {
-                                System.out.println("very bad user does not exist");
+                                BoardRoom.getLogger().severe(ctx.channel().remoteAddress() + " somehow managed to authenticate with non existent user");
+                                return;
                             }
                             client = createUserSession(ctx, user);
                         }

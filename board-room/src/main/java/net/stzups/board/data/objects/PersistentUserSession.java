@@ -58,11 +58,11 @@ public class PersistentUserSession {
 
     @Override
     public String toString() {
-        return "UserSession{userId=" + user + ",@" + hashCode()+ "}";
+        return "UserSession{id=" + id + ",user" + user + ",creationTime=" + creationTime + "}";
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(user);
+        return Long.hashCode(id);
     }
 }

@@ -26,7 +26,6 @@ public class PostgresDatabase implements Database {
 
     private Map<Long, User> users = new HashMap<>();
     private Map<Long, Document> documents = new HashMap<>();
-    private Map<Long, PersistentUserSession> userSessions = new HashMap<>();
 
     public PostgresDatabase(String url, String user, String password) throws Exception {
         Class.forName("org.postgresql.Driver");
@@ -161,7 +160,6 @@ public class PostgresDatabase implements Database {
             preparedStatement.setLong(3, persistentUserSession.getCreationTime());
             preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentUserSession.getHashedToken()));
             preparedStatement.execute();
-            userSessions.put(persistentUserSession.getUser(), persistentUserSession);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -173,18 +171,14 @@ public class PostgresDatabase implements Database {
     @Override
     public PersistentUserSession removeUserSession(long id) {
         try {
-            PersistentUserSession persistentUserSession = userSessions.remove(id);
-            if (persistentUserSession == null) {
-                PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?");
-                preparedStatement.setLong(1, id);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (!resultSet.next()) {
-                    System.out.println("user session does not exist in db");
-                    return null;
-                }
-                persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?");
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
             }
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?");
+            PersistentUserSession persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+            preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?");
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
             return persistentUserSession;
