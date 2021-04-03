@@ -8,13 +8,11 @@ import net.stzups.board.server.websocket.MessageHandler;
 
 @ChannelHandler.Sharable
 public class WebSocketInitializer extends ChannelInboundHandlerAdapter {
-    //public static final AttributeKey<HttpSession> HTTP_SESSION_KEY = AttributeKey.valueOf(WebSocketInitializer.class, "HTTP_SESSION");
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
         if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-            WebSocketServerProtocolHandler.HandshakeComplete handshakeComplete = (WebSocketServerProtocolHandler.HandshakeComplete) event;
-            //ctx.channel().attr(HTTP_SESSION_KEY).set(HttpSession.getSession(handshakeComplete.requestHeaders(), ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress()));
+            ctx.channel().attr(ServerInitializer.LOGGER).get().info("WebSocket connection initialized");
             ctx.pipeline().addLast(new MessageHandler());//todo give this a different executor https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
         }
     }

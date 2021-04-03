@@ -6,6 +6,7 @@ import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
@@ -31,8 +32,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        //System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
-        //System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
+
     }
 
     @Override
@@ -52,7 +52,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     room = Room.getRoom(document);
                     room.addClient(client);
                 } else {
-                    System.out.println(client + " tried to open document not that does not exist");
+                    ctx.channel().attr(ServerInitializer.LOGGER).get().warning(client + " tried to open document not that does not exist");
                 }
                 break;
             }
@@ -74,23 +74,23 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
-                        BoardRoom.getLogger().info(ctx.channel().remoteAddress() + " authenticated with blank session");
+                        ctx.channel().attr(ServerInitializer.LOGGER).get().info("authenticated with blank session");
                         client = createUserSession(ctx, null);
                     } else {
                         PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
                         if (persistentUserSession == null) {
-                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with non existent persistent user session");
+                            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("attempted to authenticate with non existent persistent user session");
                             client = createUserSession(ctx, null);
                         } else if (!persistentUserSession.validate(clientPacketHandshake.getToken())) {
-                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with invalid persistent user session " + persistentUserSession);
+                            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("attempted to authenticate with invalid persistent user session " + persistentUserSession);
                             client = createUserSession(ctx, null);
                         } else {
                             User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
                             if (user == null) {
-                                BoardRoom.getLogger().severe(ctx.channel().remoteAddress() + " somehow managed to authenticate with non existent user");
+                                ctx.channel().attr(ServerInitializer.LOGGER).get().severe("somehow managed to authenticate with non existent user");
                                 client = createUserSession(ctx, null);
                             } else {
-                                BoardRoom.getLogger().info(user + " authenticated with good persistent session");
+                                ctx.channel().attr(ServerInitializer.LOGGER).get().info(user + " authenticated with good persistent session");
                                 client = createUserSession(ctx, user);
                             }
                         }

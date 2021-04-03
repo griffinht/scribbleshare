@@ -13,11 +13,14 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
+import io.netty.util.AttributeKey;
 import net.stzups.board.BoardRoom;
+import net.stzups.board.LogFactory;
 import net.stzups.board.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.server.websocket.protocol.MessageDecoder;
 
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 /**
  * Creates pipeline to handle Websocket connections
@@ -25,6 +28,8 @@ import java.util.concurrent.Executors;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+    public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
+
     private static final String WEB_SOCKET_PATH = "/websocket";
     private static final boolean DEBUG_LOG_TRAFFIC = BoardRoom.getConfig().getBoolean("debug.log.traffic", false);
 
@@ -35,6 +40,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     };
 
+    private Logger logger;
     private MessageEncoder messageEncoder = new MessageEncoder();
     private MessageDecoder messageDecoder = new MessageDecoder();
     private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
@@ -46,13 +52,15 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
-        BoardRoom.getLogger().info("New connection from " + socketChannel.remoteAddress());
+        logger = LogFactory.getLogger(socketChannel.remoteAddress().toString());
+        socketChannel.attr(LOGGER).set(logger);
+        logger.info("Initial connection");
         ChannelPipeline pipeline = socketChannel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        BoardRoom.getLogger().warning("Uncaught exception");
+                        logger.warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })

@@ -7,6 +7,8 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import net.stzups.board.BoardRoom;
+import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
@@ -26,11 +28,11 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
         if (webSocketFrame instanceof TextWebSocketFrame) {
-            System.out.println(((TextWebSocketFrame) webSocketFrame).text());
+            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("Got TextWebSocketFrame, content:");
+            ctx.channel().attr(ServerInitializer.LOGGER).get().warning(((TextWebSocketFrame) webSocketFrame).text());
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientMessageType packetType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
-            System.out.println("recv " + packetType);
             ClientMessage message;
             switch (packetType) {
                 case OPEN_DOCUMENT:
@@ -48,6 +50,7 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
                 default:
                     throw new OperationNotSupportedException("Unsupported message type " + packetType + " while decoding");
             }
+            ctx.channel().attr(ServerInitializer.LOGGER).get().info("recv " + message.getClass().getSimpleName());
             list.add(message);
         }
     }
