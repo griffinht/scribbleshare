@@ -12,8 +12,12 @@ public class ServerMessageAddClient extends ServerMessage {
     private Set<Client> clients;
 
     public ServerMessageAddClient(Client client) {
+        this(Collections.singleton(client));
+    }
+
+    public ServerMessageAddClient(Set<Client> clients) {
         super(ServerMessageType.ADD_CLIENT);
-        this.clients = Collections.singleton(client);
+        this.clients = clients;
     }
 
     @Override
