@@ -3,7 +3,7 @@ package net.stzups.board.data.database.memory;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class MemoryDatabase implements Database {
     private Map<Long, Document> documents = new HashMap<>();
-    private Map<Long, UserSession> userSessions = new HashMap<>();
+    private Map<Long, PersistentUserSession> userSessions = new HashMap<>();
     private Map<Long, User> users = new HashMap<>();
 
     @Override
@@ -48,13 +48,13 @@ public class MemoryDatabase implements Database {
     }
 
     @Override
-    public UserSession removeUserSession(long token) {
-        return userSessions.remove(token);
+    public PersistentUserSession removeUserSession(long id) {
+        return userSessions.remove(id);
     }
 
     @Override
-    public void addUserSession(UserSession userSession) {
-        userSessions.put(userSession.getToken(), userSession);
+    public void addUserSession(PersistentUserSession persistentUserSession) {
+        userSessions.put(persistentUserSession.getId(), persistentUserSession);
     }
 
     @Override

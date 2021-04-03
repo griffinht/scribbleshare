@@ -5,10 +5,11 @@ import io.netty.buffer.Unpooled;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,7 +26,7 @@ public class PostgresDatabase implements Database {
 
     private Map<Long, User> users = new HashMap<>();
     private Map<Long, Document> documents = new HashMap<>();
-    private Map<Long, UserSession> userSessions = new HashMap<>();
+    private Map<Long, PersistentUserSession> userSessions = new HashMap<>();
 
     public PostgresDatabase(String url, String user, String password) throws Exception {
         Class.forName("org.postgresql.Driver");
@@ -152,15 +153,15 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void addUserSession(UserSession userSession) {
+    public void addUserSession(PersistentUserSession persistentUserSession) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions(token, \"user\", creation_time, hash) VALUES (?, ?, ?, ?)");
-            preparedStatement.setLong(1, userSession.getToken());
-            preparedStatement.setLong(2, userSession.getUser());
-            preparedStatement.setLong(3, userSession.getCreationTime());
-            preparedStatement.setLong(4, userSession.getHash());
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)");
+            preparedStatement.setLong(1, persistentUserSession.getId());
+            preparedStatement.setLong(2, persistentUserSession.getUser());
+            preparedStatement.setLong(3, persistentUserSession.getCreationTime());
+            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentUserSession.getHashedToken()));
             preparedStatement.execute();
-            userSessions.put(userSession.getUser(), userSession);
+            userSessions.put(persistentUserSession.getUser(), persistentUserSession);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -170,24 +171,24 @@ public class PostgresDatabase implements Database {
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public UserSession removeUserSession(long token) {
+    public PersistentUserSession removeUserSession(long id) {
         try {
-            UserSession userSession = userSessions.remove(token);
-            if (userSession == null) {
-                PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE token=?");
-                preparedStatement.setLong(1, token);
+            PersistentUserSession persistentUserSession = userSessions.remove(id);
+            if (persistentUserSession == null) {
+                PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?");
+                preparedStatement.setLong(1, id);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (!resultSet.next()) {
                     System.out.println("user session does not exist in db");
                     return null;
                 }
-                userSession = new UserSession(token, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getLong("hash"));
+                persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
             }
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM user_sessions WHERE token=?");
-            preparedStatement.setLong(1, token);
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?");
+            preparedStatement.setLong(1, id);
             preparedStatement.execute();
-            return userSession;
-        } catch (SQLException e) {
+            return persistentUserSession;
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             return null;
         }

@@ -118,19 +118,26 @@ socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {
     documents.set(event.id, new Document(event.name, event.id));
 });
 socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
+    window.localStorage.setItem('id', event.id.toString());
     window.localStorage.setItem('token', event.token.toString());
 })
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (event) => {
     activeDocument.canvas = event.canvas;
 })
 socket.addEventListener(WebSocketHandlerType.OPEN, () => {
+    let id = window.localStorage.getItem('id');
+    if (id != null) {
+        id = BigInt(id);
+    } else {
+        id = BigInt(0);
+    }
     let token = window.localStorage.getItem('token');
     if (token != null) {
         token = BigInt(window.localStorage.getItem('token'));
     } else {
         token = BigInt(0);
     }
-    socket.send(new ClientMessageHandshake(token));
+    socket.send(new ClientMessageHandshake(id, token));
     let invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
     if (invite !== '') {
         try {

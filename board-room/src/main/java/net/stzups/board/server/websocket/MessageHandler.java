@@ -5,7 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
@@ -78,16 +78,16 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                         System.out.println("user authed with empty session");
                         client = createUserSession(ctx, null);
                     } else {
-                        UserSession userSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getToken());
-                        if (userSession == null) {
+                        PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
+                        if (persistentUserSession == null) {
                             System.out.println("user tried authenticating with nonexistant session");
                             client = createUserSession(ctx, null);
-                        } else if (!userSession.validate(0)) {
-                            System.out.println("user tried authenticating with invalid session" + userSession);
+                        } else if (!persistentUserSession.validate(clientPacketHandshake.getToken())) {
+                            System.out.println("user tried authenticating with invalid session" + persistentUserSession);
                             client = createUserSession(ctx, null);
                         } else {
                             System.out.println("good user session");
-                            User user = BoardRoom.getDatabase().getUser(userSession.getUser());
+                            User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
                             if (user == null) {
                                 System.out.println("very bad user does not exist");
                             }
@@ -120,9 +120,9 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
         } else {
             client = new Client(user, ctx.channel());
         }
-        UserSession userSession = new UserSession(client.getUser(), 0);
-        BoardRoom.getDatabase().addUserSession(userSession);
-        client.queueMessage(new ServerMessageHandshake(userSession));
+        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());
+        client.queueMessage(new ServerMessageHandshake(persistentUserSession));
+        BoardRoom.getDatabase().addUserSession(persistentUserSession);
         return client;
     }
 

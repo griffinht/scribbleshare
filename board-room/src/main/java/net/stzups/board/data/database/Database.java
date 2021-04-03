@@ -1,9 +1,8 @@
 package net.stzups.board.data.database;
 
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.HttpSession;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.data.objects.UserSession;
+import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 public interface Database {
@@ -16,6 +15,6 @@ public interface Database {
     void saveCanvas(Canvas canvas);
     void saveDocument(Document document);
 
-    UserSession removeUserSession(long token);
-    void addUserSession(UserSession userSession);
+    PersistentUserSession removeUserSession(long id);
+    void addUserSession(PersistentUserSession persistentUserSession);
 }

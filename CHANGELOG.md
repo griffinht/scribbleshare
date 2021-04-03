@@ -88,3 +88,4 @@ Rework protocol, document serialization
 Rework db, implement document persistence
 
 - Canvas is saved in db
+- Rework user authentication
