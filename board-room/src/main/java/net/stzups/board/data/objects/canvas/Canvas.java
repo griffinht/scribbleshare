@@ -23,11 +23,13 @@ public class Canvas {
      */
     public Canvas(Document document, ByteBuf byteBuf) {
         this.document = document;
-        for (int i = 0; i < byteBuf.readUnsignedByte(); i++) {
+        int length = byteBuf.readUnsignedByte();
+        for (int i = 0; i < length; i++) {
             CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
             Map<Short, CanvasObject> map = new HashMap<>();
             canvasObjects.put(canvasObjectType, map);
-            for (int j = 0; j < byteBuf.readUnsignedShort(); j++) {
+            int l = byteBuf.readUnsignedShort();
+            for (int j = 0; j < l; j++) {
                 map.put(byteBuf.readShort(), CanvasObject.getCanvasObject(canvasObjectType, byteBuf));
             }
         }
