@@ -89,9 +89,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
                             if (user == null) {
                                 BoardRoom.getLogger().severe(ctx.channel().remoteAddress() + " somehow managed to authenticate with non existent user");
-                                return;
+                                client = createUserSession(ctx, null);
+                            } else {
+                                client = createUserSession(ctx, user);
                             }
-                            client = createUserSession(ctx, user);
                         }
                     }
                 }
