@@ -6,6 +6,8 @@ services:
             network: host
         ports:
             - "8080:8080"
+        depends_on:
+            - database
         environment:
             board.ssl: "false"
             board.postgres: "true"
