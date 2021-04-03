@@ -50,6 +50,7 @@ class Room {
     static Room startRoom(Document document) {
         Room room = new Room(document);
         rooms.add(room);
+        BoardRoom.getLogger().info("Started room " + room);
         return room;
     }
 
@@ -57,7 +58,7 @@ class Room {
         rooms.remove(this);
         BoardRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
         //todo
-        BoardRoom.getLogger().info("Destroyed room for canvas " + canvas);
+        BoardRoom.getLogger().info("Ended room " + this);
     }
 
     Document getDocument() {
