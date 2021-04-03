@@ -79,6 +79,9 @@ class Room {
         //for the existing clients
         client.sendMessage(new ServerMessageOpenDocument(canvas));
         sendMessage(new ServerMessageAddClient(client));
+        for (Client c : clients) {
+            client.sendMessage(new ServerMessageAddClient(c));
+        }
         clients.add(client);
         BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
