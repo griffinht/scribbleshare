@@ -10,6 +10,8 @@ import net.stzups.board.data.objects.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -119,12 +121,11 @@ public class PostgresDatabase implements Database {
             preparedStatement.setLong(1, document.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Blob blob = resultSet.getBlob("data");
-                return new Canvas(document, Unpooled.wrappedBuffer(blob.getBytes(1, (int) blob.length())));
+                return new Canvas(document, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
             } else {
                 return new Canvas(document);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
         return null;//todo error handling??
@@ -133,13 +134,11 @@ public class PostgresDatabase implements Database {
     @Override
     public void saveCanvas(Canvas canvas) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=?");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data");
             preparedStatement.setLong(1, canvas.getDocument().getId());
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteBuf.array());
-            preparedStatement.setBinaryStream(2, byteArrayInputStream);
-            preparedStatement.setBinaryStream(3, byteArrayInputStream);//todo is this duplicate bad?
+            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(byteBuf.array()));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();

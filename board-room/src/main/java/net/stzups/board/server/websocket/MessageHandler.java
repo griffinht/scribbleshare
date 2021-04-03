@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
-    private static Map<Document, Room> documents = new HashMap<>();
     private Room room;
     private Client client;
 
@@ -50,7 +49,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     if (room != null) {
                         room.removeClient(client);
                     }
-                    room = getRoom(document);
+                    room = Room.getRoom(document);
                     room.addClient(client);
                 } else {
                     System.out.println(client + " tried to open document not that does not exist");
@@ -63,7 +62,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(BoardRoom.getDatabase().createDocument(client.getUser()));
+                    room = Room.getRoom(BoardRoom.getDatabase().createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -125,20 +124,5 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
         client.queueMessage(new ServerMessageHandshake(persistentUserSession));
         BoardRoom.getDatabase().addUserSession(persistentUserSession);
         return client;
-    }
-
-    /**
-     * Gets or creates a room for an existing document
-     *
-     * @param document the existing document
-     * @return the live room
-     */
-    private static Room getRoom(Document document) {
-        Room r = documents.get(document);
-        if (r == null) {
-            r =  Room.startRoom(document);
-            documents.put(r.getDocument(), r);
-        }
-        return r;
     }
 }

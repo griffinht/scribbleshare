@@ -89,3 +89,7 @@ Rework db, implement document persistence
 
 - Canvas is saved in db
 - Rework user authentication
+
+### v0.3.4
+
+- Fix changes not being saved on canvas close
