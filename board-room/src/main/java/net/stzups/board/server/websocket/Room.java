@@ -77,12 +77,13 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.sendMessage(new ServerMessageOpenDocument(canvas));
-        sendMessage(new ServerMessageAddClient(client));
+        client.queueMessage(new ServerMessageOpenDocument(canvas));
+        queueMessage(new ServerMessageAddClient(client));
         for (Client c : clients) {
-            client.sendMessage(new ServerMessageAddClient(c));
+            client.queueMessage(new ServerMessageAddClient(c));//todo
         }
         clients.add(client);
+        flushMessages();
         BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
 

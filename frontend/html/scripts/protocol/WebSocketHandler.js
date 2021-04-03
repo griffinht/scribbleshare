@@ -47,6 +47,7 @@ class WebSocketHandler {
         });
     
         this.socket.addEventListener('message', (event) => {
+            console.warn('recv');
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
