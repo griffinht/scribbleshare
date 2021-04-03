@@ -49,7 +49,7 @@ class Document {
     }
 
     close() {
-        //localClient.update();
+        localUpdate();
         ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);
@@ -159,13 +159,14 @@ const MAX_TIME = 2000;
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
 let updateCanvas = new Canvas();
-setInterval(() => {
+setInterval(localUpdate, UPDATE_INTERVAL);
+function localUpdate() {
     lastUpdate = window.performance.now();
     if (updateCanvas.updateCanvasObjects.size > 0) {
         socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
         updateCanvas.updateCanvasObjects.clear();
     }
-}, UPDATE_INTERVAL);
+}
 
 function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
