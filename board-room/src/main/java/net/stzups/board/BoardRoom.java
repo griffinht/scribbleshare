@@ -22,7 +22,6 @@ public class BoardRoom {
     private static Config config;
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Random random = new Random();
-    private static MessageDigest SHA256MessageDigest;
 
     private static Database database;//user id -> user
 
@@ -32,8 +31,6 @@ public class BoardRoom {
         logger.info("Starting Board Room server...");
 
         long start = System.currentTimeMillis();
-
-        SHA256MessageDigest = MessageDigest.getInstance("SHA-256");
 
         config = new ConfigBuilder()
                 .addConfig(new ArgumentConfig(args))
@@ -82,10 +79,6 @@ public class BoardRoom {
 
     public static SecureRandom getSecureRandom() {
         return secureRandom;
-    }
-
-    public static MessageDigest getSHA256MessageDigest() {
-        return SHA256MessageDigest;
     }
 
     public static Random getRandom() {
