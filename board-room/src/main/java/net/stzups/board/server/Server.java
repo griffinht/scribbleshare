@@ -38,7 +38,7 @@ public class Server {
 
         Boolean ssl = BoardRoom.getConfig().getBoolean("ssl");
         if (ssl == null) {
-            throw new RuntimeException("Failed to set required runtime variable --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
+            throw new IllegalArgumentException("Failed to set required runtime variable --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
         }
 
         if (!ssl) {
@@ -63,13 +63,13 @@ public class Server {
                                 .build();
                         port = HTTPS_PORT;
                     } catch (IOException | GeneralSecurityException e) {
-                        throw new RuntimeException("Exception while getting SSL context", e);
+                        throw new Exception("Exception while getting SSL context", e);
                     }
                 } else {
-                    throw new RuntimeException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
+                    throw new IllegalArgumentException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
                 }
             } else {
-                throw new RuntimeException("Failed to set specify SSL keystore path from --ssl.keystore.path flag.");
+                throw new IllegalArgumentException("Failed to set specify SSL keystore path from --ssl.keystore.path flag.");
             }
         }
 

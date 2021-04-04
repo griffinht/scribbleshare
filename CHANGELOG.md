@@ -95,3 +95,4 @@ Rework db, implement document persistence
 - Fix changes not being saved on canvas close
 - Fix canvas serialization
 - Fix connected clients list
+- Check db into version control

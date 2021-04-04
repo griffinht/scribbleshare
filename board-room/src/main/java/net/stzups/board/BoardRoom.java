@@ -42,7 +42,7 @@ public class BoardRoom {
 
         Boolean postgres = config.getBoolean("postgres");
         if (postgres == null) {
-            throw new RuntimeException("Failed to specify required runtime variable --postgres");
+            throw new IllegalArgumentException("Failed to specify required runtime variable --postgres");
         } else {
             if (postgres) {
                 logger.info("Connecting to Postgres database...");
