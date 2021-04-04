@@ -41,20 +41,15 @@ public class BoardRoom {
                 .addConfig(new EnvironmentVariableConfig("board."))
                 .build();
 
-        Boolean postgres = BoardRoom.getConfig().getBoolean(BoardConfigKeys.POSTGRES);
-        if (postgres == null) {
-            throw new IllegalArgumentException("Failed to specify required runtime variable --postgres");
+        if (BoardRoom.getConfig().getBoolean(BoardConfigKeys.POSTGRES)) {
+            logger.info("Connecting to Postgres database...");
+            database = new PostgresDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_URL),
+                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_USER),
+                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_PASSWORD));
+            logger.info("Connected to Postgres database");
         } else {
-            if (postgres) {
-                logger.info("Connecting to Postgres database...");
-                database = new PostgresDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_URL),
-                        BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_USER),
-                        BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_PASSWORD));
-                logger.info("Connected to Postgres database");
-            } else {
-                logger.warning("Using debug only runtime database. No data will be persisted.");
-                database = new MemoryDatabase();
-            }
+            logger.warning("Using debug only runtime database. No data will be persisted.");
+            database = new MemoryDatabase();
         }
 
         Server server = new Server();
