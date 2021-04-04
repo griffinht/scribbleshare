@@ -3,12 +3,12 @@ CREATE DATABASE board;
 
 -- Connect to board database (currently on default postgres database)
 \c board
-REVOKE CONNECT FROM PUBLIC;
+REVOKE CONNECT ON DATABASE board FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 -- CREATE SCHEMA board;
 -- GRANT USAGE ON SCHEMA board TO board_room; todo use schema and put tables on it?
-GRANT CONNECT TO board_room;
-GRANT USAGE TO board_room;
+GRANT CONNECT ON DATABASE board TO board_room;
+GRANT USAGE ON SCHEMA public TO board_room;
 
 -- Create tables and grant permissions
 CREATE TABLE users(
@@ -36,7 +36,7 @@ GRANT SELECT, INSERT, UPDATE ON canvases TO board_room;
 
 CREATE TABLE persistent_user_sessions(
     id BIGINT NOT NULL,
-    creation_time BIGINT NOT NULL,
+    creation_time TIMESTAMP NOT NULL,
     hashed_token bytea NOT NULL,
     PRIMARY KEY (id)
 );
