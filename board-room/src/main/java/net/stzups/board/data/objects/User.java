@@ -11,7 +11,7 @@ public class User {
     private List<Long> sharedDocuments;
 
     public User() {
-        id = BoardRoom.getSecureRandom().nextLong();
+        id = BoardRoom.getRandom().nextLong();
         ownedDocuments = new ArrayList<>();
         //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
         sharedDocuments = new ArrayList<>();

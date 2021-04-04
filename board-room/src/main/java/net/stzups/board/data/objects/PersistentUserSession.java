@@ -5,11 +5,13 @@ import net.stzups.board.BoardRoom;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 public class PersistentUserSession {
     private static final int MAX_USER_SESSION_AGE = 0;//todo
-    private static MessageDigest messageDigest;
+    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final MessageDigest messageDigest;
     static {
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
@@ -24,7 +26,7 @@ public class PersistentUserSession {
     private byte[] hashedToken;
 
     public PersistentUserSession(User user) {
-        this.id = BoardRoom.getSecureRandom().nextLong();//todo secure random or regular random?
+        this.id = BoardRoom.getRandom().nextLong();//todo secure random or regular random?
         this.user = user.getId();
         this.creationTime = System.currentTimeMillis();
     }
@@ -38,7 +40,7 @@ public class PersistentUserSession {
 
     /** should be called once after instance creation */
     public long generateToken() {
-        long token = BoardRoom.getSecureRandom().nextLong();
+        long token = secureRandom.nextLong();
         hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
         return token;
     }

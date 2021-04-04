@@ -16,7 +16,7 @@ public class Document {
      * New document
      */
     public Document(User owner) {
-        this.id = BoardRoom.getSecureRandom().nextLong();
+        this.id = BoardRoom.getRandom().nextLong();
         this.owner = owner;
         owner.getOwnedDocuments().add(id);
         this.name = DEFAULT_DOCUMENT_NAME;

@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 public class BoardRoom {
     private static Logger logger;
     private static Config config;
-    private static final SecureRandom secureRandom = new SecureRandom();
     private static final Random random = new Random();
 
     private static Database database;//user id -> user
@@ -75,10 +74,6 @@ public class BoardRoom {
 
     public static Database getDatabase() {
         return database;
-    }
-
-    public static SecureRandom getSecureRandom() {
-        return secureRandom;
     }
 
     public static Random getRandom() {
