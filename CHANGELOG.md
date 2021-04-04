@@ -91,8 +91,10 @@ Rework db, implement document persistence
 - Rework user authentication
 
 ### v0.3.4
+Bugfixes, improve db creation, improve exceptions, overhaul config 
 
 - Fix changes not being saved on canvas close
 - Fix canvas serialization
 - Fix connected clients list
-- Check db into version control
+- Add db creation scripts into version control
+- Overhaul config - improve exceptions

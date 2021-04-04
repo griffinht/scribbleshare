@@ -1,4 +1,4 @@
-package net.stzups.board.config;
+package net.stzups.board.util.config;
 
 import java.util.ArrayList;
 import java.util.List;

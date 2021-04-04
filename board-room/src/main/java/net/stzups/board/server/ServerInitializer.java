@@ -13,8 +13,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.LogFactory;
+import net.stzups.board.util.LogFactory;
 import net.stzups.board.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.server.websocket.protocol.MessageEncoder;
 
@@ -30,12 +31,11 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
     private static final String WEB_SOCKET_PATH = "/websocket";
-    private static final boolean DEBUG_LOG_TRAFFIC = BoardRoom.getConfig().getBoolean("debug.log.traffic", false);
 
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            if (DEBUG_LOG_TRAFFIC) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (BoardRoom.getConfig().getBoolean(BoardConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
 

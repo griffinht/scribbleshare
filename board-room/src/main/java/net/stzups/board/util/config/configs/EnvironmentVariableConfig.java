@@ -1,6 +1,6 @@
-package net.stzups.board.config.configs;
+package net.stzups.board.util.config.configs;
 
-import net.stzups.board.config.ConfigProvider;
+import net.stzups.board.util.config.ConfigProvider;
 
 import java.util.Objects;
 

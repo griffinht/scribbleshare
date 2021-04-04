@@ -1,4 +1,4 @@
-package net.stzups.board;
+package net.stzups.board.util;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
