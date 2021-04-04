@@ -153,7 +153,7 @@ public class PostgresDatabase implements Database {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)");
             preparedStatement.setLong(1, persistentUserSession.getId());
             preparedStatement.setLong(2, persistentUserSession.getUser());
-            preparedStatement.setLong(3, persistentUserSession.getCreationTime());
+            preparedStatement.setTimestamp(3, persistentUserSession.getCreation());
             preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentUserSession.getHashedToken()));
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -173,7 +173,7 @@ public class PostgresDatabase implements Database {
             if (!resultSet.next()) {
                 return null;
             }
-            PersistentUserSession persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getLong("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+            PersistentUserSession persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
             preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?");
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
