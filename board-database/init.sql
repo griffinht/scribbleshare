@@ -1,0 +1,2 @@
+CREATE USER board PASSWORD 'changeme';
+CREATE DATABASE board;
