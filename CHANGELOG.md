@@ -106,6 +106,7 @@ Better state management, invite codes
 ### v0.4.0
 Invite codes
 - Client can get invite codes for a document, persisted in db
+- Client can join with an invite code
 
 ### v0.4.1
 Better state management

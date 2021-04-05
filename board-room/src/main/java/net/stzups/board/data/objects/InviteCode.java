@@ -3,7 +3,7 @@ package net.stzups.board.data.objects;
 import net.stzups.board.util.RandomString;
 
 public class InviteCode {
-    private static final int INVITE_CODE_LENGTH = 6;
+    public static final int INVITE_CODE_LENGTH = 6;
     String code;
     long document;
 

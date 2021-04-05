@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
-    private static final String WEB_SOCKET_PATH = "/websocket";
+    private static final String WEB_SOCKET_PATH = "/";
 
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override

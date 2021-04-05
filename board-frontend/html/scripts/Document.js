@@ -140,16 +140,15 @@ socket.addEventListener(SocketEventType.OPEN, () => {
     } else {
         token = BigInt(0);
     }
-    socket.send(new ClientMessageHandshake(id, token));
-    let invite = document.location.href.substring(document.location.href.lastIndexOf("/") + 1);
-    if (invite !== '') {
-        try {
-            let bigint = BigInt(invite);
-            //socket.sendOpen(bigint); todo
-        } catch(e) {
-            console.error('improper invite', invite);
-        }
+    let invite;
+    let index = document.location.href.lastIndexOf('invite=');
+    if (index === -1) {
+        invite = '';
+    } else {
+        invite = document.location.href.substring(index + 7, index + 7 + 6);
     }
+    console.log(index)
+    socket.send(new ClientMessageHandshake(id, token, invite));
 });
 
 const inviteButton = document.getElementById("inviteButton");
@@ -159,7 +158,7 @@ inviteButton.addEventListener('click', (event) => {
 })
 
 socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
-    window.alert('Use invite code ' + serverMessageGetInvite.code);
+    window.alert('Join at localhost/index.html?invite=' + serverMessageGetInvite.code);
 })
 
 const MAX_TIME = 2000;

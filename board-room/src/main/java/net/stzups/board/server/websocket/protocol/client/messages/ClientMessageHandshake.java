@@ -7,11 +7,13 @@ import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 public class ClientMessageHandshake extends ClientMessage {
     private long id;
     private long token;
+    private String code;
 
     public ClientMessageHandshake(ByteBuf byteBuf) {
         super(ClientMessageType.HANDSHAKE);
         this.id = byteBuf.readLong();
         this.token = byteBuf.readLong();
+        this.code = readString(byteBuf);
     }
 
     public long getId() {
@@ -20,5 +22,9 @@ public class ClientMessageHandshake extends ClientMessage {
 
     public long getToken() {
         return token;
+    }
+
+    public String getCode() {
+        return code;
     }
 }
