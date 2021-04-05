@@ -10,15 +10,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
-
-import javax.naming.OperationNotSupportedException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Logger;
 
