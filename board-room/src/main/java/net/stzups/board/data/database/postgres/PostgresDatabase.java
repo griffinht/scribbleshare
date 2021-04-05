@@ -24,7 +24,6 @@ import java.util.Map;
 public class PostgresDatabase implements Database {
     private Connection connection;
 
-    private Map<Long, User> users = new HashMap<>();
     private Map<Long, Document> documents = new HashMap<>();
 
     public PostgresDatabase(String url, String user, String password) throws Exception {
@@ -36,10 +35,9 @@ public class PostgresDatabase implements Database {
     public void addUser(User user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
-            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
-            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
+            preparedStatement.setArray(2, connection.createArrayOf("document_id", user.getOwnedDocuments().toArray()));
+            preparedStatement.setArray(3, connection.createArrayOf("document_id", user.getSharedDocuments().toArray()));
             preparedStatement.execute();
-            users.put(user.getId(), user);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -47,26 +45,21 @@ public class PostgresDatabase implements Database {
 
     @Override
     public User getUser(long id) {
-        User user = users.get(id);
-        if (user == null) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
-                preparedStatement.setLong(1, id);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    user = new User(id,
-                            new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("owned_documents").getArray())),
-                            new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("shared_documents").getArray())));
-                    users.put(user.getId(), user);
-                } else {
-                    BoardRoom.getLogger().warning("User with id " + id + " does not exist");
-                    return null;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return new User(id,
+                        new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("owned_documents").getArray())),
+                        new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("shared_documents").getArray())));
+            } else {
+                BoardRoom.getLogger().warning("User with id " + id + " does not exist");
                 return null;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-        return user;
     }
 
     @Override
