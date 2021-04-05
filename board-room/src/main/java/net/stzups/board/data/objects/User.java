@@ -1,5 +1,7 @@
 package net.stzups.board.data.objects;
 
+import java.util.Arrays;
+
 public class User {
     private long id;
     private Long[] ownedDocuments;
@@ -40,7 +42,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{id=" + id + ",ownedDocuments=" + ownedDocuments + ",sharedDocuments=" + sharedDocuments + "}";
+        return "User{id=" + id + ",ownedDocuments=" + Arrays.toString(ownedDocuments) + ",sharedDocuments=" + Arrays.toString(sharedDocuments) + "}";
     }
 
     @Override

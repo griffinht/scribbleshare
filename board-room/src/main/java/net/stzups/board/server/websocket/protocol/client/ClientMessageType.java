@@ -12,6 +12,7 @@ public enum ClientMessageType {
     HANDSHAKE(3),
     DELETE_DOCUMENT(4),
     UPDATE_DOCUMENT(5),
+    GET_INVITE(6)
     ;
 
     private static Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();

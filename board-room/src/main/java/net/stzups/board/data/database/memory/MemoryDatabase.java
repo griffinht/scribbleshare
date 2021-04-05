@@ -3,6 +3,7 @@ package net.stzups.board.data.database.memory;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
@@ -49,6 +50,16 @@ public class MemoryDatabase implements Database {
     @Override
     public void saveCanvas(Canvas canvas) {
 
+    }
+
+    @Override
+    public InviteCode getInviteCode(String code) {
+        return null;
+    }
+
+    @Override
+    public InviteCode getInviteCode(Document document) {
+        return null;
     }
 
     @Override

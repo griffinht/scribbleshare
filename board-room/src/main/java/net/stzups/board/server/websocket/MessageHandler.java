@@ -8,12 +8,12 @@ import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
@@ -57,7 +57,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 break;
             }
             case CREATE_DOCUMENT: {
-                ClientMessageCreateDocument clientPacketCreateDocument = (ClientMessageCreateDocument) message;
                 if (room != null) {
                     room.removeClient(client);
                 }
@@ -141,6 +140,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 BoardRoom.getDatabase().updateDocument(room.getDocument());
                 break;//todo better update logic
             }
+            case GET_INVITE: {
+                client.sendMessage(new ServerMessageGetInvite(BoardRoom.getDatabase().getInviteCode(room.getDocument())));
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unsupported message type " + message.getMessageType() + " sent by " + client);
         }
@@ -153,7 +156,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
         } else {
             client = new Client(user, ctx.channel());
         }
-        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());
+        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());//todo refactor
         client.queueMessage(new ServerMessageHandshake(persistentUserSession));
         BoardRoom.getDatabase().addUserSession(persistentUserSession);
         return client;

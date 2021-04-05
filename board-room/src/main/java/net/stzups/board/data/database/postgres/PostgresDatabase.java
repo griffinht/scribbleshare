@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
+import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
@@ -144,9 +145,10 @@ public class PostgresDatabase implements Database {
 
     @Override
     public void deleteDocument(Document document) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM documents WHERE id=?; DELETE FROM canvases WHERE document=?")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM documents WHERE id=?; DELETE FROM canvases WHERE document=?; DELETE FROM invite_codes WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getId());
+            preparedStatement.setLong(3, document.getId());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -179,6 +181,47 @@ public class PostgresDatabase implements Database {
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public InviteCode getInviteCode(String code) {//gets a document for an existing invite code
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT document FROM invite_codes WHERE code=?")) {
+            preparedStatement.setString(1, code);
+            ResultSet resultSet = preparedStatement.executeQuery();//todo autocloseable try with resources
+            if (!resultSet.next()) {
+                return null;
+            }
+            return new InviteCode(code, resultSet.getLong(1));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public InviteCode getInviteCode(Document document) {//gets an invite code for a document
+        //check if invite code already exists, otherwise generate a new one
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT code FROM invite_codes WHERE document=?")) {
+            preparedStatement.setLong(1, document.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return new InviteCode(resultSet.getString(1), document.getId());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        //invite code does not already exist, so a new one must be made
+        InviteCode inviteCode = new InviteCode(document);
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO invite_codes(code, document) VALUES (?, ?)")) {
+            preparedStatement.setString(1, inviteCode.getCode());
+            preparedStatement.setLong(2, inviteCode.getDocument());
+            preparedStatement.execute();
+            return inviteCode;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

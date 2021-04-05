@@ -2,13 +2,13 @@ package net.stzups.board.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageGetInvite;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
-import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -51,6 +51,9 @@ public abstract class ClientMessage {
                 break;
             case UPDATE_DOCUMENT:
                 message = new ClientMessageUpdateDocument(byteBuf);
+                break;
+            case GET_INVITE:
+                message = new ClientMessageGetInvite(byteBuf);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported message type " + clientMessageType + " while decoding");
