@@ -1,21 +1,11 @@
 package net.stzups.board.data.objects;
 
-import net.stzups.board.BoardRoom;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class User {
     private long id;
     private List<Long> ownedDocuments;
     private List<Long> sharedDocuments;
-
-    public User() {
-        id = BoardRoom.getRandom().nextLong();
-        ownedDocuments = new ArrayList<>();
-        //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
-        sharedDocuments = new ArrayList<>();
-    }
 
     public User(long id, List<Long> ownedDocuments, List<Long> sharedDocuments) {
         this.id = id;
@@ -37,7 +27,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{id=" + id + "}";
+        return "User{id=" + id + ",ownedDocuments=" + ownedDocuments + ",sharedDocuments=" + sharedDocuments + "}";
     }
 
     @Override

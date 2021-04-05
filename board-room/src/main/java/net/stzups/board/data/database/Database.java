@@ -6,7 +6,7 @@ import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 public interface Database {
-    void addUser(User user);
+    User createUser();
     User getUser(long id);
 
     Document createDocument(User owner);

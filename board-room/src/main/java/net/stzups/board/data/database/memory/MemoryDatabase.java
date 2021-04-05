@@ -1,11 +1,13 @@
 package net.stzups.board.data.database.memory;
 
+import net.stzups.board.BoardRoom;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.canvas.Canvas;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +20,10 @@ public class MemoryDatabase implements Database {
     private Map<Long, User> users = new HashMap<>();
 
     @Override
-    public void addUser(User user) {
+    public User createUser() {
+        User user = new User(BoardRoom.getRandom().nextLong(), new ArrayList<>(), new ArrayList<>());
         users.put(user.getId(), user);
+        return user;
     }
 
     @Override

@@ -8,9 +8,11 @@ import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
+import org.postgresql.util.PGobject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -32,7 +34,8 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void addUser(User user) {
+    public User createUser() {
+        User user = new User(BoardRoom.getRandom().nextLong(), new ArrayList<>(), new ArrayList<>());
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("document_id", user.getOwnedDocuments().toArray()));
@@ -41,6 +44,7 @@ public class PostgresDatabase implements Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return user;
     }
 
     @Override
@@ -50,8 +54,8 @@ public class PostgresDatabase implements Database {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return new User(id,
-                        new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("owned_documents").getArray())),
-                        new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("shared_documents").getArray())));
+                        new ArrayList<>(Arrays.asList(convertPostgresDomainArrayToLongArray(resultSet.getArray("owned_documents")))),
+                        new ArrayList<>(Arrays.asList(convertPostgresDomainArrayToLongArray(resultSet.getArray("shared_documents")))));
             } else {
                 BoardRoom.getLogger().warning("User with id " + id + " does not exist");
                 return null;
@@ -60,6 +64,17 @@ public class PostgresDatabase implements Database {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // normally (Long[]) resultSet.getArray("something").getArray()) fails with custom domain types
+    private Long[] convertPostgresDomainArrayToLongArray(Array longArray) throws SQLException {
+        Object[] objects = (Object[]) longArray.getArray();
+        Long[] longs = new Long[objects.length];
+        for (int i = 0; i < objects.length; i++) {
+            //objects is actually an array of PGobject
+            longs[i] = Long.parseLong(((PGobject) objects[i]).getValue());
+        }
+        return longs;
     }
 
     @Override
@@ -97,7 +112,6 @@ public class PostgresDatabase implements Database {
                 } else {
                     BoardRoom.getLogger().warning("Document with id " + id + " does not exist");
                     return null;
-
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

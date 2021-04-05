@@ -113,8 +113,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static Client createUserSession(ChannelHandlerContext ctx, User user) {
         Client client;
         if (user == null) {
-            client = new Client(new User(), ctx.channel());
-            BoardRoom.getDatabase().addUser(client.getUser());
+            client = new Client(BoardRoom.getDatabase().createUser(), ctx.channel());
         } else {
             client = new Client(user, ctx.channel());
         }
