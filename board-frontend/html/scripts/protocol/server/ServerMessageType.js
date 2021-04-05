@@ -6,6 +6,7 @@ import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageAddUser from "./messages/ServerMessageAddUser.js";
 import ServerMessageDeleteDocument from "./messages/ServerMessageDeleteDocument.js";
 import ServerMessageUpdateDocument from "./messages/ServerMessageUpdateDocument.js";
+import ServerMessageGetInvite from "./messages/ServerMessageGetInvite.js";
 
 const ServerMessageType = {
     ADD_CLIENT:0,
@@ -15,7 +16,8 @@ const ServerMessageType = {
     UPDATE_DOCUMENT:4,
     HANDSHAKE:5,
     ADD_USER:6,
-    DELETE_DOCUMENT:7
+    DELETE_DOCUMENT:7,
+    GET_INVITE:8,
 };
 export default ServerMessageType;
 
@@ -46,6 +48,9 @@ export function getServerMessage(type, reader) {
             break;
         case ServerMessageType.DELETE_DOCUMENT:
             message = new ServerMessageDeleteDocument(reader);
+            break;
+        case ServerMessageType.GET_INVITE:
+            message = new ServerMessageGetInvite(reader);
             break;
         default:
             console.error('unknown payload type ' + type + ', offset ' + reader.position + ', event ', event);

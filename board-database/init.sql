@@ -41,3 +41,10 @@ CREATE TABLE persistent_user_sessions(
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, DELETE ON persistent_user_sessions TO board_room;
+
+CREATE TABLE invite_codes(
+    code char(6) NOT NULL,
+    document bigint NOT NULL,
+    PRIMARY KEY (code)
+);
+GRANT SELECT, INSERT, DELETE ON invite_codes TO board_room;

@@ -1,8 +1,6 @@
 package net.stzups.board.data.objects;
 
-import io.netty.buffer.ByteBuf;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.data.objects.canvas.Canvas;
 
 public class Document {
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
@@ -10,7 +8,6 @@ public class Document {
     private long id;
     private User owner;
     private String name;
-    private String inviteCode;
 
     /**
      * New document

@@ -12,6 +12,7 @@ import Shape from "./canvas/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import SocketEventType from "./protocol/SocketEventType.js";
+import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 
 const documents = new Map();
 let activeDocument = null;
@@ -154,7 +155,11 @@ socket.addEventListener(SocketEventType.OPEN, () => {
 const inviteButton = document.getElementById("inviteButton");
 
 inviteButton.addEventListener('click', (event) => {
-    console.log('invite');
+    socket.send(new ClientMessageGetInvite());
+})
+
+socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
+    window.alert('Use invite code ' + serverMessageGetInvite.code);
 })
 
 const MAX_TIME = 2000;
