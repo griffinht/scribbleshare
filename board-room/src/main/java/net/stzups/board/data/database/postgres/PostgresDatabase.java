@@ -35,11 +35,11 @@ public class PostgresDatabase implements Database {
 
     @Override
     public User createUser() {
-        User user = new User(BoardRoom.getRandom().nextLong(), new ArrayList<>(), new ArrayList<>());
+        User user = new User(BoardRoom.getRandom().nextLong(), new Long[0], new Long[0]);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
-            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
-            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
+            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments()));
+            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments()));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,8 +54,8 @@ public class PostgresDatabase implements Database {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return new User(id,
-                        new ArrayList<>(Arrays.asList((Long[]) (resultSet.getArray("owned_documents").getArray()))),
-                        new ArrayList<>(Arrays.asList((Long[]) (resultSet.getArray("shared_documents").getArray()))));
+                        (Long[]) (resultSet.getArray("owned_documents").getArray()),
+                        (Long[]) (resultSet.getArray("shared_documents").getArray()));
             } else {
                 BoardRoom.getLogger().warning("User with id " + id + " does not exist");
                 return null;
@@ -63,6 +63,18 @@ public class PostgresDatabase implements Database {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public void updateUser(User user) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET owned_documents=?, shared_documents=? WHERE id=?")){
+            preparedStatement.setArray(1, connection.createArrayOf("bigint", user.getOwnedDocuments()));
+            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getSharedDocuments()));
+            preparedStatement.setLong(3, user.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 /*
@@ -86,11 +98,13 @@ public class PostgresDatabase implements Database {
             preparedStatement.setString(3, document.getName());
             preparedStatement.execute();
             documents.put(document.getId(), document);
-            return document;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+        owner.addOwnedDocument(document);
+        updateUser(owner);
+        return document;
     }
 
     @Override

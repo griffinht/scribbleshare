@@ -21,7 +21,7 @@ public class MemoryDatabase implements Database {
 
     @Override
     public User createUser() {
-        User user = new User(BoardRoom.getRandom().nextLong(), new ArrayList<>(), new ArrayList<>());
+        User user = new User(BoardRoom.getRandom().nextLong(), new Long[0], new Long[0]);
         users.put(user.getId(), user);
         return user;
     }
@@ -29,6 +29,11 @@ public class MemoryDatabase implements Database {
     @Override
     public User getUser(long id) {
         return users.get(id);
+    }
+
+    @Override
+    public void updateUser(User user) {
+
     }
 
     @Override

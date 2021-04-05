@@ -8,6 +8,7 @@ import net.stzups.board.data.objects.canvas.Canvas;
 public interface Database {
     User createUser();
     User getUser(long id);
+    void updateUser(User user);
 
     Document createDocument(User owner);
     Document getDocument(long id);

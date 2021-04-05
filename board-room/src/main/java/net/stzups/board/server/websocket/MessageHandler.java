@@ -94,7 +94,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     }
                 }
                 client.queueMessage(new ServerMessageAddUser(client.getUser()));
-                if (client.getUser().getOwnedDocuments().size() == 0) {
+                if (client.getUser().getOwnedDocuments().length == 0) {
                     client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));//todo
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
