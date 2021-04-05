@@ -12,9 +12,10 @@ public interface Database {
 
     Document createDocument(User owner);
     Document getDocument(long id);
+    void updateDocument(Document document);
+    void deleteDocument(Document document);
     Canvas getCanvas(Document document);
     void saveCanvas(Canvas canvas);
-    void saveDocument(Document document);
 
     PersistentUserSession removeUserSession(long id);
     void addUserSession(PersistentUserSession persistentUserSession);

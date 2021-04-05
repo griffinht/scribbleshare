@@ -47,4 +47,10 @@ public class User {
     public int hashCode() {
         return Long.hashCode(id);
     }
+
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof User && id == ((User) object).id;
+    }
 }

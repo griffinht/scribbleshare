@@ -8,18 +8,14 @@ import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
-import org.postgresql.util.PGobject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -136,6 +132,28 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
+    public void updateDocument(Document document) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE documents SET name=? WHERE id=?")) {
+            preparedStatement.setString(1, document.getName());
+            preparedStatement.setLong(2, document.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteDocument(Document document) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM documents WHERE id=?; DELETE FROM canvases WHERE document=?")) {
+            preparedStatement.setLong(1, document.getId());
+            preparedStatement.setLong(2, document.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public Canvas getCanvas(Document document) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
@@ -165,11 +183,6 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void saveDocument(Document document) {
-
-    }
-
-    @Override
     public void addUserSession(PersistentUserSession persistentUserSession) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setLong(1, persistentUserSession.getId());
@@ -186,7 +199,7 @@ public class PostgresDatabase implements Database {
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public PersistentUserSession removeUserSession(long id) {
+    public PersistentUserSession removeUserSession(long id) {//todo combine
         PersistentUserSession persistentUserSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {

@@ -24,14 +24,14 @@ CREATE TABLE documents(
     name varchar(64) not null,
     PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE ON documents TO board_room;
+GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO board_room;
 
 CREATE TABLE canvases(
     document bigint NOT NULL,
     data bytea NOT NULL,
     PRIMARY KEY (document)
 );
-GRANT SELECT, INSERT, UPDATE ON canvases TO board_room;
+GRANT SELECT, INSERT, UPDATE, DELETE ON canvases TO board_room;
 
 CREATE TABLE persistent_user_sessions(
     id bigint NOT NULL,

@@ -1,28 +1,22 @@
 import BufferReader from './BufferReader.js'
 import BufferWriter from "./BufferWriter.js";
-import ServerMessageAddClient from "./server/messages/ServerMessageAddClient.js";
-import ServerMessageRemoveClient from "./server/messages/ServerMessageRemoveClient.js";
-import ServerMessageOpenDocument from "./server/messages/ServerMessageOpenDocument.js";
-import ServerMessageUpdateCanvas from "./server/messages/ServerMessageUpdateCanvas.js";
-import ServerMessageAddDocument from "./server/messages/ServerMessageAddDocument.js";
-import ServerMessageHandshake from "./server/messages/ServerMessageHandshake.js";
-import ServerMessageAddUser from "./server/messages/ServerMessageAddUser.js";
 import ServerMessageType from "./server/ServerMessageType.js";
-import WebSocketHandlerType from "./WebSocketHandlerType.js";
+import SocketEventType from "./SocketEventType.js";
+import {getServerMessage} from "./server/ServerMessageType.js";
 
 const HTTP_PORT = 8080;
 const HTTPS_PORT = 443;
 
 class WebSocketHandler {
     constructor() {
-        this.events = {};
-        Object.keys(WebSocketHandlerType).forEach((key, value) => {
-            this.events[value] = [];
+        this.socketEvents = {};
+        Object.keys(SocketEventType).forEach((key, value) => {
+            this.socketEvents[value] = [];
         });
 
-        this.messageEvents = {};
+        this.serverMessageEvents = {};
         Object.keys(ServerMessageType).forEach((key, value) => {
-            this.messageEvents[value] = [];
+            this.serverMessageEvents[value] = [];
         });
 
         let webSocketUrl;
@@ -38,12 +32,12 @@ class WebSocketHandler {
 
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            this.dispatchEvent(WebSocketHandlerType.OPEN);
+            this.dispatchEvent(SocketEventType.OPEN);
         });
 
         this.socket.addEventListener('close', (event) => {
             console.log('WebSocket connection closed');
-            this.dispatchEvent(WebSocketHandlerType.CLOSE);
+            this.dispatchEvent(SocketEventType.CLOSE);
         });
     
         this.socket.addEventListener('message', (event) => {
@@ -53,35 +47,7 @@ class WebSocketHandler {
             } else {
                 let reader = new BufferReader(event.data);
                 while (reader.hasNext()) {
-                    let type = reader.readUint8();
-                    let message;
-                    switch (type) {
-                        case ServerMessageType.ADD_CLIENT:
-                            message = new ServerMessageAddClient(reader);
-                            break;
-                        case ServerMessageType.REMOVE_CLIENT:
-                            message = new ServerMessageRemoveClient(reader);
-                            break;
-                        case ServerMessageType.UPDATE_CANVAS:
-                            message = new ServerMessageUpdateCanvas(reader);
-                            break;
-                        case ServerMessageType.OPEN_DOCUMENT:
-                            message = new ServerMessageOpenDocument(reader);
-                            break;
-                        case ServerMessageType.ADD_DOCUMENT:
-                            message = new ServerMessageAddDocument(reader);
-                            break;
-                        case ServerMessageType.HANDSHAKE:
-                            message = new ServerMessageHandshake(reader);
-                            break;
-                        case ServerMessageType.ADD_USER:
-                            message = new ServerMessageAddUser(reader)
-                            break;
-                        default:
-                            console.error('unknown payload type ' + type + ', offset ' + reader.position + ', event ', event);
-                            break;
-                    }
-                    this.dispatchMessageEvent(message.type, message);
+                    this.dispatchMessageEvent(getServerMessage(reader.readUint8(), reader));
                 }
             }
         });
@@ -91,22 +57,22 @@ class WebSocketHandler {
         });
     }
 
-    addEventListener(type, onevent) {
-        this.events[type].push(onevent);
+    addEventListener(socketEventType, onSocketEvent) {
+        this.socketEvents[socketEventType].push(onSocketEvent);
     }
     
-    dispatchEvent(type, event) {
-        console.log('recv', type, event);
-        this.events[type].forEach(onevent => onevent(event));
+    dispatchEvent(socketEventType, socketEvent) {
+        console.log('recv', socketEventType, socketEvent);
+        this.socketEvents[socketEventType].forEach(onSocketEvent => onSocketEvent(socketEvent));
     }
 
-    addMessageListener(type, onevent) {
-        this.messageEvents[type].push(onevent);
+    addMessageListener(serverMessageType, onServerMessage) {
+        this.serverMessageEvents[serverMessageType].push(onServerMessage);
     }
 
-    dispatchMessageEvent(type, event) {
-        console.log('recv', type, event);
-        this.messageEvents[type].forEach(onevent => onevent(event));
+    dispatchMessageEvent(serverMessage) {
+        console.log('recv', serverMessage.type, serverMessage);
+        this.serverMessageEvents[serverMessage.type].forEach(onServerMessage => onServerMessage(serverMessage));
     }
 
     send(message) {

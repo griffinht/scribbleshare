@@ -11,9 +11,11 @@ import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;
@@ -31,32 +33,10 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             ctx.channel().attr(ServerInitializer.LOGGER).get().warning(((TextWebSocketFrame) webSocketFrame).text());
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
-            ClientMessageType packetType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
-            ClientMessage message;
-            switch (packetType) {
-                case OPEN_DOCUMENT:
-                    message = new ClientMessageOpenDocument(byteBuf);
-                    break;
-                case UPDATE_CANVAS:
-                    message = new ClientMessageUpdateCanvas(byteBuf);
-                    break;
-                case CREATE_DOCUMENT:
-                    message = new ClientMessageCreateDocument();
-                    break;
-                case HANDSHAKE:
-                    message = new ClientMessageHandshake(byteBuf);
-                    break;
-                default:
-                    throw new OperationNotSupportedException("Unsupported message type " + packetType + " while decoding");
-            }
-            ctx.channel().attr(ServerInitializer.LOGGER).get().info("recv " + message.getClass().getSimpleName());
-            list.add(message);
+            ClientMessageType clientMessageType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
+            ClientMessage clientMessage = ClientMessage.getClientMessage(clientMessageType, byteBuf);
+            ctx.channel().attr(ServerInitializer.LOGGER).get().info("recv " + clientMessage.getClass().getSimpleName());
+            list.add(clientMessage);
         }
-    }
-
-    private String readString(ByteBuf byteBuf) {
-        byte[] buffer = new byte[byteBuf.readUnsignedByte()];
-        byteBuf.readBytes(buffer);
-        return new String(buffer, StandardCharsets.UTF_8);
     }
 }

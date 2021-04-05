@@ -52,8 +52,13 @@ public class MemoryDatabase implements Database {
     }
 
     @Override
-    public void saveDocument(Document document) {
+    public void updateDocument(Document document) {
         documents.put(document.getId(), document);
+    }
+
+    @Override
+    public void deleteDocument(Document document) {
+        documents.remove(document.getId());
     }
 
     @Override

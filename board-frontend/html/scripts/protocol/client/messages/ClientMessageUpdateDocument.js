@@ -1,10 +1,11 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
 
-export default class ClientMessageOpenDocument extends ClientMessage {
+export default class ClientMessageUpdateDocument extends ClientMessage {
     constructor(document) {
-        super(ClientMessageType.OPEN_DOCUMENT);
+        super(ClientMessageType.UPDATE_DOCUMENT);
         this.id = document.id;
+        this.name = document.name;
     }
 
     getBufferSize() {

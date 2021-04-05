@@ -38,6 +38,10 @@ public class Document {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -50,5 +54,10 @@ public class Document {
     @Override
     public int hashCode() {
         return Long.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof Document && id == ((Document) object).id;
     }
 }

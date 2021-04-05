@@ -19,13 +19,13 @@ class User {
     }
 }
 
-socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
-    user = new User(event.userId);
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
+    user = new User(serverMessageHandshake.userId);
 })
-socket.addMessageListener(ServerMessageType.ADD_USER, (event) => {
-    let user = users.get(event.user.id);
+socket.addMessageListener(ServerMessageType.ADD_USER, (serverMessageAddUser) => {
+    let user = users.get(serverMessageAddUser.user.id);
     if (user == null) {
-        user = new User(event.user.id);
+        user = new User(serverMessageAddUser.user.id);
     }
-    Object.assign(user, event.user);
+    Object.assign(user, serverMessageAddUser.user);
 });

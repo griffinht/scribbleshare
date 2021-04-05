@@ -82,4 +82,9 @@ public class PersistentUserSession {
     public int hashCode() {
         return Long.hashCode(id);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof PersistentUserSession && id == ((PersistentUserSession) object).id;
+    }
 }

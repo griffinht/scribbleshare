@@ -7,11 +7,11 @@ import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageO
 import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
-import WebSocketHandlerType from "./protocol/WebSocketHandlerType.js";
 import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
 import Shape from "./canvas/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
+import SocketEventType from "./protocol/SocketEventType.js";
 
 const documents = new Map();
 let activeDocument = null;
@@ -29,7 +29,7 @@ class Document {
                 activeDocument = this;
                 activeDocument.open();
 
-                socket.send(new ClientMessageOpenDocument(this.id));
+                socket.send(new ClientMessageOpenDocument(this));
             } else {
                 console.log('id was null', this);
             }
@@ -99,34 +99,34 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-socket.addMessageListener(ServerMessageType.ADD_CLIENT, (event) => {
-    event.clients.forEach((value) => {
+socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient) => {
+    serverMessageAddClient.clients.forEach((value) => {
         let client = new Client(value.id, User.getUser(value.userId));
         activeDocument.addClient(client);
         console.log('Add client ', client);
     })
 });
-socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (event) => {
-    console.log('Remove client ', activeDocument.removeClient(event.id));
+socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveClient) => {
+    console.log('Remove client ', activeDocument.removeClient(serverMessageRemoveClient.id));
 });
-socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (event) => {
+socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateCanvas) => {
     if (activeDocument != null) {
-        activeDocument.canvas.updateMultiple(event.canvasObjectWrappers);
+        activeDocument.canvas.updateMultiple(serverMessageUpdateCanvas.canvasObjectWrappers);
     } else {
         console.warn('oops');
     }
 });
-socket.addMessageListener(ServerMessageType.ADD_DOCUMENT, (event) => {
-    documents.set(event.id, new Document(event.name, event.id));
+socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
+    documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name, serverMessageUpdateDocument.id));
 });
-socket.addMessageListener(ServerMessageType.HANDSHAKE, (event) => {
-    window.localStorage.setItem('id', event.id.toString());
-    window.localStorage.setItem('token', event.token.toString());
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
+    window.localStorage.setItem('id', serverMessageHandshake.id.toString());
+    window.localStorage.setItem('token', serverMessageHandshake.token.toString());
 })
-socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (event) => {
-    activeDocument.canvas = event.canvas;
+socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
+    activeDocument.canvas = serverMessageOpenDocument.canvas;
 })
-socket.addEventListener(WebSocketHandlerType.OPEN, () => {
+socket.addEventListener(SocketEventType.OPEN, () => {
     let id = window.localStorage.getItem('id');
     if (id != null) {
         id = BigInt(id);

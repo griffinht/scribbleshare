@@ -49,10 +49,6 @@ public class Canvas {
         }
     }
 
-    public void delete(Canvas canvas) {
-        delete(canvas.canvasObjects);
-    }
-
     public void delete(Map<CanvasObjectType, Map<Short, CanvasObject>> deleteCanvasObjects) {
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : deleteCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
@@ -66,10 +62,6 @@ public class Canvas {
         }
     }
 
-    public void clear() {
-        canvasObjects.clear();
-    }
-
     public void serialize(ByteBuf byteBuf) {
         byteBuf.writeByte((byte) canvasObjects.size());
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : canvasObjects.entrySet()) {
@@ -80,10 +72,6 @@ public class Canvas {
                 entry1.getValue().serialize(byteBuf);
             }
         }
-    }
-
-    public boolean isEmpty() {
-        return canvasObjects.isEmpty();
     }
 
     @Override
