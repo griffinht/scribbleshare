@@ -11,9 +11,8 @@ import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageO
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -22,12 +21,12 @@ import java.util.TimerTask;
 class Room {
     private static final int SEND_PERIOD = 1000;
 
-    private static List<Room> rooms = new ArrayList<>();
+    private static Map<Document, Room> rooms = new HashMap<>();
     static {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                for (Room room : rooms) {
+                for (Room room : rooms.values()) {
                     room.update();
                 }
             }
@@ -38,26 +37,25 @@ class Room {
 
     private Canvas canvas;
 
-    private Room(Document document) {
+    Room(Document document) {
         this.canvas = BoardRoom.getDatabase().getCanvas(document);
+        rooms.put(document, this);
+        BoardRoom.getLogger().info("Started " + this);
     }
 
-    /**
-     * Creates a new room with a random id
-     *
-     * @return the created room
-     */
-    static Room startRoom(Document document) {
-        Room room = new Room(document);
-        rooms.add(room);
+    static Room getRoom(Document document) {
+        Room room = rooms.get(document);
+        if (room == null) {
+            room = new Room(document);
+        }
         return room;
     }
 
     void end() {
-        rooms.remove(this);
+        rooms.remove(canvas.getDocument());
         BoardRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
         //todo
-        BoardRoom.getLogger().info("Destroyed room for canvas " + canvas);
+        BoardRoom.getLogger().info("Ended room " + this);
     }
 
     Document getDocument() {
@@ -79,9 +77,11 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.sendMessage(new ServerMessageOpenDocument(canvas));
-        sendMessage(new ServerMessageAddClient(client));
+        client.queueMessage(new ServerMessageOpenDocument(canvas));
+        queueMessage(new ServerMessageAddClient(client));
+        client.queueMessage(new ServerMessageAddClient(clients));//todo
         clients.add(client);
+        flushMessages();
         BoardRoom.getLogger().info("Added " + client + " to " + this);
     }
 

@@ -89,3 +89,13 @@ Rework db, implement document persistence
 
 - Canvas is saved in db
 - Rework user authentication
+
+### v0.3.4
+Document update/delete operations, overhaul db and config
+
+- Fix changes not being saved on canvas close
+- Fix canvas serialization
+- Fix connected clients list
+- Add db creation scripts into version control
+- Overhaul config - improve exceptions
+- Add document update and delete functionality

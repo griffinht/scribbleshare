@@ -4,22 +4,22 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.User;
+import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
-import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddDocument;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageGetInvite;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageHandshake;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
-    private static Map<Document, Room> documents = new HashMap<>();
     private Room room;
     private Client client;
 
@@ -32,8 +32,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        //System.out.println(ctx.channel().hasAttr(WebSocketInitializer.HTTP_SESSION_KEY));
-        //System.out.println(ctx.channel().attr(WebSocketInitializer.HTTP_SESSION_KEY).get());
+
     }
 
     @Override
@@ -50,24 +49,23 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     if (room != null) {
                         room.removeClient(client);
                     }
-                    room = getRoom(document);
+                    room = Room.getRoom(document);
                     room.addClient(client);
                 } else {
-                    System.out.println(client + " tried to open document not that does not exist");
+                    ctx.channel().attr(ServerInitializer.LOGGER).get().warning(client + " tried to open document not that does not exist");
                 }
                 break;
             }
             case CREATE_DOCUMENT: {
-                ClientMessageCreateDocument clientPacketCreateDocument = (ClientMessageCreateDocument) message;
                 if (room != null) {
                     room.removeClient(client);
                 }
                 try {
-                    room = getRoom(BoardRoom.getDatabase().createDocument(client.getUser()));
+                    room = Room.getRoom(BoardRoom.getDatabase().createDocument(client.getUser()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                client.sendMessage(new ServerMessageAddDocument(room.getDocument()));
+                client.sendMessage(new ServerMessageUpdateDocument(room.getDocument()));
                 room.addClient(client);
                 break;
             }
@@ -75,37 +73,75 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                 if (client == null) {
                     if (clientPacketHandshake.getToken() == 0) {
-                        System.out.println("user authed with empty session");
+                        ctx.channel().attr(ServerInitializer.LOGGER).get().info("Authenticated with blank session");
                         client = createUserSession(ctx, null);
                     } else {
                         PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
                         if (persistentUserSession == null) {
-                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with non existent persistent user session");
+                            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("Attempted to authenticate with non existent persistent user session");
                             client = createUserSession(ctx, null);
                         } else if (!persistentUserSession.validate(clientPacketHandshake.getToken())) {
-                            BoardRoom.getLogger().warning(ctx.channel().remoteAddress() + " attempted to authenticate with invalid persistent user session " + persistentUserSession);
+                            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("Attempted to authenticate with invalid persistent user session " + persistentUserSession);
                             client = createUserSession(ctx, null);
                         } else {
                             User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
                             if (user == null) {
-                                BoardRoom.getLogger().severe(ctx.channel().remoteAddress() + " somehow managed to authenticate with non existent user");
+                                ctx.channel().attr(ServerInitializer.LOGGER).get().severe("Somehow managed to authenticate with non existent user");
                                 client = createUserSession(ctx, null);
                             } else {
+                                ctx.channel().attr(ServerInitializer.LOGGER).get().info(user + " authenticated with good persistent session");
                                 client = createUserSession(ctx, user);
                             }
                         }
                     }
                 }
                 client.queueMessage(new ServerMessageAddUser(client.getUser()));
-                if (client.getUser().getOwnedDocuments().size() == 0) {
-                    client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().createDocument(client.getUser())));
+                if (client.getUser().getOwnedDocuments().length == 0) {
+                    client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().createDocument(client.getUser())));//todo
                 } else {
                     for (long id : client.getUser().getOwnedDocuments()) {
-                        client.queueMessage(new ServerMessageAddDocument(BoardRoom.getDatabase().getDocument(id)));
+                        client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
                     }
                 }
                 client.flushMessages();
 
+                break;
+            }
+            case DELETE_DOCUMENT: {
+                ClientMessageDeleteDocument clientMessageDeleteDocument = (ClientMessageDeleteDocument) message;
+                if (clientMessageDeleteDocument.id() == room.getDocument().getId()) {
+                    System.out.println("document is delete ROOM");
+                    room.sendMessage(new ServerMessageDeleteDocument(room.getDocument()));
+                    room.end();
+                    BoardRoom.getDatabase().deleteDocument(room.getDocument());
+                    break;
+                }
+                Document document = BoardRoom.getDatabase().getDocument(clientMessageDeleteDocument.id());
+                if (document == null) {
+                    ctx.channel().attr(ServerInitializer.LOGGER).get().warning(client + " tried to delete document that does not exist");
+                    break;
+                }
+                if (!document.getOwner().equals(client.getUser())) {
+                    ctx.channel().attr(ServerInitializer.LOGGER).get().warning(client + " tried to delete document they do not own");
+                    break;
+                }
+                System.out.println("document is delete");
+                BoardRoom.getDatabase().deleteDocument(room.getDocument());
+                //Room.getRoom(document);
+                break;//todo better update logic
+            }
+            case UPDATE_DOCUMENT: {
+                ClientMessageUpdateDocument clientMessageUpdateDocument = (ClientMessageUpdateDocument) message;
+                if (clientMessageUpdateDocument.getName().length() > 64) {
+                    ctx.channel().attr(ServerInitializer.LOGGER).get().warning(client + " tried to change name to string that is too long (" + clientMessageUpdateDocument.getName().length() + ")");
+                    break;
+                }
+                room.getDocument().setName(clientMessageUpdateDocument.getName());
+                BoardRoom.getDatabase().updateDocument(room.getDocument());
+                break;//todo better update logic
+            }
+            case GET_INVITE: {
+                client.sendMessage(new ServerMessageGetInvite(BoardRoom.getDatabase().getInviteCode(room.getDocument())));
                 break;
             }
             default:
@@ -116,29 +152,13 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static Client createUserSession(ChannelHandlerContext ctx, User user) {
         Client client;
         if (user == null) {
-            client = new Client(new User(), ctx.channel());
-            BoardRoom.getDatabase().addUser(client.getUser());
+            client = new Client(BoardRoom.getDatabase().createUser(), ctx.channel());
         } else {
             client = new Client(user, ctx.channel());
         }
-        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());
+        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());//todo refactor
         client.queueMessage(new ServerMessageHandshake(persistentUserSession));
         BoardRoom.getDatabase().addUserSession(persistentUserSession);
         return client;
-    }
-
-    /**
-     * Gets or creates a room for an existing document
-     *
-     * @param document the existing document
-     * @return the live room
-     */
-    private static Room getRoom(Document document) {
-        Room r = documents.get(document);
-        if (r == null) {
-            r =  Room.startRoom(document);
-            documents.put(r.getDocument(), r);
-        }
-        return r;
     }
 }

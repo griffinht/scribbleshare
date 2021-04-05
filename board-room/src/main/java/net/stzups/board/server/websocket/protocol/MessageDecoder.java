@@ -7,12 +7,15 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
+import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
-import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.board.server.websocket.protocol.client.ClientMessageType;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
+import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.charset.StandardCharsets;
@@ -26,35 +29,14 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
         if (webSocketFrame instanceof TextWebSocketFrame) {
-            System.out.println(((TextWebSocketFrame) webSocketFrame).text());
+            ctx.channel().attr(ServerInitializer.LOGGER).get().warning("Got TextWebSocketFrame, content:");
+            ctx.channel().attr(ServerInitializer.LOGGER).get().warning(((TextWebSocketFrame) webSocketFrame).text());
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
-            ClientMessageType packetType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
-            System.out.println("recv " + packetType);
-            ClientMessage message;
-            switch (packetType) {
-                case OPEN_DOCUMENT:
-                    message = new ClientMessageOpenDocument(byteBuf);
-                    break;
-                case UPDATE_CANVAS:
-                    message = new ClientMessageUpdateCanvas(byteBuf);
-                    break;
-                case CREATE_DOCUMENT:
-                    message = new ClientMessageCreateDocument();
-                    break;
-                case HANDSHAKE:
-                    message = new ClientMessageHandshake(byteBuf);
-                    break;
-                default:
-                    throw new OperationNotSupportedException("Unsupported message type " + packetType + " while decoding");
-            }
-            list.add(message);
+            ClientMessageType clientMessageType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
+            ClientMessage clientMessage = ClientMessage.getClientMessage(clientMessageType, byteBuf);
+            ctx.channel().attr(ServerInitializer.LOGGER).get().info("recv " + clientMessage.getClass().getSimpleName());
+            list.add(clientMessage);
         }
-    }
-
-    private String readString(ByteBuf byteBuf) {
-        byte[] buffer = new byte[byteBuf.readUnsignedByte()];
-        byteBuf.readBytes(buffer);
-        return new String(buffer, StandardCharsets.UTF_8);
     }
 }

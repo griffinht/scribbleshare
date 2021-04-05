@@ -16,9 +16,8 @@ public class Document {
      * New document
      */
     public Document(User owner) {
-        this.id = BoardRoom.getSecureRandom().nextLong();
+        this.id = BoardRoom.getRandom().nextLong();
         this.owner = owner;
-        owner.getOwnedDocuments().add(id);
         this.name = DEFAULT_DOCUMENT_NAME;
     }
 
@@ -39,6 +38,10 @@ public class Document {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -51,5 +54,10 @@ public class Document {
     @Override
     public int hashCode() {
         return Long.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof Document && id == ((Document) object).id;
     }
 }

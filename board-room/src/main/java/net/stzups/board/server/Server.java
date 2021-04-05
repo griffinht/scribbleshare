@@ -10,8 +10,9 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.LogFactory;
+import net.stzups.board.util.LogFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import java.io.FileInputStream;
@@ -36,40 +37,29 @@ public class Server {
         SslContext sslContext;
         int port;
 
-        Boolean ssl = BoardRoom.getConfig().getBoolean("ssl");
-        if (ssl == null) {
-            throw new RuntimeException("Failed to set required runtime variable --ssl. Perhaps you meant to explicitly disable encrypted sockets over HTTPS using --ssl false");
-        }
+        Boolean ssl = BoardRoom.getConfig().getBoolean(BoardConfigKeys.SSL);
 
         if (!ssl) {
             BoardRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
             port = HTTP_PORT;
         } else {
-            String keystorePath = BoardRoom.getConfig().get("ssl.keystore.path");
-            if (keystorePath != null) {//must not be null
-                String passphrase = BoardRoom.getConfig().get("ssl.passphrase");
-                if (passphrase != null) {//can be null if value of keystore is http
-                    try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
-                        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-                        keyStore.load(fileInputStream, passphrase.toCharArray());
+            String keystorePath = BoardRoom.getConfig().getString(BoardConfigKeys.SSL_KEYSTORE_PATH);
+            String passphrase = BoardRoom.getConfig().getString(BoardConfigKeys.SSL_KEYSTORE_PASSPHRASE);
+            try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
+                KeyStore keyStore = KeyStore.getInstance("PKCS12");
+                keyStore.load(fileInputStream, passphrase.toCharArray());
 
-                        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                        keyManagerFactory.init(keyStore, passphrase.toCharArray());
+                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                keyManagerFactory.init(keyStore, passphrase.toCharArray());
 
-                        //SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-                        sslContext = SslContextBuilder.forServer(keyManagerFactory)
-                                .sslProvider(SslProvider.JDK)
-                                .build();
-                        port = HTTPS_PORT;
-                    } catch (IOException | GeneralSecurityException e) {
-                        throw new RuntimeException("Exception while getting SSL context", e);
-                    }
-                } else {
-                    throw new RuntimeException("Failed to specify SSL passphrase from --ssl.passphrase flag.");
-                }
-            } else {
-                throw new RuntimeException("Failed to set specify SSL keystore path from --ssl.keystore.path flag.");
+                //SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
+                sslContext = SslContextBuilder.forServer(keyManagerFactory)
+                        .sslProvider(SslProvider.JDK)
+                        .build();
+                port = HTTPS_PORT;
+            } catch (IOException | GeneralSecurityException e) {
+                throw new Exception("Exception while getting SSL context", e);
             }
         }
 

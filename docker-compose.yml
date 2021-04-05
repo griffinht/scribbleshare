@@ -6,20 +6,23 @@ services:
             network: host
         ports:
             - "8080:8080"
+        depends_on:
+            - board-database
         environment:
             board.ssl: "false"
             board.postgres: "true"
-            board.postgres.url: "jdbc:postgresql://database:5432/postgres"
-            board.postgres.user: "postgres"
+            board.postgres.url: "jdbc:postgresql://board-database:5432/board"
+            board.postgres.user: "board-room"
             board.postgres.password: "changeme"
     board-frontend:
         image: board-frontend
         build:
-            context: frontend
+            context: board-frontend
         ports:
             - "80:80"
-    database:
-        image: postgres
+    board-database:
+        build:
+            context: board-database
         environment:
             POSTGRES_PASSWORD: "changeme"
         ports:

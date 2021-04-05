@@ -1,23 +1,13 @@
 package net.stzups.board.data.objects;
 
-import net.stzups.board.BoardRoom;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class User {
     private long id;
-    private List<Long> ownedDocuments;
-    private List<Long> sharedDocuments;
+    private Long[] ownedDocuments;
+    private Long[] sharedDocuments;
 
-    public User() {
-        id = BoardRoom.getSecureRandom().nextLong();
-        ownedDocuments = new ArrayList<>();
-        //ownedDocuments.add(Document.createDocument(this).getId()); todo do somewhere else
-        sharedDocuments = new ArrayList<>();
-    }
-
-    public User(long id, List<Long> ownedDocuments, List<Long> sharedDocuments) {
+    public User(long id, Long[] ownedDocuments, Long[] sharedDocuments) {
         this.id = id;
         this.ownedDocuments = ownedDocuments;
         this.sharedDocuments = sharedDocuments;
@@ -27,21 +17,42 @@ public class User {
         return id;
     }
 
-    public List<Long> getOwnedDocuments() {
+    public Long[] getOwnedDocuments() {
         return ownedDocuments;
     }
 
-    public List<Long> getSharedDocuments() {
+    public void addOwnedDocument(Document document) {
+        ownedDocuments = addElement(ownedDocuments, document);
+    }
+
+    public Long[] getSharedDocuments() {
         return sharedDocuments;
+    }
+
+    public void addSharedDocument(Document document) {
+        sharedDocuments = addElement(sharedDocuments, document);
+    }
+
+    private Long[] addElement(Long[] oldLongs, Document element) {
+        Long[] newLongs = new Long[oldLongs.length + 1];
+        System.arraycopy(oldLongs, 0, newLongs, 0, oldLongs.length);
+        newLongs[newLongs.length - 1] = element.getId();
+        return newLongs;
     }
 
     @Override
     public String toString() {
-        return "User{id=" + id + "}";
+        return "User{id=" + id + ",ownedDocuments=" + Arrays.toString(ownedDocuments) + ",sharedDocuments=" + Arrays.toString(sharedDocuments) + "}";
     }
 
     @Override
     public int hashCode() {
         return Long.hashCode(id);
+    }
+
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof User && id == ((User) object).id;
     }
 }
