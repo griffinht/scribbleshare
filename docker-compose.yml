@@ -1,0 +1,29 @@
+services:
+    board-room:
+        image: board-room:0.3
+        build:
+            context: board-room
+            network: host
+        ports:
+            - "8080:8080"
+        depends_on:
+            - board-database
+        environment:
+            board.ssl: "false"
+            board.postgres: "true"
+            board.postgres.url: "jdbc:postgresql://board-database:5432/board"
+            board.postgres.user: "board-room"
+            board.postgres.password: "changeme"
+    board-frontend:
+        image: board-frontend
+        build:
+            context: board-frontend
+        ports:
+            - "80:80"
+    board-database:
+        build:
+            context: board-database
+        environment:
+            POSTGRES_PASSWORD: "changeme"
+        ports:
+            - "5432:5432"
