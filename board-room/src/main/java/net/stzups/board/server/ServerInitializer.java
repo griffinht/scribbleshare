@@ -15,6 +15,7 @@ import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.BoardRoom;
+import net.stzups.board.server.websocket.WebSocketHandshakeHandler;
 import net.stzups.board.util.LogFactory;
 import net.stzups.board.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.server.websocket.protocol.MessageEncoder;
@@ -42,7 +43,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private Logger logger;
     private MessageEncoder messageEncoder = new MessageEncoder();
     private MessageDecoder messageDecoder = new MessageDecoder();
-    private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
     private SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
@@ -74,6 +74,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
                 .addLast(messageEncoder)
                 .addLast(messageDecoder)
-                .addLast(webSocketInitializer);
+                .addLast(new WebSocketHandshakeHandler());
     }
 }

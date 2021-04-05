@@ -2,6 +2,7 @@ package net.stzups.board.server.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
@@ -49,7 +50,6 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
                         }
                     }
                 }
-                client.queueMessage(new ServerMessageAddUser(client.getUser()));
                 ctx.pipeline().remove(this);
                 ctx.pipeline().addLast(new ClientHandler(client, BoardRoom.getDatabase().getInviteCode(clientPacketHandshake.getCode())));
                 break;
@@ -70,5 +70,13 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
         client.queueMessage(new ServerMessageHandshake(persistentUserSession));
         BoardRoom.getDatabase().addUserSession(persistentUserSession);
         return client;
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
+        if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
+            logger.info("WebSocket connection initialized");
+            //todo give this a different executor https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+        }
     }
 }

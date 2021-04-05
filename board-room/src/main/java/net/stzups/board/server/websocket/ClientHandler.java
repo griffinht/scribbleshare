@@ -11,6 +11,7 @@ import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageD
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
+import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
@@ -30,6 +31,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<ClientMessage> {
 
     ClientHandler(Client client, InviteCode inviteCode) {
         this.client = client;
+        client.queueMessage(new ServerMessageAddUser(client.getUser()));
         for (long id : client.getUser().getOwnedDocuments()) {
             client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
         }
