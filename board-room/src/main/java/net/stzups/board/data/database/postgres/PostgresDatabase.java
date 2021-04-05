@@ -38,8 +38,8 @@ public class PostgresDatabase implements Database {
         User user = new User(BoardRoom.getRandom().nextLong(), new ArrayList<>(), new ArrayList<>());
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
-            preparedStatement.setArray(2, connection.createArrayOf("document_id", user.getOwnedDocuments().toArray()));
-            preparedStatement.setArray(3, connection.createArrayOf("document_id", user.getSharedDocuments().toArray()));
+            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
+            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,8 +54,8 @@ public class PostgresDatabase implements Database {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return new User(id,
-                        new ArrayList<>(Arrays.asList(convertPostgresDomainArrayToLongArray(resultSet.getArray("owned_documents")))),
-                        new ArrayList<>(Arrays.asList(convertPostgresDomainArrayToLongArray(resultSet.getArray("shared_documents")))));
+                        new ArrayList<>(Arrays.asList((Long[]) (resultSet.getArray("owned_documents").getArray()))),
+                        new ArrayList<>(Arrays.asList((Long[]) (resultSet.getArray("shared_documents").getArray()))));
             } else {
                 BoardRoom.getLogger().warning("User with id " + id + " does not exist");
                 return null;
@@ -65,7 +65,7 @@ public class PostgresDatabase implements Database {
             return null;
         }
     }
-
+/*
     // normally (Long[]) resultSet.getArray("something").getArray()) fails with custom domain types
     private Long[] convertPostgresDomainArrayToLongArray(Array longArray) throws SQLException {
         Object[] objects = (Object[]) longArray.getArray();
@@ -75,7 +75,7 @@ public class PostgresDatabase implements Database {
             longs[i] = Long.parseLong(((PGobject) objects[i]).getValue());
         }
         return longs;
-    }
+    }*/
 
     @Override
     public Document createDocument(User owner) {
