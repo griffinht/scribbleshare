@@ -100,6 +100,9 @@ Document update/delete operations, overhaul db and config
 - Overhaul config - improve exceptions
 - Add document update and delete functionality
 
-### v0.3.5
+## v0.4
+Features
+
+### v0.4.0
 Invite codes
 - Client can get invite codes for document, persisted in db
