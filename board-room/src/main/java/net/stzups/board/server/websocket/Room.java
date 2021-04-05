@@ -40,7 +40,7 @@ class Room {
     Room(Document document) {
         this.canvas = BoardRoom.getDatabase().getCanvas(document);
         rooms.put(document, this);
-        BoardRoom.getLogger().info("Started room " + this);
+        BoardRoom.getLogger().info("Started " + this);
     }
 
     static Room getRoom(Document document) {
