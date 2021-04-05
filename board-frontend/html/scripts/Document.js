@@ -147,7 +147,6 @@ socket.addEventListener(SocketEventType.OPEN, () => {
     } else {
         invite = document.location.href.substring(index + 7, index + 7 + 6);
     }
-    console.log(index)
     socket.send(new ClientMessageHandshake(id, token, invite));
 });
 

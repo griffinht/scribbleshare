@@ -8,8 +8,11 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
     }
 
     writeString(value) {//todo improve performance
-        this.writeUint8(value);
-        return new TextDecoder().decode(this.view.buffer.slice(this.position, this.position + length));
+        this.writeUint8(value.length);
+        let buffer = new TextEncoder().encode(value);
+        this.checkResize(buffer.length);
+        copy(buffer, this.view.buffer, this.position);
+        this.position += buffer.length;
     }
 
     writeInt8(value) {
@@ -90,8 +93,8 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
     }
 }
 
-function copy(sourceBuffer, destinationBuffer) {
+function copy(sourceBuffer, destinationBuffer, offset) {
     let sourceArray = new Uint8Array(sourceBuffer);
     let destinationArray = new Uint8Array(destinationBuffer);
-    destinationArray.set(sourceArray);
+    destinationArray.set(sourceArray, offset);
 }

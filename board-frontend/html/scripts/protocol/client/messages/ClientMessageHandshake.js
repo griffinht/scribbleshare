@@ -17,6 +17,7 @@ export default class ClientMessageHandshake extends ClientMessage {
         super.serialize(writer);
         writer.writeBigInt64(this.id);
         writer.writeBigInt64(this.token);
+        console.log(this.invite);
         writer.writeString(this.invite);
     }
 }
