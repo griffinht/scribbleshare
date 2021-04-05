@@ -9,6 +9,7 @@ import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.server.ServerMessage;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Encodes a ServerPacket sent by the server to
@@ -17,6 +18,8 @@ import java.util.List;
 public class MessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
     @Override
     protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf b) {
+        Logger logger = ctx.channel().attr(ServerInitializer.LOGGER).get();
+
         StringBuilder stringBuilder = new StringBuilder();
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
         ByteBuf byteBuf = binaryWebSocketFrame.content();
