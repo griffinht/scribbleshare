@@ -37,6 +37,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<ClientMessage> {
         }
         //figure out which document to open first
         if (inviteCode != null) {//todo shared documents
+            System.out.println(inviteCode.getCode());
             Document document = BoardRoom.getDatabase().getDocument(inviteCode.getDocument());
             if (document != null) {
                 room = Room.getRoom(document);
