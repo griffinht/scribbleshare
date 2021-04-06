@@ -118,7 +118,10 @@ socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateC
     }
 });
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
-    documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name, serverMessageUpdateDocument.id));
+    console.log(serverMessageUpdateDocument.shared);
+    documents.set(serverMessageUpdateDocument.id,
+        new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""),
+            serverMessageUpdateDocument.id));
 });
 socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
     window.localStorage.setItem('id', serverMessageHandshake.id.toString());

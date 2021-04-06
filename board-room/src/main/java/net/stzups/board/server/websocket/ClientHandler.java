@@ -32,24 +32,30 @@ public class ClientHandler extends SimpleChannelInboundHandler<ClientMessage> {
     ClientHandler(Client client, InviteCode inviteCode) {
         this.client = client;
         client.queueMessage(new ServerMessageAddUser(client.getUser()));
-        for (long id : client.getUser().getOwnedDocuments()) {
-            client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
-        }
         //figure out which document to open first
-        if (inviteCode != null) {//todo shared documents
-            System.out.println(inviteCode.getCode());
+        if (inviteCode != null) {
             Document document = BoardRoom.getDatabase().getDocument(inviteCode.getDocument());
             if (document != null) {
+                //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
+                if (!document.getOwner().equals(client.getUser())) {
+                    if (client.getUser().addSharedDocument(document)) BoardRoom.getDatabase().updateUser(client.getUser());
+                }
                 room = Room.getRoom(document);
-                client.flushMessages();
-                return;
             } else {
                 logger.warning(client + " somehow used invite code for non existent document");
+                return;
+                //NPE will be thrown later
             }
         } else {
             if (client.getUser().getOwnedDocuments().length == 0) {
-                client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().createDocument(client.getUser())));//todo
+                BoardRoom.getDatabase().createDocument(client.getUser());
             }
+        }
+        for (long id : client.getUser().getOwnedDocuments()) {
+            client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
+        }
+        for (long id : client.getUser().getSharedDocuments()) {
+            client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id), true));
         }
         client.flushMessages();
     }
