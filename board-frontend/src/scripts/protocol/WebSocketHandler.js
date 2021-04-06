@@ -1,8 +1,7 @@
 import BufferReader from './BufferReader.js'
 import BufferWriter from "./BufferWriter.js";
-import ServerMessageType from "./server/ServerMessageType.js";
+import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import SocketEventType from "./SocketEventType.js";
-import {getServerMessage} from "./server/ServerMessageType.js";
 
 const HTTP_PORT = 8080;
 const HTTPS_PORT = 443;
