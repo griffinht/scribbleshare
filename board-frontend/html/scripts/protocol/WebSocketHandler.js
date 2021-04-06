@@ -21,10 +21,10 @@ class WebSocketHandler {
 
         let webSocketUrl;
         if (window.location.protocol === 'https:') {
-            webSocketUrl = 'wss://localhost:' + HTTPS_PORT + '/websocket';
+            webSocketUrl = 'wss://localhost:' + HTTPS_PORT + '/';
         } else {
             console.warn('Insecure connection, this better be a development environment');//todo disable/disallow
-            webSocketUrl = 'ws://localhost:' + HTTP_PORT + '/websocket';
+            webSocketUrl = 'ws://localhost:' + HTTP_PORT + '/';
         }
         console.log('Opening WebSocket connection to ' + webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);

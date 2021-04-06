@@ -186,6 +186,9 @@ public class PostgresDatabase implements Database {
 
     @Override
     public InviteCode getInviteCode(String code) {//gets a document for an existing invite code
+        if (code.length() != InviteCode.INVITE_CODE_LENGTH) {
+            return null;
+        }
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT document FROM invite_codes WHERE code=?")) {
             preparedStatement.setString(1, code);
             ResultSet resultSet = preparedStatement.executeQuery();//todo autocloseable try with resources

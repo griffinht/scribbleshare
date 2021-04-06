@@ -21,18 +21,34 @@ public class User {
         return ownedDocuments;
     }
 
-    public void addOwnedDocument(Document document) {
-        ownedDocuments = addElement(ownedDocuments, document);
+    public boolean addOwnedDocument(Document document) {
+        if (contains(ownedDocuments, document.getId())) {
+            return false;
+        } else {
+            ownedDocuments = addElement(ownedDocuments, document);
+            return true;
+        }
     }
 
     public Long[] getSharedDocuments() {
         return sharedDocuments;
     }
 
-    public void addSharedDocument(Document document) {
-        sharedDocuments = addElement(sharedDocuments, document);
+    public boolean addSharedDocument(Document document) {
+        if (contains(sharedDocuments, document.getId())) {
+            return false;
+        } else {
+            sharedDocuments = addElement(sharedDocuments, document);
+            return true;
+        }
     }
 
+    private boolean contains(Long[] longs, Long check) {
+        for (long l : longs) {
+            if (l == check) return true;
+        }
+        return false;
+    }
     private Long[] addElement(Long[] oldLongs, Document element) {
         Long[] newLongs = new Long[oldLongs.length + 1];
         System.arraycopy(oldLongs, 0, newLongs, 0, oldLongs.length);

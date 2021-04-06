@@ -99,3 +99,15 @@ Document update/delete operations, overhaul db and config
 - Add db creation scripts into version control
 - Overhaul config - improve exceptions
 - Add document update and delete functionality
+
+## v0.4
+Better state management, invite codes
+
+### v0.4.0
+Invite codes
+- Client can get invite codes for a document, persisted in db
+- Client can join with an invite code
+
+### v0.4.1
+Better state management
+- todo

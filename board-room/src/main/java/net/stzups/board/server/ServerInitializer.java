@@ -15,6 +15,7 @@ import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.BoardRoom;
+import net.stzups.board.server.websocket.WebSocketHandshakeHandler;
 import net.stzups.board.util.LogFactory;
 import net.stzups.board.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.server.websocket.protocol.MessageEncoder;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
-    private static final String WEB_SOCKET_PATH = "/websocket";
+    private static final String WEB_SOCKET_PATH = "/";
 
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
@@ -42,7 +43,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private Logger logger;
     private MessageEncoder messageEncoder = new MessageEncoder();
     private MessageDecoder messageDecoder = new MessageDecoder();
-    private WebSocketInitializer webSocketInitializer = new WebSocketInitializer();
     private SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
@@ -74,6 +74,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
                 .addLast(messageEncoder)
                 .addLast(messageDecoder)
-                .addLast(webSocketInitializer);
+                .addLast(new WebSocketHandshakeHandler());
     }
 }
