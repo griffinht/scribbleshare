@@ -110,5 +110,7 @@ Invite codes, better state management
 - Better server state management
 
 ### v0.4.1
-Import
-- todo
+Docker deployment improvements
+- Fix credential typo
+- Minify javascript
+- Add retry logic to board-room
