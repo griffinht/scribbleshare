@@ -9,7 +9,7 @@ COPY src src
 COPY package.json rollup.config.js ./
 
 # Install rollup and roll up javascript
-RUN npm i @rollup/plugin-node-resolve rollup-plugin-terser -D
+RUN npm install @rollup/plugin-node-resolve rollup-plugin-terser --save-dev
 RUN npx rollup -c;
 
 #
@@ -23,9 +23,9 @@ WORKDIR /usr/share/nginx/html
 
 # Everything here can be served by the HTTP server (nginx)
 
-# Copy minified javascript
+# Copy everyhing
 COPY src .
+# Remove source javascript
 RUN rm -rf scripts
+# Add minified javascript
 COPY --from=board-frontend-js /usr/src/app/dist/src/scripts scripts
-RUN ls
-# RUN ls
