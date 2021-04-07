@@ -1,7 +1,7 @@
 #
 # Build server with maven
 #
-FROM maven:3.6.0-jdk-11-slim AS board-room
+FROM maven:3.6.0-jdk-11-slim AS board-room-java
 
 # Fetch and cache dependencies
 WORKDIR /usr/src/app
@@ -20,7 +20,7 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /usr/app
 
-COPY --from=board-room /usr/src/app/target/board-room-0.3.jar .
+COPY --from=board-room-java /usr/src/app/target/board-room-0.3.jar .
 
 # Failure to set required environment variables will cause the server to crash
 ENV board.ssl=required
