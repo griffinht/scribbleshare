@@ -5,7 +5,6 @@ import net.stzups.board.util.config.OptionalConfigKey;
 import net.stzups.board.util.config.RequiredConfigKey;
 
 public class BoardConfigKeys {
-    public static final ConfigKey<Boolean> POSTGRES = new RequiredConfigKey<>("postgres");
     public static final ConfigKey<String> POSTGRES_URL = new RequiredConfigKey<>("postgres.url");
     public static final ConfigKey<String> POSTGRES_USER = new RequiredConfigKey<>("postgres.user");
     public static final ConfigKey<String> POSTGRES_PASSWORD = new RequiredConfigKey<>("postgres.password");

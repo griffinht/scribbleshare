@@ -1,9 +1,8 @@
-package net.stzups.board.data.database.postgres;
+package net.stzups.board.data.database;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.board.BoardRoom;
-import net.stzups.board.data.database.Database;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;

@@ -114,3 +114,7 @@ Docker deployment improvements
 - Fix credential typo
 - Minify javascript
 - Add retry logic to board-room
+
+# v0.4.2
+Database rework
+- Add Redis

@@ -2,8 +2,6 @@ package net.stzups.board;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.board.data.database.Database;
-import net.stzups.board.data.database.memory.MemoryDatabase;
-import net.stzups.board.data.database.postgres.PostgresDatabase;
 import net.stzups.board.server.Server;
 import net.stzups.board.util.LogFactory;
 import net.stzups.board.util.config.Config;
@@ -20,7 +18,7 @@ public class BoardRoom {
     private static Config config;
     private static final Random random = new Random();
 
-    private static Database database;//user id -> user
+    private static Database database;
 
     public static void main(String[] args) throws Exception {
         logger = LogFactory.getLogger("Board Room");
@@ -35,17 +33,7 @@ public class BoardRoom {
                 .addConfig(new EnvironmentVariableConfig("board."))
                 .build();
 
-        if (BoardRoom.getConfig().getBoolean(BoardConfigKeys.POSTGRES)) {
-            logger.info("Connecting to Postgres database...");
-            database = new PostgresDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_URL),
-                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_USER),
-                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_PASSWORD),
-                    BoardRoom.getConfig().getInteger(BoardConfigKeys.POSTGRES_RETRIES));
-            logger.info("Connected to Postgres database");
-        } else {
-            logger.warning("Using debug only runtime database. No data will be persisted.");
-            database = new MemoryDatabase();
-        }
+        database = new BoardDatabase();
 
         Server server = new Server();
         ChannelFuture channelFuture = server.start();

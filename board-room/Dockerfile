@@ -22,7 +22,4 @@ WORKDIR /usr/app
 
 COPY --from=board-room-java /usr/src/app/target/board-room-0.3.jar .
 
-# Failure to set required environment variables will cause the server to crash
-ENV board.ssl=required
-ENV board.postgres=required
 ENTRYPOINT ["java", "-jar", "board-room-0.3.jar"]
