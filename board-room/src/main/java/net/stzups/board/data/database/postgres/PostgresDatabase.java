@@ -9,9 +9,11 @@ import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
+import org.postgresql.util.PSQLException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,9 +27,20 @@ public class PostgresDatabase implements Database {
 
     private Map<Long, Document> documents = new HashMap<>();
 
-    public PostgresDatabase(String url, String user, String password) throws Exception {
+    public PostgresDatabase(String url, String user, String password, int maxRetries) throws Exception {
         Class.forName("org.postgresql.Driver");
-        connection = DriverManager.getConnection(url, user, password);
+        int retries = 0;
+        while (connection == null) {
+            try {
+                connection = DriverManager.getConnection(url, user, password);
+            } catch (PSQLException e) {
+                if (e.getCause() instanceof ConnectException && (maxRetries < 0 || retries < maxRetries)) {
+                    BoardRoom.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
+                } else {
+                    throw e;
+                }
+            }
+        }
     }
 
     @Override
@@ -48,14 +61,15 @@ public class PostgresDatabase implements Database {
     public User getUser(long id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
             preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return new User(id,
-                        (Long[]) (resultSet.getArray("owned_documents").getArray()),
-                        (Long[]) (resultSet.getArray("shared_documents").getArray()));
-            } else {
-                BoardRoom.getLogger().warning("User with id " + id + " does not exist");
-                return null;
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new User(id,
+                            (Long[]) (resultSet.getArray("owned_documents").getArray()),
+                            (Long[]) (resultSet.getArray("shared_documents").getArray()));
+                } else {
+                    BoardRoom.getLogger().warning("User with id " + id + " does not exist");
+                    return null;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,19 +124,20 @@ public class PostgresDatabase implements Database {
         if (document == null) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM documents WHERE id=?")) {
                 preparedStatement.setLong(1, id);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    long userId = resultSet.getLong("owner");
-                    User user = getUser(userId);
-                    if (user == null) {
-                        BoardRoom.getLogger().warning("Document with id " + id + " has no owner with id " + userId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        long userId = resultSet.getLong("owner");
+                        User user = getUser(userId);
+                        if (user == null) {
+                            BoardRoom.getLogger().warning("Document with id " + id + " has no owner with id " + userId);
+                            return null;
+                        }
+                        document = new Document(id, user, resultSet.getString("name"));
+                        documents.put(document.getId(), document);
+                    } else {
+                        BoardRoom.getLogger().warning("Document with id " + id + " does not exist");
                         return null;
                     }
-                    document = new Document(id, user, resultSet.getString("name"));
-                    documents.put(document.getId(), document);
-                } else {
-                    BoardRoom.getLogger().warning("Document with id " + id + " does not exist");
-                    return null;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -159,11 +174,12 @@ public class PostgresDatabase implements Database {
     public Canvas getCanvas(Document document) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return new Canvas(document, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
-            } else {
-                return new Canvas(document);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new Canvas(document, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
+                } else {
+                    return new Canvas(document);
+                }
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
@@ -191,11 +207,12 @@ public class PostgresDatabase implements Database {
         }
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT document FROM invite_codes WHERE code=?")) {
             preparedStatement.setString(1, code);
-            ResultSet resultSet = preparedStatement.executeQuery();//todo autocloseable try with resources
-            if (!resultSet.next()) {
-                return null;
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
+                }
+                return new InviteCode(code, resultSet.getLong(1));
             }
-            return new InviteCode(code, resultSet.getLong(1));
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -207,9 +224,10 @@ public class PostgresDatabase implements Database {
         //check if invite code already exists, otherwise generate a new one
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT code FROM invite_codes WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return new InviteCode(resultSet.getString(1), document.getId());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new InviteCode(resultSet.getString(1), document.getId());
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -250,12 +268,13 @@ public class PostgresDatabase implements Database {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
-            } else {
-                BoardRoom.getLogger().warning("PersistentUserSession with id " + id + " does not exist");
-                return null;
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+                } else {
+                    BoardRoom.getLogger().warning("PersistentUserSession with id " + id + " does not exist");
+                    return null;
+                }
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();

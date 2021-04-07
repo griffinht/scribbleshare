@@ -12,7 +12,7 @@ services:
             board.ssl: "false"
             board.postgres: "true"
             board.postgres.url: "jdbc:postgresql://board-database:5432/board"
-            board.postgres.user: "board-room"
+            board.postgres.user: "board_room"
             board.postgres.password: "changeme"
     board-frontend:
         image: board-frontend
