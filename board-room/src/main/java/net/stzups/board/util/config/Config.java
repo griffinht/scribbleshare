@@ -37,7 +37,7 @@ public class Config {//todo probably needs a better name
         return key.getDefaultValue(null);
     }
 
-    public int getInt(ConfigKey<Integer> key) {
+    public Integer getInteger(ConfigKey<Integer> key) {
         String value = find(key);
         if (value != null) {
             try {

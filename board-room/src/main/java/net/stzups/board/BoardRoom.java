@@ -1,19 +1,17 @@
 package net.stzups.board;
 
 import io.netty.channel.ChannelFuture;
-import net.stzups.board.util.config.Config;
-import net.stzups.board.util.config.ConfigBuilder;
-import net.stzups.board.util.LogFactory;
-import net.stzups.board.util.config.configs.ArgumentConfig;
-import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
-import net.stzups.board.util.config.configs.PropertiesConfig;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.data.database.memory.MemoryDatabase;
 import net.stzups.board.data.database.postgres.PostgresDatabase;
 import net.stzups.board.server.Server;
+import net.stzups.board.util.LogFactory;
+import net.stzups.board.util.config.Config;
+import net.stzups.board.util.config.ConfigBuilder;
+import net.stzups.board.util.config.configs.ArgumentConfig;
+import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
+import net.stzups.board.util.config.configs.PropertiesConfig;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -41,7 +39,8 @@ public class BoardRoom {
             logger.info("Connecting to Postgres database...");
             database = new PostgresDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_URL),
                     BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_USER),
-                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_PASSWORD));
+                    BoardRoom.getConfig().getString(BoardConfigKeys.POSTGRES_PASSWORD),
+                    BoardRoom.getConfig().getInteger(BoardConfigKeys.POSTGRES_RETRIES));
             logger.info("Connected to Postgres database");
         } else {
             logger.warning("Using debug only runtime database. No data will be persisted.");

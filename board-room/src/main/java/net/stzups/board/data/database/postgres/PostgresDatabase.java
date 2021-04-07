@@ -9,9 +9,11 @@ import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
+import org.postgresql.util.PSQLException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,9 +27,20 @@ public class PostgresDatabase implements Database {
 
     private Map<Long, Document> documents = new HashMap<>();
 
-    public PostgresDatabase(String url, String user, String password) throws Exception {
+    public PostgresDatabase(String url, String user, String password, int maxRetries) throws Exception {
         Class.forName("org.postgresql.Driver");
-        connection = DriverManager.getConnection(url, user, password);
+        int retries = 0;
+        while (connection == null) {
+            try {
+                connection = DriverManager.getConnection(url, user, password);
+            } catch (PSQLException e) {
+                if (e.getCause() instanceof ConnectException && (maxRetries < 0 || retries < maxRetries)) {
+                    BoardRoom.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
+                } else {
+                    throw e;
+                }
+            }
+        }
     }
 
     @Override

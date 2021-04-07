@@ -9,6 +9,7 @@ public class BoardConfigKeys {
     public static final ConfigKey<String> POSTGRES_URL = new RequiredConfigKey<>("postgres.url");
     public static final ConfigKey<String> POSTGRES_USER = new RequiredConfigKey<>("postgres.user");
     public static final ConfigKey<String> POSTGRES_PASSWORD = new RequiredConfigKey<>("postgres.password");
+    public static final ConfigKey<Integer> POSTGRES_RETRIES = new OptionalConfigKey<>("postgres.retries", 3);
     public static final ConfigKey<Boolean> SSL = new RequiredConfigKey<>("ssl");
     public static final ConfigKey<String> SSL_KEYSTORE_PATH = new RequiredConfigKey<>("ssl.keystore.path");
     public static final ConfigKey<String> SSL_KEYSTORE_PASSPHRASE = new RequiredConfigKey<>("ssl.keystore.passphrase");
