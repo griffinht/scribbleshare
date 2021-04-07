@@ -1,14 +1,4 @@
 {
-  "name": "Board",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "test": ""
-  },
-  "keywords": [],
-  "author": "stzups",
-  "license": "",
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "^0.26.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
