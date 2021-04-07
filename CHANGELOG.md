@@ -101,7 +101,7 @@ Document update/delete operations, overhaul db and config
 - Add document update and delete functionality
 
 ## v0.4
-Better state management, invite codes, features
+Better state management, invite codes, improve backend
 
 ### v0.4.0
 Invite codes, better state management
@@ -115,6 +115,6 @@ Docker deployment improvements
 - Minify javascript
 - Add retry logic to board-room
 
-# v0.4.2
+### v0.4.2
 Database rework
 - Add Redis
