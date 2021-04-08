@@ -51,7 +51,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             MimeTypes.load(new FileInputStream(path));
         } catch (IOException e) {
-            InputStream inputStream = MimeTypes.class.getResourceAsStream(path);
+            InputStream inputStream = HttpServerHandler.class.getResourceAsStream(path.startsWith("/") ? "" : "/" + path); //always use root of classpath
             if (inputStream != null) {
                 try {
                     MimeTypes.load(inputStream);
