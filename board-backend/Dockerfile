@@ -17,6 +17,6 @@ COPY --from=board-frontend /usr/src/app/dist/src/scripts scripts
 # Copy actual jar
 WORKDIR /usr/app
 
-COPY build/libs/board-backend-all.jar .
+COPY --from=board-backend-jar build/libs/board-backend-all.jar .
 
 ENTRYPOINT ["java", "-jar", "board-backend-all.jar"]

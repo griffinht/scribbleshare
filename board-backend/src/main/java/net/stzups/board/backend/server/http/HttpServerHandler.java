@@ -71,6 +71,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         File file = new File(httpRoot, path);
+        System.out.println(httpRoot.getPath() + ", " + httpRoot.exists());
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;

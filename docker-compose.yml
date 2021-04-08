@@ -34,8 +34,10 @@ services:
         image: board-frontend
         build:
             context: board-frontend
-        ports:
-            - "80:80"
+    board-gradle:
+        image: board-gradle
+        build:
+            context: .
     board-postgres:
         build:
             context: board-postgres
