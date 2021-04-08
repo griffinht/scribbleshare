@@ -9,7 +9,6 @@ import net.stzups.board.data.objects.User;
 import net.stzups.board.server.ServerInitializer;
 import net.stzups.board.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.server.websocket.protocol.client.messages.ClientMessageHandshake;
-import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.board.server.websocket.protocol.server.messages.ServerMessageHandshake;
 
 import java.util.logging.Logger;

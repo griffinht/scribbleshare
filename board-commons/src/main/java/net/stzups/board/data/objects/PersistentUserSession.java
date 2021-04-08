@@ -1,7 +1,6 @@
 package net.stzups.board.data.objects;
 
 import io.netty.buffer.Unpooled;
-import net.stzups.board.BoardRoom;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,10 +10,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
+import java.util.Random;
 
 public class PersistentUserSession {
     private static final TemporalAmount MAX_USER_SESSION_AGE = Duration.ofDays(90);//todo
     private static final SecureRandom secureRandom = new SecureRandom();
+    private static final Random random = new Random();
     private static final MessageDigest messageDigest;
     static {
         try {
@@ -30,7 +31,7 @@ public class PersistentUserSession {
     private byte[] hashedToken;
 
     public PersistentUserSession(User user) {
-        this.id = BoardRoom.getRandom().nextLong();//todo secure random or regular random?
+        this.id = random.nextLong();//todo secure random or regular random?
         this.user = user.getId();
         this.creation = new Timestamp(Instant.now().toEpochMilli());
     }

@@ -1,8 +1,9 @@
 package net.stzups.board.data.objects;
 
-import net.stzups.board.BoardRoom;
+import java.util.Random;
 
 public class Document {
+    private static final Random random = new Random();
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
     private long id;
@@ -13,7 +14,7 @@ public class Document {
      * New document
      */
     public Document(User owner) {
-        this.id = BoardRoom.getRandom().nextLong();
+        this.id = random.nextLong();
         this.owner = owner;
         this.name = DEFAULT_DOCUMENT_NAME;
     }

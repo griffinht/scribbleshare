@@ -2,8 +2,8 @@ package net.stzups.board.data.database;
 
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
-import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 
 public interface Database {

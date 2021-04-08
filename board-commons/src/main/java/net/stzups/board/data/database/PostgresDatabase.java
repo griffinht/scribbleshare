@@ -2,7 +2,6 @@ package net.stzups.board.data.database;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.stzups.board.BoardRoom;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;
@@ -20,8 +19,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class PostgresDatabase implements Database {
+    private static final Random random = new Random();
     private Connection connection;
 
     private Map<Long, Document> documents = new HashMap<>();
@@ -34,7 +35,7 @@ public class PostgresDatabase implements Database {
                 connection = DriverManager.getConnection(url, user, password);
             } catch (PSQLException e) {
                 if (e.getCause() instanceof ConnectException && (maxRetries < 0 || retries < maxRetries)) {
-                    BoardRoom.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
+                    System.out.println("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
                 } else {
                     throw e;
                 }
@@ -44,7 +45,7 @@ public class PostgresDatabase implements Database {
 
     @Override
     public User createUser() {
-        User user = new User(BoardRoom.getRandom().nextLong(), new Long[0], new Long[0]);
+        User user = new User(random.nextLong(), new Long[0], new Long[0]);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments()));
@@ -66,7 +67,7 @@ public class PostgresDatabase implements Database {
                             (Long[]) (resultSet.getArray("owned_documents").getArray()),
                             (Long[]) (resultSet.getArray("shared_documents").getArray()));
                 } else {
-                    BoardRoom.getLogger().warning("User with id " + id + " does not exist");
+                    System.out.println("User with id " + id + " does not exist");
                     return null;
                 }
             }
@@ -128,13 +129,13 @@ public class PostgresDatabase implements Database {
                         long userId = resultSet.getLong("owner");
                         User user = getUser(userId);
                         if (user == null) {
-                            BoardRoom.getLogger().warning("Document with id " + id + " has no owner with id " + userId);
+                            System.out.println("Document with id " + id + " has no owner with id " + userId);
                             return null;
                         }
                         document = new Document(id, user, resultSet.getString("name"));
                         documents.put(document.getId(), document);
                     } else {
-                        BoardRoom.getLogger().warning("Document with id " + id + " does not exist");
+                        System.out.println("Document with id " + id + " does not exist");
                         return null;
                     }
                 }
@@ -271,7 +272,7 @@ public class PostgresDatabase implements Database {
                 if (resultSet.next()) {
                     persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
                 } else {
-                    BoardRoom.getLogger().warning("PersistentUserSession with id " + id + " does not exist");
+                    System.out.println("PersistentUserSession with id " + id + " does not exist");
                     return null;
                 }
             }
