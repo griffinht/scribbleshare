@@ -3,3 +3,9 @@
 # Gradle
 .gradle
 build
+# Gradle binaries
+# These are not needed for building the project with Docker
+# These would be needed to build the projct without Docker, so instead just install Gradle
+gradle
+gradlew
+gradlew.bat
