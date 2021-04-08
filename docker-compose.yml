@@ -21,8 +21,6 @@ services:
         image: board-backend
         build:
             context: board-backend
-        ports:
-        -   "8080:80"
         depends_on:
             - board-postgres
             - board-redis
