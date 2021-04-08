@@ -1,0 +1,15 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':board-commons')
+}
+
+application {
+    mainClass = 'net.stzups.board.room.BoardRoom'
+}

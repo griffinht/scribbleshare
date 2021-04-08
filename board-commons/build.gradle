@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api 'io.netty:netty-all:4.1.55.Final'
+    implementation 'org.postgresql:postgresql:42.2.13'
+    implementation 'redis.clients:jedis:3.5.2'
+}
