@@ -14,3 +14,11 @@ dependencies {
 application {
     mainClassName  = 'net.stzups.board.backend.BoardBackend'
 }
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources"
+        }
+    }
+}

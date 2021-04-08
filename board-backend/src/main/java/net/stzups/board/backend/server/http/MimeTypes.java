@@ -3,6 +3,7 @@ package net.stzups.board.backend.server.http;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,11 @@ public class MimeTypes {
 
     static {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(MimeTypes.class.getResourceAsStream(MIME_TYPES_FILE_PATH)));
+            InputStream inputStream = MimeTypes.class.getResourceAsStream(MIME_TYPES_FILE_PATH);
+            if (inputStream == null) {
+                throw new IOException("No resource for name found");
+            }
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             for (String line; (line = bufferedReader.readLine()) != null;) {
                 String[] split = line.split("\\s");
                 if (split.length > 1) {
@@ -31,8 +36,8 @@ public class MimeTypes {
                     }
                 }
             }
-        } catch (IOException e) {
-            new IOException("Exception while loading MIME types from mime.types resource", e).printStackTrace();
+        } catch (Exception e) {
+            new Exception("Exception while loading MIME types from resource in " + MIME_TYPES_FILE_PATH, e).printStackTrace();
         }
     }
 
