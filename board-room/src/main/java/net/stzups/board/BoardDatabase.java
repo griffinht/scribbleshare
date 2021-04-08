@@ -22,7 +22,7 @@ public class BoardDatabase implements Database {
         BoardRoom.getLogger().info("Connected to Postgres database");
 
         BoardRoom.getLogger().info("Connecting to Redis database...");
-        redis = new RedisDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.REDIS_URL));
+        redis = new RedisDatabase(BoardRoom.getConfig().getString(BoardConfigKeys.REDIS_URL), BoardRoom.getConfig().getInteger(BoardConfigKeys.REDIS_PORT));
         BoardRoom.getLogger().info("Connected to Redis database");
     }
     @Override

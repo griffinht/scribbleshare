@@ -14,7 +14,7 @@ services:
             board.postgres.url: "jdbc:postgresql://board-database:5432/board"
             board.postgres.user: "board_room"
             board.postgres.password: "changeme"
-            board.redis.url: "board-redis:6379"
+            board.redis.url: "board-redis"
     board-frontend:
         image: board-frontend
         build:
