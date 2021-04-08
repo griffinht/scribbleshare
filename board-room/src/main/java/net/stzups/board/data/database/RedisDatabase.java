@@ -5,8 +5,15 @@ import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.PersistentUserSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
+import redis.clients.jedis.Jedis;
 
 public class RedisDatabase implements Database {
+    private Jedis jedis;
+
+    public RedisDatabase(String host) {
+        jedis = new Jedis(host);
+    }
+
     @Override
     public User createUser() {
         throw new UnsupportedOperationException();
