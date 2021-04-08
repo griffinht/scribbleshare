@@ -116,6 +116,6 @@ Docker deployment improvements
 - Add retry logic to board-room
 
 ### v0.4.2
-Project structure rework, Database rework
+Swap Maven for Gradle, add board-http, Database rework
 - Add Redis
 - Add board-backend and refactor common Java code into Maven module
