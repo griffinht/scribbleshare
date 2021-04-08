@@ -1,6 +1,3 @@
-#
-# Runtime (alpine)
-#
 FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /usr/app

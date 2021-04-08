@@ -28,3 +28,5 @@ WORKDIR /usr/src/app
 COPY --from=board-frontend-build /usr/src/app/dist dist/
 # Example usage from other image
 # COPY --from=board-frontend /usr/src/app/dist .
+
+# todo add CMD/ENTRYPOINT or something to make docker stop complaining not being able to start this service
