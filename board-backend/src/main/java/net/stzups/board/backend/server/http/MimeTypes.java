@@ -2,8 +2,8 @@ package net.stzups.board.backend.server.http;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,9 +20,9 @@ public class MimeTypes {
 
     private static final Map<String, String> extensionMimeTypeMap = new HashMap<>();
 
-    static void load(File file) throws IOException {
+    static void load(InputStream inputStream) throws IOException {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             for (String line; (line = bufferedReader.readLine()) != null;) {
                 String[] split = line.split("\\s");
                 if (split.length > 1) {
@@ -32,7 +32,7 @@ public class MimeTypes {
                 }
             }
         } catch (IOException e) {
-            throw new IOException("Exception while loading MIME types from file at " + file.getAbsolutePath(), e);
+            throw new IOException("Exception while loading MIME types from InputStream", e);
         }
     }
 

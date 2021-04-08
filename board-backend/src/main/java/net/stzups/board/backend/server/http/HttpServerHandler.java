@@ -26,8 +26,10 @@ import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -45,10 +47,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private File httpRoot;
 
     static {
+        String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
         try {
-            MimeTypes.load(new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH)));
+            MimeTypes.load(new FileInputStream(path));
         } catch (IOException e) {
-            throw new RuntimeException("Exception while starting HTTP server", e);
+            InputStream inputStream = MimeTypes.class.getResourceAsStream(path);
+            if (inputStream != null) {
+                try {
+                    MimeTypes.load(inputStream);
+                } catch (IOException e1) {
+                    e.printStackTrace();
+                }
+            } else {
+                e.printStackTrace(); // non critical, MimeTypes will just use the default value
+            }
         }
     }
 
