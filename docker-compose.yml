@@ -6,10 +6,11 @@ services:
             context: board-room
         ports:
             - "8080:80"
-# todo wait for healthy
         depends_on:
-            - board-postgres
-            - board-redis
+            board-postgres:
+                condition: service_healthy
+            board-redis:
+                condition: service_healthy
         environment:
             board.ssl: "false"
             board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
@@ -22,8 +23,10 @@ services:
         build:
             context: board-backend
         depends_on:
-            - board-postgres
-            - board-redis
+            board-postgres:
+                condition: service_healthy
+            board-redis:
+                condition: service_healthy
         environment:
             board.ssl: "false"
 # Reverse proxy
@@ -37,11 +40,22 @@ services:
     board-postgres:
         build:
             context: board-postgres
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+            interval: 3s
+            timeout: 3s
+            retries: 5
         environment:
             POSTGRES_PASSWORD: "changeme"
     board-redis:
         build:
             context: board-redis
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
 #
 # Build
 #
