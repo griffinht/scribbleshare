@@ -1,6 +1,6 @@
 services:
     board-room:
-        image: board-room:0.4
+        image: board-room
         build:
             context: board-room
             network: host
@@ -16,7 +16,7 @@ services:
             board.postgres.password: "changeme"
             board.redis.url: "board-redis"
     board-backend:
-        image: board-backend:0.4
+        image: board-backend
         build:
             context: board-backend
             network: host
