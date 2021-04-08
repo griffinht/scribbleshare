@@ -22,9 +22,12 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
+import net.stzups.board.backend.BoardBackend;
+import net.stzups.board.backend.BoardBackendConfigKeys;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +41,14 @@ import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private File httpRoot;
+
+    static {
+        try {
+            MimeTypes.load(new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH)));
+        } catch (IOException e) {
+            throw new RuntimeException("Exception while starting HTTP server", e);
+        }
+    }
 
     public HttpServerHandler(File httpRoot) {
         this.httpRoot = httpRoot;
@@ -71,7 +82,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         File file = new File(httpRoot, path);
-        System.out.println(httpRoot.getPath() + ", " + httpRoot.exists());
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;

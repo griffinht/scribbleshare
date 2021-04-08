@@ -2,32 +2,27 @@ package net.stzups.board.backend.server.http;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Simple utility class that looks for a META-INF/mime.types file from resources and provides MIME type mappings.
+ * Simple utility class parses a mime.types file from resources and provides MIME type mappings.
  * mime.types should be formatted as follows:
  * text/html htm html
  * image/jpeg jpg jpeg
  * application/javascript js
  */
 public class MimeTypes {
-    private static final String MIME_TYPES_FILE_PATH = "/META-INF/mime.types";
     private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
 
-    private static Map<String, String> extensionMimeTypeMap = new HashMap<>();
+    private static final Map<String, String> extensionMimeTypeMap = new HashMap<>();
 
-    static {
+    static void load(File file) throws IOException {
         try {
-            InputStream inputStream = MimeTypes.class.getResourceAsStream(MIME_TYPES_FILE_PATH);
-            if (inputStream == null) {
-                throw new IOException("No resource for name found");
-            }
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             for (String line; (line = bufferedReader.readLine()) != null;) {
                 String[] split = line.split("\\s");
                 if (split.length > 1) {
@@ -36,8 +31,8 @@ public class MimeTypes {
                     }
                 }
             }
-        } catch (Exception e) {
-            new Exception("Exception while loading MIME types from resource in " + MIME_TYPES_FILE_PATH, e).printStackTrace();
+        } catch (IOException e) {
+            throw new IOException("Exception while loading MIME types from file at " + file.getAbsolutePath(), e);
         }
     }
 
