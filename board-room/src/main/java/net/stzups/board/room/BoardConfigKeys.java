@@ -15,4 +15,5 @@ public class BoardConfigKeys {
     public static final ConfigKey<Boolean> DEBUG_LOG_TRAFFIC = new OptionalConfigKey<>("debug.log.traffic", false);
     public static final ConfigKey<String> REDIS_URL = new RequiredConfigKey<>("redis.url");
     public static final ConfigKey<Integer> REDIS_PORT = new OptionalConfigKey<>("redis.port", 6390);
+    public static final ConfigKey<String> BOARD_PROPERTIES = new OptionalConfigKey<>("board.properties", "board.properties");
 }

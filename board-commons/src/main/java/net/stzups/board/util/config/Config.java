@@ -1,18 +1,29 @@
 package net.stzups.board.util.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Used to store and retrieve key-value pairs by finding the first result from many different strategies.
  */
 public class Config {//todo probably needs a better name
-    private List<ConfigProvider> configProviders;
+    private List<ConfigProvider> configProviders = new ArrayList<>();
 
     /**
      * Constructs a new ConfigProvider from its builder
      */
-    Config(List<ConfigProvider> configProviders) {
-        this.configProviders = configProviders;
+    public Config() {
+
+    }
+
+    public Config addConfigProvider(ConfigProvider configProvider) {
+        configProviders.add(configProvider);
+        return this;
+    }
+
+    public Config removeConfigProvider(ConfigProvider configProvider) {
+        configProviders.remove(configProvider);
+        return this;
     }
 
     /**

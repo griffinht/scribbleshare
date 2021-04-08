@@ -5,7 +5,6 @@ import net.stzups.board.data.database.Database;
 import net.stzups.board.room.server.Server;
 import net.stzups.board.util.LogFactory;
 import net.stzups.board.util.config.Config;
-import net.stzups.board.util.config.ConfigBuilder;
 import net.stzups.board.util.config.configs.ArgumentConfig;
 import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.util.config.configs.PropertiesConfig;
@@ -25,11 +24,11 @@ public class BoardRoom {
 
         long start = System.currentTimeMillis();
 
-        config = new ConfigBuilder()
-                .addConfig(new ArgumentConfig(args))
-                .addConfig(new PropertiesConfig("board.properties"))
-                .addConfig(new EnvironmentVariableConfig("board."))
-                .build();
+        config = new Config()
+                .addConfigProvider(new ArgumentConfig(args))
+                .addConfigProvider(new EnvironmentVariableConfig("board."));
+        //this is added last in case the other config strategies have a different value for this
+        config.addConfigProvider(new PropertiesConfig(config.getString(BoardConfigKeys.BOARD_PROPERTIES)));
 
         database = new BoardDatabase();
 
