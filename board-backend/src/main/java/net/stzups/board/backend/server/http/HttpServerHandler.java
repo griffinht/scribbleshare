@@ -37,9 +37,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private Logger logger;
     private File httpRoot;
 
     static {
@@ -50,7 +52,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler(File httpRoot) {
+    public HttpServerHandler(Logger logger, File httpRoot) {
+        this.logger = logger;
         this.httpRoot = httpRoot;
     }
 
@@ -63,6 +66,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         this.request = request;
+        logger.info(request.method() + " " + request.uri());
         if (!request.decoderResult().isSuccess()) {
             sendError(ctx, HttpResponseStatus.BAD_REQUEST);
             return;

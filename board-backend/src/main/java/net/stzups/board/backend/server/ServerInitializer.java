@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
-import io.netty.util.AttributeKey;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
 import net.stzups.board.backend.server.http.HttpServerHandler;
@@ -26,8 +25,6 @@ import java.util.logging.Logger;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
-    public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
-
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
@@ -45,7 +42,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) {
         logger = LogFactory.getLogger(socketChannel.remoteAddress().toString());
-        socketChannel.attr(LOGGER).set(logger);
         logger.info("Connection");
         ChannelPipeline pipeline = socketChannel.pipeline();
         pipeline
@@ -63,7 +59,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 //.addLast(new ChunkedWriteHandler())
-                //.addLast(new HttpContentCompressor())
-                .addLast(new HttpServerHandler(new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT))));
+                //.addLast(new HttpContentCompressor())//todo breaks things
+                .addLast(new HttpServerHandler(logger, new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT))));
     }
 }
