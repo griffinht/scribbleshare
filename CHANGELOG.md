@@ -101,10 +101,10 @@ Document update/delete operations, overhaul db and config
 - Add document update and delete functionality
 
 ## v0.4
-Better state management, invite codes, improve backend
+Project structure rework, invite codes
 
 ### v0.4.0
-Project structure rework, invite codes, better state management
+Invite codes, better state management
 - Client can get invite codes for a document, persisted in db
 - Client can join with an invite code
 - Better server state management
