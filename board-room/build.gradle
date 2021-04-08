@@ -1,5 +1,6 @@
 plugins {
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 repositories {
@@ -7,9 +8,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(':board-commons')
+    compile project(':board-commons')
 }
 
 application {
-    mainClass = 'net.stzups.board.room.BoardRoom'
+    mainClassName  = 'net.stzups.board.room.BoardRoom'
 }
