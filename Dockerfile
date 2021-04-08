@@ -6,9 +6,7 @@ FROM gradle:jdk11 AS board-gradle-build
 WORKDIR /usr/src/app
 
 COPY . .
-#RUN rm -rf gradle
-RUN ls .
-RUN gradle shadowJar --stacktrace
+RUN gradle shadowJar
 
 FROM scratch
 
