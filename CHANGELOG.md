@@ -104,7 +104,7 @@ Document update/delete operations, overhaul db and config
 Better state management, invite codes, improve backend
 
 ### v0.4.0
-Invite codes, better state management
+Project structure rework, invite codes, better state management
 - Client can get invite codes for a document, persisted in db
 - Client can join with an invite code
 - Better server state management
@@ -116,5 +116,6 @@ Docker deployment improvements
 - Add retry logic to board-room
 
 ### v0.4.2
-Database rework
+Project structure rework, Database rework
 - Add Redis
+- Add board-backend and refactor common Java code into Maven module
