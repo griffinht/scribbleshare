@@ -3,14 +3,16 @@ package net.stzups.board.room.server.websocket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import net.stzups.board.data.objects.User;
-import net.stzups.board.room.BoardRoom;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Client {
+    private static final Random random = new Random();
+
     private User user;
     private Channel channel;
     private short id;
@@ -32,7 +34,7 @@ public class Client {
     }
 
     public short regenerateId() {
-        id = (short) BoardRoom.getRandom().nextInt(); //todo is this cast less random
+        id = (short) random.nextInt(); //todo is this cast less random
         if (id == 0) {//indicates fake client, should not be used by real clients
             return regenerateId();
         } else {

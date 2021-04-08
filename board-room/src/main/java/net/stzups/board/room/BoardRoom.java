@@ -10,13 +10,11 @@ import net.stzups.board.util.config.configs.ArgumentConfig;
 import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
 import net.stzups.board.util.config.configs.PropertiesConfig;
 
-import java.util.Random;
 import java.util.logging.Logger;
 
 public class BoardRoom {
     private static Logger logger;
     private static Config config;
-    private static final Random random = new Random();
 
     private static Database database;
 
@@ -61,9 +59,5 @@ public class BoardRoom {
 
     public static Database getDatabase() {
         return database;
-    }
-
-    public static Random getRandom() {
-        return random;
     }
 }
