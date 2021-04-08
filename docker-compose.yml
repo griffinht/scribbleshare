@@ -1,52 +1,57 @@
 services:
+# WebSocket backend
     board-room:
         image: board-room
         build:
             context: board-room
-            network: host
         ports:
-            - "8080:8080"
+            - "8080:80"
+# todo wait for healthy
         depends_on:
             - board-postgres
             - board-redis
         environment:
             board.ssl: "false"
-            board.postgres.url: "jdbc:postgresql://board-database:5432/board"
+            board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
             board.postgres.user: "board_room"
             board.postgres.password: "changeme"
             board.redis.url: "board-redis"
+# HTTP backend
     board-backend:
         image: board-backend
         build:
             context: board-backend
-            network: host
-        ports:
-            - "8080:8080"
         depends_on:
             - board-postgres
             - board-redis
+        environment:
+            board.ssl: "false"
+# Reverse proxy
     board-nginx:
         image: board-nginx
         build:
             context: board-nginx
-            network: host
-    board-frontend:
-        image: board-frontend
-        build:
-            context: board-frontend
-    board-gradle:
-        image: board-gradle
-        build:
-            context: .
+        ports:
+            - "80:80"
+# Database
     board-postgres:
         build:
             context: board-postgres
         environment:
             POSTGRES_PASSWORD: "changeme"
-        ports:
-            - "5432:5432"
     board-redis:
         build:
             context: board-redis
-        ports:
-        -   "6379:6379"
+#
+# Build
+#
+# Build jars with Gradle for board-room and board-backend
+    board-gradle:
+        image: board-gradle
+        build:
+            context: .
+# Minify/compress HTML/JS/CSS/Assets
+    board-frontend:
+        image: board-frontend
+        build:
+            context: board-frontend

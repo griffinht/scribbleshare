@@ -15,7 +15,7 @@ import net.stzups.board.util.LogFactory;
  * Uses netty to create an HTTP/WebSocket server on the specified port
  */
 public class Server {
-    private static final int HTTP_PORT = 8080;
+    private static final int HTTP_PORT = 80;
     private static final int HTTPS_PORT = 443;
 
     private EventLoopGroup bossGroup;
