@@ -1,6 +1,6 @@
 services:
     board-room:
-        image: board-room:0.3
+        image: board-room:0.4
         build:
             context: board-room
             network: host
@@ -15,6 +15,21 @@ services:
             board.postgres.user: "board_room"
             board.postgres.password: "changeme"
             board.redis.url: "board-redis"
+    board-backend:
+        image: board-backend:0.4
+        build:
+            context: board-backend
+            network: host
+        ports:
+            - "8080:8080"
+        depends_on:
+            - board-postgres
+            - board-redis
+    board-nginx:
+        image: board-nginx
+        build:
+            context: board-nginx
+            network: host
     board-frontend:
         image: board-frontend
         build:
