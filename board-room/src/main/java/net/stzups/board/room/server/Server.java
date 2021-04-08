@@ -24,9 +24,6 @@ import java.security.KeyStore;
  * Uses netty to create an HTTP/WebSocket server on the specified port
  */
 public class Server {
-    private static final int HTTP_PORT = 8080;
-    private static final int HTTPS_PORT = 443;
-
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
@@ -42,7 +39,7 @@ public class Server {
         if (!ssl) {
             BoardRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
-            port = HTTP_PORT;
+            port = BoardRoom.getConfig().getInteger(BoardConfigKeys.WS_PORT);
         } else {
             String keystorePath = BoardRoom.getConfig().getString(BoardConfigKeys.SSL_KEYSTORE_PATH);
             String passphrase = BoardRoom.getConfig().getString(BoardConfigKeys.SSL_KEYSTORE_PASSPHRASE);
@@ -57,7 +54,7 @@ public class Server {
                 sslContext = SslContextBuilder.forServer(keyManagerFactory)
                         .sslProvider(SslProvider.JDK)
                         .build();
-                port = HTTPS_PORT;
+                port = BoardRoom.getConfig().getInteger(BoardConfigKeys.WSS_PORT);
             } catch (IOException | GeneralSecurityException e) {
                 throw new Exception("Exception while getting SSL context", e);
             }
