@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
@@ -18,8 +17,6 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.backend.BoardBackend;
@@ -43,8 +40,8 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private Logger logger;
-    private File httpRoot;
+    private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private final Logger logger;
 
     static {
         String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
@@ -64,9 +61,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler(Logger logger, File httpRoot) {
+    public HttpServerHandler(Logger logger) {
         this.logger = logger;
-        this.httpRoot = httpRoot;
     }
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -97,7 +93,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        File file = new File(httpRoot, path);
+        File file = new File(HTTP_ROOT, path);
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
