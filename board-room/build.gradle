@@ -8,9 +8,14 @@ repositories {
 }
 
 dependencies {
-    compile project(':board-commons')
+    implementation project(':board-commons')
 }
 
+// https://github.com/johnrengelman/shadow/issues/609#issuecomment-795983873
 application {
-    mainClassName  = 'net.stzups.board.room.BoardRoom'
+    mainClass.set('net.stzups.board.room.BoardRoom')
+}
+
+shadow {
+    mainClassName = application.mainClass.get()
 }
