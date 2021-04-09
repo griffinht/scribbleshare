@@ -5,18 +5,32 @@ CREATE DATABASE board;
 REVOKE CONNECT ON DATABASE board FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 
+CREATE USER board_backend PASSWORD 'changeme';
+GRANT CONNECT ON DATABASE board TO board_backend;
+GRANT USAGE ON SCHEMA public TO board_backend;
+
 CREATE USER board_room PASSWORD 'changeme';
 GRANT CONNECT ON DATABASE board TO board_room;
 GRANT USAGE ON SCHEMA public TO board_room;
 
 -- Create tables and grant permissions
+CREATE TABLE persistent_user_sessions(
+     id bigint NOT NULL,
+     "user" bigint NOT NULL,
+     creation_time timestamp,
+     hashed_token bytea NOT NULL,
+     PRIMARY KEY (id)
+);
+GRANT SELECT, INSERT, DELETE ON persistent_user_sessions TO board_backend;
+
 CREATE TABLE users(
     id bigint NOT NULL,
     owned_documents bigint[] NOT NULL,
     shared_documents bigint[] NOT NULL,
     PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE ON users TO board_room;
+GRANT SELECT, INSERT, UPDATE ON users TO board_backend;
+GRANT SELECT, UPDATE ON users TO board_room;
 
 CREATE TABLE documents(
     id bigint NOT NULL,
@@ -32,15 +46,6 @@ CREATE TABLE canvases(
     PRIMARY KEY (document)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON canvases TO board_room;
-
-CREATE TABLE persistent_user_sessions(
-    id bigint NOT NULL,
-    "user" bigint NOT NULL,
-    creation_time timestamp,
-    hashed_token bytea NOT NULL,
-    PRIMARY KEY (id)
-);
-GRANT SELECT, INSERT, DELETE ON persistent_user_sessions TO board_room;
 
 CREATE TABLE invite_codes(
     code char(6) NOT NULL,
