@@ -119,3 +119,6 @@ Docker deployment improvements
 Swap Maven for Gradle, add board-http, Database rework
 - Add Redis
 - Add board-backend and refactor common Java code into Maven module
+
+### v0.4.3
+Proper cookie authentication
