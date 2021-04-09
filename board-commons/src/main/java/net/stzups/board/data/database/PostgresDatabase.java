@@ -4,7 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
-import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 import org.postgresql.util.PSQLException;
@@ -247,30 +248,40 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void addUserSession(PersistentUserSession persistentUserSession) {
+    public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)")) {
-            preparedStatement.setLong(1, persistentUserSession.getId());
-            preparedStatement.setLong(2, persistentUserSession.getUser());
-            preparedStatement.setTimestamp(3, persistentUserSession.getCreation());
-            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentUserSession.getHashedToken()));
+            preparedStatement.setLong(1, persistentHttpSession.getId());
+            preparedStatement.setLong(2, persistentHttpSession.getUser());
+            preparedStatement.setTimestamp(3, persistentHttpSession.getCreation());
+            preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentHttpSession.getHashedToken()));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    @Override
+    public HttpSession getHttpSession(long id) {
+        return null;
+    }
+
+    @Override
+    public void addHttpSession(HttpSession httpSession) {
+
+    }
+
     /**
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public PersistentUserSession removeUserSession(long id) {//todo combine
-        PersistentUserSession persistentUserSession;
+    public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {//todo combine
+        PersistentHttpSession persistentHttpSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    persistentUserSession = new PersistentUserSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+                    persistentHttpSession = new PersistentHttpSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
                 } else {
                     System.out.println("PersistentUserSession with id " + id + " does not exist");
                     return null;
@@ -284,7 +295,7 @@ public class PostgresDatabase implements Database {
         try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM persistent_user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
-            return persistentUserSession;
+            return persistentHttpSession;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

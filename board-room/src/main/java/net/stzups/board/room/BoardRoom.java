@@ -1,6 +1,7 @@
 package net.stzups.board.room;
 
 import io.netty.channel.ChannelFuture;
+import net.stzups.board.data.database.BoardDatabase;
 import net.stzups.board.data.database.Database;
 import net.stzups.board.room.server.Server;
 import net.stzups.board.util.LogFactory;
@@ -28,9 +29,9 @@ public class BoardRoom {
                 .addConfigProvider(new ArgumentConfig(args))
                 .addConfigProvider(new EnvironmentVariableConfig("board."));
         //this is added last in case the other config strategies have a different value for this
-        config.addConfigProvider(new PropertiesConfig(config.getString(BoardConfigKeys.BOARD_PROPERTIES)));
+        config.addConfigProvider(new PropertiesConfig(config.getString(BoardRoomConfigKeys.BOARD_PROPERTIES)));
 
-        database = new BoardDatabase();
+        database = new BoardDatabase(logger, config);
 
         Server server = new Server();
         ChannelFuture channelFuture = server.start();

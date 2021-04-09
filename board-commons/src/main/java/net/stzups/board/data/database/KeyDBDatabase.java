@@ -2,15 +2,16 @@ package net.stzups.board.data.database;
 
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
-import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
 
-public class RedisDatabase implements Database {
+public class KeyDBDatabase implements Database {
     private Jedis jedis;
 
-    public RedisDatabase(String host, int port) {
+    public KeyDBDatabase(String host, int port) {
         jedis = new Jedis(host, port);
     }
 
@@ -70,12 +71,22 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public PersistentUserSession removeUserSession(long id) {
+    public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addUserSession(PersistentUserSession persistentUserSession) {
+    public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HttpSession getHttpSession(long id) {
+        return null;
+    }
+
+    @Override
+    public void addHttpSession(HttpSession httpSession) {
+
     }
 }

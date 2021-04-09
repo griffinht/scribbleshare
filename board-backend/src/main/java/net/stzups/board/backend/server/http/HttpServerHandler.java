@@ -17,10 +17,17 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.CookieDecoder;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
+import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,12 +36,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.URLDecoder;
+import java.net.http.HttpHeaders;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -140,10 +149,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        if (!authenticate(response, file)) {
+            return;
+        }
         HttpUtil.setContentLength(response, fileLength);
-        //content-type headers
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
-        //cache headers
         setDateAndCacheHeaders(response, file);
 
         if (!keepAlive) {
@@ -272,5 +282,23 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
         response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+    }
+
+    private boolean authenticate(HttpResponse response, File file) {
+        String cookiesHeader = request.headers().get("Cookies");
+        HttpSession httpSession;
+        if (cookiesHeader == null) {
+            User user = BoardBackend.getDatabase().createUser();
+            httpSession = new HttpSession(user);
+            BoardBackend.getDatabase().addHttpSession(httpSession);
+
+        } else {
+            Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
+            System.out.println();
+            httpSession = null;
+        }
+        PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession);
+        BoardBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+        return true;
     }
 }

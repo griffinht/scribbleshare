@@ -3,7 +3,7 @@ package net.stzups.board.room.server.websocket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.room.BoardRoom;
 import net.stzups.board.room.server.ServerInitializer;
@@ -23,7 +23,7 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
-        switch (message.getMessageType()) {
+        switch (message.getMessageType()) {//todo
             case HANDSHAKE: {
                 ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                 Client client;
@@ -31,15 +31,15 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
                     logger.info("Authenticated with blank session");
                     client = createUserSession(ctx, null);
                 } else {
-                    PersistentUserSession persistentUserSession = BoardRoom.getDatabase().removeUserSession(clientPacketHandshake.getId());
-                    if (persistentUserSession == null) {
+                    PersistentHttpSession persistentHttpSession = BoardRoom.getDatabase().getAndRemovePersistentHttpSession(clientPacketHandshake.getId());
+                    if (persistentHttpSession == null) {
                         logger.warning("Attempted to authenticate with non existent persistent user session");
                         client = createUserSession(ctx, null);
-                    } else if (!persistentUserSession.validate(clientPacketHandshake.getToken())) {
-                        logger.warning("Attempted to authenticate with invalid persistent user session " + persistentUserSession);
+                    } else if (!persistentHttpSession.validate(null)) {
+                        logger.warning("Attempted to authenticate with invalid persistent user session " + persistentHttpSession);
                         client = createUserSession(ctx, null);
                     } else {
-                        User user = BoardRoom.getDatabase().getUser(persistentUserSession.getUser());
+                        User user = BoardRoom.getDatabase().getUser(persistentHttpSession.getUser());
                         if (user == null) {
                             logger.severe("Somehow managed to authenticate with non existent user");
                             client = createUserSession(ctx, null);
@@ -65,9 +65,9 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
         } else {
             client = new Client(user, ctx.channel());
         }
-        PersistentUserSession persistentUserSession = new PersistentUserSession(client.getUser());//todo refactor
-        client.queueMessage(new ServerMessageHandshake(persistentUserSession));
-        BoardRoom.getDatabase().addUserSession(persistentUserSession);
+        PersistentHttpSession persistentHttpSession = new PersistentHttpSession(null);//todo refactor
+        client.queueMessage(new ServerMessageHandshake(persistentHttpSession));
+        BoardRoom.getDatabase().addPersistentHttpSession(persistentHttpSession);
         return client;
     }
 

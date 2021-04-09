@@ -2,7 +2,8 @@ package net.stzups.board.data.database;
 
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
-import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 
@@ -21,6 +22,9 @@ public interface Database {
     InviteCode getInviteCode(String code);
     InviteCode getInviteCode(Document document);
 
-    PersistentUserSession removeUserSession(long id);
-    void addUserSession(PersistentUserSession persistentUserSession);
+    PersistentHttpSession getAndRemovePersistentHttpSession(long id);
+    void addPersistentHttpSession(PersistentHttpSession persistentHttpSession);
+
+    HttpSession getHttpSession(long id);
+    void addHttpSession(HttpSession httpSession);
 }
