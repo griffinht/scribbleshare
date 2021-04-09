@@ -159,18 +159,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // Write the initial line and the header.
         ctx.write(response);
 
-        // Write the content.
-        ChannelFuture lastContentFuture;
-        if (ctx.pipeline().get(SslHandler.class) == null) {
-            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-            // Write the end marker.
-            lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-        } else {
-            // HttpChunkedInput will write the end marker (LastHttpContent) for us.
-            lastContentFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)), ctx.newProgressivePromise());
-        }
+        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
+        ChannelFuture lastContentFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)), ctx.newProgressivePromise());
 
-        // Decide whether to close the connection or not.
         if (!keepAlive) {
             // Close the connection when the whole content is written out.
             lastContentFuture.addListener(ChannelFutureListener.CLOSE);

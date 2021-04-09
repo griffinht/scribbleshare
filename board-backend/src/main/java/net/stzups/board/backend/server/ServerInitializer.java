@@ -6,8 +6,12 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.board.backend.BoardBackend;
@@ -56,10 +60,11 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         if (sslContext != null) {
             pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
         }
-        pipeline.addLast(new HttpServerCodec())
-                //.addLast(new HttpObjectAggregator(65536))
-                //.addLast(new ChunkedWriteHandler())
-                .addLast(new HttpContentCompressor())//todo breaks things
+        pipeline
+                .addLast(new HttpServerCodec())
+                .addLast(new HttpObjectAggregator(65536))
+                .addLast(new HttpContentCompressor())
+                .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpServerHandler(logger, new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT))));
     }
 }
