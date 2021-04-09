@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
@@ -57,9 +57,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
             pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
         }
         pipeline.addLast(new HttpServerCodec())
-                .addLast(new HttpObjectAggregator(65536))
+                //.addLast(new HttpObjectAggregator(65536))
                 //.addLast(new ChunkedWriteHandler())
-                //.addLast(new HttpContentCompressor())//todo breaks things
+                .addLast(new HttpContentCompressor())//todo breaks things
                 .addLast(new HttpServerHandler(logger, new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT))));
     }
 }
