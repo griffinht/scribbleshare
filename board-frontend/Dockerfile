@@ -1,31 +1,31 @@
 #
-# Minify javascript with node and rollup
+# Minify JavaScript (todo minify/compress html/css/assets)
 #
-FROM node:15 AS board-frontend-js
+FROM node:15 AS board-frontend-build
 
 WORKDIR /usr/src/app
 
 COPY src src
-COPY package.json rollup.config.js ./
+# Copy everything to dist
+COPY src dist
+# Except for javascript, which will be added minifed
+RUN rm -rf dist/scripts
 
-# Install rollup and roll up javascript
+# Install rollup with barebones node project and roll up JavaScript
+COPY package.json rollup.config.js ./
 RUN npm install @rollup/plugin-node-resolve rollup-plugin-terser --save-dev
 RUN npx rollup -c;
+# Minifed JavaScript is now in dist/
 
 #
-# Nginx
+# Store result in fresh layer (significantly cuts down on size) for other Docker images to use
 #
-FROM nginx
+FROM scratch
 
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /usr/src/app
 
-WORKDIR /usr/share/nginx/html
+COPY --from=board-frontend-build /usr/src/app/dist dist/
+# Example usage from other image
+# COPY --from=board-frontend /usr/src/app/dist .
 
-# Everything here can be served by the HTTP server (nginx)
-
-# Copy everyhing
-COPY src .
-# Remove source javascript
-RUN rm -rf scripts
-# Add minified javascript
-COPY --from=board-frontend-js /usr/src/app/dist/src/scripts scripts
+# todo add CMD/ENTRYPOINT or something to make docker stop complaining not being able to start this service

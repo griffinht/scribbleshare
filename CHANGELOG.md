@@ -101,7 +101,7 @@ Document update/delete operations, overhaul db and config
 - Add document update and delete functionality
 
 ## v0.4
-Better state management, invite codes, features
+Project structure rework, invite codes
 
 ### v0.4.0
 Invite codes, better state management
@@ -114,3 +114,8 @@ Docker deployment improvements
 - Fix credential typo
 - Minify javascript
 - Add retry logic to board-room
+
+### v0.4.2
+Swap Maven for Gradle, add board-http, Database rework
+- Add Redis
+- Add board-backend and refactor common Java code into Maven module
