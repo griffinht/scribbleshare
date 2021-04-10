@@ -69,8 +69,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                //.addLast(new ChunkedWriteHandler())
-                .addLast(new WebSocketServerCompressionHandler())
+                //.addLast(new ChunkedWriteHandler())//todo gzip compression?
+                .addLast(new HttpAuthenticator(logger))
+                .addLast(new WebSocketServerCompressionHandler())//todo make sure this is working and worth the performance overhead
                 .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
                 .addLast(messageEncoder)
                 .addLast(messageDecoder)
