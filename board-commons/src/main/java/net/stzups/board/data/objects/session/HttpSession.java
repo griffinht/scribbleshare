@@ -80,17 +80,4 @@ public class HttpSession extends Session {
 
         response.headers().add(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
     }
-
-    public static Cookie findCookie(HttpRequest request) {
-        String cookiesHeader = request.headers().get(HttpHeaderNames.COOKIE);
-        if (cookiesHeader != null) {
-            Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
-            for (Cookie cookie : cookies) {
-                if (cookie.name().equals(HttpSession.COOKIE_NAME)) {
-                    return cookie;
-                }
-            }
-        }
-        return null;
-    }
 }
