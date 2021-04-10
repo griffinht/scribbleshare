@@ -52,13 +52,17 @@ public class HttpSession extends Session {
 
     public static final String COOKIE_NAME = "session";
 
-    public HttpSession(User user, HttpResponse response) {
+    public HttpSession(long user) {
         super(user);
-        setCookie(response);
     }
 
     public HttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
         super(id, user, creation, hashedToken);
+    }
+
+    public HttpSession(User user, HttpResponse response) {
+        super(user.getId());
+        setCookie(response);
     }
 
     private void setCookie(HttpResponse response) {
@@ -70,7 +74,7 @@ public class HttpSession extends Session {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie
 
-        response.headers().set(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
     }
 
     public static Cookie findCookie(HttpRequest request) {

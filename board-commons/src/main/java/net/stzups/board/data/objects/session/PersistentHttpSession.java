@@ -21,8 +21,12 @@ public class PersistentHttpSession extends HttpSession {
     public static final String COOKIE_NAME = "persistent_session";
     public static final String LOGIN_PATH = "/index.html";
 
+    public PersistentHttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
+        super(id, user, creation, hashedToken);
+    }
+
     public PersistentHttpSession(HttpSession httpSession, HttpResponse response) {
-        super(httpSession.getId(), httpSession.getUser(), httpSession.getCreation(), httpSession.getHashedToken());
+        super(httpSession.getUser());
         setCookie(response);
     }
 
@@ -35,11 +39,7 @@ public class PersistentHttpSession extends HttpSession {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
-        response.headers().set(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
-    }
-
-    public PersistentHttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
-        super(id, user, creation, hashedToken);
+        response.headers().add(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
     }
 
     @Override

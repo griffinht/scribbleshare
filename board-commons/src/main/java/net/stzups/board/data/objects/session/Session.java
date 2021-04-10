@@ -1,15 +1,12 @@
 package net.stzups.board.data.objects.session;
 
 import io.netty.buffer.Unpooled;
-import net.stzups.board.data.objects.User;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
 public class Session {
@@ -29,13 +26,13 @@ public class Session {
     private Timestamp creation;
     private byte[] hashedToken;
 
-    Session(User user) {
+    protected Session(long user) {
         this.id = secureRandom.nextLong();
-        this.user = user.getId();
+        this.user = user;
         this.creation = new Timestamp(Instant.now().toEpochMilli());
     }
 
-    Session(long id, long user, Timestamp creation, byte[] hashedToken) {
+    protected Session(long id, long user, Timestamp creation, byte[] hashedToken) {
         this.id = id;
         this.user = user;
         this.creation = creation;
