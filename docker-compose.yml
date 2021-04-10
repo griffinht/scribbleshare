@@ -16,7 +16,7 @@ services:
             board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
             board.postgres.user: "board_room"
             board.postgres.password: "changeme"
-            board.redis.url: "board-keydb"
+            board.redis.url: "redis://default:changeme@board-keydb:6379"
 # HTTP backend
     board-backend:
         image: board-backend
@@ -29,6 +29,7 @@ services:
                 condition: service_healthy
         environment:
             board.ssl: "false"
+            board.redis.url: "redis://default:changeme@board-keydb:6379"
 # Reverse proxy
     board-nginx:
         image: board-nginx

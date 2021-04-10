@@ -25,8 +25,7 @@ public class BoardDatabase implements Database {
         logger.info("Connected to Postgres database");
 
         logger.info("Connecting to Redis database...");
-        keyDB = new RedisDatabase(config.getString(BoardConfigKeys.REDIS_URL),
-                config.getInteger(BoardConfigKeys.REDIS_PORT));
+        keyDB = new RedisDatabase(config.getString(BoardConfigKeys.REDIS_URL));
         logger.info("Connected to Redis database");
     }
     @Override

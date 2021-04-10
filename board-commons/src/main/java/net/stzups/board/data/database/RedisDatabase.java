@@ -13,8 +13,8 @@ import redis.clients.jedis.Jedis;
 public class RedisDatabase implements Database {
     private Jedis jedis;
 
-    public RedisDatabase(String host, int port) {
-        jedis = new Jedis(host, port);
+    public RedisDatabase(String host) {
+        jedis = new Jedis(host);
     }
 
     @Override
