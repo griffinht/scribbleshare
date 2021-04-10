@@ -1,10 +1,12 @@
 package net.stzups.board.backend.server.http;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -13,6 +15,7 @@ import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
@@ -123,6 +126,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
+
+
+
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
@@ -134,7 +140,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
             long fileLastModifiedSeconds = file.lastModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                sendNotModified(ctx);
+                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
+                authenticate(ctx, response, file);
+                setDateHeader(response);
+
+                sendAndCleanupConnection(ctx, response);
                 return;
             }
         }
@@ -149,9 +159,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        if (!authenticate(response, file)) {
-            return;
-        }
+        authenticate(ctx, response, file);
         HttpUtil.setContentLength(response, fileLength);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
         setDateAndCacheHeaders(response, file);
@@ -222,16 +230,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     /**
-     * When file timestamp is the same as what the browser is sending up, send a "304 Not Modified"
-     */
-    private void sendNotModified(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-        setDateHeader(response);
-
-        sendAndCleanupConnection(ctx, response);
-    }
-
-    /**
      * If Keep-Alive is disabled, attaches "Connection: close" header to the response
      * and closes the connection after the response being sent.
      */
@@ -284,21 +282,44 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
-    private boolean authenticate(HttpResponse response, File file) {
-        String cookiesHeader = request.headers().get("Cookies");
-        HttpSession httpSession;
-        if (cookiesHeader == null) {
-            User user = BoardBackend.getDatabase().createUser();
-            httpSession = new HttpSession(user);
+    private void authenticate(ChannelHandlerContext ctx, HttpResponse response, File file) {
+        if (file.getName().equals("index.html")) {
+            if (!authenticate(request, response)) {
+                logger.info("Bad authentication");
+                ctx.close();
+                //todo punish/throttle/ban ip address
+            } else {
+                logger.info("Good authentication");
+            }
+        }
+    }
+
+    private static boolean authenticate(HttpRequest request, HttpResponse response) {
+        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        if (cookie == null) {
+            User user;
+            HttpSession.ClientCookie cookiePersistent = HttpSession.ClientCookie.getClientCookie(request, PersistentHttpSession.COOKIE_NAME);
+            if (cookiePersistent != null) {
+                PersistentHttpSession persistentHttpSession = BoardBackend.getDatabase().getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
+                    user = BoardBackend.getDatabase().getUser(persistentHttpSession.getUser());
+                } else {
+                    return false;
+                }
+            } else {
+                user = BoardBackend.getDatabase().createUser();
+            }
+
+            HttpSession httpSession = new HttpSession(user, response);
             BoardBackend.getDatabase().addHttpSession(httpSession);
 
+            //this is single use and always refreshed
+            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, response);
+            BoardBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+            return true;
         } else {
-            Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
-            System.out.println();
-            httpSession = null;
+            HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
+            return httpSession != null && httpSession.validate(cookie.getToken());
         }
-        PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession);
-        BoardBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
-        return true;
     }
 }

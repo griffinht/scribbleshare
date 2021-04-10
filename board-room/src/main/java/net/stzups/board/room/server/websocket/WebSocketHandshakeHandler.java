@@ -65,7 +65,7 @@ public class WebSocketHandshakeHandler extends SimpleChannelInboundHandler<Clien
         } else {
             client = new Client(user, ctx.channel());
         }
-        PersistentHttpSession persistentHttpSession = new PersistentHttpSession(null);//todo refactor
+        PersistentHttpSession persistentHttpSession = new PersistentHttpSession();//todo refactor
         client.queueMessage(new ServerMessageHandshake(persistentHttpSession));
         BoardRoom.getDatabase().addPersistentHttpSession(persistentHttpSession);
         return client;

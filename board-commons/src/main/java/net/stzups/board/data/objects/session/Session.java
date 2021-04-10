@@ -13,8 +13,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
 public class Session {
-    private static final TemporalAmount MAX_USER_SESSION_AGE = Duration.ofDays(90);//todo
-
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final MessageDigest messageDigest;
 
@@ -67,11 +65,7 @@ public class Session {
         return hashedToken;
     }
 
-    boolean validate() {
-        return Instant.now().isBefore(creation.toInstant().plus(MAX_USER_SESSION_AGE));
-    }
-
-    boolean validateToken(long token) {
+    public boolean validate(long token) {
         byte[] hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
         //this session will have already been deleted in db and should be garbage collected right after this, but just in case zero the hashes so it won't work again
         boolean validate = Arrays.equals(hashedToken, this.hashedToken);
