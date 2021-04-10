@@ -278,7 +278,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (file.getName().equals("index.html")) {
             if (!authenticate(request, response)) {
                 logger.info("Bad authentication");
-                ctx.close();
+                ctx.close();//todo block AND rate limit then close to slow down????
                 //todo punish/throttle/ban ip address
             } else {
                 logger.info("Good authentication");

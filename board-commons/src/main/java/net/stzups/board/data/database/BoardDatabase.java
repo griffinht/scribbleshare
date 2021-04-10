@@ -25,7 +25,7 @@ public class BoardDatabase implements Database {
         logger.info("Connected to Postgres database");
 
         logger.info("Connecting to Redis database...");
-        keyDB = new KeyDBDatabase(config.getString(BoardConfigKeys.REDIS_URL),
+        keyDB = new RedisDatabase(config.getString(BoardConfigKeys.REDIS_URL),
                 config.getInteger(BoardConfigKeys.REDIS_PORT));
         logger.info("Connected to Redis database");
     }
@@ -96,11 +96,11 @@ public class BoardDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        return null;
+        return keyDB.getHttpSession(id);
     }
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-
+        keyDB.addHttpSession(httpSession);
     }
 }

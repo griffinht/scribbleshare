@@ -65,6 +65,10 @@ public class HttpSession extends Session {
         setCookie(response);
     }
 
+    public HttpSession(long id, ByteBuf byteBuf) {
+        super(id, byteBuf);
+    }
+
     private void setCookie(HttpResponse response) {
         DefaultCookie cookie = new DefaultCookie(COOKIE_NAME, Base64.encode(Unpooled.wrappedBuffer(Unpooled.copyLong(getId()), Unpooled.copyLong(super.generateToken()))).toString(StandardCharsets.UTF_8));
         //todo cookie.setDomain("");

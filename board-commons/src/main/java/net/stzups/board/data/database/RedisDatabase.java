@@ -1,5 +1,7 @@
 package net.stzups.board.data.database;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
 import net.stzups.board.data.objects.session.HttpSession;
@@ -8,10 +10,10 @@ import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
 
-public class KeyDBDatabase implements Database {
+public class RedisDatabase implements Database {
     private Jedis jedis;
 
-    public KeyDBDatabase(String host, int port) {
+    public RedisDatabase(String host, int port) {
         jedis = new Jedis(host, port);
     }
 
@@ -82,11 +84,13 @@ public class KeyDBDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        return null;
+        return new HttpSession(id, Unpooled.wrappedBuffer(jedis.get(Unpooled.copyLong(id).array())));
     }
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-
+        ByteBuf byteBuf = Unpooled.buffer();
+        httpSession.serialize(byteBuf);
+        jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }
 }

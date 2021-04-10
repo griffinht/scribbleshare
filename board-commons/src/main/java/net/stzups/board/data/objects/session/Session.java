@@ -1,5 +1,6 @@
 package net.stzups.board.data.objects.session;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.security.MessageDigest;
@@ -39,6 +40,13 @@ public class Session {
         this.hashedToken = hashedToken;
     }
 
+    public Session(long id, ByteBuf byteBuf) {
+        this.id = id;
+        this.user = byteBuf.readLong();
+        this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
+        this.hashedToken = byteBuf.readBytes(32).array();
+    }
+
     /** should be called once after instance creation */
     long generateToken() {
         long token = secureRandom.nextLong();
@@ -68,6 +76,13 @@ public class Session {
         boolean validate = Arrays.equals(hashedToken, this.hashedToken);
         Arrays.fill(this.hashedToken, (byte) 0);
         return validate;
+    }
+
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeLong(id);
+        byteBuf.writeLong(user);
+        byteBuf.writeLong(creation.getTime());
+        byteBuf.writeBytes(hashedToken);
     }
 
     @Override
