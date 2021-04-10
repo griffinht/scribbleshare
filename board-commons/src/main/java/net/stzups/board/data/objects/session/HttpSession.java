@@ -15,7 +15,6 @@ import net.stzups.board.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.Set;
 
 public class HttpSession extends Session {
@@ -73,10 +72,7 @@ public class HttpSession extends Session {
     protected DefaultCookie getCookie(String name) {
         ByteBuf byteBuf = Unpooled.buffer();
         byteBuf.writeLong(getId());
-        long a = super.generateToken();
-        System.out.println("token:" + a + "\nid:" + getId() + "\nhashedToken:" + Arrays.toString(getHashedToken()));
-        byteBuf.writeLong(a);
-        byteBuf.writeLong(0);
+        byteBuf.writeLong(super.generateToken());
         return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
     }
 

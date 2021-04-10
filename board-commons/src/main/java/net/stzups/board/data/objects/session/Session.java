@@ -41,7 +41,6 @@ public class Session {
     }
 
     public Session(long id, ByteBuf byteBuf) {
-        System.out.println("DESERIALIZE" + Arrays.toString(Unpooled.copiedBuffer(byteBuf).array()));
         this.id = id;
         this.user = byteBuf.readLong();
         this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
@@ -73,17 +72,13 @@ public class Session {
 
     public boolean validate(long token) {
         byte[] hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
-        boolean validate = Arrays.equals(hashedToken, this.hashedToken);
-        System.out.println("VALIDATING");
-        System.out.println("token:" + token + "\nclient hashedToken:" + Arrays.toString(hashedToken) + "\nid:" + getId() + "\nhashedToken:" + Arrays.toString(getHashedToken()) + "KLJAHSD" + getHashedToken().length);
-        return validate;
+        return Arrays.equals(hashedToken, this.hashedToken);
     }
 
     public void serialize(ByteBuf byteBuf) {
         byteBuf.writeLong(user);
         byteBuf.writeLong(creation.getTime());
         byteBuf.writeBytes(hashedToken);
-        System.out.println("SERIALIZE" + Arrays.toString(byteBuf.array()));
     }
 
     @Override
