@@ -5,8 +5,6 @@ import net.stzups.board.util.config.OptionalConfigKey;
 import net.stzups.board.util.config.RequiredConfigKey;
 
 public class BoardRoomConfigKeys {
-    public static final ConfigKey<String> BOARD_PROPERTIES = new OptionalConfigKey<>("board.properties", "board.properties");
-
     public static final ConfigKey<Boolean> SSL = new RequiredConfigKey<>("ssl");
     public static final ConfigKey<String> SSL_KEYSTORE_PATH = new RequiredConfigKey<>("ssl.keystore.path");
     public static final ConfigKey<String> SSL_KEYSTORE_PASSPHRASE = new RequiredConfigKey<>("ssl.keystore.passphrase");

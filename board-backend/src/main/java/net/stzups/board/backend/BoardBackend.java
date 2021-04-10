@@ -1,6 +1,7 @@
 package net.stzups.board.backend;
 
 import io.netty.channel.ChannelFuture;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.backend.server.Server;
 import net.stzups.board.data.database.BoardDatabase;
 import net.stzups.board.data.database.Database;
@@ -8,6 +9,7 @@ import net.stzups.board.util.LogFactory;
 import net.stzups.board.util.config.Config;
 import net.stzups.board.util.config.configs.ArgumentConfig;
 import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
+import net.stzups.board.util.config.configs.PropertiesConfig;
 
 import java.util.logging.Logger;
 
@@ -21,8 +23,10 @@ public class BoardBackend {
 
         long start = System.currentTimeMillis();
 
-        config.addConfigProvider(new EnvironmentVariableConfig("board."))
-                .addConfigProvider(new ArgumentConfig(args));
+        config.addConfigProvider(new ArgumentConfig(args))
+                .addConfigProvider(new EnvironmentVariableConfig("board."));
+        //this is added last in case the other config strategies have a different value for this
+        config.addConfigProvider(new PropertiesConfig(config.getString(BoardConfigKeys.BOARD_PROPERTIES)));
 
         database = new BoardDatabase(logger, config);
 
