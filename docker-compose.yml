@@ -13,7 +13,7 @@ services:
                 condition: service_healthy
         environment:
             board.ssl: "false"
-            board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
+            board.postgres.url: "jdbc:postgresql://board_room:changeme@localhost:5432/board"
             board.postgres.user: "board_room"
             board.postgres.password: "changeme"
             board.redis.url: "redis://default:changeme@board-keydb:6379"
@@ -29,6 +29,7 @@ services:
                 condition: service_healthy
         environment:
             board.ssl: "false"
+            board.postgres.url: "jdbc:postgresql://board_backend:changeme@board-postgres:5432/board"
             board.redis.url: "redis://default:changeme@board-keydb:6379"
 # Reverse proxy
     board-nginx:
