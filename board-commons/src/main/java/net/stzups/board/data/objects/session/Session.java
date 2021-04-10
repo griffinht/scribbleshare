@@ -44,7 +44,7 @@ public class Session {
         this.id = id;
         this.user = byteBuf.readLong();
         this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
-        this.hashedToken = byteBuf.readBytes(32).array();
+        this.hashedToken = Unpooled.copiedBuffer(byteBuf.readBytes(32)).array(); //byteBuf#readBytes() returns direct buffer which does not support #array() method
     }
 
     /** should be called once after instance creation */
