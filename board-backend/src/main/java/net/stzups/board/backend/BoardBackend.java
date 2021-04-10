@@ -21,7 +21,7 @@ public class BoardBackend {
 
         long start = System.currentTimeMillis();
 
-        config.addConfigProvider(new EnvironmentVariableConfig("board"))
+        config.addConfigProvider(new EnvironmentVariableConfig("board."))
                 .addConfigProvider(new ArgumentConfig(args));
 
         database = new BoardDatabase(logger, config);
