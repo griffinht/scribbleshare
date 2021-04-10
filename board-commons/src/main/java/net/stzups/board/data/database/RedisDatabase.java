@@ -89,7 +89,7 @@ public class RedisDatabase implements Database {
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-        ByteBuf byteBuf = Unpooled.buffer();
+        ByteBuf byteBuf = Unpooled.buffer(56, 56);
         httpSession.serialize(byteBuf);
         jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }

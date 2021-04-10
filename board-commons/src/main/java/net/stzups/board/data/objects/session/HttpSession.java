@@ -15,6 +15,7 @@ import net.stzups.board.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Set;
 
 public class HttpSession extends Session {
@@ -42,7 +43,7 @@ public class HttpSession extends Session {
                 for (Cookie cookie : cookies) {
                     if (cookie.name().equals(name)) {
                         ByteBuf byteBuf = Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8)));
-                        return new ClientCookie(byteBuf.getLong(0), byteBuf.getLong(1));
+                        return new ClientCookie(byteBuf.readLong(), byteBuf.readLong());
                     }
                 }
             }
@@ -69,8 +70,18 @@ public class HttpSession extends Session {
         super(id, byteBuf);
     }
 
+    protected DefaultCookie getCookie(String name) {
+        ByteBuf byteBuf = Unpooled.buffer();
+        byteBuf.writeLong(getId());
+        long a = super.generateToken();
+        System.out.println("token:" + a + "\nid:" + getId() + "\nhashedToken:" + Arrays.toString(getHashedToken()));
+        byteBuf.writeLong(a);
+        byteBuf.writeLong(0);
+        return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
+    }
+
     private void setCookie(HttpResponse response) {
-        DefaultCookie cookie = new DefaultCookie(COOKIE_NAME, Base64.encode(Unpooled.wrappedBuffer(Unpooled.copyLong(getId()), Unpooled.copyLong(super.generateToken()))).toString(StandardCharsets.UTF_8));
+        DefaultCookie cookie = getCookie(COOKIE_NAME);
         //todo cookie.setDomain("");
         //not used cookie.setPath("");
         //todo ssl cookie.setSecure(true);

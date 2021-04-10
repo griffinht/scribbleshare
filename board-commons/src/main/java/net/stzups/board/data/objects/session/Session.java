@@ -41,6 +41,7 @@ public class Session {
     }
 
     public Session(long id, ByteBuf byteBuf) {
+        System.out.println("DESERIALIZE" + Arrays.toString(Unpooled.copiedBuffer(byteBuf).array()));
         this.id = id;
         this.user = byteBuf.readLong();
         this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
@@ -72,17 +73,17 @@ public class Session {
 
     public boolean validate(long token) {
         byte[] hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
-        //this session will have already been deleted in db and should be garbage collected right after this, but just in case zero the hashes so it won't work again
         boolean validate = Arrays.equals(hashedToken, this.hashedToken);
-        Arrays.fill(this.hashedToken, (byte) 0);
+        System.out.println("VALIDATING");
+        System.out.println("token:" + token + "\nclient hashedToken:" + Arrays.toString(hashedToken) + "\nid:" + getId() + "\nhashedToken:" + Arrays.toString(getHashedToken()) + "KLJAHSD" + getHashedToken().length);
         return validate;
     }
 
     public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeLong(id);
         byteBuf.writeLong(user);
         byteBuf.writeLong(creation.getTime());
         byteBuf.writeBytes(hashedToken);
+        System.out.println("SERIALIZE" + Arrays.toString(byteBuf.array()));
     }
 
     @Override

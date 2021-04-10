@@ -311,6 +311,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return true;
         } else {
             HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
+            System.out.println("GRRRRRRR");
             return httpSession != null && httpSession.validate(cookie.getToken());
         }
     }

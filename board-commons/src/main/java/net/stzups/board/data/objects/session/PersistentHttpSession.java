@@ -1,14 +1,11 @@
 package net.stzups.board.data.objects.session;
 
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,7 +28,7 @@ public class PersistentHttpSession extends HttpSession {
     }
 
     private void setCookie(HttpResponse response) {
-        DefaultCookie cookie = new DefaultCookie(COOKIE_NAME, Base64.encode(Unpooled.wrappedBuffer(Unpooled.copyLong(getId()), Unpooled.copyLong(super.generateToken()))).toString(StandardCharsets.UTF_8));
+        DefaultCookie cookie = getCookie(COOKIE_NAME);
         //todo cookie.setDomain("");
         cookie.setPath(LOGIN_PATH);
         //todo ssl cookie.setSecure(true);
