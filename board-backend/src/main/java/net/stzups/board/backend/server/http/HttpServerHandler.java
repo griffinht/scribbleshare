@@ -221,13 +221,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendAndCleanupConnection(ctx, response);
     }
 
+    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response) {
+        sendAndCleanupConnection(ctx, response, HttpUtil.isKeepAlive(request));
+    }
+
     /**
      * If Keep-Alive is disabled, attaches "Connection: close" header to the response
      * and closes the connection after the response being sent.
      */
-    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response) {
+    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response, boolean keepAlive) {
         final FullHttpRequest request = this.request;
-        final boolean keepAlive = HttpUtil.isKeepAlive(request);
         HttpUtil.setContentLength(response, response.content().readableBytes());
         if (!keepAlive) {
             // We're going to close the connection as soon as the response is sent,
@@ -278,8 +281,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (file.getName().equals("index.html")) {
             if (!authenticate(request, response)) {
                 logger.info("Bad authentication");
-                ctx.close();//todo block AND rate limit then close to slow down????
-                //todo punish/throttle/ban ip address
+                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST), false);
+                //todo rate limiting strategies
             } else {
                 logger.info("Good authentication");
             }

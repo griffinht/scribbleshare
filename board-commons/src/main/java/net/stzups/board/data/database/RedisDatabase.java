@@ -84,7 +84,11 @@ public class RedisDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        return new HttpSession(id, Unpooled.wrappedBuffer(jedis.get(Unpooled.copyLong(id).array())));
+        byte[] b = jedis.get(Unpooled.copyLong(id).array());
+        if (b == null) {
+            return null;
+        }
+        return new HttpSession(id, Unpooled.wrappedBuffer(b));
     }
 
     @Override
