@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+
     private final Logger logger;
 
     static {
@@ -278,7 +279,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private void authenticate(ChannelHandlerContext ctx, HttpResponse response, File file) {
-        if (file.getName().equals("index.html")) {
+        if (file.getName().equals(PersistentHttpSession.LOGIN_PATH)) {
             if (!authenticate(request, response)) {
                 logger.info("Bad authentication");
                 sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);

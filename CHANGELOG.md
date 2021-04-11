@@ -126,6 +126,6 @@ Proper cookie authentication
 - Db caching of session cookies
 - No more XSS vulnerable local storage token store
 
-# v0.4.4
+### v0.4.4
 Bugfixes, better urls/file paths
 - Fix cookies not having proper security properties
