@@ -281,7 +281,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (file.getName().equals("index.html")) {
             if (!authenticate(request, response)) {
                 logger.info("Bad authentication");
-                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST), false);
+                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
                 //todo rate limiting strategies
             } else {
                 logger.info("Good authentication");

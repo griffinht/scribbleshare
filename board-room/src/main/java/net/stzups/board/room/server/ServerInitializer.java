@@ -31,8 +31,6 @@ import java.util.logging.Logger;
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
-    private static final String WEB_SOCKET_PATH = "/";
-
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
@@ -41,8 +39,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     };
 
     private Logger logger;
-    private MessageEncoder messageEncoder = new MessageEncoder();
-    private MessageDecoder messageDecoder = new MessageDecoder();
     private SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
@@ -70,11 +66,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 //.addLast(new ChunkedWriteHandler())//todo gzip compression?
-                .addLast(new HttpAuthenticator(logger))
-                .addLast(new WebSocketServerCompressionHandler())//todo make sure this is working and worth the performance overhead
-                .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
-                .addLast(messageEncoder)
-                .addLast(messageDecoder)
-                .addLast(new WebSocketHandshakeHandler());
+                .addLast(new HttpAuthenticator(logger));
     }
 }

@@ -16,18 +16,22 @@ import java.util.logging.Logger;
  */
 @ChannelHandler.Sharable
 public class MessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
+    private Logger logger;
+
+    public MessageEncoder(Logger logger) {
+        this.logger = logger;
+    }
+
     @Override
     protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf b) {
-        Logger logger = ctx.channel().attr(ServerInitializer.LOGGER).get();
-
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();//debug
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
         ByteBuf byteBuf = binaryWebSocketFrame.content();
         for (ServerMessage serverMessage : serverMessages) {
-            stringBuilder.append(serverMessage.getClass().getSimpleName()).append(", ");
+            stringBuilder.append(serverMessage.getClass().getSimpleName()).append(", ");//debug
             serverMessage.serialize(byteBuf);
         }
-        ctx.channel().attr(ServerInitializer.LOGGER).get().info("send " + stringBuilder.toString());
+        logger.info("send " + stringBuilder);//debug
         ctx.writeAndFlush(binaryWebSocketFrame);
     }
 }
