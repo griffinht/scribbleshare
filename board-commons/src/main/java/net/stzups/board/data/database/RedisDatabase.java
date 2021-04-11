@@ -1,8 +1,11 @@
 package net.stzups.board.data.database;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.stzups.board.data.objects.Document;
 import net.stzups.board.data.objects.InviteCode;
-import net.stzups.board.data.objects.PersistentUserSession;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
@@ -10,8 +13,8 @@ import redis.clients.jedis.Jedis;
 public class RedisDatabase implements Database {
     private Jedis jedis;
 
-    public RedisDatabase(String host, int port) {
-        jedis = new Jedis(host, port);
+    public RedisDatabase(String host) {
+        jedis = new Jedis(host);
     }
 
     @Override
@@ -70,12 +73,28 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public PersistentUserSession removeUserSession(long id) {
+    public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addUserSession(PersistentUserSession persistentUserSession) {
+    public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HttpSession getHttpSession(long id) {
+        byte[] b = jedis.get(Unpooled.copyLong(id).array());
+        if (b == null) {
+            return null;
+        }
+        return new HttpSession(id, Unpooled.wrappedBuffer(b));
+    }
+
+    @Override
+    public void addHttpSession(HttpSession httpSession) {
+        ByteBuf byteBuf = Unpooled.buffer(56, 56);
+        httpSession.serialize(byteBuf);
+        jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }
 }

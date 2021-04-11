@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
@@ -14,16 +13,18 @@ import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
+import net.stzups.board.data.objects.User;
+import net.stzups.board.data.objects.session.HttpSession;
+import net.stzups.board.data.objects.session.PersistentHttpSession;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,8 +44,8 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private Logger logger;
-    private File httpRoot;
+    private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private final Logger logger;
 
     static {
         String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
@@ -64,9 +65,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler(Logger logger, File httpRoot) {
+    public HttpServerHandler(Logger logger) {
         this.logger = logger;
-        this.httpRoot = httpRoot;
     }
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -97,7 +97,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        File file = new File(httpRoot, path);
+        File file = new File(HTTP_ROOT, path);
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
@@ -118,6 +118,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
+
+
+
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
@@ -129,7 +132,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
             long fileLastModifiedSeconds = file.lastModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                sendNotModified(ctx);
+                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
+                authenticate(ctx, response, file);
+                setDateHeader(response);
+
+                sendAndCleanupConnection(ctx, response);
                 return;
             }
         }
@@ -144,10 +151,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        authenticate(ctx, response, file);
         HttpUtil.setContentLength(response, fileLength);
-        //content-type headers
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
-        //cache headers
         setDateAndCacheHeaders(response, file);
 
         if (!keepAlive) {
@@ -215,23 +221,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendAndCleanupConnection(ctx, response);
     }
 
-    /**
-     * When file timestamp is the same as what the browser is sending up, send a "304 Not Modified"
-     */
-    private void sendNotModified(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-        setDateHeader(response);
-
-        sendAndCleanupConnection(ctx, response);
+    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response) {
+        sendAndCleanupConnection(ctx, response, HttpUtil.isKeepAlive(request));
     }
 
     /**
      * If Keep-Alive is disabled, attaches "Connection: close" header to the response
      * and closes the connection after the response being sent.
      */
-    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response) {
+    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response, boolean keepAlive) {
         final FullHttpRequest request = this.request;
-        final boolean keepAlive = HttpUtil.isKeepAlive(request);
         HttpUtil.setContentLength(response, response.content().readableBytes());
         if (!keepAlive) {
             // We're going to close the connection as soon as the response is sent,
@@ -276,5 +275,46 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
         response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+    }
+
+    private void authenticate(ChannelHandlerContext ctx, HttpResponse response, File file) {
+        if (file.getName().equals("index.html")) {
+            if (!authenticate(request, response)) {
+                logger.info("Bad authentication");
+                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
+                //todo rate limiting strategies
+            } else {
+                logger.info("Good authentication");
+            }
+        }
+    }
+
+    private static boolean authenticate(HttpRequest request, HttpResponse response) {
+        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        if (cookie == null) {
+            User user;
+            HttpSession.ClientCookie cookiePersistent = HttpSession.ClientCookie.getClientCookie(request, PersistentHttpSession.COOKIE_NAME);
+            if (cookiePersistent != null) {
+                PersistentHttpSession persistentHttpSession = BoardBackend.getDatabase().getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
+                    user = BoardBackend.getDatabase().getUser(persistentHttpSession.getUser());
+                } else {
+                    return false;
+                }
+            } else {
+                user = BoardBackend.getDatabase().createUser();
+            }
+
+            HttpSession httpSession = new HttpSession(user, response);
+            BoardBackend.getDatabase().addHttpSession(httpSession);
+
+            //this is single use and always refreshed
+            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, response);
+            BoardBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+            return true;
+        } else {
+            HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
+            return httpSession != null && httpSession.validate(cookie.getToken());
+        }
     }
 }

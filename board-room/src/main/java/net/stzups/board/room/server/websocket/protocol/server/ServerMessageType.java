@@ -11,10 +11,9 @@ public enum ServerMessageType {
     UPDATE_CANVAS(2),
     OPEN_DOCUMENT(3),
     UPDATE_DOCUMENT(4),
-    HANDSHAKE(5),
-    ADD_USER(6),
-    DELETE_DOCUMENT(7),
-    GET_INVITE(8)
+    ADD_USER(5),
+    DELETE_DOCUMENT(6),
+    GET_INVITE(7)
     ;
 
     private static Map<Integer, ServerMessageType> messageTypeMap = new IntObjectHashMap<>();

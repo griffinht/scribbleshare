@@ -65,6 +65,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
-                .addLast(new HttpServerHandler(logger, new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT))));
+                .addLast(new HttpServerHandler(logger));
     }
 }

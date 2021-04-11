@@ -46,7 +46,7 @@ class Room {
     static Room getRoom(Document document) {
         Room room = rooms.get(document);
         if (room == null) {
-            room = new Room(document);
+            return new Room(document);
         }
         return room;
     }

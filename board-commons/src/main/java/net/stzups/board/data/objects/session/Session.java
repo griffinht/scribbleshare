@@ -1,22 +1,19 @@
-package net.stzups.board.data.objects;
+package net.stzups.board.data.objects.session;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
-import java.util.Random;
 
-public class PersistentUserSession {
-    private static final TemporalAmount MAX_USER_SESSION_AGE = Duration.ofDays(90);//todo
+public class Session {
     private static final SecureRandom secureRandom = new SecureRandom();
-    private static final Random random = new Random();
     private static final MessageDigest messageDigest;
+
     static {
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
@@ -30,21 +27,28 @@ public class PersistentUserSession {
     private Timestamp creation;
     private byte[] hashedToken;
 
-    public PersistentUserSession(User user) {
-        this.id = random.nextLong();//todo secure random or regular random?
-        this.user = user.getId();
+    protected Session(long user) {
+        this.id = secureRandom.nextLong();
+        this.user = user;
         this.creation = new Timestamp(Instant.now().toEpochMilli());
     }
 
-    public PersistentUserSession(long id, long user, Timestamp creation, byte[] hashedToken) {
+    protected Session(long id, long user, Timestamp creation, byte[] hashedToken) {
         this.id = id;
         this.user = user;
         this.creation = creation;
         this.hashedToken = hashedToken;
     }
 
+    public Session(long id, ByteBuf byteBuf) {
+        this.id = id;
+        this.user = byteBuf.readLong();
+        this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
+        this.hashedToken = Unpooled.copiedBuffer(byteBuf.readBytes(32)).array(); //byteBuf#readBytes() returns direct buffer which does not support #array() method
+    }
+
     /** should be called once after instance creation */
-    public long generateToken() {
+    long generateToken() {
         long token = secureRandom.nextLong();
         hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
         return token;
@@ -68,15 +72,18 @@ public class PersistentUserSession {
 
     public boolean validate(long token) {
         byte[] hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
-        boolean validate = Instant.now().isBefore(creation.toInstant().plus(MAX_USER_SESSION_AGE)) && Arrays.equals(this.hashedToken, hashedToken);
-        //this session will have already been deleted in db and should be garbage collected right after this, but just in case zero the hashes so it won't work again
-        Arrays.fill(this.hashedToken, (byte) 0);
-        return validate;
+        return Arrays.equals(hashedToken, this.hashedToken);
+    }
+
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeLong(user);
+        byteBuf.writeLong(creation.getTime());
+        byteBuf.writeBytes(hashedToken);
     }
 
     @Override
     public String toString() {
-        return "UserSession{id=" + id + ",user" + user + ",creationTime=" + creation + "}";
+        return "Session{id=" + id + ",user" + user + ",creationTime=" + creation + "}";
     }
 
     @Override
@@ -86,6 +93,6 @@ public class PersistentUserSession {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof PersistentUserSession && id == ((PersistentUserSession) object).id;
+        return object instanceof Session && id == ((Session) object).id;
     }
 }

@@ -13,9 +13,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
-import net.stzups.board.room.BoardConfigKeys;
+import net.stzups.board.room.BoardRoomConfigKeys;
 import net.stzups.board.room.BoardRoom;
-import net.stzups.board.room.server.websocket.WebSocketHandshakeHandler;
+import net.stzups.board.room.server.websocket.WebSocketHandler;
 import net.stzups.board.room.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.room.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.util.LogFactory;
@@ -31,18 +31,14 @@ import java.util.logging.Logger;
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
-    private static final String WEB_SOCKET_PATH = "/";
-
     private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            if (BoardRoom.getConfig().getBoolean(BoardConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (BoardRoom.getConfig().getBoolean(BoardRoomConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
 
     private Logger logger;
-    private MessageEncoder messageEncoder = new MessageEncoder();
-    private MessageDecoder messageDecoder = new MessageDecoder();
     private SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
@@ -69,11 +65,12 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                //.addLast(new ChunkedWriteHandler())
+                .addLast(new HttpAuthenticator(logger))
                 .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new WebSocketServerProtocolHandler(WEB_SOCKET_PATH, null, true))
-                .addLast(messageEncoder)
-                .addLast(messageDecoder)
-                .addLast(new WebSocketHandshakeHandler());
+                .addLast(new WebSocketServerProtocolHandler("/", null, true))
+                .addLast(new MessageEncoder(logger))
+                .addLast(new MessageDecoder(logger))
+                .addLast(new WebSocketHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+
     }
 }

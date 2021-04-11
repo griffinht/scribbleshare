@@ -1,25 +1,34 @@
 package net.stzups.board.backend;
 
 import io.netty.channel.ChannelFuture;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.backend.server.Server;
+import net.stzups.board.data.database.BoardDatabase;
+import net.stzups.board.data.database.Database;
 import net.stzups.board.util.LogFactory;
 import net.stzups.board.util.config.Config;
 import net.stzups.board.util.config.configs.ArgumentConfig;
 import net.stzups.board.util.config.configs.EnvironmentVariableConfig;
+import net.stzups.board.util.config.configs.PropertiesConfig;
 
 import java.util.logging.Logger;
 
 public class BoardBackend {
     private static final Logger logger = LogFactory.getLogger("BoardBackend");
     private static final Config config = new Config();
+    private static Database database;
 
     public static void main(String[] args) throws Exception {
         logger.info("Starting Board Backend server...");
 
         long start = System.currentTimeMillis();
 
-        config.addConfigProvider(new EnvironmentVariableConfig("board"))
-                .addConfigProvider(new ArgumentConfig(args));
+        config.addConfigProvider(new ArgumentConfig(args))
+                .addConfigProvider(new EnvironmentVariableConfig("board."));
+        //this is added last in case the other config strategies have a different value for this
+        config.addConfigProvider(new PropertiesConfig(config.getString(BoardConfigKeys.BOARD_PROPERTIES)));
+
+        database = new BoardDatabase(logger, config);
 
         Server server = new Server();
         ChannelFuture channelFuture = server.start();
@@ -43,5 +52,9 @@ public class BoardBackend {
 
     public static Config getConfig() {
         return config;
+    }
+
+    public static Database getDatabase() {
+        return database;
     }
 }
