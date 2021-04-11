@@ -108,7 +108,8 @@ socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient)
     })
 });
 socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveClient) => {
-    console.log('Remove client ', activeDocument.removeClient(serverMessageRemoveClient.id));
+    console.log('Remove client ', serverMessageRemoveClient.id);
+    activeDocument.removeClient(serverMessageRemoveClient.id)
 });
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateCanvas) => {
     if (activeDocument != null) {
@@ -123,26 +124,10 @@ socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdat
         new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""),
             serverMessageUpdateDocument.id));
 });
-socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
-    window.localStorage.setItem('id', serverMessageHandshake.id.toString());
-    window.localStorage.setItem('token', serverMessageHandshake.token.toString());
-})
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
     activeDocument.canvas = serverMessageOpenDocument.canvas;
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
-    let id = window.localStorage.getItem('id');
-    if (id != null) {
-        id = BigInt(id);
-    } else {
-        id = BigInt(0);
-    }
-    let token = window.localStorage.getItem('token');
-    if (token != null) {
-        token = BigInt(window.localStorage.getItem('token'));
-    } else {
-        token = BigInt(0);
-    }
     let invite;
     let index = document.location.href.lastIndexOf('invite=');
     if (index === -1) {
@@ -150,7 +135,7 @@ socket.addEventListener(SocketEventType.OPEN, () => {
     } else {
         invite = document.location.href.substring(index + 7, index + 7 + 6);
     }
-    socket.send(new ClientMessageHandshake(id, token, invite));
+    socket.send(new ClientMessageHandshake(invite));
 });
 
 const inviteButton = document.getElementById("inviteButton");

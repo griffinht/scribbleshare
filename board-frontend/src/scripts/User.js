@@ -2,7 +2,6 @@ import socket from "./protocol/WebSocketHandler.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 
 const users = new Map();
-let user = null;
 
 export function getUser(id) {
     if (id == null) {
@@ -19,9 +18,6 @@ class User {
     }
 }
 
-socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
-    user = new User(serverMessageHandshake.userId);
-})
 socket.addMessageListener(ServerMessageType.ADD_USER, (serverMessageAddUser) => {
     let user = users.get(serverMessageAddUser.user.id);
     if (user == null) {

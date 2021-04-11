@@ -2,7 +2,6 @@ import ServerMessageAddClient from "./messages/ServerMessageAddClient.js";
 import ServerMessageRemoveClient from "./messages/ServerMessageRemoveClient.js";
 import ServerMessageUpdateCanvas from "./messages/ServerMessageUpdateCanvas.js";
 import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
-import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageAddUser from "./messages/ServerMessageAddUser.js";
 import ServerMessageDeleteDocument from "./messages/ServerMessageDeleteDocument.js";
 import ServerMessageUpdateDocument from "./messages/ServerMessageUpdateDocument.js";
@@ -14,10 +13,9 @@ const ServerMessageType = {
     UPDATE_CANVAS:2,
     OPEN_DOCUMENT:3,
     UPDATE_DOCUMENT:4,
-    HANDSHAKE:5,
-    ADD_USER:6,
-    DELETE_DOCUMENT:7,
-    GET_INVITE:8,
+    ADD_USER:5,
+    DELETE_DOCUMENT:6,
+    GET_INVITE:7,
 };
 export default ServerMessageType;
 
@@ -39,9 +37,6 @@ export function getServerMessage(type, reader) {
             break;
         case ServerMessageType.UPDATE_DOCUMENT:
             message = new ServerMessageUpdateDocument(reader);
-            break;
-        case ServerMessageType.HANDSHAKE:
-            message = new ServerMessageHandshake(reader);
             break;
         case ServerMessageType.ADD_USER:
             message = new ServerMessageAddUser(reader)
