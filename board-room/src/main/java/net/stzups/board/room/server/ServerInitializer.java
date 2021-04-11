@@ -15,7 +15,7 @@ import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.board.room.BoardRoomConfigKeys;
 import net.stzups.board.room.BoardRoom;
-import net.stzups.board.room.server.websocket.WebSocketHandshakeHandler;
+import net.stzups.board.room.server.websocket.WebSocketHandler;
 import net.stzups.board.room.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.room.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.util.LogFactory;
@@ -65,7 +65,12 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                //.addLast(new ChunkedWriteHandler())//todo gzip compression?
-                .addLast(new HttpAuthenticator(logger));
+                .addLast(new HttpAuthenticator(logger))
+                .addLast(new WebSocketServerCompressionHandler())
+                .addLast(new WebSocketServerProtocolHandler("/", null, true))
+                .addLast(new MessageEncoder(logger))
+                .addLast(new MessageDecoder(logger))
+                .addLast(new WebSocketHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+
     }
 }

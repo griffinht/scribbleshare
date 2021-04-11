@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 @ChannelHandler.Sharable
 public class MessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
-    private Logger logger;
+    private final Logger logger;
 
     public MessageEncoder(Logger logger) {
         this.logger = logger;
