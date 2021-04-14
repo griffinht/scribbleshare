@@ -48,6 +48,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
+    private static final String PHP_QUERY_DELIMITER = "?";
+    private static final String PHP_QUERY_SEPARATOR = "&";
+    private static final String PHP_QUERY_PAIR_SEPARATOR = "=";
 
     private final Logger logger;
 
@@ -94,27 +97,32 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
+        // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
+
+        // split php style query from path
         final String[] splitQuery = splitQuery(uri);
         final String rawPath = splitQuery[0];
         final String rawQuery = splitQuery[1];
 
+        // redirects
         if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + PHP_QUERY_DELIMITER + rawQuery);
             return;
         } else if ((rawPath + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + PHP_QUERY_DELIMITER + rawQuery);
             return;
         } else if (rawPath.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + PHP_QUERY_DELIMITER + rawQuery);
             return;
         }
 
-        final String path = getPath(rawPath); // the actual filesystem path
+        // get filesystem path from provided path
+        final String path = getPath(rawPath);
         if (path == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
@@ -342,8 +350,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
      */
     public static String[] splitQuery(String uri) {
-        int index = uri.lastIndexOf("?");
-        if (index <= 0 || uri.indexOf("?") != index) return new String[] {uri, ""}; // make sure there is only one ? in the uri
+        int index = uri.lastIndexOf(PHP_QUERY_DELIMITER);
+        if (index <= 0 || uri.indexOf(PHP_QUERY_DELIMITER) != index) return new String[] {uri, ""}; // make sure there is only one ? in the uri
 
         return new String[] {uri.substring(0, index), uri.substring(index + 1)};
     }
@@ -353,9 +361,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      */
     public static Map<String, String> parseQuery(String query) {
         Map<String, String> queries = new HashMap<>();
-        String[] keyValuePairs = query.split("&");
+        String[] keyValuePairs = query.split(PHP_QUERY_SEPARATOR);
         for (String keyValuePair : keyValuePairs) {
-            String[] split = keyValuePair.split("=");
+            String[] split = keyValuePair.split(PHP_QUERY_PAIR_SEPARATOR);
             if (split.length != 2) { // check if malformed
                 return Collections.emptyMap();
             }
