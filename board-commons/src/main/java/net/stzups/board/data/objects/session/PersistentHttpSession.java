@@ -17,7 +17,7 @@ public class PersistentHttpSession extends HttpSession {
     private static final TemporalAmount MAX_SESSION_AGE = Duration.ofDays(90);//todo
 
     public static final String COOKIE_NAME = "persistent_session";
-    public static final String LOGIN_PATH = "/index.html";
+    public static final String LOGIN_PATH = "/";
 
     public PersistentHttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
         super(id, user, creation, hashedToken);
