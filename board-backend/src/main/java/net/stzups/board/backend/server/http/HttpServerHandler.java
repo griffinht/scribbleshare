@@ -52,6 +52,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String PHP_QUERY_SEPARATOR = "&";
     private static final String PHP_QUERY_PAIR_SEPARATOR = "=";
 
+    private static final String PHP_QUERY_REGEX = PHP_QUERY_DELIMITER + PHP_QUERY_SEPARATOR + PHP_QUERY_PAIR_SEPARATOR;
+    private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
+
     private final Logger logger;
 
     static {
@@ -313,14 +316,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/.?&=a-zA-Z0-9\\-_]+$");
+    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + PHP_QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
     /** Sanitizes uri */
     public static String getUri(String uri) {
         return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
     }
 
-    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separatorChar + ".a-zA-Z0-9\\-_]+$");
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separatorChar + "." + FILE_NAME_REGEX + "]+$");
 
     /** Converts uri to filesystem path */
     public static String getPath(String path) {
