@@ -151,7 +151,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
         }
 
-
+        String mimeType = MimeTypes.getMimeType(file);
+        if (mimeType == null) {
+            logger.warning("Unknown MIME type for file " + file.getName());
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
 
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
@@ -189,7 +194,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             authenticate(ctx, response);
         }
         HttpUtil.setContentLength(response, fileLength);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeType);
         setDateAndCacheHeaders(response, file);
 
         if (!keepAlive) {
