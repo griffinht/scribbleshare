@@ -122,3 +122,10 @@ Swap Maven for Gradle, add board-http, Database rework
 
 ### v0.4.3
 Proper cookie authentication
+- Session cookies and persistent cookies
+- Db caching of session cookies
+- No more XSS vulnerable local storage token store
+
+### v0.4.4
+Bugfixes, better urls/file paths
+- Fix cookies not having proper security properties

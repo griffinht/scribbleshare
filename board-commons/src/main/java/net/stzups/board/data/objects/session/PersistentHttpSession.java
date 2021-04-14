@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -16,7 +17,7 @@ public class PersistentHttpSession extends HttpSession {
     private static final TemporalAmount MAX_SESSION_AGE = Duration.ofDays(90);//todo
 
     public static final String COOKIE_NAME = "persistent_session";
-    public static final String LOGIN_PATH = "/index.html";
+    public static final String LOGIN_PATH = "/";
 
     public PersistentHttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
         super(id, user, creation, hashedToken);
@@ -29,14 +30,14 @@ public class PersistentHttpSession extends HttpSession {
 
     private void setCookie(HttpResponse response) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        //todo cookie.setDomain("");
+        cookie.setDomain("localhost");
         cookie.setPath(LOGIN_PATH);
         //todo ssl cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
-        response.headers().add(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 
     @Override

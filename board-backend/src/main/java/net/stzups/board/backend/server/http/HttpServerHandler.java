@@ -32,19 +32,30 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private static final String DEFAULT_FILE = "index.html";
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
+
+    private static final String QUERY_DELIMITER = "?";
+    private static final String QUERY_SEPARATOR = "&";
+    private static final String QUERY_PAIR_SEPARATOR = "=";
+
+    private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
+    private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
+
     private final Logger logger;
 
     static {
@@ -90,36 +101,62 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
-        final String uri = request.uri();
-        final String path = sanitizeUri(uri);
-        if (path == null) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN);
-            return;
-        }
-
-        File file = new File(HTTP_ROOT, path);
-        if (file.isHidden() || !file.exists()) {
+        // sanitize uri
+        final String uri = getUri(request.uri());
+        if (uri == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
-        if (file.isDirectory()) {
-            if (uri.endsWith("/")) {
-                //legit directory listing, disallow
-                sendError(ctx, HttpResponseStatus.FORBIDDEN);
+        // split query from path
+        final String[] splitQuery = splitQuery(uri);
+        if (splitQuery == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+        final String rawPath = splitQuery[0];
+        final String rawQuery = splitQuery[1];
+
+        Map<String, String> queries = parseQuery(rawQuery);
+        if (queries == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+        }
+
+        // redirects
+        if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + rawQuery);
+            return;
+        } else if ((rawPath + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+            return;
+        } else if (rawPath.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
+            return;
+        }
+
+        // get filesystem path from provided path
+        final String path = getPath(rawPath);
+        if (path == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        File file = new File(HTTP_ROOT, path);
+        if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
+            if (new File(HTTP_ROOT, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
+                sendRedirect(ctx, rawPath + "/" + rawQuery);
             } else {
-                sendRedirect(ctx, uri + '/');
+                sendError(ctx, HttpResponseStatus.NOT_FOUND);
+                return;
             }
-            return;
         }
 
-        if (!file.isFile()) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN);
+        String mimeType = MimeTypes.getMimeType(file);
+        if (mimeType == null) {
+            logger.warning("Unknown MIME type for file " + file.getName());
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
-
-
-
 
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
@@ -133,7 +170,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             long fileLastModifiedSeconds = file.lastModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-                authenticate(ctx, response, file);
+                if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
+                    authenticate(ctx, response);
+                }
                 setDateHeader(response);
 
                 sendAndCleanupConnection(ctx, response);
@@ -151,9 +190,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        authenticate(ctx, response, file);
+        if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
+            authenticate(ctx, response);
+        }
         HttpUtil.setContentLength(response, fileLength);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeType);
         setDateAndCacheHeaders(response, file);
 
         if (!keepAlive) {
@@ -182,33 +223,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
 
-    private static String sanitizeUri(String uri) {
-        // Decode the path.
-        uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
-
-        if (uri.isEmpty() || uri.charAt(0) != '/') {
-            return null;
-        }
-
-        // Convert file separators.
-        uri = uri.replace('/', File.separatorChar);
-
-        // Simplistic dumb security check.
-        // You will have to do something serious in the production environment.
-        if (uri.contains(File.separator + '.') ||
-                uri.contains('.' + File.separator) ||
-                uri.charAt(0) == '.' || uri.charAt(uri.length() - 1) == '.' ||
-                INSECURE_URI.matcher(uri).matches()) {
-            return null;
-        }
-
-        return uri;
-    }
 
     private void sendRedirect(ChannelHandlerContext ctx, String newUri) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND, Unpooled.EMPTY_BUFFER);
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
         sendAndCleanupConnection(ctx, response);
@@ -277,15 +295,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
-    private void authenticate(ChannelHandlerContext ctx, HttpResponse response, File file) {
-        if (file.getName().equals("index.html")) {
-            if (!authenticate(request, response)) {
-                logger.info("Bad authentication");
-                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
-                //todo rate limiting strategies
-            } else {
-                logger.info("Good authentication");
-            }
+    private void authenticate(ChannelHandlerContext ctx, HttpResponse response) {
+        if (!authenticate(request, response)) {
+            logger.info("Bad authentication");
+            sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
+            //todo rate limiting strategies
+        } else {
+            logger.info("Good authentication");
         }
     }
 
@@ -316,5 +332,81 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
             return httpSession != null && httpSession.validate(cookie.getToken());
         }
+    }
+
+
+    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + QUERY_REGEX + FILE_NAME_REGEX + "]+$");
+
+    /** Sanitizes uri */
+    public static String getUri(String uri) {
+        return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
+    }
+
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
+
+    /** Converts uri to filesystem path */
+    public static String getPath(String path) {
+        path = path.replace("/", File.separator);
+
+        if (path.contains(File.separator + '.') // /.
+                || path.contains('.' + File.separator) // ./
+                || path.contains(File.separator + File.separator) // //
+                || path.charAt(0) == '.' // .
+                || path.charAt(path.length() - 1) == '.' // /page.
+                || !ALLOWED_PATH.matcher(path).matches()) {
+            return null;
+        }
+
+        if (path.endsWith(File.separator)) { // / -> index.html
+            path = path + DEFAULT_FILE;
+        } else if (path.lastIndexOf(File.separator) > path.lastIndexOf(".")) { // /page -> /page.html
+            path = path + DEFAULT_FILE_EXTENSION;
+        }
+        return path;
+    }
+
+
+    /**
+     * Returns String array with length of 2, with the first element as the path and the second element as the raw query
+     * Example:
+     * /index.html?key=value&otherKey=otherValue -> [ /index.html, ?key=value&otherKey=otherValue ]
+     */
+    public static String[] splitQuery(String uri) {
+        int index = uri.lastIndexOf(QUERY_DELIMITER);
+        if (index <= 0) { // check for a query
+            if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) { // there is no query, so there should also be no other reserved keywords
+                return null;
+            } else {
+                return new String[] {uri, ""};
+            }
+        } else if (uri.indexOf(QUERY_DELIMITER) != index) { // make sure there is only one ? in the uri
+            return null;
+        } else {
+            return new String[] {uri.substring(0, index), uri.substring(index)};
+        }
+    }
+
+    /**
+     * Parses ?key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
+     */
+    public static Map<String, String> parseQuery(String query) {
+        if (query.isEmpty()) return Collections.emptyMap(); // no query to parse
+        if (!query.startsWith("?")) return null; // malformed, should start with ?
+
+        Map<String, String> queries = new HashMap<>();
+        String[] keyValuePairs = query.substring(1) // query starts with ?
+                .split(QUERY_SEPARATOR);
+        for (String keyValuePair : keyValuePairs) {
+            String[] split = keyValuePair.split(QUERY_PAIR_SEPARATOR, 3); // a limit of 2 (expected) would not detect malformed queries such as ?key==, so we need to go one more
+            if (split.length == 1) { // key with no value, such as ?key
+                queries.put(split[0], "");
+            } else if (split.length != 2) { // malformed, each key should have one value
+                return null;
+            } else {
+                queries.put(split[0], split[1]);
+            }
+        }
+
+        return queries;
     }
 }

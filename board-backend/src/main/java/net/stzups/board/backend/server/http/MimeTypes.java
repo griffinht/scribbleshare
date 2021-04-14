@@ -16,8 +16,6 @@ import java.util.Map;
  * application/javascript js
  */
 public class MimeTypes {
-    private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
-
     private static final Map<String, String> extensionMimeTypeMap = new HashMap<>();
 
     static void load(InputStream inputStream) throws IOException {
@@ -37,9 +35,8 @@ public class MimeTypes {
     }
 
     /**
-     * Gets a MIME type for the extension from the path of a {@link java.io.File}.
+     * Gets a MIME type for the extension from the path of a {@link java.io.File}, or the default mime type if the extension is unknown.
      *
-     * @param file the file
      * @return the MIME type for the given file, or a default type
      */
     public static String getMimeType(File file) {
@@ -49,14 +46,14 @@ public class MimeTypes {
     /**
      * Gets a MIME type for an extension.
      *
-     * @param extension the extension, can include or exclude the file separator ("html" or ".html" both work)
-     * @return the MIME type for the given extension, or a default type
+     * @param extension can include or exclude the file separator ("html" or ".html" both work)
+     * @return the MIME type for the given extension, or null
      */
     public static String getMimeType(String extension) {
         int i = extension.lastIndexOf(".");
         if (i != -1) {
             extension = extension.substring(i + 1);
         }
-        return extensionMimeTypeMap.getOrDefault(extension, DEFAULT_MIME_TYPE);
+        return extensionMimeTypeMap.get(extension);
     }
 }

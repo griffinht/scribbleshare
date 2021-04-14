@@ -6,11 +6,11 @@ import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import net.stzups.board.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
@@ -78,13 +78,13 @@ public class HttpSession extends Session {
 
     private void setCookie(HttpResponse response) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        //todo cookie.setDomain("");
+        cookie.setDomain("localhost");
         //not used cookie.setPath("");
         //todo ssl cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie
 
-        response.headers().add(HttpHeaderNames.SET_COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 }
