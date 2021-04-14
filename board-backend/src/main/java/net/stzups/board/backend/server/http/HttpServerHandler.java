@@ -143,7 +143,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         File file = new File(HTTP_ROOT, path);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
-            if (new File(HTTP_ROOT, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) {
+            if (new File(HTTP_ROOT, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
                 sendRedirect(ctx, rawPath + "/" + rawQuery);
             } else {
                 sendError(ctx, HttpResponseStatus.NOT_FOUND);
