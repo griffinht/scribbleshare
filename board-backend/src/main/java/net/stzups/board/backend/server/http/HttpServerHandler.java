@@ -318,10 +318,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public static String getPath(String path) {
         path = path.replace("/", File.separator);
 
-        if (path.contains(File.separator + '.') ||
-                path.contains('.' + File.separator) ||
-                path.charAt(0) == '.' || path.charAt(path.length() - 1) == '.' ||
-                !ALLOWED_PATH.matcher(path).matches()) {
+        if (path.contains(File.separator + '.') // /.
+                || path.contains('.' + File.separator) // ./
+                || path.contains(File.separator + File.separator) // //
+                || path.charAt(0) == '.' // .
+                || path.charAt(path.length() - 1) == '.' // /page.
+                || !ALLOWED_PATH.matcher(path).matches()) {
             return null;
         }
 
