@@ -48,6 +48,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
+
     private static final String QUERY_DELIMITER = "?";
     private static final String QUERY_SEPARATOR = "&";
     private static final String QUERY_PAIR_SEPARATOR = "=";
