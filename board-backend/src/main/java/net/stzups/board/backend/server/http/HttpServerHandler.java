@@ -46,6 +46,8 @@ import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private static final int HTTP_CACHE_SECONDS = BoardBackend.getConfig().getInteger(BoardBackendConfigKeys.HTTP_CACHE_SECONDS);
+
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
 
@@ -82,7 +84,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    public static final int HTTP_CACHE_SECONDS = 60;
 
     private FullHttpRequest request;
 
