@@ -111,7 +111,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        final String path = getPath(uri);
+        final String path = getPath(uri); // the actual filesystem path
         if (path == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
@@ -137,7 +137,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             long fileLastModifiedSeconds = file.lastModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-                authenticate(ctx, response, file);
+                if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
+                    authenticate(ctx, response);
+                }
                 setDateHeader(response);
 
                 sendAndCleanupConnection(ctx, response);
@@ -155,7 +157,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        authenticate(ctx, response, file);
+        if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
+            authenticate(ctx, response);
+        }
         HttpUtil.setContentLength(response, fileLength);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, MimeTypes.getMimeType(file));
         setDateAndCacheHeaders(response, file);
@@ -258,15 +262,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
-    private void authenticate(ChannelHandlerContext ctx, HttpResponse response, File file) {
-        if (file.getName().equals(PersistentHttpSession.LOGIN_PATH)) {
-            if (!authenticate(request, response)) {
-                logger.info("Bad authentication");
-                sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
-                //todo rate limiting strategies
-            } else {
-                logger.info("Good authentication");
-            }
+    private void authenticate(ChannelHandlerContext ctx, HttpResponse response) {
+        if (!authenticate(request, response)) {
+            logger.info("Bad authentication");
+            sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
+            //todo rate limiting strategies
+        } else {
+            logger.info("Good authentication");
         }
     }
 
@@ -302,12 +304,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/.?&=a-zA-Z0-9\\-_]+$");
 
+    /** Sanitizes uri */
     public static String getUri(String uri) {
         return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
     }
 
     private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separatorChar + ".a-zA-Z0-9\\-_]+$");
 
+    /** Converts uri to filesystem path */
     public static String getPath(String path) {
         path = path.replace("/", File.separator);
 
@@ -329,6 +333,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     /**
      * Returns String array with length of 2, with the first element as the path and the second element as the raw query
+     * Example:
+     * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
      */
     public static String[] splitQuery(String uri) {
         int index = uri.lastIndexOf("?");
@@ -337,7 +343,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return new String[] {uri.substring(0, index), uri.substring(index + 1)};
     }
 
-
+    /**
+     * Parses key=value&otherKey=otherValue to a Map of key-value pairs
+     */
     public static Map<String, String> parseQuery(String query) {
         Map<String, String> queries = new HashMap<>();
         String[] keyValuePairs = query.split("&");
