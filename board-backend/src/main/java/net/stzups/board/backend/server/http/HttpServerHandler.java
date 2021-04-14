@@ -48,11 +48,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
-    private static final String PHP_QUERY_DELIMITER = "?";
-    private static final String PHP_QUERY_SEPARATOR = "&";
-    private static final String PHP_QUERY_PAIR_SEPARATOR = "=";
+    private static final String QUERY_DELIMITER = "?";
+    private static final String QUERY_SEPARATOR = "&";
+    private static final String QUERY_PAIR_SEPARATOR = "=";
 
-    private static final String PHP_QUERY_REGEX = PHP_QUERY_DELIMITER + PHP_QUERY_SEPARATOR + PHP_QUERY_PAIR_SEPARATOR;
+    private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
     private final Logger logger;
@@ -107,20 +107,28 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        // split php style query from path
+        // split query from path
         final String[] splitQuery = splitQuery(uri);
+        if (splitQuery == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+        }
         final String rawPath = splitQuery[0];
         final String rawQuery = splitQuery[1];
 
+        Map<String, String> queries = parseQuery(rawQuery);
+        if (queries == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+        }
+
         // redirects
         if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + PHP_QUERY_DELIMITER + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + rawQuery);
             return;
         } else if ((rawPath + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + PHP_QUERY_DELIMITER + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
             return;
         } else if (rawPath.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + PHP_QUERY_DELIMITER + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
             return;
         }
 
@@ -133,8 +141,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         File file = new File(HTTP_ROOT, path);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
-            return;
+            if (new File(HTTP_ROOT, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) {
+                sendRedirect(ctx, rawPath + "/" + rawQuery);
+            } else {
+                sendError(ctx, HttpResponseStatus.NOT_FOUND);
+                return;
+            }
         }
 
 
@@ -316,7 +328,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + PHP_QUERY_REGEX + FILE_NAME_REGEX + "]+$");
+    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
     /** Sanitizes uri */
     public static String getUri(String uri) {
@@ -350,28 +362,44 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * Returns String array with length of 2, with the first element as the path and the second element as the raw query
      * Example:
-     * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
+     * /index.html?key=value&otherKey=otherValue -> [ /index.html, ?key=value&otherKey=otherValue ]
      */
     public static String[] splitQuery(String uri) {
-        int index = uri.lastIndexOf(PHP_QUERY_DELIMITER);
-        if (index <= 0 || uri.indexOf(PHP_QUERY_DELIMITER) != index) return new String[] {uri, ""}; // make sure there is only one ? in the uri
-
-        return new String[] {uri.substring(0, index), uri.substring(index + 1)};
+        int index = uri.lastIndexOf(QUERY_DELIMITER);
+        if (index <= 0) { // check for a query
+            if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) { // there is no query, so there should also be no other reserved keywords
+                return null;
+            } else {
+                return new String[] {uri, ""};
+            }
+        } else if (uri.indexOf(QUERY_DELIMITER) != index) { // make sure there is only one ? in the uri
+            return null;
+        } else {
+            return new String[] {uri.substring(0, index), uri.substring(index)};
+        }
     }
 
     /**
-     * Parses key=value&otherKey=otherValue to a Map of key-value pairs
+     * Parses ?key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
      */
     public static Map<String, String> parseQuery(String query) {
+        if (query.isEmpty()) return Collections.emptyMap(); // no query to parse
+        if (!query.startsWith("?")) return null; // malformed, should start with ?
+
         Map<String, String> queries = new HashMap<>();
-        String[] keyValuePairs = query.split(PHP_QUERY_SEPARATOR);
+        String[] keyValuePairs = query.substring(1) // query starts with ?
+                .split(QUERY_SEPARATOR);
         for (String keyValuePair : keyValuePairs) {
-            String[] split = keyValuePair.split(PHP_QUERY_PAIR_SEPARATOR);
-            if (split.length != 2) { // check if malformed
-                return Collections.emptyMap();
+            String[] split = keyValuePair.split(QUERY_PAIR_SEPARATOR, 3); // a limit of 2 (expected) would not detect malformed queries such as ?key==, so we need to go one more
+            if (split.length == 1) { // key with no value, such as ?key
+                queries.put(split[0], "");
+            } else if (split.length != 2) { // malformed, each key should have one value
+                return null;
+            } else {
+                queries.put(split[0], split[1]);
             }
-            queries.put(split[0], split[1]);
         }
+
         return queries;
     }
 }
