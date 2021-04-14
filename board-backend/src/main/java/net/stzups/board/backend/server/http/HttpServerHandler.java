@@ -158,6 +158,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
+        // Requested file is now validated, so we can serve it
+
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
@@ -183,7 +185,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         RandomAccessFile raf;
         try {
             raf = new RandomAccessFile(file, "r");
-        } catch (FileNotFoundException ignore) {
+        } catch (FileNotFoundException e) {
+            logger.warning(e.getMessage() + " while opening RandomAccessFile for file " + file.getPath());
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
