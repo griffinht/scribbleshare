@@ -336,7 +336,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
     }
 
-    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separatorChar + "." + FILE_NAME_REGEX + "]+$");
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
 
     /** Converts uri to filesystem path */
     public static String getPath(String path) {
