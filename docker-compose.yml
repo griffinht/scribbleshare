@@ -1,29 +1,79 @@
 services:
+# WebSocket backend
     board-room:
-        image: board-room:0.3
+        image: board-room
         build:
             context: board-room
-            network: host
         ports:
-            - "8080:8080"
+            - "8080:80"
         depends_on:
-            - board-database
+            board-postgres:
+                condition: service_healthy
+            board-keydb:
+                condition: service_healthy
         environment:
             board.ssl: "false"
-            board.postgres: "true"
-            board.postgres.url: "jdbc:postgresql://board-database:5432/board"
-            board.postgres.user: "board-room"
+            board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
+            board.postgres.user: "board_room"
             board.postgres.password: "changeme"
+            board.redis.url: "redis://default:changeme@board-keydb:6379"
+# HTTP backend
+    board-backend:
+        image: board-backend
+        build:
+            context: board-backend
+        depends_on:
+            board-postgres:
+                condition: service_healthy
+            board-keydb:
+                condition: service_healthy
+        environment:
+            board.ssl: "false"
+            board.postgres.url: "jdbc:postgresql://board-postgres:5432/board"
+            board.postgres.user: "board_backend"
+            board.postgres.password: "changeme"
+            board.redis.url: "redis://default:changeme@board-keydb:6379"
+# Reverse proxy
+    board-nginx:
+        image: board-nginx
+        build:
+            context: board-nginx
+        ports:
+            - "80:80"
+# Database
+    board-postgres:
+        build:
+            context: board-postgres
+        ports:
+            - "5432:5432"
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+        environment:
+            POSTGRES_PASSWORD: "changeme"
+    board-keydb:
+        build:
+            context: board-keydb
+        ports:
+            - "6379:6379"
+        healthcheck:
+            test: [ "CMD", "keydb-cli", "ping" ]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+#
+# Build
+#
+# Build jars with Gradle for board-room and board-backend
+    board-gradle:
+        image: board-gradle
+        build:
+            context: .
+# Minify/compress HTML/JS/CSS/Assets
     board-frontend:
         image: board-frontend
         build:
             context: board-frontend
-        ports:
-            - "80:80"
-    board-database:
-        build:
-            context: board-database
-        environment:
-            POSTGRES_PASSWORD: "changeme"
-        ports:
-            - "5432:5432"

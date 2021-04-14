@@ -99,3 +99,33 @@ Document update/delete operations, overhaul db and config
 - Add db creation scripts into version control
 - Overhaul config - improve exceptions
 - Add document update and delete functionality
+
+## v0.4
+Project structure rework, invite codes
+
+### v0.4.0
+Invite codes, better state management
+- Client can get invite codes for a document, persisted in db
+- Client can join with an invite code
+- Better server state management
+
+### v0.4.1
+Docker deployment improvements
+- Fix credential typo
+- Minify javascript
+- Add retry logic to board-room
+
+### v0.4.2
+Swap Maven for Gradle, add board-http, Database rework
+- Add Redis
+- Add board-backend and refactor common Java code into Maven module
+
+### v0.4.3
+Proper cookie authentication
+- Session cookies and persistent cookies
+- Db caching of session cookies
+- No more XSS vulnerable local storage token store
+
+### v0.4.4
+Bugfixes, better urls/file paths
+- Fix cookies not having proper security properties
