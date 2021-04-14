@@ -114,7 +114,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        final String path = getPath(uri); // the actual filesystem path
+        final String path = getPath(rawPath); // the actual filesystem path
         if (path == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
