@@ -111,6 +111,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         final String[] splitQuery = splitQuery(uri);
         if (splitQuery == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            return;
         }
         final String rawPath = splitQuery[0];
         final String rawQuery = splitQuery[1];
