@@ -104,10 +104,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         final String rawQuery = splitQuery[1];
 
         if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - 10) + rawQuery);
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + rawQuery);
             return;
-        } else if (splitQuery[0].endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - 5) + rawQuery);
+        } else if ((rawPath + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+            return;
+        } else if (rawPath.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
             return;
         }
 
