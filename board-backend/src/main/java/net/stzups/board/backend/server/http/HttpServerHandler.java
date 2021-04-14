@@ -32,19 +32,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private static final String DEFAULT_FILE = "index.html";
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
 
     private final Logger logger;
 
@@ -91,34 +94,34 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
-        final String uri = request.uri();
-        final String path = sanitizeUri(uri);
-        if (path == null) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN);
+        final String uri = getUri(request.uri());
+        if (uri == null) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+        final String[] splitQuery = splitQuery(uri);
+        final String rawPath = splitQuery[0];
+        final String rawQuery = splitQuery[1];
+
+        if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - 10) + rawQuery);
+            return;
+        } else if (splitQuery[0].endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - 5) + rawQuery);
             return;
         }
 
-        File file = new File(HTTP_ROOT, path);
-        if (file.isHidden() || !file.exists()) {
+        final String path = getPath(uri);
+        if (path == null) {
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
-        if (file.isDirectory()) {
-            if (uri.endsWith("/")) {
-                //legit directory listing, disallow
-                sendError(ctx, HttpResponseStatus.FORBIDDEN);
-            } else {
-                sendRedirect(ctx, uri + '/');
-            }
+        File file = new File(HTTP_ROOT, path);
+        if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND);
             return;
         }
-
-        if (!file.isFile()) {
-            sendError(ctx, HttpResponseStatus.FORBIDDEN);
-            return;
-        }
-
 
 
 
@@ -183,33 +186,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
 
-    private static String sanitizeUri(String uri) {
-        // Decode the path.
-        uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
-
-        if (uri.isEmpty() || uri.charAt(0) != '/') {
-            return null;
-        }
-
-        // Convert file separators.
-        uri = uri.replace('/', File.separatorChar);
-
-        // Simplistic dumb security check.
-        // You will have to do something serious in the production environment.
-        if (uri.contains(File.separator + '.') ||
-                uri.contains('.' + File.separator) ||
-                uri.charAt(0) == '.' || uri.charAt(uri.length() - 1) == '.' ||
-                INSECURE_URI.matcher(uri).matches()) {
-            return null;
-        }
-
-        return uri;
-    }
 
     private void sendRedirect(ChannelHandlerContext ctx, String newUri) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND, Unpooled.EMPTY_BUFFER);
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
         sendAndCleanupConnection(ctx, response);
@@ -317,5 +297,57 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
             return httpSession != null && httpSession.validate(cookie.getToken());
         }
+    }
+
+
+    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/.?&=a-zA-Z0-9\\-_]+$");
+
+    public static String getUri(String uri) {
+        return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
+    }
+
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separatorChar + ".a-zA-Z0-9\\-_]+$");
+
+    public static String getPath(String path) {
+        path = path.replace("/", File.separator);
+
+        if (path.contains(File.separator + '.') ||
+                path.contains('.' + File.separator) ||
+                path.charAt(0) == '.' || path.charAt(path.length() - 1) == '.' ||
+                !ALLOWED_PATH.matcher(path).matches()) {
+            return null;
+        }
+
+        if (path.endsWith(File.separator)) { // / -> index.html
+            path = path + DEFAULT_FILE;
+        } else if (path.lastIndexOf(File.separator) > path.lastIndexOf(".")) { // /page -> /page.html
+            path = path + DEFAULT_FILE_EXTENSION;
+        }
+        return path;
+    }
+
+
+    /**
+     * Returns String array with length of 2, with the first element as the path and the second element as the raw query
+     */
+    public static String[] splitQuery(String uri) {
+        int index = uri.lastIndexOf("?");
+        if (index <= 0 || uri.indexOf("?") != index) return new String[] {uri, ""}; // make sure there is only one ? in the uri
+
+        return new String[] {uri.substring(0, index), uri.substring(index + 1)};
+    }
+
+
+    public static Map<String, String> parseQuery(String query) {
+        Map<String, String> queries = new HashMap<>();
+        String[] keyValuePairs = query.split("&");
+        for (String keyValuePair : keyValuePairs) {
+            String[] split = keyValuePair.split("=");
+            if (split.length != 2) { // check if malformed
+                return Collections.emptyMap();
+            }
+            queries.put(split[0], split[1]);
+        }
+        return queries;
     }
 }
