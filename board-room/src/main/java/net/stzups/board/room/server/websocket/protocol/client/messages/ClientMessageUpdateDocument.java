@@ -5,8 +5,8 @@ import net.stzups.board.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.room.server.websocket.protocol.client.ClientMessageType;
 
 public class ClientMessageUpdateDocument extends ClientMessage {
-    private long id;
-    private String name;
+    private final long id;
+    private final String name;
 
     public ClientMessageUpdateDocument(ByteBuf byteBuf) {
         super(ClientMessageType.UPDATE_DOCUMENT);

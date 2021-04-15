@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
  * Represents a packet sent by the client
  */
 public abstract class ClientMessage {
-    private ClientMessageType packetType;
+    private final ClientMessageType packetType;
 
     protected ClientMessage(ClientMessageType packetType) {
         this.packetType = packetType;

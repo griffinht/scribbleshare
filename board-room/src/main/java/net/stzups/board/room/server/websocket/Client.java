@@ -13,8 +13,8 @@ import java.util.Random;
 public class Client {
     private static final Random random = new Random();
 
-    private User user;
-    private Channel channel;
+    private final User user;
+    private final Channel channel;
     private short id;
 
     private List<ServerMessage> messages = new ArrayList<>();

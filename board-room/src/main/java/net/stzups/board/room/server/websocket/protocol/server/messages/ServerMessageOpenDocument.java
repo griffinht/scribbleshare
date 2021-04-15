@@ -6,7 +6,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageOpenDocument extends ServerMessage {
-    private Canvas canvas;
+    private final Canvas canvas;
 
     public ServerMessageOpenDocument(Canvas canvas) {
         super(ServerMessageType.OPEN_DOCUMENT);

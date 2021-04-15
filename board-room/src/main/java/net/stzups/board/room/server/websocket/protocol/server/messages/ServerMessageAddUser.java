@@ -6,7 +6,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageAddUser extends ServerMessage {
-    private User user;
+    private final User user;
 
     public ServerMessageAddUser(User user) {
         super(ServerMessageType.ADD_USER);

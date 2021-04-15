@@ -18,19 +18,14 @@ import java.util.logging.Logger;
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
     public static AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
 
-    private Logger logger;
+    private final Logger logger;
 
     HttpAuthenticator(Logger logger) {
         this.logger = logger;
     }
 
-
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-
-    }
-
     @Override
-    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
             HttpSession httpSession = BoardRoom.getDatabase().getHttpSession(cookie.getId());

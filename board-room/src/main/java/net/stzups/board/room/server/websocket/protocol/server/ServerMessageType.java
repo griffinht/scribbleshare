@@ -1,10 +1,5 @@
 package net.stzups.board.room.server.websocket.protocol.server;
 
-import io.netty.util.collection.IntObjectHashMap;
-
-import java.util.EnumSet;
-import java.util.Map;
-
 public enum ServerMessageType {
     ADD_CLIENT(0),
     REMOVE_CLIENT(1),
@@ -16,14 +11,7 @@ public enum ServerMessageType {
     GET_INVITE(7)
     ;
 
-    private static Map<Integer, ServerMessageType> messageTypeMap = new IntObjectHashMap<>();
-    static {
-        for (ServerMessageType packetType : EnumSet.allOf(ServerMessageType.class)) {
-            messageTypeMap.put(packetType.id, packetType);
-        }
-    }
-
-    private int id;
+    private final int id;
 
     ServerMessageType(int id) {
         this.id = id;
@@ -31,13 +19,5 @@ public enum ServerMessageType {
 
     public int getId() {
         return id;
-    }
-
-    public static ServerMessageType valueOf(int id) {
-        ServerMessageType messageType = messageTypeMap.get(id);
-        if (messageType == null) {
-            throw new IllegalArgumentException("Unknown PacketTypeServer for given id " + id);
-        }
-        return messageType;
     }
 }

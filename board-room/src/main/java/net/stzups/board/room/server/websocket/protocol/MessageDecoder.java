@@ -7,7 +7,6 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import net.stzups.board.room.server.ServerInitializer;
 import net.stzups.board.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.room.server.websocket.protocol.client.ClientMessageType;
 
@@ -26,7 +25,7 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) {
         if (webSocketFrame instanceof TextWebSocketFrame) {
             logger.warning("Got TextWebSocketFrame, content:");//debug
             logger.warning(((TextWebSocketFrame) webSocketFrame).text());//debug

@@ -6,7 +6,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageGetInvite extends ServerMessage {
-    private String code;
+    private final String code;
 
     public ServerMessageGetInvite(InviteCode inviteCode) {
         super(ServerMessageType.GET_INVITE);

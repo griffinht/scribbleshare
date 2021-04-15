@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClientMessageUpdateCanvas extends ClientMessage {
-    private Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvas = new HashMap<>();
+    private final Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvas = new HashMap<>();
 
     public ClientMessageUpdateCanvas(ByteBuf byteBuf) {
         super(ClientMessageType.UPDATE_CANVAS);

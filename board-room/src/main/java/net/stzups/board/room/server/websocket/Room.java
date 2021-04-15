@@ -21,7 +21,7 @@ import java.util.TimerTask;
 class Room {
     private static final int SEND_PERIOD = 1000;
 
-    private static Map<Document, Room> rooms = new HashMap<>();
+    private static final  Map<Document, Room> rooms = new HashMap<>();
     static {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -33,9 +33,9 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Set<Client> clients = new HashSet<>();
+    private final Set<Client> clients = new HashSet<>();
 
-    private Canvas canvas;
+    private final Canvas canvas;
 
     Room(Document document) {
         this.canvas = BoardRoom.getDatabase().getCanvas(document);

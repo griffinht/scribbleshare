@@ -15,14 +15,14 @@ public enum ClientMessageType {
     GET_INVITE(6)
     ;
 
-    private static Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();
+    private static final Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();
     static {
         for (ClientMessageType messageType : EnumSet.allOf(ClientMessageType.class)) {
             messageTypeMap.put(messageType.id, messageType);
         }
     }
 
-    private int id;
+    private final int id;
 
     ClientMessageType(int id) {
         this.id = id;
