@@ -17,7 +17,7 @@ export default class BufferReader {
     readBase64() {
         let length = this.readInt32();
         this.position += length;
-        return btoa(String.fromCharCode.apply(...new Uint8Array(this.view.buffer, length)));
+        return btoa(String.fromCharCode(...new Uint8Array(this.view.buffer)));
     }
 
     readInt8() {
