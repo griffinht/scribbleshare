@@ -10,9 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Canvas {
-    private Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
+    private final Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
-    private Document document;
+    private final Document document;
 
     public Canvas(Document document) {
         this.document = document;

@@ -7,7 +7,7 @@ import java.util.List;
  * Used to store and retrieve key-value pairs by finding the first result from many different strategies.
  */
 public class Config {//todo probably needs a better name
-    private List<ConfigProvider> configProviders = new ArrayList<>();
+    private final List<ConfigProvider> configProviders = new ArrayList<>();
 
     /**
      * Constructs a new ConfigProvider from its builder

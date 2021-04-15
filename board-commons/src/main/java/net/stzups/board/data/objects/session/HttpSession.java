@@ -19,8 +19,8 @@ import java.util.Set;
 
 public class HttpSession extends Session {
     public static class ClientCookie {
-        private long id;
-        private long token;
+        private final long id;
+        private final long token;
 
         ClientCookie(long id, long token) {
             this.id = id;

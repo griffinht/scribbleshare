@@ -2,7 +2,6 @@ package net.stzups.board.data.objects.session;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;

@@ -9,14 +9,14 @@ public enum CanvasObjectType {
     SHAPE(0),
     ;
 
-    private static Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();
+    private static final Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();
     static {
         for (CanvasObjectType canvasObjectType : EnumSet.allOf(CanvasObjectType.class)) {
             objectTypeMap.put(canvasObjectType.id, canvasObjectType);
         }
     }
 
-    private int id;
+    private final int id;
 
     CanvasObjectType(int id) {
         this.id = id;

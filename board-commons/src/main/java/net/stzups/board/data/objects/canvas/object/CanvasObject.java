@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.canvas.object.objects.Shape;
 
 public class CanvasObject {
-    private short x;
-    private short y;
+    private final short x;
+    private final short y;
 
     public CanvasObject(ByteBuf byteBuf) {
         x = byteBuf.readShort();

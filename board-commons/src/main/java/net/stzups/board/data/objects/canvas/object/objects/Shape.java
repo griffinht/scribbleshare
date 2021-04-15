@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.board.data.objects.canvas.object.CanvasObject;
 
 public class Shape extends CanvasObject {
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     public Shape(ByteBuf byteBuf) {
         super(byteBuf);
