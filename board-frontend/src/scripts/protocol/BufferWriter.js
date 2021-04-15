@@ -7,17 +7,23 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
         this.view = new DataView(new ArrayBuffer(size));
     }
 
-    writeString(value) {//todo improve performance
+    writeString8(value) {
         this.writeUint8(value.length);
         let buffer = new TextEncoder().encode(value);
         this.checkResize(buffer.length);
-        copy(buffer, this.view.buffer, this.position);
+        new Uint8Array(this.view.buffer).set(new Uint8Array(buffer), this.position);
         this.position += buffer.length;
     }
 
     writeBase64(value) {
         let array = Uint8Array.from(atob(value), c => c.charCodeAt(0));
-        console.log(array);
+        this.writeInt32(array.byteLength);
+        console.log(this.view.buffer);
+        this.checkResize(array.byteLength);
+        console.log(this.view.buffer);
+        new Uint8Array(this.view.buffer).set(array, this.position);
+        this.position += array.byteLength;
+        console.log(this.view.buffer);
     }
 
     writeInt8(value) {
@@ -84,7 +90,7 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
         let targetLength = this.position + extraLength;
         if (targetLength > this.view.byteLength) {
             let buffer = new ArrayBuffer(targetLength);
-            copy(this.view.buffer, buffer)
+            new Uint8Array(buffer).set(new Uint8Array(this.view.buffer));
             this.view = new DataView(buffer);
         }
     }
@@ -96,10 +102,4 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
             return this.view.buffer;
         }
     }
-}
-
-function copy(sourceBuffer, destinationBuffer, offset) {
-    let sourceArray = new Uint8Array(sourceBuffer);
-    let destinationArray = new Uint8Array(destinationBuffer);
-    destinationArray.set(sourceArray, offset);
 }

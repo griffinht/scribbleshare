@@ -1,5 +1,6 @@
 import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
+import CanvasImage from "./canvasObjects/CanvasImage.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -184,6 +185,9 @@ export function getCanvasObject(type, reader) {
     switch (type) {
         case CanvasObjectType.SHAPE:
             object = new Shape(reader);
+            break;
+        case CanvasObjectType.IMAGE:
+            object = new CanvasImage(reader);
             break;
         default:
             console.error('unknown type ' + type);

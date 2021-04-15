@@ -13,6 +13,6 @@ export default class ClientMessageHandshake extends ClientMessage {
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeString(this.invite);
+        writer.writeString8(this.invite);
     }
 }

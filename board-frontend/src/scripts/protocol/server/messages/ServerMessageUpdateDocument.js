@@ -6,6 +6,6 @@ export default class ServerMessageUpdateDocument extends ServerMessage {
         super(ServerMessageType.UPDATE_DOCUMENT);
         this.shared = reader.readUint8() ? 1 : 0;
         this.id = reader.readBigInt64();
-        this.name = reader.readString();
+        this.name = reader.readString8();
     }
 }

@@ -15,7 +15,7 @@ import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 
 const documents = new Map();
-let activeDocument = null;
+export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
 
 class Document {
@@ -151,7 +151,7 @@ socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite)
 const MAX_TIME = 2000;
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
-let updateCanvas = new Canvas();
+export let updateCanvas = new Canvas();
 setInterval(localUpdate, UPDATE_INTERVAL);
 function localUpdate() {
     lastUpdate = window.performance.now();
@@ -161,7 +161,7 @@ function localUpdate() {
     }
 }
 
-function getDt() {
+export function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
 

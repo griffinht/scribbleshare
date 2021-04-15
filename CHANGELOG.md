@@ -135,5 +135,5 @@ Bugfixes, better urls/file paths
 Canvas features
 
 ### v0.5.0
-Image upload
-- Ability to drag and drop images on to the board
+CanvasImage upload
+- Ability to upload images on to the board

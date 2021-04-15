@@ -8,14 +8,14 @@ export default class BufferReader {
         return this.position < this.view.byteLength;
     }
 
-    readString() {
+    readString8() {
         let length = this.readUint8();
         this.position += length;
         return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
     }
 
     readBase64() {
-        let length = this.readUint32();
+        let length = this.readInt32();
         this.position += length;
         return btoa(String.fromCharCode.apply(...new Uint8Array(this.view.buffer, length)));
     }

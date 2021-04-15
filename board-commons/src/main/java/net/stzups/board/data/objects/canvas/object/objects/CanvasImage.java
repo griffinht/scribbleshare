@@ -41,11 +41,13 @@ public class CanvasImage extends CanvasObject {
     public CanvasImage(ByteBuf byteBuf) {
         super(byteBuf);
         this.type = Type.valueOf(byteBuf.readUnsignedByte());
-        data = byteBuf.readBytes((int) byteBuf.readUnsignedInt()).array();
+        data = new byte[byteBuf.readInt()];
+        byteBuf.readBytes(data);
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
+        super.serialize(byteBuf);
         byteBuf.writeByte((byte) type.id);
         byteBuf.writeInt(data.length);
         byteBuf.writeBytes(data);
