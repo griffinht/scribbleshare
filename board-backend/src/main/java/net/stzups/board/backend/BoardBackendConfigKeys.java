@@ -2,7 +2,6 @@ package net.stzups.board.backend;
 
 import net.stzups.board.util.config.ConfigKey;
 import net.stzups.board.util.config.OptionalConfigKey;
-import net.stzups.board.util.config.RequiredConfigKey;
 
 public class BoardBackendConfigKeys {
     public static final ConfigKey<String> HTML_ROOT = new OptionalConfigKey<>("html.root", "html");

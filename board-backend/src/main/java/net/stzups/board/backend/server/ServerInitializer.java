@@ -7,19 +7,16 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.backend.BoardBackend;
-import net.stzups.board.backend.BoardBackendConfigKeys;
 import net.stzups.board.backend.server.http.HttpServerHandler;
 import net.stzups.board.util.LogFactory;
 
-import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -29,15 +26,15 @@ import java.util.logging.Logger;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
-    private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
+    private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            if (false) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (BoardBackend.getConfig().getBoolean(BoardConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
 
     private Logger logger;
-    private SslContext sslContext;
+    private final SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
