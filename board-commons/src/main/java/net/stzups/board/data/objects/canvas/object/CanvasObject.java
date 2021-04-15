@@ -1,6 +1,7 @@
 package net.stzups.board.data.objects.canvas.object;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.board.data.objects.canvas.object.objects.CanvasImage;
 import net.stzups.board.data.objects.canvas.object.objects.Shape;
 
 public class CanvasObject {
@@ -22,6 +23,9 @@ public class CanvasObject {
         switch (canvasObjectType) {
             case SHAPE:
                 canvasObject = new Shape(byteBuf);
+                break;
+            case IMAGE:
+                canvasObject = new CanvasImage(byteBuf);
                 break;
             default:
                 canvasObject = null;

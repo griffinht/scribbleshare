@@ -7,6 +7,7 @@ import java.util.Map;
 
 public enum CanvasObjectType {
     SHAPE(0),
+    IMAGE(1),
     ;
 
     private static final Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();

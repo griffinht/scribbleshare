@@ -15,6 +15,11 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
         this.position += buffer.length;
     }
 
+    writeBase64(value) {
+        let array = Uint8Array.from(atob(value), c => c.charCodeAt(0));
+        console.log(array);
+    }
+
     writeInt8(value) {
         this.checkResize(1);
         this.view.setInt8(this.position, value);
