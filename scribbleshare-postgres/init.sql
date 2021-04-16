@@ -39,6 +39,7 @@ CREATE TABLE documents(
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO scribbleshare_room;
+GRANT SELECT ON documents TO scribbleshare_backend;
 
 CREATE TABLE canvases(
     document bigint NOT NULL,
@@ -46,6 +47,7 @@ CREATE TABLE canvases(
     PRIMARY KEY (document)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON canvases TO scribbleshare_room;
+GRANT SELECT ON canvases TO scribbleshare_backend;
 
 CREATE TABLE invite_codes(
     code char(6) NOT NULL,

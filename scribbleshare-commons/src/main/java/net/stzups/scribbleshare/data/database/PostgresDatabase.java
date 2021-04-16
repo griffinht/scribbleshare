@@ -68,7 +68,6 @@ public class PostgresDatabase implements Database {
                             (Long[]) (resultSet.getArray("owned_documents").getArray()),
                             (Long[]) (resultSet.getArray("shared_documents").getArray()));
                 } else {
-                    System.out.println("User with id " + id + " does not exist");
                     return null;
                 }
             }

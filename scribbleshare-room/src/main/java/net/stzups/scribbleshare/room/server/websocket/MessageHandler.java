@@ -63,6 +63,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     case HANDSHAKE: {
                         ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                         User user = ScribbleshareRoom.getDatabase().getUser(ctx.channel().attr(HttpAuthenticator.USER).get());
+                        if (user == null) {
+                            logger.warning("User with does not exist");//todo
+                            return;
+                        }
                         logger.info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
 
                         state = State.READY;
