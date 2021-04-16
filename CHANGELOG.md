@@ -137,4 +137,4 @@ Canvas features, add api for server resources like documents
 ### v0.5.0
 CanvasImage upload, add api
 - Ability to upload images on to the board
-- API: http://localhost/api/document/id
+- API: http://localhost/api/document/id 
