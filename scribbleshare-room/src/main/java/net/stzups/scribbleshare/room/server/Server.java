@@ -10,8 +10,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
-import net.stzups.scribbleshare.room.BoardRoomConfigKeys;
-import net.stzups.scribbleshare.room.BoardRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
+import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.util.LogFactory;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -34,15 +34,15 @@ public class Server {
         SslContext sslContext;
         int port;
 
-        Boolean ssl = BoardRoom.getConfig().getBoolean(BoardRoomConfigKeys.SSL);
+        Boolean ssl = ScribbleshareRoom.getConfig().getBoolean(ScribbleshareRoomConfigKeys.SSL);
 
         if (!ssl) {
-            BoardRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
+            ScribbleshareRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
-            port = BoardRoom.getConfig().getInteger(BoardRoomConfigKeys.WS_PORT);
+            port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.WS_PORT);
         } else {
-            String keystorePath = BoardRoom.getConfig().getString(BoardRoomConfigKeys.SSL_KEYSTORE_PATH);
-            String passphrase = BoardRoom.getConfig().getString(BoardRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
+            String keystorePath = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PATH);
+            String passphrase = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
             try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 keyStore.load(fileInputStream, passphrase.toCharArray());
@@ -54,7 +54,7 @@ public class Server {
                 sslContext = SslContextBuilder.forServer(keyManagerFactory)
                         .sslProvider(SslProvider.JDK)
                         .build();
-                port = BoardRoom.getConfig().getInteger(BoardRoomConfigKeys.WSS_PORT);
+                port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.WSS_PORT);
             } catch (IOException | GeneralSecurityException e) {
                 throw new Exception("Exception while getting SSL context", e);
             }
@@ -67,7 +67,7 @@ public class Server {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer(sslContext));
-        BoardRoom.getLogger().info("Binding to port " + port);
+        ScribbleshareRoom.getLogger().info("Binding to port " + port);
         return serverBootstrap.bind(port).sync().channel().closeFuture();
     }
 

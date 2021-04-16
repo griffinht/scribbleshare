@@ -4,7 +4,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectWrapper;
-import net.stzups.scribbleshare.room.BoardRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
@@ -37,9 +37,9 @@ class Room {
     private final Canvas canvas;
 
     Room(Document document) {
-        this.canvas = BoardRoom.getDatabase().getCanvas(document);
+        this.canvas = ScribbleshareRoom.getDatabase().getCanvas(document);
         rooms.put(document, this);
-        BoardRoom.getLogger().info("Started " + this);
+        ScribbleshareRoom.getLogger().info("Started " + this);
     }
 
     static Room getRoom(Document document) {
@@ -52,9 +52,9 @@ class Room {
 
     void end() {
         rooms.remove(canvas.getDocument());
-        BoardRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
+        ScribbleshareRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
         //todo
-        BoardRoom.getLogger().info("Ended room " + this);
+        ScribbleshareRoom.getLogger().info("Ended room " + this);
     }
 
     Document getDocument() {
@@ -80,7 +80,7 @@ class Room {
         client.queueMessage(new ServerMessageAddClient(clients));//todo
         clients.add(client);
         flushMessages();
-        BoardRoom.getLogger().info("Added " + client + " to " + this);
+        ScribbleshareRoom.getLogger().info("Added " + client + " to " + this);
     }
 
     /**
@@ -91,7 +91,7 @@ class Room {
     void removeClient(Client client) {
         clients.remove(client);
         sendMessage(new ServerMessageRemoveClient(client));
-        BoardRoom.getLogger().info("Removed " + client + " to " + this);
+        ScribbleshareRoom.getLogger().info("Removed " + client + " to " + this);
         if (clients.isEmpty()) {
             end();
         }

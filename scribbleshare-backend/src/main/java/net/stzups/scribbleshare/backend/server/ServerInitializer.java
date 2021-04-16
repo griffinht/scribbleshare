@@ -14,8 +14,8 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
-import net.stzups.scribbleshare.BoardConfigKeys;
-import net.stzups.scribbleshare.backend.BoardBackend;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
+import net.stzups.scribbleshare.backend.Main;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.util.LogFactory;
 
@@ -33,7 +33,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            if (BoardBackend.getConfig().getBoolean(BoardConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (Main.getConfig().getBoolean(ScribbleshareConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
 

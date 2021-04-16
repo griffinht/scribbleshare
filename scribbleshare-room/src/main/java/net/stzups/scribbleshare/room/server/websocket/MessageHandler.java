@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.room.BoardRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
@@ -62,20 +62,20 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                 switch (message.getMessageType()) {
                     case HANDSHAKE: {
                         ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
-                        User user = BoardRoom.getDatabase().getUser(ctx.channel().attr(HttpAuthenticator.USER).get());
+                        User user = ScribbleshareRoom.getDatabase().getUser(ctx.channel().attr(HttpAuthenticator.USER).get());
                         logger.info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
 
                         state = State.READY;
                         client = new Client(user, ctx.channel());
-                        InviteCode inviteCode = BoardRoom.getDatabase().getInviteCode(clientPacketHandshake.getCode());
+                        InviteCode inviteCode = ScribbleshareRoom.getDatabase().getInviteCode(clientPacketHandshake.getCode());
                         client.queueMessage(new ServerMessageAddUser(client.getUser()));
                         //figure out which document to open first
                         if (inviteCode != null) {
-                            Document document = BoardRoom.getDatabase().getDocument(inviteCode.getDocument());
+                            Document document = ScribbleshareRoom.getDatabase().getDocument(inviteCode.getDocument());
                             if (document != null) {
                                 //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
                                 if (!document.getOwner().equals(client.getUser())) {
-                                    if (client.getUser().addSharedDocument(document)) BoardRoom.getDatabase().updateUser(client.getUser());
+                                    if (client.getUser().addSharedDocument(document)) ScribbleshareRoom.getDatabase().updateUser(client.getUser());
                                 }
                                 room = Room.getRoom(document);
                             } else {
@@ -85,14 +85,14 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             }
                         } else {
                             if (client.getUser().getOwnedDocuments().length == 0) {
-                                BoardRoom.getDatabase().createDocument(client.getUser());
+                                ScribbleshareRoom.getDatabase().createDocument(client.getUser());
                             }
                         }
                         for (long id : client.getUser().getOwnedDocuments()) {
-                            client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id)));//todo aggregate
+                            client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id)));//todo aggregate
                         }
                         for (long id : client.getUser().getSharedDocuments()) {
-                            client.queueMessage(new ServerMessageUpdateDocument(BoardRoom.getDatabase().getDocument(id), true));
+                            client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id), true));
                         }
                         client.flushMessages();
                         break;
@@ -110,7 +110,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     }
                     case OPEN_DOCUMENT: {
                         ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) message;
-                        Document document = BoardRoom.getDatabase().getDocument(clientPacketOpenDocument.getId());
+                        Document document = ScribbleshareRoom.getDatabase().getDocument(clientPacketOpenDocument.getId());
                         if (document != null) {
                             if (room != null) {
                                 room.removeClient(client);
@@ -127,7 +127,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             room.removeClient(client);
                         }
                         try {
-                            room = Room.getRoom(BoardRoom.getDatabase().createDocument(client.getUser()));
+                            room = Room.getRoom(ScribbleshareRoom.getDatabase().createDocument(client.getUser()));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -141,10 +141,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             System.out.println("document is delete ROOM");
                             room.sendMessage(new ServerMessageDeleteDocument(room.getDocument()));
                             room.end();
-                            BoardRoom.getDatabase().deleteDocument(room.getDocument());
+                            ScribbleshareRoom.getDatabase().deleteDocument(room.getDocument());
                             break;
                         }
-                        Document document = BoardRoom.getDatabase().getDocument(clientMessageDeleteDocument.id());
+                        Document document = ScribbleshareRoom.getDatabase().getDocument(clientMessageDeleteDocument.id());
                         if (document == null) {
                             logger.warning(client + " tried to delete document that does not exist");
                             break;
@@ -154,7 +154,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             break;
                         }
                         System.out.println("document is delete");
-                        BoardRoom.getDatabase().deleteDocument(room.getDocument());
+                        ScribbleshareRoom.getDatabase().deleteDocument(room.getDocument());
                         //Room.getRoom(document);
                         break;//todo better update logic
                     }
@@ -165,11 +165,11 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             break;
                         }
                         room.getDocument().setName(clientMessageUpdateDocument.getName());
-                        BoardRoom.getDatabase().updateDocument(room.getDocument());
+                        ScribbleshareRoom.getDatabase().updateDocument(room.getDocument());
                         break;//todo better update logic
                     }
                     case GET_INVITE: {
-                        client.sendMessage(new ServerMessageGetInvite(BoardRoom.getDatabase().getInviteCode(room.getDocument())));
+                        client.sendMessage(new ServerMessageGetInvite(ScribbleshareRoom.getDatabase().getInviteCode(room.getDocument())));
                         break;
                     }
                     default:

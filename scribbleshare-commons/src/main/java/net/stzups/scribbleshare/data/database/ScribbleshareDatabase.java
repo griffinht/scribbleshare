@@ -1,6 +1,6 @@
 package net.stzups.scribbleshare.data.database;
 
-import net.stzups.scribbleshare.BoardConfigKeys;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
@@ -11,21 +11,21 @@ import net.stzups.scribbleshare.util.config.Config;
 
 import java.util.logging.Logger;
 
-public class BoardDatabase implements Database {
+public class ScribbleshareDatabase implements Database {
     private final Database postgres;
     private final Database keyDB;
 
-    public BoardDatabase(Logger logger, Config config) throws Exception {
+    public ScribbleshareDatabase(Logger logger, Config config) throws Exception {
         logger.info("Connecting to Postgres database...");
-        postgres = new PostgresDatabase(config.getString(BoardConfigKeys.POSTGRES_URL),
-                config.getString(BoardConfigKeys.POSTGRES_USER),
-                config.getString(BoardConfigKeys.POSTGRES_PASSWORD),
-                config.getInteger(BoardConfigKeys.POSTGRES_RETRIES));
+        postgres = new PostgresDatabase(config.getString(ScribbleshareConfigKeys.POSTGRES_URL),
+                config.getString(ScribbleshareConfigKeys.POSTGRES_USER),
+                config.getString(ScribbleshareConfigKeys.POSTGRES_PASSWORD),
+                config.getInteger(ScribbleshareConfigKeys.POSTGRES_RETRIES));
 
         logger.info("Connected to Postgres database");
 
         logger.info("Connecting to Redis database...");
-        keyDB = new RedisDatabase(config.getString(BoardConfigKeys.REDIS_URL));
+        keyDB = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));
         logger.info("Connected to Redis database");
     }
     @Override

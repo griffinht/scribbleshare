@@ -10,7 +10,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.room.BoardRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoom;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = BoardRoom.getDatabase().getHttpSession(cookie.getId());
+            HttpSession httpSession = ScribbleshareRoom.getDatabase().getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 ServerInitializer.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());

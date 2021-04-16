@@ -21,8 +21,8 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
-import net.stzups.scribbleshare.backend.BoardBackend;
-import net.stzups.scribbleshare.backend.BoardBackendConfigKeys;
+import net.stzups.scribbleshare.backend.Main;
+import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
@@ -47,8 +47,8 @@ import java.util.regex.Pattern;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
-    private static final int HTTP_CACHE_SECONDS = BoardBackend.getConfig().getInteger(BoardBackendConfigKeys.HTTP_CACHE_SECONDS);
+    private static final File HTTP_ROOT = new File(Main.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
+    private static final int HTTP_CACHE_SECONDS = Main.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
 
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
@@ -61,7 +61,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
     static {
-        String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
+        String path = Main.getConfig().getString(ScribbleshareBackendConfigKeys.MIME_TYPES_FILE_PATH);
         try {
             MimeTypes.load(new FileInputStream(path));
         } catch (IOException e) {
@@ -326,25 +326,25 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             User user;
             HttpSession.ClientCookie cookiePersistent = HttpSession.ClientCookie.getClientCookie(request, PersistentHttpSession.COOKIE_NAME);
             if (cookiePersistent != null) {
-                PersistentHttpSession persistentHttpSession = BoardBackend.getDatabase().getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                PersistentHttpSession persistentHttpSession = Main.getDatabase().getAndRemovePersistentHttpSession(cookiePersistent.getId());
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
-                    user = BoardBackend.getDatabase().getUser(persistentHttpSession.getUser());
+                    user = Main.getDatabase().getUser(persistentHttpSession.getUser());
                 } else {
                     return false;
                 }
             } else {
-                user = BoardBackend.getDatabase().createUser();
+                user = Main.getDatabase().createUser();
             }
 
             HttpSession httpSession = new HttpSession(user, response);
-            BoardBackend.getDatabase().addHttpSession(httpSession);
+            Main.getDatabase().addHttpSession(httpSession);
 
             //this is single use and always refreshed
             PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, response);
-            BoardBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+            Main.getDatabase().addPersistentHttpSession(persistentHttpSession);
             return true;
         } else {
-            HttpSession httpSession = BoardBackend.getDatabase().getHttpSession(cookie.getId());
+            HttpSession httpSession = Main.getDatabase().getHttpSession(cookie.getId());
             return httpSession != null && httpSession.validate(cookie.getToken());
         }
     }
