@@ -1,7 +1,7 @@
-scribbleshare adoptopenjdk/openjdk11:alpine-jre
+FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /usr/app
 
-COPY --scribbleshare=board-gradle /usr/src/app/board-room.jar .
+COPY --from=scribbleshare-gradle /usr/src/app/scribbleshare-room.jar .
 
-ENTRYPOINT ["java", "-jar", "board-room.jar"]
+ENTRYPOINT ["java", "-jar", "scribbleshare-room.jar"]
