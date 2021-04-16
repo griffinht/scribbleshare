@@ -14,6 +14,7 @@ import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 import {apiUrl} from "./main.js";
+import BufferReader from "./protocol/BufferReader.js";
 
 const documents = new Map();
 export let activeDocument = null;
@@ -49,8 +50,14 @@ class Document {
         this.canvas.draw(-1);
         //this.addClient(localClient);
         let request = new XMLHttpRequest();
+        request.responseType = 'arraybuffer';
         request.addEventListener('load', (response) => {
             console.log(response);
+            if (request.status !== 200) {
+                console.error(request.status + ' while fetching document');
+                return;
+            }
+            this.canvas = new Canvas(new BufferReader(new Uint8Array(request.response).buffer));
         });
         request.open('GET', apiUrl + '/document/' + this.id);
         request.send();
