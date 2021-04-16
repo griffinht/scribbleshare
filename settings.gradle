@@ -1,2 +1,2 @@
-rootProject.name = 'Board'
-include('board-room', 'board-backend', ':board-commons')
+rootProject.name = 'scribbleshare'
+include('scribbleshare-room', 'scribbleshare-backend', ':scribbleshare-commons')
