@@ -15,9 +15,8 @@ import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.board.BoardConfigKeys;
-import net.stzups.board.room.BoardRoomConfigKeys;
 import net.stzups.board.room.BoardRoom;
-import net.stzups.board.room.server.websocket.WebSocketHandler;
+import net.stzups.board.room.server.websocket.MessageHandler;
 import net.stzups.board.room.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.room.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.util.LogFactory;
@@ -57,7 +56,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
                         getLogger(channel).warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
@@ -73,7 +72,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new WebSocketServerProtocolHandler("/", null, true))
                 .addLast(messageEncoder)
                 .addLast(messageDecoder)
-                .addLast(new WebSocketHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+                .addLast(new MessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
 
     }
 

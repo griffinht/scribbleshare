@@ -22,7 +22,7 @@ import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMes
 
 import java.util.logging.Logger;
 
-public class WebSocketHandler extends SimpleChannelInboundHandler<ClientMessage> {
+public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private enum State {
         HANDSHAKE,
         READY,
