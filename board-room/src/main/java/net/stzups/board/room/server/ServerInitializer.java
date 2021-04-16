@@ -1,5 +1,6 @@
 package net.stzups.board.room.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -41,6 +42,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private Logger logger;
     private SslContext sslContext;
+    private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
+    private final MessageEncoder messageEncoder = new MessageEncoder();
+    private final MessageDecoder messageDecoder = new MessageDecoder();
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
@@ -66,12 +70,23 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                .addLast(new HttpAuthenticator(logger))
+                .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler("/", null, true))
-                .addLast(new MessageEncoder(logger))
-                .addLast(new MessageDecoder(logger))
+                .addLast(messageEncoder)
+                .addLast(messageDecoder)
                 .addLast(new WebSocketHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
 
+    }
+
+    public static void setLogger(SocketChannel channel) {
+        channel.attr(LOGGER).set(LogFactory.getLogger(channel.remoteAddress().toString()));
+    }
+
+    public static Logger getLogger(ChannelHandlerContext ctx) {
+        return getLogger(ctx.channel());
+    }
+    public static Logger getLogger(Channel channel) {
+        return channel.attr(LOGGER).get();
     }
 }
