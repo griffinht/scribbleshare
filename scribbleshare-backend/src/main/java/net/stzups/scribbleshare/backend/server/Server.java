@@ -8,7 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
-import net.stzups.scribbleshare.backend.Main;
+import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.util.LogFactory;
 
 /**
@@ -37,7 +37,7 @@ public class Server {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer(null));
-        Main.getLogger().info("Binding to port " + port);
+        ScribbleshareBackend.getLogger().info("Binding to port " + port);
         return serverBootstrap.bind(port).sync().channel().closeFuture();
     }
 

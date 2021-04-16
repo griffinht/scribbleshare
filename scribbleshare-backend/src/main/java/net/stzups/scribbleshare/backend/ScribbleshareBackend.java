@@ -13,7 +13,7 @@ import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
 
 import java.util.logging.Logger;
 
-public class Main {
+public class ScribbleshareBackend {
     private static final Logger logger = LogFactory.getLogger("scribbleshare-backend");
     private static final Config config = new Config();
     private static Database database;
