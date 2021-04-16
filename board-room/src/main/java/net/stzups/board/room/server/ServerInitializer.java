@@ -40,7 +40,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     };
 
-    private Logger logger;
     private SslContext sslContext;
     private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
     private final MessageEncoder messageEncoder = new MessageEncoder();
@@ -51,22 +50,21 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
-        logger = LogFactory.getLogger(socketChannel.remoteAddress().toString());
-        socketChannel.attr(LOGGER).set(logger);
-        logger.info("Initial connection");
-        ChannelPipeline pipeline = socketChannel.pipeline();
+    protected void initChannel(SocketChannel channel) {
+        setLogger(channel);
+        getLogger(channel).info("Initial connection");
+        ChannelPipeline pipeline = channel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        logger.warning("Uncaught exception");
+                        getLogger(channel).warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })
                 .addLast(globalTrafficShapingHandler);
         if (sslContext != null) {
-            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+            pipeline.addLast(sslContext.newHandler(channel.alloc()));
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
