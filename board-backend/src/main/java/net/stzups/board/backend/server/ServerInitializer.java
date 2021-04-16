@@ -38,6 +38,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     };
 
     private final SslContext sslContext;
+    private final HttpServerHandler httpServerHandler = new HttpServerHandler();
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
@@ -65,7 +66,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
-                .addLast(new HttpServerHandler());
+                .addLast(httpServerHandler);
     }
 
     public static void setLogger(SocketChannel channel) {
