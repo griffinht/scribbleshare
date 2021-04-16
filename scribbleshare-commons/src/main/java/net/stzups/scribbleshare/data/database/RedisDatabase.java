@@ -58,7 +58,7 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public void saveCanvas(Canvas canvas) {
+    public void saveCanvas(long id, byte[] canvas) {
         throw new UnsupportedOperationException();
     }
 

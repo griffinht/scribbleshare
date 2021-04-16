@@ -10,18 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Canvas {
-    private final long id;
     private final Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
-    public Canvas(long id) {
-        this.id = id;
+    public Canvas() {
     }
 
     /**
      * Deserializes canvas from db
      */
-    public Canvas(long id, ByteBuf byteBuf) {
-        this.id = id;
+    public Canvas(ByteBuf byteBuf) {
         int length = byteBuf.readUnsignedByte();
         for (int i = 0; i < length; i++) {
             CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
@@ -32,10 +29,6 @@ public class Canvas {
                 map.put(byteBuf.readShort(), CanvasObject.getCanvasObject(canvasObjectType, byteBuf));
             }
         }
-    }
-
-    public long getId() {
-        return id;
     }
 
     public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
@@ -74,6 +67,6 @@ public class Canvas {
 
     @Override
     public String toString() {
-        return "Canvas{document=" + id + "}";
+        return "Canvas{canvasObjects=" + canvasObjects.size() + "}";
     }
 }

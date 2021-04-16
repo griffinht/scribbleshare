@@ -167,7 +167,9 @@ public class PostgresDatabase implements Database {
                 if (resultSet.next()) {
                     return resultSet.getBinaryStream("data").readAllBytes();
                 } else {
-                    return new byte[0];
+                    ByteBuf byteBuf = Unpooled.buffer(); // just make an empty canvas, could be optimized
+                    new Canvas().serialize(byteBuf);
+                    return byteBuf.array();
                 }
             }
         } catch (SQLException | IOException e) {
@@ -177,12 +179,10 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void saveCanvas(Canvas canvas) {
+    public void saveCanvas(long id, byte[] canvas) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data")) {
-            preparedStatement.setLong(1, canvas.getId());
-            ByteBuf byteBuf = Unpooled.buffer();
-            canvas.serialize(byteBuf);
-            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(byteBuf.array()));
+            preparedStatement.setLong(1, id);
+            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(canvas));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();

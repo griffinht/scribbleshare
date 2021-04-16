@@ -69,8 +69,8 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public void saveCanvas(Canvas canvas) {
-        postgres.saveCanvas(canvas);
+    public void saveCanvas(long id, byte[] canvas) {
+        postgres.saveCanvas(id, canvas);
     }
 
     @Override

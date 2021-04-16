@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.room.server.websocket;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
@@ -39,7 +40,7 @@ class Room {
 
     Room(Document document) {
         this.document = document;
-        document.setCanvas(new Canvas(document.getId(), Unpooled.wrappedBuffer(ScribbleshareRoom.getDatabase().getCanvas(document.getId()))));
+        document.setCanvas(new Canvas(Unpooled.wrappedBuffer(ScribbleshareRoom.getDatabase().getCanvas(document.getId()))));
         rooms.put(document, this);
         ScribbleshareRoom.getLogger().info("Started " + this);
     }
@@ -54,7 +55,9 @@ class Room {
 
     void end() {
         rooms.remove(document);
-        ScribbleshareRoom.getDatabase().saveCanvas(document.getCanvas());//todo save interval and dirty flags
+        ByteBuf byteBuf = Unpooled.buffer();
+        document.getCanvas().serialize(byteBuf);
+        ScribbleshareRoom.getDatabase().saveCanvas(document.getId(), byteBuf.array());//todo save interval and dirty flags
         //todo
         ScribbleshareRoom.getLogger().info("Ended room " + this);
     }
