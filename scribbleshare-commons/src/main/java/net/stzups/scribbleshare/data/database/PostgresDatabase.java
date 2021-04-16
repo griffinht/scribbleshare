@@ -160,14 +160,14 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public Canvas getCanvas(long id) {
+    public byte[] getCanvas(long id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new Canvas(id, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
+                    return resultSet.getBinaryStream("data").readAllBytes();
                 } else {
-                    return new Canvas(id);
+                    return null;
                 }
             }
         } catch (SQLException | IOException e) {

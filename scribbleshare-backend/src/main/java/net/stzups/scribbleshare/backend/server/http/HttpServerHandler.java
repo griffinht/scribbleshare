@@ -159,14 +159,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         } catch (NumberFormatException e) {
                             break;
                         }
-                        Canvas canvas = ScribbleshareBackend.getDatabase().getCanvas(id);
+                        byte[] canvas = ScribbleshareBackend.getDatabase().getCanvas(id);
                         if (canvas == null) {
                             break;
                         }
 
                         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
                         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
-                        canvas.serialize(response.content());
+                        response.content().writeBytes(canvas);
 
                         send(ctx, request, response);
                         return;

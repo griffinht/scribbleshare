@@ -12,8 +12,8 @@ import net.stzups.scribbleshare.util.config.Config;
 import java.util.logging.Logger;
 
 public class ScribbleshareDatabase implements Database {
-    private final Database postgres;
-    private final Database keyDB;
+    private final PostgresDatabase postgres;
+    private final RedisDatabase keyDB;
 
     public ScribbleshareDatabase(Logger logger, Config config) throws Exception {
         logger.info("Connecting to Postgres database...");
@@ -64,7 +64,7 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public Canvas getCanvas(long id) {
+    public byte[] getCanvas(long id) {
         return postgres.getCanvas(id);
     }
 
