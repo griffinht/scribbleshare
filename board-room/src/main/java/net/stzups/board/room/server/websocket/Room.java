@@ -7,7 +7,6 @@ import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.board.room.BoardRoom;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
-import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
@@ -77,7 +76,6 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.queueMessage(new ServerMessageOpenDocument(canvas));
         queueMessage(new ServerMessageAddClient(client));
         client.queueMessage(new ServerMessageAddClient(clients));//todo
         clients.add(client);
