@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -60,9 +61,9 @@ public class HttpSession extends Session {
         super(id, user, creation, hashedToken);
     }
 
-    public HttpSession(User user, HttpResponse response) {
+    public HttpSession(User user, HttpHeaders headers) {
         super(user.getId());
-        setCookie(response);
+        setCookie(headers);
     }
 
     public HttpSession(long id, ByteBuf byteBuf) {
@@ -76,7 +77,7 @@ public class HttpSession extends Session {
         return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
     }
 
-    private void setCookie(HttpResponse response) {
+    private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
         cookie.setDomain("localhost");
         //not used cookie.setPath("");
@@ -85,6 +86,6 @@ public class HttpSession extends Session {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie
 
-        response.headers().add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 }

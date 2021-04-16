@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.backend.server.http;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -7,12 +8,14 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
@@ -20,11 +23,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.stream.ChunkedFile;
+import io.netty.handler.stream.ChunkedInput;
 import io.netty.util.CharsetUtil;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+import net.stzups.scribbleshare.data.objects.canvas.object.objects.CanvasImage;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
@@ -49,6 +55,9 @@ import java.util.regex.Pattern;
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(ScribbleshareBackend.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
     private static final int HTTP_CACHE_SECONDS = ScribbleshareBackend.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
+
+    private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
 
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
@@ -78,9 +87,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-    public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
@@ -94,7 +100,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        final boolean keepAlive = HttpUtil.isKeepAlive(request);
         // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
@@ -137,25 +142,71 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // check if this is a special request
 
         switch (route[0]) {
-            case "api":
-                if (route.length > 1) {
-                    switch (route[1]) {
-                        case "document":
-                            if (route.length == 3) {
+            case "api": {
+                if (route.length <= 1) {
+                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                    return;
+                }
+
+                switch (route[1]) {
+                    case "document": {
+                        if (route.length != 3) {
+                            break;
+                        }
+
+                        long id;
+                        try {
+                            id = Long.parseLong(route[2]);
+                        } catch (NumberFormatException e) {
+                            break;
+                        }
+                        Canvas canvas = ScribbleshareBackend.getDatabase().getCanvas(id);
+                        if (canvas == null) {
+                            break;
+                        }
+
+                        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+                        canvas.serialize(response.content());
+
+                        send(ctx, request, response);
+                        return;
+                    }
+                    case "resource": {
+                        if (route.length <= 3) {
+                            break;
+                        }
+                        switch (route[2]) {
+                            case "canvasImage":
+                                if (route.length != 4) {
+                                    break;
+                                }
+
                                 long id;
                                 try {
-                                    id = Long.parseLong(route[2]);
+                                    id = Long.parseLong(route[3]);
                                 } catch (NumberFormatException e) {
-                                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
-                                    return;
+                                    break;
                                 }
-                                System.out.println(ScribbleshareBackend.getDatabase().getCanvas(id));
-                            }
+                                CanvasImage canvasImage = ScribbleshareBackend.getDatabase().getImage(id);
+                                if (canvasImage == null) {
+                                    break;
+                                }
+
+                                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                                response.headers().set(HttpHeaderNames.CONTENT_TYPE, "image/png");
+                                canvasImage.serialize(response.content());
+
+                                send(ctx, request, response);
+                                return;
+                        }
+                        break;
                     }
-                } else {
-                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
                 }
+                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
                 return;
+            }
+
         }
 
         // otherwise try to serve a regular HTTP file resource
@@ -176,69 +227,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
         }
-
-        String mimeType = MimeTypes.getMimeType(file);
-        if (mimeType == null) {
-            ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        // Cache Validation
-        String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
-        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-            SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-            Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
-
-            // Only compare up to the second because the datetime format we send to the client
-            // does not have milliseconds
-            long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-            long fileLastModifiedSeconds = file.lastModified() / 1000;
-            if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-                if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
-                    authenticate(ctx, request, response);
-                }
-                setDateHeader(response);
-
-                sendAndCleanupConnection(ctx, request, response);
-                return;
-            }
-        }
-
-        RandomAccessFile raf;
-        try {
-            raf = new RandomAccessFile(file, "r");
-        } catch (FileNotFoundException ignore) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-        long fileLength = raf.length();
-
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        HttpHeaders headers = new DefaultHttpHeaders();
         if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
-            authenticate(ctx, request, response);
+            authenticate(ctx, request, headers);
         }
-        HttpUtil.setContentLength(response, fileLength);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeType);
-        setDateAndCacheHeaders(response, file);
-
-        if (!keepAlive) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-        } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
-
-        // Write the initial line and the header.
-        ctx.write(response);
-
-        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
-        ChannelFuture lastContentFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)), ctx.newProgressivePromise());
-
-        if (!keepAlive) {
-            // Close the connection when the whole content is written out.
-            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-        }
+        sendFile(ctx, request, headers, file);
     }
 
     @Override
@@ -249,41 +242,75 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
+    private static boolean isCached(FullHttpRequest request, long lastModified) throws Exception {
+        String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
+        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+            SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);//todo
+
+            // Only compare up to the second because the datetime format we send to the client does not have milliseconds
+            return (dateFormatter.parse(ifModifiedSince).getTime() / 1000) == (lastModified / 1000);
+        }
+
+        return false;
+    }
+
+    private static void setDate(HttpHeaders headers) {
+        setDateAndCache(headers, null);
+    }
+
+    private static void setDateAndCache(HttpHeaders headers, Long lastModified) {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
+
+        // Date header
+        Calendar time = new GregorianCalendar();
+        headers.set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+
+        if (lastModified == null) {
+            return;
+        }
+        // Add cache headers
+        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
+        headers.set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
+        headers.set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
+        headers.set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(lastModified)));
+    }
+
+    /** sets keep alive headers and returns whether the connection is keep alive */
+    private static boolean setKeepAlive(FullHttpRequest request, HttpResponse response) {
+        boolean keepAlive = HttpUtil.isKeepAlive(request);
+        if (!keepAlive) {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        }
+        return keepAlive;
+    }
+
 
 
     private static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
-        sendAndCleanupConnection(ctx, request, response);
+        send(ctx, request, response);
     }
 
     private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
-        sendAndCleanupConnection(ctx, request, response);
+        send(ctx, request, response);
     }
 
-    /**
-     * If Keep-Alive is disabled, attaches "Connection: close" header to the response
-     * and closes the connection after the response being sent.
-     */
-    private static void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
-        HttpUtil.setContentLength(response, response.content().readableBytes());
-        if (request == null) {
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        if (request == null) { // assume no keep alive
             ctx.writeAndFlush(response);
             return;
         }
 
-        boolean keepAlive = !HttpUtil.isKeepAlive(request);
-        if (!keepAlive) {
-            // We're going to close the connection as soon as the response is sent,
-            // so we should also make it clear for the client.
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-        } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
+        boolean keepAlive = setKeepAlive(request, response);
 
         ChannelFuture flushPromise = ctx.writeAndFlush(response);
 
@@ -293,46 +320,75 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    /**
-     * Sets the Date header for the HTTP response
-     */
-    private static void setDateHeader(FullHttpResponse response) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, HttpChunkedInput httpChunkedInput) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpChunkedInput.length());
 
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+        boolean keepAlive = setKeepAlive(request, response);
+
+        // Write the initial line and the header.
+        ctx.write(response);
+
+        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
+        ChannelFuture lastContentFuture = ctx.writeAndFlush(httpChunkedInput, ctx.newProgressivePromise());
+
+        if (!keepAlive) {
+            // Close the connection when the whole content is written out.
+            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+        }
     }
 
-    /**
-     * Sets the Date and Cache headers for the HTTP Response
-     */
-    private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
+    private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, long lastModified) throws Exception {
+        if (isCached(request, lastModified)) {
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
+            response.headers().set(headers);
+            setDate(response.headers());
 
-        // Date header
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+            send(ctx, request, response);
+        } else {
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            response.headers().set(headers);
+            setDateAndCache(response.headers(), lastModified);
 
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+            send(ctx, request, response, new HttpChunkedInput(chunkedInput));
+        }
+
     }
 
-    private void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) {
-        if (!authenticate(request, response)) {
+    /** make sure the file being sent is valid */
+    private static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file) throws Exception {
+        RandomAccessFile raf;
+        try {
+            raf = new RandomAccessFile(file, "r");
+        } catch (FileNotFoundException ignore) {
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+        long fileLength = raf.length();
+        String mimeType = MimeTypes.getMimeType(file);
+        if (mimeType == null) {
+            ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+        headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
+
+        sendChunkedResource(ctx, request, headers, new ChunkedFile(raf, 0, fileLength, 8192), file.lastModified());
+
+    }
+
+
+
+    private static void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
+        if (!authenticate(request, headers)) {
             ServerInitializer.getLogger(ctx).info("Bad authentication");
-            sendAndCleanupConnection(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
+            send(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
             //todo rate limiting strategies
         } else {
             ServerInitializer.getLogger(ctx).info("Good authentication");
         }
     }
 
-    private static boolean authenticate(HttpRequest request, HttpResponse response) {
+    private static boolean authenticate(HttpRequest request, HttpHeaders headers) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie == null) {
             User user;
@@ -348,11 +404,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 user = ScribbleshareBackend.getDatabase().createUser();
             }
 
-            HttpSession httpSession = new HttpSession(user, response);
+            HttpSession httpSession = new HttpSession(user, headers);
             ScribbleshareBackend.getDatabase().addHttpSession(httpSession);
 
             //this is single use and always refreshed
-            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, response);
+            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, headers);
             ScribbleshareBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
             return true;
         } else {
@@ -360,6 +416,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return httpSession != null && httpSession.validate(cookie.getToken());
         }
     }
+
 
 
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + QUERY_REGEX + FILE_NAME_REGEX + "]+$");

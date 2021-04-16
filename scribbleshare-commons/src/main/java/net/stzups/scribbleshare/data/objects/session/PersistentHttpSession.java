@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.session;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -22,12 +23,12 @@ public class PersistentHttpSession extends HttpSession {
         super(id, user, creation, hashedToken);
     }
 
-    public PersistentHttpSession(HttpSession httpSession, HttpResponse response) {
+    public PersistentHttpSession(HttpSession httpSession, HttpHeaders headers) {
         super(httpSession.getUser());
-        setCookie(response);
+        setCookie(headers);
     }
 
-    private void setCookie(HttpResponse response) {
+    private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
         cookie.setDomain("localhost");
         cookie.setPath(LOGIN_PATH);
@@ -36,7 +37,7 @@ public class PersistentHttpSession extends HttpSession {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
-        response.headers().add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 
     @Override
