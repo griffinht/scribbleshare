@@ -167,7 +167,7 @@ public class PostgresDatabase implements Database {
                 if (resultSet.next()) {
                     return resultSet.getBinaryStream("data").readAllBytes();
                 } else {
-                    return null;
+                    return new byte[0];
                 }
             }
         } catch (SQLException | IOException e) {
