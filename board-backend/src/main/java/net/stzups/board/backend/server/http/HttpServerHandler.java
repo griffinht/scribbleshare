@@ -22,6 +22,7 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
+import net.stzups.board.backend.server.ServerInitializer;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.session.HttpSession;
 import net.stzups.board.data.objects.session.PersistentHttpSession;
@@ -58,8 +59,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
-    private final Logger logger;
-
     static {
         String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
         try {
@@ -78,16 +77,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler(Logger logger) {
-        this.logger = logger;
-    }
-
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        logger.info(request.method() + " " + request.uri());
+        ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
         if (!request.decoderResult().isSuccess()) {
             sendError(ctx, request, HttpResponseStatus.BAD_REQUEST);
             return;
@@ -171,7 +166,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         String mimeType = MimeTypes.getMimeType(file);
         if (mimeType == null) {
-            logger.warning("Unknown MIME type for file " + file.getName());
+            ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
             sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -316,11 +311,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) {
         if (!authenticate(request, response)) {
-            logger.info("Bad authentication");
+            ServerInitializer.getLogger(ctx).info("Bad authentication");
             sendAndCleanupConnection(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
             //todo rate limiting strategies
         } else {
-            logger.info("Good authentication");
+            ServerInitializer.getLogger(ctx).info("Good authentication");
         }
     }
 

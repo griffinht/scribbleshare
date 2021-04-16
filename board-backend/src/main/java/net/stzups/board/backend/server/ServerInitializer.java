@@ -1,5 +1,6 @@
 package net.stzups.board.backend.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -12,6 +13,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
+import io.netty.util.AttributeKey;
 import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.server.http.HttpServerHandler;
@@ -26,6 +28,8 @@ import java.util.logging.Logger;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+    private static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
+
     private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
@@ -33,7 +37,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     };
 
-    private Logger logger;
     private final SslContext sslContext;
 
     ServerInitializer(SslContext sslContext) {
@@ -41,27 +44,38 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
-        logger = LogFactory.getLogger(socketChannel.remoteAddress().toString());
-        logger.info("Connection");
-        ChannelPipeline pipeline = socketChannel.pipeline();
+    protected void initChannel(SocketChannel channel) {
+        setLogger(channel);
+        getLogger(channel).info("Connection");
+        ChannelPipeline pipeline = channel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        logger.warning("Uncaught exception");
+                        getLogger(channel).warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })
                 .addLast(globalTrafficShapingHandler);
         if (sslContext != null) {
-            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+            pipeline.addLast(sslContext.newHandler(channel.alloc()));
         }
         pipeline
                 .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
-                .addLast(new HttpServerHandler(logger));
+                .addLast(new HttpServerHandler());
+    }
+
+    public static void setLogger(SocketChannel channel) {
+        channel.attr(LOGGER).set(LogFactory.getLogger(channel.remoteAddress().toString()));
+    }
+
+    public static Logger getLogger(ChannelHandlerContext ctx) {
+        return getLogger(ctx.channel());
+    }
+    public static Logger getLogger(Channel channel) {
+        return channel.attr(LOGGER).get();
     }
 }
