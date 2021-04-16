@@ -53,7 +53,7 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public Canvas getCanvas(Document document) {
+    public Canvas getCanvas(long id) {
         throw new UnsupportedOperationException();
     }
 

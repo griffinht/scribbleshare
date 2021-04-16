@@ -161,14 +161,14 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public Canvas getCanvas(Document document) {
+    public Canvas getCanvas(long id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?")) {
-            preparedStatement.setLong(1, document.getId());
+            preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new Canvas(document, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
+                    return new Canvas(id, Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
-                    return new Canvas(document);
+                    return new Canvas(id);
                 }
             }
         } catch (SQLException | IOException e) {
@@ -180,7 +180,7 @@ public class PostgresDatabase implements Database {
     @Override
     public void saveCanvas(Canvas canvas) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data")) {
-            preparedStatement.setLong(1, canvas.getDocument().getId());
+            preparedStatement.setLong(1, canvas.getId());
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
             preparedStatement.setBinaryStream(2, new ByteArrayInputStream(byteBuf.array()));

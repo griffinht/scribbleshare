@@ -139,7 +139,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         switch (route[0]) {
             case "api":
                 if (route.length > 1) {
-
+                    switch (route[1]) {
+                        case "document":
+                            if (route.length == 3) {
+                                long id;
+                                try {
+                                    id = Long.parseLong(route[2]);
+                                } catch (NumberFormatException e) {
+                                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                                    return;
+                                }
+                                System.out.println(ScribbleshareBackend.getDatabase().getCanvas(id));
+                            }
+                    }
                 } else {
                     sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
                 }

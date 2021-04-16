@@ -34,10 +34,11 @@ class Room {
 
     private final Set<Client> clients = new HashSet<>();
 
-    private final Canvas canvas;
+    private final Document document;
 
     Room(Document document) {
-        this.canvas = ScribbleshareRoom.getDatabase().getCanvas(document);
+        this.document = document;
+        document.setCanvas(ScribbleshareRoom.getDatabase().getCanvas(document.getId()));
         rooms.put(document, this);
         ScribbleshareRoom.getLogger().info("Started " + this);
     }
@@ -51,18 +52,18 @@ class Room {
     }
 
     void end() {
-        rooms.remove(canvas.getDocument());
-        ScribbleshareRoom.getDatabase().saveCanvas(canvas);//todo save interval and dirty flags
+        rooms.remove(document);
+        ScribbleshareRoom.getDatabase().saveCanvas(document.getCanvas());//todo save interval and dirty flags
         //todo
         ScribbleshareRoom.getLogger().info("Ended room " + this);
     }
 
     Document getDocument() {
-        return canvas.getDocument();
+        return document;
     }
 
     void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
-        canvas.update(canvasObjects);
+        document.getCanvas().update(canvasObjects);
         ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
         queueMessageExcept(serverMessageUpdateCanvas, client);
     }
@@ -148,6 +149,6 @@ class Room {
 
     @Override
     public String toString() {
-        return "Room{canvas=" + canvas + "}";
+        return "Room{document=" + document + "}";
     }
 }

@@ -1,5 +1,7 @@
 package net.stzups.scribbleshare.data.objects;
 
+import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+
 import java.util.Random;
 
 public class Document {
@@ -9,6 +11,7 @@ public class Document {
     private final long id;
     private final User owner;
     private String name;
+    private Canvas canvas;
 
     /**
      * New document
@@ -44,9 +47,17 @@ public class Document {
         return owner;
     }
 
+    public void setCanvas(Canvas canvas) {
+        this.canvas = canvas;
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
     @Override
     public String toString() {
-        return "Document{id=" + id + ",name=" + name + "}";
+        return "Document{id=" + id + ",name=" + name + ",canvas=" + canvas + "}";
     }
 
     @Override

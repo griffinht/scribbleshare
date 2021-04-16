@@ -64,8 +64,8 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public Canvas getCanvas(Document document) {
-        return postgres.getCanvas(document);
+    public Canvas getCanvas(long id) {
+        return postgres.getCanvas(id);
     }
 
     @Override
