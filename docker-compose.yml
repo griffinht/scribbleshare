@@ -36,6 +36,7 @@ services:
 # Reverse proxy
     scribbleshare-nginx:
         image: scribbleshare-nginx
+# todo wait for scribbleshare-backend to start
         build:
             context: scribbleshare-nginx
         ports:
