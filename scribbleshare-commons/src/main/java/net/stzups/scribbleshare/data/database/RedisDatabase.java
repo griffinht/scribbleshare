@@ -97,4 +97,14 @@ public class RedisDatabase implements Database {
         httpSession.serialize(byteBuf);
         jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }
+
+    @Override
+    public void addResource(long id, byte[] resource) {
+        jedis.set(Unpooled.copyLong(id).array(), resource);
+    }
+
+    @Override
+    public byte[] getResource(long id) {
+        return jedis.get(Unpooled.copyLong(id).array());
+    }
 }

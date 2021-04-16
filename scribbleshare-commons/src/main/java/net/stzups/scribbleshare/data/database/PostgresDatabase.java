@@ -250,12 +250,22 @@ public class PostgresDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
+        throw new UnsupportedOperationException();
+    }
 
+    @Override
+    public void addResource(long id, byte[] resource) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] getResource(long id) {
+        throw new UnsupportedOperationException();
     }
 
     /**

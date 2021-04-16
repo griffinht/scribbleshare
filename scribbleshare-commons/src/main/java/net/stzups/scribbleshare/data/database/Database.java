@@ -27,4 +27,7 @@ public interface Database {
 
     HttpSession getHttpSession(long id);
     void addHttpSession(HttpSession httpSession);
+
+    void addResource(long id, byte[] resource);
+    byte[] getResource(long id);
 }

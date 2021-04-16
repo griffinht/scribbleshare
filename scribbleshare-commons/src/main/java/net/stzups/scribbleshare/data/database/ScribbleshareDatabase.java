@@ -102,4 +102,14 @@ public class ScribbleshareDatabase implements Database {
     public void addHttpSession(HttpSession httpSession) {
         keyDB.addHttpSession(httpSession);
     }
+
+    @Override
+    public void addResource(long id, byte[] resource) {
+        keyDB.addResource(id, resource);
+    }
+
+    @Override
+    public byte[] getResource(long id) {
+        return keyDB.getResource(id);
+    }
 }

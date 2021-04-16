@@ -30,7 +30,6 @@ import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
-import net.stzups.scribbleshare.data.objects.canvas.object.objects.CanvasImage;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
@@ -188,14 +187,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 } catch (NumberFormatException e) {
                                     break;
                                 }
-                                CanvasImage canvasImage = ScribbleshareBackend.getDatabase().getImage(id);
+                                byte[] canvasImage = ScribbleshareBackend.getDatabase().getResource(id);//todo change
                                 if (canvasImage == null) {
                                     break;
                                 }
 
                                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
                                 response.headers().set(HttpHeaderNames.CONTENT_TYPE, "image/png");
-                                canvasImage.serialize(response.content());
+                                response.content().writeBytes(canvasImage);
 
                                 send(ctx, request, response);
                                 return;
@@ -380,7 +379,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
         if (!authenticate(request, headers)) {
-            ServerInitializer.getLogger(ctx).info("Bad authentication");
+            ServerInitializer.getLogger(ctx).warning("Bad authentication");
             send(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
             //todo rate limiting strategies
         } else {
