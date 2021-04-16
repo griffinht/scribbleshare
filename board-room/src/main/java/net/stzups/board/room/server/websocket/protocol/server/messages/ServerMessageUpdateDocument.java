@@ -6,8 +6,8 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageUpdateDocument extends ServerMessage {
-    private Document document;
-    private boolean shared;
+    private final Document document;
+    private final boolean shared;
 
     public ServerMessageUpdateDocument(Document document) {
         this(document, false);

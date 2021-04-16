@@ -11,7 +11,7 @@ import net.stzups.board.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
 
 public class RedisDatabase implements Database {
-    private Jedis jedis;
+    private final Jedis jedis;
 
     public RedisDatabase(String host) {
         jedis = new Jedis(host);

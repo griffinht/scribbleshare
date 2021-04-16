@@ -6,8 +6,8 @@ public class Document {
     private static final Random random = new Random();
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
-    private long id;
-    private User owner;
+    private final long id;
+    private final User owner;
     private String name;
 
     /**

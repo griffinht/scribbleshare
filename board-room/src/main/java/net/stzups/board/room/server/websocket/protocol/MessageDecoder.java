@@ -19,22 +19,16 @@ import java.util.logging.Logger;
  */
 @ChannelHandler.Sharable
 public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
-    private final Logger logger;
-
-    public MessageDecoder(Logger logger) {
-        this.logger = logger;
-    }
-
     @Override
-    protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) {
         if (webSocketFrame instanceof TextWebSocketFrame) {
-            logger.warning("Got TextWebSocketFrame, content:");//debug
-            logger.warning(((TextWebSocketFrame) webSocketFrame).text());//debug
+            ServerInitializer.getLogger(ctx).warning("Got TextWebSocketFrame, content:");//debug
+            ServerInitializer.getLogger(ctx).warning(((TextWebSocketFrame) webSocketFrame).text());//debug
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
             ClientMessageType clientMessageType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
             ClientMessage clientMessage = ClientMessage.getClientMessage(clientMessageType, byteBuf);
-            logger.info("recv " + clientMessage.getClass().getSimpleName());//debug
+            ServerInitializer.getLogger(ctx).info("recv " + clientMessage.getClass().getSimpleName());//debug
             list.add(clientMessage);
         }
     }

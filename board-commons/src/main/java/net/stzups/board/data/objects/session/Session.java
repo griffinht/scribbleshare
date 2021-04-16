@@ -22,9 +22,9 @@ public class Session {
         }
     }
 
-    private long id;
-    private long user;
-    private Timestamp creation;
+    private final long id;
+    private final long user;
+    private final Timestamp creation;
     private byte[] hashedToken;
 
     protected Session(long user) {

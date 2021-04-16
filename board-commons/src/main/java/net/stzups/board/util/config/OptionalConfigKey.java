@@ -1,7 +1,7 @@
 package net.stzups.board.util.config;
 
 public class OptionalConfigKey<T> extends ConfigKey<T> {
-    private T defaultValue;
+    private final T defaultValue;
 
     public OptionalConfigKey(String key, T defaultValue) {
         super(key);

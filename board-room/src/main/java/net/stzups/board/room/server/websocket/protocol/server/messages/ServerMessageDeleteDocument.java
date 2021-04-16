@@ -6,7 +6,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageDeleteDocument extends ServerMessage {
-    private long id;
+    private final long id;
 
     public ServerMessageDeleteDocument(Document document) {
         super(ServerMessageType.DELETE_DOCUMENT);

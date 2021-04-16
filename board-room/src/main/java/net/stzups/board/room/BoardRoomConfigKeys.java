@@ -11,6 +11,4 @@ public class BoardRoomConfigKeys {
 
     public static final ConfigKey<Integer> WS_PORT = new OptionalConfigKey<>("http.port", 80);
     public static final ConfigKey<Integer> WSS_PORT = new OptionalConfigKey<>("https.port", 443);
-
-    public static final ConfigKey<Boolean> DEBUG_LOG_TRAFFIC = new OptionalConfigKey<>("debug.log.traffic", false);
 }

@@ -4,11 +4,7 @@ import ServerMessageType from "./protocol/server/ServerMessageType.js";
 const users = new Map();
 
 export function getUser(id) {
-    if (id == null) {
-        return user;
-    } else {
-        return users.get(id);
-    }
+    return users.get(id);
 }
 
 class User {

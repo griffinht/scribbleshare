@@ -1,7 +1,7 @@
 package net.stzups.board.util.config;
 
 public class ConfigKey<T> {
-    private String key;
+    private final String key;
 
     ConfigKey(String key) {
         this.key = key;

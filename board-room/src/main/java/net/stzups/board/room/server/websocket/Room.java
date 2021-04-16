@@ -7,7 +7,6 @@ import net.stzups.board.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.board.room.BoardRoom;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
-import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 import net.stzups.board.room.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
@@ -21,7 +20,7 @@ import java.util.TimerTask;
 class Room {
     private static final int SEND_PERIOD = 1000;
 
-    private static Map<Document, Room> rooms = new HashMap<>();
+    private static final  Map<Document, Room> rooms = new HashMap<>();
     static {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -33,9 +32,9 @@ class Room {
         }, 0, SEND_PERIOD);
     }
 
-    private Set<Client> clients = new HashSet<>();
+    private final Set<Client> clients = new HashSet<>();
 
-    private Canvas canvas;
+    private final Canvas canvas;
 
     Room(Document document) {
         this.canvas = BoardRoom.getDatabase().getCanvas(document);
@@ -77,7 +76,6 @@ class Room {
         //for the new client
         //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
         //for the existing clients
-        client.queueMessage(new ServerMessageOpenDocument(canvas));
         queueMessage(new ServerMessageAddClient(client));
         client.queueMessage(new ServerMessageAddClient(clients));//todo
         clients.add(client);

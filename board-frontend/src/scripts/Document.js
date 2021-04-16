@@ -13,9 +13,10 @@ import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
+import {apiUrl} from "./main.js";
 
 const documents = new Map();
-let activeDocument = null;
+export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
 
 class Document {
@@ -47,6 +48,12 @@ class Document {
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
         this.canvas.draw(-1);
         //this.addClient(localClient);
+        let request = new XMLHttpRequest();
+        request.addEventListener('load', (response) => {
+            console.log(response);
+        });
+        request.open('GET', apiUrl + '/document/' + this.id);
+        request.send();
     }
 
     close() {
@@ -119,14 +126,10 @@ socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateC
     }
 });
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
-    console.log(serverMessageUpdateDocument.shared);
     documents.set(serverMessageUpdateDocument.id,
         new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""),
             serverMessageUpdateDocument.id));
 });
-socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
-    activeDocument.canvas = serverMessageOpenDocument.canvas;
-})
 socket.addEventListener(SocketEventType.OPEN, () => {
     let invite;
     let index = document.location.href.lastIndexOf('invite=');
@@ -151,7 +154,7 @@ socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite)
 const MAX_TIME = 2000;
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
-let updateCanvas = new Canvas();
+export let updateCanvas = new Canvas();
 setInterval(localUpdate, UPDATE_INTERVAL);
 function localUpdate() {
     lastUpdate = window.performance.now();
@@ -161,7 +164,7 @@ function localUpdate() {
     }
 }
 
-function getDt() {
+export function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
 

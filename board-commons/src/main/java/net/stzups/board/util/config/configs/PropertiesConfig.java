@@ -12,7 +12,7 @@ import java.util.Properties;
  * This still works if the file does not exist or no values are present in the file.
  */
 public class PropertiesConfig implements ConfigProvider {
-    private Properties properties;
+    private final Properties properties;
 
     /**
      * Loads .properties formatted file from given path, only if it exists.

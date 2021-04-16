@@ -129,3 +129,12 @@ Proper cookie authentication
 ### v0.4.4
 Bugfixes, better urls/file paths
 - Fix cookies not having proper security properties
+- Improve routing
+
+## v0.5
+Canvas features, add api for server resources like documents
+
+### v0.5.0
+CanvasImage upload, add api
+- Ability to upload images on to the board
+- API: http://localhost/api/document/id

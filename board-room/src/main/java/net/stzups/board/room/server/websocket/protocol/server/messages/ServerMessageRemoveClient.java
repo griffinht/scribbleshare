@@ -6,7 +6,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 
 public class ServerMessageRemoveClient extends ServerMessage {
-    Client client;
+    private final Client client;
 
     public ServerMessageRemoveClient(Client client) {
         super(ServerMessageType.REMOVE_CLIENT);

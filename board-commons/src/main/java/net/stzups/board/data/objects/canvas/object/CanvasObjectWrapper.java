@@ -3,8 +3,8 @@ package net.stzups.board.data.objects.canvas.object;
 import io.netty.buffer.ByteBuf;
 
 public class CanvasObjectWrapper {
-    private byte dt;
-    private CanvasObject canvasObject;
+    private final byte dt;
+    private final CanvasObject canvasObject;
 
     public CanvasObjectWrapper(CanvasObjectType canvasObjectType, ByteBuf byteBuf) {
         dt = byteBuf.readByte();

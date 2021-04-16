@@ -11,7 +11,7 @@ import java.util.Map;
  * Takes arguments from the console and parses them as key value pairs.
  */
 public class ArgumentConfig implements ConfigProvider {
-    private Map<String, String> flags = new HashMap<>();
+    private final Map<String, String> flags = new HashMap<>();
 
     /**
      * Format:

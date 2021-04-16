@@ -5,7 +5,7 @@ import net.stzups.board.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.room.server.websocket.protocol.client.ClientMessageType;
 
 public class ClientMessageOpenDocument extends ClientMessage {
-    private long id;
+    private final long id;
 
     public ClientMessageOpenDocument(ByteBuf byteBuf) {
         super(ClientMessageType.OPEN_DOCUMENT);

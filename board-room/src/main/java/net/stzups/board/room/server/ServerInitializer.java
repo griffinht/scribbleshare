@@ -1,5 +1,6 @@
 package net.stzups.board.room.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -13,9 +14,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
-import net.stzups.board.room.BoardRoomConfigKeys;
+import net.stzups.board.BoardConfigKeys;
 import net.stzups.board.room.BoardRoom;
-import net.stzups.board.room.server.websocket.WebSocketHandler;
+import net.stzups.board.room.server.websocket.MessageHandler;
 import net.stzups.board.room.server.websocket.protocol.MessageDecoder;
 import net.stzups.board.room.server.websocket.protocol.MessageEncoder;
 import net.stzups.board.util.LogFactory;
@@ -31,46 +32,58 @@ import java.util.logging.Logger;
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     public static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
 
-    private GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
+    private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
-            if (BoardRoom.getConfig().getBoolean(BoardRoomConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+            if (BoardRoom.getConfig().getBoolean(BoardConfigKeys.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
         }
     };
 
-    private Logger logger;
     private SslContext sslContext;
+    private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
+    private final MessageEncoder messageEncoder = new MessageEncoder();
+    private final MessageDecoder messageDecoder = new MessageDecoder();
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
-        logger = LogFactory.getLogger(socketChannel.remoteAddress().toString());
-        socketChannel.attr(LOGGER).set(logger);
-        logger.info("Initial connection");
-        ChannelPipeline pipeline = socketChannel.pipeline();
+    protected void initChannel(SocketChannel channel) {
+        setLogger(channel);
+        getLogger(channel).info("Initial connection");
+        ChannelPipeline pipeline = channel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        logger.warning("Uncaught exception");
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
+                        getLogger(channel).warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })
                 .addLast(globalTrafficShapingHandler);
         if (sslContext != null) {
-            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+            pipeline.addLast(sslContext.newHandler(channel.alloc()));
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                .addLast(new HttpAuthenticator(logger))
+                .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler("/", null, true))
-                .addLast(new MessageEncoder(logger))
-                .addLast(new MessageDecoder(logger))
-                .addLast(new WebSocketHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+                .addLast(messageEncoder)
+                .addLast(messageDecoder)
+                .addLast(new MessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
 
+    }
+
+    public static void setLogger(SocketChannel channel) {
+        channel.attr(LOGGER).set(LogFactory.getLogger(channel.remoteAddress().toString()));
+    }
+
+    public static Logger getLogger(ChannelHandlerContext ctx) {
+        return getLogger(ctx.channel());
+    }
+    public static Logger getLogger(Channel channel) {
+        return channel.attr(LOGGER).get();
     }
 }

@@ -3,7 +3,7 @@ package net.stzups.board.data.objects;
 import java.util.Arrays;
 
 public class User {
-    private long id;
+    private final long id;
     private Long[] ownedDocuments;
     private Long[] sharedDocuments;
 

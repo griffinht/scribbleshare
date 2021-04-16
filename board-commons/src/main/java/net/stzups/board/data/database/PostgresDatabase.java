@@ -26,7 +26,7 @@ public class PostgresDatabase implements Database {
     private static final Random random = new Random();
     private Connection connection;
 
-    private Map<Long, Document> documents = new HashMap<>();
+    private final Map<Long, Document> documents = new HashMap<>();
 
     public PostgresDatabase(String url, String user, String password, int maxRetries) throws Exception {
         Class.forName("org.postgresql.Driver");
@@ -89,17 +89,6 @@ public class PostgresDatabase implements Database {
             e.printStackTrace();
         }
     }
-/*
-    // normally (Long[]) resultSet.getArray("something").getArray()) fails with custom domain types
-    private Long[] convertPostgresDomainArrayToLongArray(Array longArray) throws SQLException {
-        Object[] objects = (Object[]) longArray.getArray();
-        Long[] longs = new Long[objects.length];
-        for (int i = 0; i < objects.length; i++) {
-            //objects is actually an array of PGobject
-            longs[i] = Long.parseLong(((PGobject) objects[i]).getValue());
-        }
-        return longs;
-    }*/
 
     @Override
     public Document createDocument(User owner) {

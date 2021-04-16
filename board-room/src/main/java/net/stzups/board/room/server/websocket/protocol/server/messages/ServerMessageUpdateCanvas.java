@@ -9,7 +9,7 @@ import net.stzups.board.room.server.websocket.protocol.server.ServerMessageType;
 import java.util.Map;
 
 public class ServerMessageUpdateCanvas extends ServerMessage {
-    private Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects;
+    private final  Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects;
 
     public ServerMessageUpdateCanvas(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
         super(ServerMessageType.UPDATE_CANVAS);

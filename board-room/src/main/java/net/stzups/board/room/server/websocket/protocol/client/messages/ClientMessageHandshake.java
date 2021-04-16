@@ -5,7 +5,7 @@ import net.stzups.board.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.board.room.server.websocket.protocol.client.ClientMessageType;
 
 public class ClientMessageHandshake extends ClientMessage {
-    private String code;
+    private final String code;
 
     public ClientMessageHandshake(ByteBuf byteBuf) {
         super(ClientMessageType.HANDSHAKE);

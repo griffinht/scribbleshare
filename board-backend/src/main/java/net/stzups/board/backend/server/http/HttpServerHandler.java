@@ -3,6 +3,7 @@ package net.stzups.board.backend.server.http;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -22,6 +23,7 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import net.stzups.board.backend.BoardBackend;
 import net.stzups.board.backend.BoardBackendConfigKeys;
+import net.stzups.board.backend.server.ServerInitializer;
 import net.stzups.board.data.objects.User;
 import net.stzups.board.data.objects.session.HttpSession;
 import net.stzups.board.data.objects.session.PersistentHttpSession;
@@ -41,11 +43,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+@ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final File HTTP_ROOT = new File(BoardBackend.getConfig().getString(BoardBackendConfigKeys.HTML_ROOT));
+    private static final int HTTP_CACHE_SECONDS = BoardBackend.getConfig().getInteger(BoardBackendConfigKeys.HTTP_CACHE_SECONDS);
+
     private static final String DEFAULT_FILE = "index.html";
     private static final String DEFAULT_FILE_EXTENSION = ".html";
 
@@ -55,8 +59,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
-
-    private final Logger logger;
 
     static {
         String path = BoardBackend.getConfig().getString(BoardBackendConfigKeys.MIME_TYPES_FILE_PATH);
@@ -76,27 +78,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler(Logger logger) {
-        this.logger = logger;
-    }
-
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    public static final int HTTP_CACHE_SECONDS = 60;
-
-    private FullHttpRequest request;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        this.request = request;
-        logger.info(request.method() + " " + request.uri());
+        ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
         if (!request.decoderResult().isSuccess()) {
-            sendError(ctx, HttpResponseStatus.BAD_REQUEST);
+            sendError(ctx, request, HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
         if (!HttpMethod.GET.equals(request.method())) {
-            sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
             return;
         }
 
@@ -104,61 +98,79 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
         // split query from path
         final String[] splitQuery = splitQuery(uri);
         if (splitQuery == null) {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
-        final String rawPath = splitQuery[0];
+        final String path = splitQuery[0];
         final String rawQuery = splitQuery[1];
 
         Map<String, String> queries = parseQuery(rawQuery);
         if (queries == null) {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
         }
 
         // redirects
-        if (rawPath.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE.length()) + rawQuery);
+        if (path.endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE.length()) + rawQuery);
             return;
-        } else if ((rawPath + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+        } else if ((path + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, request, path.substring(0, path.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
             return;
-        } else if (rawPath.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, rawPath.substring(0, rawPath.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
-            return;
-        }
-
-        // get filesystem path from provided path
-        final String path = getPath(rawPath);
-        if (path == null) {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+        } else if (path.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
             return;
         }
 
-        File file = new File(HTTP_ROOT, path);
+        String[] route = getRoute(path);
+        if (route == null) {
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        // check if this is a special request
+
+        switch (route[0]) {
+            case "api":
+                if (route.length > 1) {
+
+                } else {
+                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                }
+                return;
+        }
+
+        // otherwise try to serve a regular HTTP file resource
+
+        // get filesystem filePath from provided filePath
+        final String filePath = getFilePath(path);
+        if (filePath == null) {
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        File file = new File(HTTP_ROOT, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
-            if (new File(HTTP_ROOT, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
-                sendRedirect(ctx, rawPath + "/" + rawQuery);
+            if (new File(HTTP_ROOT, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
+                sendRedirect(ctx, request, path + "/" + rawQuery);
             } else {
-                sendError(ctx, HttpResponseStatus.NOT_FOUND);
+                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
                 return;
             }
         }
 
         String mimeType = MimeTypes.getMimeType(file);
         if (mimeType == null) {
-            logger.warning("Unknown MIME type for file " + file.getName());
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+            ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
-
-        // Requested file is now validated, so we can serve it
 
         // Cache Validation
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
@@ -173,11 +185,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
                 if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
-                    authenticate(ctx, response);
+                    authenticate(ctx, request, response);
                 }
                 setDateHeader(response);
 
-                sendAndCleanupConnection(ctx, response);
+                sendAndCleanupConnection(ctx, request, response);
                 return;
             }
         }
@@ -185,16 +197,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         RandomAccessFile raf;
         try {
             raf = new RandomAccessFile(file, "r");
-        } catch (FileNotFoundException e) {
-            logger.warning(e.getMessage() + " while opening RandomAccessFile for file " + file.getPath());
-            sendError(ctx, HttpResponseStatus.NOT_FOUND);
+        } catch (FileNotFoundException ignore) {
+            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
         long fileLength = raf.length();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
-            authenticate(ctx, response);
+            authenticate(ctx, request, response);
         }
         HttpUtil.setContentLength(response, fileLength);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeType);
@@ -222,37 +233,38 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (ctx.channel().isActive()) {
-            sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            sendError(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
 
-    private void sendRedirect(ChannelHandlerContext ctx, String newUri) {
+    private static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
-        sendAndCleanupConnection(ctx, response);
+        sendAndCleanupConnection(ctx, request, response);
     }
 
-    private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
+    private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
-        sendAndCleanupConnection(ctx, response);
-    }
-
-    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response) {
-        sendAndCleanupConnection(ctx, response, HttpUtil.isKeepAlive(request));
+        sendAndCleanupConnection(ctx, request, response);
     }
 
     /**
      * If Keep-Alive is disabled, attaches "Connection: close" header to the response
      * and closes the connection after the response being sent.
      */
-    private void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpResponse response, boolean keepAlive) {
-        final FullHttpRequest request = this.request;
+    private static void sendAndCleanupConnection(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
         HttpUtil.setContentLength(response, response.content().readableBytes());
+        if (request == null) {
+            ctx.writeAndFlush(response);
+            return;
+        }
+
+        boolean keepAlive = !HttpUtil.isKeepAlive(request);
         if (!keepAlive) {
             // We're going to close the connection as soon as the response is sent,
             // so we should also make it clear for the client.
@@ -298,13 +310,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         response.headers().set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
-    private void authenticate(ChannelHandlerContext ctx, HttpResponse response) {
+    private void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) {
         if (!authenticate(request, response)) {
-            logger.info("Bad authentication");
-            sendAndCleanupConnection(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED), false);
+            ServerInitializer.getLogger(ctx).info("Bad authentication");
+            sendAndCleanupConnection(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
             //todo rate limiting strategies
         } else {
-            logger.info("Good authentication");
+            ServerInitializer.getLogger(ctx).info("Good authentication");
         }
     }
 
@@ -347,8 +359,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
 
+    private static String[] getRoute(String path) {
+        if (!path.startsWith("/")) return null;
+        String[] route = path.substring(1).split("/");
+        if (route.length == 0) {
+            return new String[] {""};
+        } else {
+            return route;
+        }
+    }
+
     /** Converts uri to filesystem path */
-    public static String getPath(String path) {
+    private static String getFilePath(String path) {
         path = path.replace("/", File.separator);
 
         if (path.contains(File.separator + '.') // /.
