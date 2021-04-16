@@ -2,7 +2,7 @@
 # Build Gradle project
 #
 # todo gradle 7 currently won't build with some wierd error
-FROM gradle:6.0-jdk11 AS scribbleshare-gradle-build
+FROM gradle:6.7-jdk11 AS scribbleshare-gradle-build
 
 WORKDIR /usr/src/app
 
