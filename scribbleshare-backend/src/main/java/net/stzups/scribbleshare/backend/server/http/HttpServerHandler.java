@@ -28,6 +28,7 @@ import io.netty.util.CharsetUtil;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
+import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
@@ -142,64 +143,43 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         switch (route[0]) {
             case "api": {
-                if (route.length <= 1) {
+                if (route.length < 2) {
                     sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
                     return;
                 }
 
                 switch (route[1]) {
-                    case "document": {
-                        if (route.length != 3) {
+                    case "resource": {
+                        if (route.length != 4) {
                             break;
                         }
 
-                        long id;
+                        long documentId;
+                        long resourceId;
                         try {
-                            id = Long.parseLong(route[2]);
+                            documentId = Long.parseLong(route[2]);
+                            resourceId = Long.parseLong(route[3]);
                         } catch (NumberFormatException e) {
                             break;
                         }
-                        byte[] canvas = ScribbleshareBackend.getDatabase().getCanvas(id);
-                        if (canvas == null) {
+                        Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
+                        if (document == null) {
+                            break;
+                        }
+                        document
+                        byte[] data = ScribbleshareBackend.getDatabase().getResource(resourceId);
+                        if (data == null) {
                             break;
                         }
 
                         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
                         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
-                        response.content().writeBytes(canvas);
+                        response.content().writeBytes(data);
 
                         send(ctx, request, response);
+
+
                         return;
-                    }
-                    case "resource": {
-                        if (route.length <= 3) {
-                            break;
-                        }
-                        switch (route[2]) {
-                            case "canvasImage":
-                                if (route.length != 4) {
-                                    break;
-                                }
-
-                                long id;
-                                try {
-                                    id = Long.parseLong(route[3]);
-                                } catch (NumberFormatException e) {
-                                    break;
-                                }
-                                byte[] canvasImage = ScribbleshareBackend.getDatabase().getResource(id);//todo change
-                                if (canvasImage == null) {
-                                    break;
-                                }
-
-                                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                                response.headers().set(HttpHeaderNames.CONTENT_TYPE, "image/png");
-                                response.content().writeBytes(canvasImage);
-
-                                send(ctx, request, response);
-                                return;
-                        }
-                        break;
                     }
                 }
                 sendError(ctx, request, HttpResponseStatus.NOT_FOUND);

@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.data.objects;
 
-import net.stzups.scribbleshare.data.objects.canvas.Canvas;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Document {
@@ -9,30 +9,40 @@ public class Document {
     private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
 
     private final long id;
-    private final User owner;
+    private final long owner;
+    private final List<Long> resources;
     private String name;
-    private Canvas canvas;
 
     /**
      * New document
      */
     public Document(User owner) {
-        this.id = random.nextLong();
-        this.owner = owner;
-        this.name = DEFAULT_DOCUMENT_NAME;
+        id = random.nextLong();
+        this.owner = owner.getId();
+        resources = new ArrayList<>();
+        name = DEFAULT_DOCUMENT_NAME;
     }
 
     /**
      * Serialize document from db
      */
-    public Document(long id, User owner, String name) {
+    public Document(long id, long owner, List<Long> resources, String name) {
         this.id = id;
         this.owner = owner;
         this.name = name;
+        this.resources = resources;
     }
 
     public long getId() {
         return id;
+    }
+
+    public long getOwner() {
+        return owner;
+    }
+
+    public List<Long> getResources() {
+        return resources;
     }
 
     public String getName() {
@@ -43,21 +53,9 @@ public class Document {
         this.name = name;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
     @Override
     public String toString() {
-        return "Document{id=" + id + ",name=" + name + ",canvas=" + canvas + "}";
+        return "Document{id=" + id + ",name=" + name + ",resources=" + resources + "}";
     }
 
     @Override

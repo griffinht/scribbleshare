@@ -35,19 +35,20 @@ GRANT SELECT, UPDATE ON users TO scribbleshare_room;
 CREATE TABLE documents(
     id bigint NOT NULL,
     owner bigint NOT NULL,
-    name varchar(64) not null,
+    resources bigint[] NOT NULL,
+    name varchar(64) NOT NULL,
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO scribbleshare_room;
 GRANT SELECT ON documents TO scribbleshare_backend;
 
-CREATE TABLE canvases(
-    document bigint NOT NULL,
+CREATE TABLE resources(
+    id bigint NOT NULL,
     data bytea NOT NULL,
-    PRIMARY KEY (document)
+    PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE, DELETE ON canvases TO scribbleshare_room;
-GRANT SELECT ON canvases TO scribbleshare_backend;
+GRANT SELECT, INSERT, UPDATE, DELETE ON resources TO scribbleshare_room;
+GRANT SELECT ON resources TO scribbleshare_backend;
 
 CREATE TABLE invite_codes(
     code char(6) NOT NULL,

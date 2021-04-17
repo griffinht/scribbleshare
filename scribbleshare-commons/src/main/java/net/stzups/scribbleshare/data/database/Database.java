@@ -16,8 +16,6 @@ public interface Database {
     Document getDocument(long id);
     void updateDocument(Document document);
     void deleteDocument(Document document);
-    byte[] getCanvas(long id);
-    void saveCanvas(long id, byte[] canvas);
 
     InviteCode getInviteCode(String code);
     InviteCode getInviteCode(Document document);

@@ -18,6 +18,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -92,10 +94,11 @@ public class PostgresDatabase implements Database {
     @Override
     public Document createDocument(User owner) {
         Document document = new Document(owner);
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)")){
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, resources, name) VALUES (?, ?, ?, ?)")){
             preparedStatement.setLong(1, document.getId());
-            preparedStatement.setLong(2, document.getOwner().getId());
-            preparedStatement.setString(3, document.getName());
+            preparedStatement.setLong(2, document.getOwner());
+            preparedStatement.setArray(3, connection.createArrayOf("bigint", document.getResources().toArray()));
+            preparedStatement.setString(4, document.getName());
             preparedStatement.execute();
             documents.put(document.getId(), document);
         } catch (SQLException e) {
@@ -115,13 +118,10 @@ public class PostgresDatabase implements Database {
                 preparedStatement.setLong(1, id);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        long userId = resultSet.getLong("owner");
-                        User user = getUser(userId);
-                        if (user == null) {
-                            System.out.println("Document with id " + id + " has no owner with id " + userId);
-                            return null;
-                        }
-                        document = new Document(id, user, resultSet.getString("name"));
+                        document = new Document(id,
+                                resultSet.getLong("owner"),
+                                new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("resources").getArray())),
+                                resultSet.getString("name"));
                         documents.put(document.getId(), document);
                     } else {
                         System.out.println("Document with id " + id + " does not exist");
@@ -153,36 +153,6 @@ public class PostgresDatabase implements Database {
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getId());
             preparedStatement.setLong(3, document.getId());
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public byte[] getCanvas(long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM canvases WHERE document=?")) {
-            preparedStatement.setLong(1, id);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getBinaryStream("data").readAllBytes();
-                } else {
-                    ByteBuf byteBuf = Unpooled.buffer(); // just make an empty canvas, could be optimized
-                    new Canvas().serialize(byteBuf);
-                    return byteBuf.array();
-                }
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-            return null;//todo error handling??
-        }
-    }
-
-    @Override
-    public void saveCanvas(long id, byte[] canvas) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO canvases(document, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(canvas));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -259,13 +229,32 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void addResource(long id, byte[] resource) {
+    public void addResource(long id, byte[] data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(data));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         throw new UnsupportedOperationException();
     }
 
     @Override
     public byte[] getResource(long id) {
-        throw new UnsupportedOperationException();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE document=?")) {
+            preparedStatement.setLong(1, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getBinaryStream("data").readAllBytes();
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            return null;//todo error handling??
+        }
     }
 
     /**
