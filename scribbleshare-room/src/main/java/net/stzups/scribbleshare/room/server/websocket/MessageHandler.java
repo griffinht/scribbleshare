@@ -78,7 +78,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             Document document = ScribbleshareRoom.getDatabase().getDocument(inviteCode.getDocument());
                             if (document != null) {
                                 //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
-                                if (!document.getOwner().equals(client.getUser())) {
+                                if (document.getOwner() != client.getUser().getId()) {
                                     if (client.getUser().addSharedDocument(document)) ScribbleshareRoom.getDatabase().updateUser(client.getUser());
                                 }
                                 room = Room.getRoom(document);
@@ -153,7 +153,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             logger.warning(client + " tried to delete document that does not exist");
                             break;
                         }
-                        if (!document.getOwner().equals(client.getUser())) {
+                        if (document.getOwner() != client.getUser().getId()) {
                             logger.warning(client + " tried to delete document they do not own");
                             break;
                         }

@@ -64,16 +64,6 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public byte[] getCanvas(long id) {
-        return postgres.getCanvas(id);
-    }
-
-    @Override
-    public void saveCanvas(long id, byte[] canvas) {
-        postgres.saveCanvas(id, canvas);
-    }
-
-    @Override
     public InviteCode getInviteCode(String code) {
         return postgres.getInviteCode(code);
     }
@@ -105,11 +95,11 @@ public class ScribbleshareDatabase implements Database {
 
     @Override
     public void addResource(long id, byte[] resource) {
-        keyDB.addResource(id, resource);
+        postgres.addResource(id, resource);
     }
 
     @Override
     public byte[] getResource(long id) {
-        return keyDB.getResource(id);
+        return postgres.getResource(id);
     }
 }

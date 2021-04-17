@@ -53,16 +53,6 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public byte[] getCanvas(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void saveCanvas(long id, byte[] canvas) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public InviteCode getInviteCode(String code) {
         throw new UnsupportedOperationException();
     }
@@ -100,11 +90,21 @@ public class RedisDatabase implements Database {
 
     @Override
     public void addResource(long id, byte[] resource) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] getResource(long id) {
+        throw new UnsupportedOperationException();
+    }
+/*
+    @Override
+    public void addResource(long id, byte[] resource) {
         jedis.set(Unpooled.copyLong(id).array(), resource);
     }
 
     @Override
     public byte[] getResource(long id) {
         return jedis.get(Unpooled.copyLong(id).array());
-    }
+    }*/
 }
