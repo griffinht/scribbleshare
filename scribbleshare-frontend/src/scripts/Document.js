@@ -52,7 +52,6 @@ class Document {
         let request = new XMLHttpRequest();
         request.responseType = 'arraybuffer';
         request.addEventListener('load', (response) => {
-            console.log(response);
             if (request.status !== 200) {
                 console.error(request.status + ' while fetching document');
                 return;
