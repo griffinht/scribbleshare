@@ -30,11 +30,11 @@ public class PersistentHttpSession extends HttpSession {
 
     private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain("localhost");
+        cookie.setDomain("localhost"); //todo
         cookie.setPath(LOGIN_PATH);
         //todo ssl cookie.setSecure(true);
         cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
+        cookie.setSameSite(CookieHeaderNames.SameSite.Lax); //todo strict
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));

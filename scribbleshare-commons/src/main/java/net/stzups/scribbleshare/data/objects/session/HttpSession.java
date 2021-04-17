@@ -79,11 +79,11 @@ public class HttpSession extends Session {
 
     private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain("localhost");
+        cookie.setDomain("localhost"); //todo
         //not used cookie.setPath("");
         //todo ssl cookie.setSecure(true);
         cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
+        cookie.setSameSite(CookieHeaderNames.SameSite.Lax); //todo strict
         //session cookie
 
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
