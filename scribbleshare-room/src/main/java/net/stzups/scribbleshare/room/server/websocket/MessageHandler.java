@@ -28,17 +28,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
         READY,
     }
 
-    private Logger logger;
-
     private State state = null;
 
     private Client client;
     private Room room;
-
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-        logger = ctx.channel().attr(ServerInitializer.LOGGER).get();
-    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
@@ -50,7 +43,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
         if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-            logger.info("WebSocket connection initialized");
+            ServerInitializer.getLogger(ctx).info("WebSocket connection initialized");
             state = State.HANDSHAKE;
         }
     }
@@ -64,10 +57,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                         ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) message;
                         User user = ScribbleshareRoom.getDatabase().getUser(ctx.channel().attr(HttpAuthenticator.USER).get());
                         if (user == null) {
-                            logger.warning("User with does not exist");//todo
+                            ServerInitializer.getLogger(ctx).warning("User with does not exist");//todo
                             return;
                         }
-                        logger.info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
+                        ServerInitializer.getLogger(ctx).info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
 
                         state = State.READY;
                         client = new Client(user, ctx.channel());
@@ -85,7 +78,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                                 }
                                 room = Room.getRoom(document);
                             } else {
-                                logger.warning(client + " somehow used invite code for non existent document");
+                                ServerInitializer.getLogger(ctx).warning(client + " somehow used invite code for non existent document");
                                 return;
                                 //NPE will be thrown later
                             }
@@ -124,7 +117,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             room = Room.getRoom(document);
                             room.addClient(client);
                         } else {
-                            logger.warning(client + " tried to open document not that does not exist");
+                            ServerInitializer.getLogger(ctx).warning(client + " tried to open document not that does not exist");
                         }
                         break;
                     }
@@ -152,11 +145,11 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                         }
                         Document document = ScribbleshareRoom.getDatabase().getDocument(clientMessageDeleteDocument.id());
                         if (document == null) {
-                            logger.warning(client + " tried to delete document that does not exist");
+                            ServerInitializer.getLogger(ctx).warning(client + " tried to delete document that does not exist");
                             break;
                         }
                         if (document.getOwner() != client.getUser().getId()) {
-                            logger.warning(client + " tried to delete document they do not own");
+                            ServerInitializer.getLogger(ctx).warning(client + " tried to delete document they do not own");
                             break;
                         }
                         System.out.println("document is delete");
@@ -167,7 +160,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                     case UPDATE_DOCUMENT: {
                         ClientMessageUpdateDocument clientMessageUpdateDocument = (ClientMessageUpdateDocument) message;
                         if (clientMessageUpdateDocument.getName().length() > 64) {
-                            logger.warning(client + " tried to change name to string that is too long (" + clientMessageUpdateDocument.getName().length() + ")");
+                            ServerInitializer.getLogger(ctx).warning(client + " tried to change name to string that is too long (" + clientMessageUpdateDocument.getName().length() + ")");
                             break;
                         }
                         room.getDocument().setName(clientMessageUpdateDocument.getName());
