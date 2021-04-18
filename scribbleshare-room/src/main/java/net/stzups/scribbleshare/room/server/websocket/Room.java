@@ -43,7 +43,6 @@ class Room {
         this.document = document;
         ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId());
         if (canvas == null) {
-            System.out.println("null");
             this.canvas = new Canvas();
         } else {
             this.canvas = new Canvas(canvas);
