@@ -35,17 +35,16 @@ GRANT SELECT, UPDATE ON users TO scribbleshare_room;
 CREATE TABLE documents(
     id bigint NOT NULL,
     owner bigint NOT NULL,
-    resources bigint[] NOT NULL,
     name varchar(64) NOT NULL,
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO scribbleshare_room;
-GRANT SELECT, UPDATE ON documents TO scribbleshare_backend;
 
 CREATE TABLE resources(
+    owner bigint NOT NULL,
     id bigint NOT NULL,
     data bytea NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (owner)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON resources TO scribbleshare_room;
 GRANT SELECT, INSERT ON resources TO scribbleshare_backend;

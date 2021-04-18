@@ -1,7 +1,5 @@
 package net.stzups.scribbleshare.data.objects;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class Document {
@@ -10,7 +8,6 @@ public class Document {
 
     private final long id;
     private final long owner;
-    private final List<Long> resources;
     private String name;
 
     /**
@@ -19,18 +16,16 @@ public class Document {
     public Document(User owner) {
         id = random.nextLong();
         this.owner = owner.getId();
-        resources = new ArrayList<>();
         name = DEFAULT_DOCUMENT_NAME;
     }
 
     /**
      * Serialize document from db
      */
-    public Document(long id, long owner, List<Long> resources, String name) {
+    public Document(long id, long owner, String name) {
         this.id = id;
         this.owner = owner;
         this.name = name;
-        this.resources = resources;
     }
 
     public long getId() {
@@ -39,10 +34,6 @@ public class Document {
 
     public long getOwner() {
         return owner;
-    }
-
-    public List<Long> getResources() {
-        return resources;
     }
 
     public String getName() {
@@ -55,7 +46,7 @@ public class Document {
 
     @Override
     public String toString() {
-        return "Document{id=" + id + ",name=" + name + ",resources=" + resources + "}";
+        return "Document{id=" + id + ",name=" + name + "}";
     }
 
     @Override

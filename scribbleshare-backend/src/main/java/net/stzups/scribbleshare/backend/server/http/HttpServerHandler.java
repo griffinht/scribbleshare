@@ -176,7 +176,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, 0);
                                 if (data == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
                                     return;
@@ -188,8 +188,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                     ServerInitializer.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                     break;
                                 }
-                                long id = ScribbleshareBackend.getDatabase().addResource(request.content());
-                                document.getResources().add(id);
+                                long id = ScribbleshareBackend.getDatabase().addResource(document.getId(), request.content());
                                 ScribbleshareBackend.getDatabase().updateDocument(document);
                                 send(ctx, request, Unpooled.copyLong(id));
                             } else {
@@ -212,11 +211,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                if (!document.getResources().contains(resourceId)) {
-                                    break;
-                                }
-
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, resourceId);
                                 if (data == null) {
                                     break;
                                 }

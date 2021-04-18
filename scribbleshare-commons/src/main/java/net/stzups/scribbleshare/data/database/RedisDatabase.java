@@ -89,17 +89,17 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public long addResource(ByteBuf resource) {
+    public long addResource(long owner, ByteBuf resource) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateResource(long id, ByteBuf resource) {
+    public void updateResource(long owner, long id, ByteBuf resource) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ByteBuf getResource(long id) {
+    public ByteBuf getResource(long owner, long id) {
         throw new UnsupportedOperationException();
     }
 /*

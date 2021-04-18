@@ -96,19 +96,19 @@ public class PostgresDatabase implements Database {
     @Override
     public Document createDocument(User owner) {
         Document document = new Document(owner);
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, resources, name) VALUES (?, ?, ?, ?)")){
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)")){
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getOwner());
-            preparedStatement.setArray(3, connection.createArrayOf("bigint", document.getResources().toArray()));
-            preparedStatement.setString(4, document.getName());
+            preparedStatement.setString(3, document.getName());
             preparedStatement.execute();
             documents.put(document.getId(), document);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+        addResource(document.getId(), 0, Canvas.getEmptyCanvas());
         owner.getOwnedDocuments().add(document.getId());
-        updateUser(owner);
+        updateUser(owner);//todo
         return document;
     }
 
@@ -122,7 +122,6 @@ public class PostgresDatabase implements Database {
                     if (resultSet.next()) {
                         document = new Document(id,
                                 resultSet.getLong("owner"),
-                                new ArrayList<>(Arrays.asList((Long[]) resultSet.getArray("resources").getArray())),
                                 resultSet.getString("name"));
                         documents.put(document.getId(), document);
                     } else {
@@ -231,23 +230,29 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public long addResource(ByteBuf data) {
+    public long addResource(long owner, ByteBuf data) {
         long id = random.nextLong();
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES (?, ?)")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setBinaryStream(2, new ByteBufInputStream(data));
+        addResource(owner, id, data);
+        return id;
+    }
+
+    private void addResource(long owner, long id, ByteBuf data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(owner, id, data) VALUES (?, ?, ?)")) {
+            preparedStatement.setLong(1, owner);
+            preparedStatement.setLong(2, id);
+            preparedStatement.setBinaryStream(3, new ByteBufInputStream(data));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return id;
     }
 
     @Override
-    public void updateResource(long id, ByteBuf data) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources (id, data) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET data=excluded.data")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setBinaryStream(2, new ByteBufInputStream(data));
+    public void updateResource(long owner, long id, ByteBuf data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET data=? WHERE owner=? AND id=?")) {
+            preparedStatement.setBinaryStream(1, new ByteBufInputStream(data));
+            preparedStatement.setLong(2, owner);
+            preparedStatement.setLong(3, id);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -255,9 +260,10 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public ByteBuf getResource(long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=?")) {
-            preparedStatement.setLong(1, id);
+    public ByteBuf getResource(long owner, long id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE owner=? AND id=?")) {
+            preparedStatement.setLong(1, owner);
+            preparedStatement.setLong(2, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes());

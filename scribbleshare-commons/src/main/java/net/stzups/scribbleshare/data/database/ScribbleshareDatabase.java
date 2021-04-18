@@ -95,17 +95,17 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public long addResource(ByteBuf resource) {
-        return postgres.addResource(resource);
+    public long addResource(long owner, ByteBuf resource) {
+        return postgres.addResource(owner, resource);
     }
 
     @Override
-    public void updateResource(long id, ByteBuf resource) {
-        postgres.updateResource(id, resource);
+    public void updateResource(long owner, long id, ByteBuf resource) {
+        postgres.updateResource(owner, id, resource);
     }
 
     @Override
-    public ByteBuf getResource(long id) {
-        return postgres.getResource(id);
+    public ByteBuf getResource(long owner, long id) {
+        return postgres.getResource(owner, id);
     }
 }

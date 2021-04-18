@@ -30,13 +30,13 @@ public interface Database {
     /**
      * Add resource to database and return the corresponding id for the new resource
      */
-    long addResource(ByteBuf resource);
+    long addResource(long owner, ByteBuf resource);
 
-    /** insert or update resource */
-    void updateResource(long id, ByteBuf resource);
+    /** update resource */
+    void updateResource(long owner, long id, ByteBuf resource);
 
     /**
      * Gets resource, or null if the resource does not exist
      */
-    ByteBuf getResource(long id);
+    ByteBuf getResource(long owner, long id);
 }

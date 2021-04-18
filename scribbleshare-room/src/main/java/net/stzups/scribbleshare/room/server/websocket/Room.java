@@ -41,12 +41,8 @@ class Room {
 
     Room(Document document) {
         this.document = document;
-        ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId());
-        if (canvas == null) {
-            this.canvas = new Canvas();
-        } else {
-            this.canvas = new Canvas(canvas);
-        }
+        ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId(), 0);
+        this.canvas = new Canvas(canvas);
         rooms.put(document, this);
         ScribbleshareRoom.getLogger().info("Started " + this);
     }
@@ -63,7 +59,7 @@ class Room {
         rooms.remove(document);
         ByteBuf byteBuf = Unpooled.buffer();
         canvas.serialize(byteBuf);
-        ScribbleshareRoom.getDatabase().updateResource(document.getId(), byteBuf);//todo save interval and dirty flags
+        ScribbleshareRoom.getDatabase().updateResource(document.getId(), 0, byteBuf);//todo save interval and dirty flags
         //todo
         ScribbleshareRoom.getLogger().info("Ended room " + this);
     }
