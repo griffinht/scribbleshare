@@ -79,7 +79,9 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             if (document != null) {
                                 //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
                                 if (document.getOwner() != client.getUser().getId()) {
-                                    if (client.getUser().addSharedDocument(document)) ScribbleshareRoom.getDatabase().updateUser(client.getUser());
+                                    if (!client.getUser().getSharedDocuments().add(document.getId())) {
+                                        ScribbleshareRoom.getDatabase().updateUser(client.getUser());
+                                    }
                                 }
                                 room = Room.getRoom(document);
                             } else {
@@ -88,7 +90,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                                 //NPE will be thrown later
                             }
                         } else {
-                            if (client.getUser().getOwnedDocuments().length == 0) {
+                            if (client.getUser().getOwnedDocuments().size() == 0) {
                                 ScribbleshareRoom.getDatabase().createDocument(client.getUser());
                             }
                         }

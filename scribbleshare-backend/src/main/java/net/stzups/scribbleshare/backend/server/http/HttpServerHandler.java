@@ -30,7 +30,6 @@ import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
@@ -95,11 +94,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        if (!HttpMethod.GET.equals(request.method())) {
-            sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            return;
-        }
-
         // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
@@ -154,6 +148,24 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             break;
                         }
 
+
+
+                        Long userId = authenticate(ctx, request);
+                        if (userId == null) {
+                            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
+                            ctx.writeAndFlush(fullHttpResponse);
+                            ctx.close();
+                            return;
+                        }
+
+                        User user = ScribbleshareBackend.getDatabase().getUser(userId);
+                        if (user == null) {
+                            ServerInitializer.getLogger(ctx).warning("User with " + userId + " authenticated but does not exist");
+                            break;
+                        }
+
+                        user.getOwnedDocuments()
+
                         long documentId;
                         long resourceId;
                         try {
@@ -166,7 +178,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         if (document == null) {
                             break;
                         }
-                        document
+
+
                         byte[] data = ScribbleshareBackend.getDatabase().getResource(resourceId);
                         if (data == null) {
                             break;
@@ -186,6 +199,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
+        }
+
+        if (!HttpMethod.GET.equals(request.method())) {
+            sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            return;
         }
 
         // otherwise try to serve a regular HTTP file resource
@@ -208,7 +226,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
         HttpHeaders headers = new DefaultHttpHeaders();
         if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
-            authenticate(ctx, request, headers);
+            logIn(ctx, request, headers);
         }
         sendFile(ctx, request, headers, file);
     }
@@ -356,9 +374,27 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
+    private static Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
+        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        if (cookie != null) {
+            HttpSession httpSession = ScribbleshareBackend.getDatabase().getHttpSession(cookie.getId());
+            if (httpSession != null && httpSession.validate(cookie.getToken())) {
+                ServerInitializer.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
+                return httpSession.getUser();
+            } else {
+                ServerInitializer.getLogger(ctx).warning("Bad authentication");
+                //bad authentication attempt
+                //todo rate limit timeout server a proper response???
+            }
+        } else {
+            ServerInitializer.getLogger(ctx).info("No authentication");
+        }
 
-    private static void authenticate(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
-        if (!authenticate(request, headers)) {
+        return null;
+    }
+
+    private static void logIn(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
+        if (!logIn(request, headers)) {
             ServerInitializer.getLogger(ctx).warning("Bad authentication");
             send(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
             //todo rate limiting strategies
@@ -367,7 +403,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static boolean authenticate(HttpRequest request, HttpHeaders headers) {
+    private static boolean logIn(HttpRequest request, HttpHeaders headers) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie == null) {
             User user;

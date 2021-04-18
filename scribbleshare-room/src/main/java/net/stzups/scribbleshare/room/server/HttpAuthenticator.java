@@ -31,7 +31,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
                 //pass on this request
                 out.add(request.retain());
             } else {
-                ServerInitializer.getLogger(ctx).info("Bad authentication");
+                ServerInitializer.getLogger(ctx).warning("Bad authentication");
                 //bad authentication attempt
                 FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
                 //todo rate limit timeout server a proper response???

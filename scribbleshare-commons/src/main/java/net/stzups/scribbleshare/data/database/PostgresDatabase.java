@@ -51,8 +51,8 @@ public class PostgresDatabase implements Database {
         User user = new User(random.nextLong(), new Long[0], new Long[0]);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
-            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments()));
-            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments()));
+            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
+            preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -82,8 +82,8 @@ public class PostgresDatabase implements Database {
     @Override
     public void updateUser(User user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET owned_documents=?, shared_documents=? WHERE id=?")){
-            preparedStatement.setArray(1, connection.createArrayOf("bigint", user.getOwnedDocuments()));
-            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getSharedDocuments()));
+            preparedStatement.setArray(1, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
+            preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
             preparedStatement.setLong(3, user.getId());
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -105,7 +105,7 @@ public class PostgresDatabase implements Database {
             e.printStackTrace();
             return null;
         }
-        owner.addOwnedDocument(document);
+        owner.getOwnedDocuments().add(document.getId());
         updateUser(owner);
         return document;
     }
