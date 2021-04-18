@@ -218,7 +218,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
                         }
-
+                        //a response should have been sent by the time this is reached
                         return;
                     }
                 }
