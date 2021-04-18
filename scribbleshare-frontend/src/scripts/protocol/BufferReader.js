@@ -14,10 +14,28 @@ export default class BufferReader {
         return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
     }
 
-    readBase64() {
-        let length = this.readInt32();
+    readString16() {
+        let length = this.readUint16();
         this.position += length;
-        return btoa(String.fromCharCode(...new Uint8Array(this.view.buffer)));
+        return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
+    }
+
+    readString32() {
+        let length = this.readUint32();
+        this.position += length;
+        return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
+    }
+
+    readBase64_8() {
+        return btoa(this.readString8());
+    }
+
+    readBase64_16() {
+        return btoa(this.readString8());
+    }
+
+    readBase64_32() {
+        return btoa(this.readString8());
     }
 
     readInt8() {

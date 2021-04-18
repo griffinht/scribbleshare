@@ -15,16 +15,32 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
         this.position += buffer.length;
     }
 
-    writeBase64(value) {
-        let value_binary = atob(value);
-        let array = new Uint8Array(value_binary.length);
-        for (let i = 0; i < value_binary.length; i++) {
-            array[i] = value_binary.charCodeAt(i);
-        }
-        this.writeInt32(array.byteLength);
-        this.checkResize(array.byteLength);
-        new Uint8Array(this.view.buffer).set(array, this.position);
-        this.position += array.byteLength;
+    writeString16(value) {
+        this.writeUint16(value.length);
+        let buffer = new TextEncoder().encode(value);
+        this.checkResize(buffer.length);
+        new Uint8Array(this.view.buffer).set(new Uint8Array(buffer), this.position);
+        this.position += buffer.length;
+    }
+
+    writeString32(value) {
+        this.writeUint32(value.length);
+        let buffer = new TextEncoder().encode(value);
+        this.checkResize(buffer.length);
+        new Uint8Array(this.view.buffer).set(new Uint8Array(buffer), this.position);
+        this.position += buffer.length;
+    }
+
+    writeBase64_8(value) {
+        this.writeString8(atob(value));
+    }
+
+    writeBase64_16(value) {
+        this.writeString16(atob(value));
+    }
+
+    writeBase64_32(value) {
+        this.writeString32(atob(value));
     }
 
     writeInt8(value) {
