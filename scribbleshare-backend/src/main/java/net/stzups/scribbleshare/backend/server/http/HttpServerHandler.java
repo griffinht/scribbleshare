@@ -121,18 +121,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
         }
 
-        // redirects
-        if (path.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE.length()) + rawQuery);
-            return;
-        } else if ((path + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, request, path.substring(0, path.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
-            return;
-        } else if (path.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
-            return;
-        }
-
         String[] route = getRoute(path);
         if (route == null) {
             sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -244,6 +232,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         // otherwise try to serve a regular HTTP file resource
+
+        // redirects
+        if (path.endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE.length()) + rawQuery);
+            return;
+        } else if ((path + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, request, path.substring(0, path.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+            return;
+        } else if (path.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
+            return;
+        }
 
         // get filesystem filePath from provided filePath
         final String filePath = getFilePath(path);
@@ -362,8 +362,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
+        //response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
         send(ctx, request, response);
     }
@@ -435,7 +435,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static void logIn(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
         if (!logIn(request, headers)) {
             ServerInitializer.getLogger(ctx).warning("Bad authentication");
-            send(ctx, null, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
+            sendError(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             //todo rate limiting strategies
         } else {
             ServerInitializer.getLogger(ctx).info("Good authentication");
