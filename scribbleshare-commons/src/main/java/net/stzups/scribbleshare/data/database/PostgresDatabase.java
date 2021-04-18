@@ -233,7 +233,7 @@ public class PostgresDatabase implements Database {
     @Override
     public long addResource(ByteBuf data) {
         long id = random.nextLong();
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES(?, ?)")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES (?, ?)")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setBinaryStream(2, new ByteBufInputStream(data));
             preparedStatement.execute();
@@ -244,16 +244,14 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public boolean updateResource(long id, ByteBuf data) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET data=? WHERE id=?")) {
-            preparedStatement.setBinaryStream(1, new ByteBufInputStream(data));
-            preparedStatement.setLong(2, id);
+    public void updateResource(long id, ByteBuf data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources (id, data) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET data=excluded.data")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.setBinaryStream(2, new ByteBufInputStream(data));
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
     }
 
     @Override

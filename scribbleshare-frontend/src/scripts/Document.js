@@ -57,6 +57,7 @@ class Document {
                 return;
             }
             this.canvas = new Canvas(new BufferReader(new Uint8Array(request.response).buffer));
+            console.log('GET', this.canvas);
         });
         request.open('GET', apiUrl + '/document/' + this.id);
         request.send();

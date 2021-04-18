@@ -4,6 +4,7 @@ import BufferReader from "./protocol/BufferReader.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasImage from "./canvas/canvasObjects/CanvasImage.js";
+
 const fileUploadButton = document.getElementById("fileUploadButton");
 
 fileUploadButton.addEventListener('change', (event) => {

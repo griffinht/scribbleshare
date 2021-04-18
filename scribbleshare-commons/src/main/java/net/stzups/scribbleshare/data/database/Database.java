@@ -32,10 +32,8 @@ public interface Database {
      */
     long addResource(ByteBuf resource);
 
-    /**
-     * Update resource with id, returns false if the resource does not exist
-     */
-    boolean updateResource(long id, ByteBuf resource);
+    /** insert or update resource */
+    void updateResource(long id, ByteBuf resource);
 
     /**
      * Gets resource, or null if the resource does not exist

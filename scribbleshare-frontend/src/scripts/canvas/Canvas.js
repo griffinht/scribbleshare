@@ -147,11 +147,11 @@ export class Canvas {
     }
 
     //for local drawing, updates canvas instantly
-    insert(type, id, canvasObject) {
-        let map = this.canvasObjects.get(type);
+    insert(canvasObjectType, id, canvasObject) {
+        let map = this.canvasObjects.get(canvasObjectType);
         if (map == null) {
             map = new Map();
-            this.canvasObjects.set(type, map);
+            this.canvasObjects.set(canvasObjectType, map);
         }
         map.set(id, canvasObject);//todo random id is bad
     }
