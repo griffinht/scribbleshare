@@ -209,7 +209,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, resourceId);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(resourceId, documentId);
                                 if (data == null) {
                                     break;
                                 }

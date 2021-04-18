@@ -272,8 +272,7 @@ public class PostgresDatabase implements Database {
                 }
             }
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
-            return null;//todo error handling??
+            throw new RuntimeException(e);//todo error handling??
         }
     }
 
