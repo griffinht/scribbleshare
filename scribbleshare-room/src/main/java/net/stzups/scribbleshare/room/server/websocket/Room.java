@@ -41,7 +41,12 @@ class Room {
 
     Room(Document document) {
         this.document = document;
-        canvas = new Canvas(Unpooled.wrappedBuffer(ScribbleshareRoom.getDatabase().getResource(document.getId())));
+        byte[] canvas = ScribbleshareRoom.getDatabase().getResource(document.getId());
+        if (canvas == null) {
+            this.canvas = new Canvas();
+        } else {
+            this.canvas = new Canvas(Unpooled.wrappedBuffer(canvas));
+        }
         rooms.put(document, this);
         ScribbleshareRoom.getLogger().info("Started " + this);
     }

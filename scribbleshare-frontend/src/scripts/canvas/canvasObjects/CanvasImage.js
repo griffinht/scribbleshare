@@ -1,12 +1,13 @@
 import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../Canvas.js";
 import {activeDocument} from "../../Document.js";
+import {apiUrl} from "../../main.js";
 
 export default class CanvasImage extends CanvasObject {
     constructor(reader) {
         super(reader);
         this.image = document.createElement('img');
-        this.image.src = apiUrl + '/resource/' + activeDocument.id + '/' + reader.readBigInt64();
+        this.image.src = apiUrl + '/document/' + activeDocument.id + '/' + reader.readBigInt64();
     }
 
     draw() {

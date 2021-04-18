@@ -30,6 +30,7 @@ import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
@@ -143,7 +144,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
 
                 switch (route[1]) {
-                    case "resource": {
+                    case "document": {
                         if (route.length != 3 && route.length != 4) {
                             break;
                         }
@@ -175,7 +176,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                if (!sendResource(ctx, request, documentId)) break;
+                                byte[] data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                if (data == null) { //indicates an empty unsaved canvas, so serve that
+                                    send(ctx, request, Canvas.EMPTY_CANVAS);
+                                }
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
                                 send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(request.content().array())).array());
                             } else {
@@ -201,7 +205,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 if (!document.getResources().contains(resourceId)) {
                                     break;
                                 }
-                                if (!sendResource(ctx, request, documentId)) break;
+
+                                byte[] data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                if (data == null) {
+                                    break;
+                                }
+
+                                send(ctx, request, data);
                             } else {
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -244,17 +254,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             logIn(ctx, request, headers);
         }
         sendFile(ctx, request, headers, file);
-    }
-
-    /** false if the resource was not found */
-    private static boolean sendResource(ChannelHandlerContext ctx, FullHttpRequest request, long resourceId) {
-        byte[] data = ScribbleshareBackend.getDatabase().getResource(resourceId);
-        if (data == null) {
-            return false;
-        }
-
-        send(ctx, request, data);
-        return true;
     }
 
     private static void send(ChannelHandlerContext ctx, FullHttpRequest request, byte[] responseContent) {

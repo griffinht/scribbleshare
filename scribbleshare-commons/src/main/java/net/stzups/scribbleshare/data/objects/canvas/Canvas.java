@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
@@ -10,6 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Canvas {
+    // a serialized blank canvas
+    public static final byte[] EMPTY_CANVAS;
+    static {
+        Canvas canvas = new Canvas();
+        ByteBuf byteBuf = Unpooled.buffer();
+        canvas.serialize(byteBuf);
+        EMPTY_CANVAS = byteBuf.array();
+    }
+
     private final Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
     public Canvas() {
