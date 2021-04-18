@@ -16,7 +16,11 @@ export default class BufferWriter {//todo rename to buffered buffer writer?
     }
 
     writeBase64(value) {
-        let array = Uint8Array.from(atob(value), c => c.charCodeAt(0));
+        let value_binary = atob(value);
+        let array = new Uint8Array(value_binary.length);
+        for (let i = 0; i < value_binary.length; i++) {
+            array[i] = value_binary.charCodeAt(i);
+        }
         this.writeInt32(array.byteLength);
         this.checkResize(array.byteLength);
         new Uint8Array(this.view.buffer).set(array, this.position);
