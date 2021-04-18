@@ -4,7 +4,10 @@ import BufferReader from "./protocol/BufferReader.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasImage from "./canvas/canvasObjects/CanvasImage.js";
-import BufferWriter from "./protocol/BufferWriter.js";
+
+const MAX_WIDTH = 1280;
+const MAX_HEIGHT = 1280;
+const JPEG_QUALITY = 0.69; // very nice quality with a relatively small file size
 
 const fileUploadButton = document.getElementById("fileUploadButton");
 
@@ -20,15 +23,18 @@ function uploadImage(file) {
         image.src = fileReader.result;
         image.addEventListener('load', (event) => {
             let canvas = document.createElement('canvas');
-            canvas.height = image.height;
-            canvas.width = image.width;
+            // resize image if it is too large
+            let scale = Math.min(
+                MAX_WIDTH / Math.max(image.width, MAX_WIDTH),
+                MAX_HEIGHT / Math.max(image.height, MAX_HEIGHT));
+            // scale will be 1 if the image is not too large
+            canvas.width = image.width * scale;
+            canvas.height = image.height * scale;
             let ctx = canvas.getContext('2d');
-            ctx.drawImage(image, 0, 0);
-            //todo resize
-
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             // re encode image to smallest format
             let png = canvas.toDataURL('image/png');
-            let jpeg = canvas.toDataURL('image/jpeg', 0.69); // very nice quality
+            let jpeg = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
             let output;
             if (png.length < jpeg.length) {
                 output = png;
