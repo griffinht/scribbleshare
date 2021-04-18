@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.stream.ChunkedStream;
+import jdk.jfr.ContentType;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
@@ -215,7 +216,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
                         }
-                        //a response should have been sent by the time this is reached
                         return;
                     }
                 }
@@ -257,8 +257,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 sendRedirect(ctx, request, path + "/" + rawQuery);
             } else {
                 sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
-                return;
             }
+            return;
         }
         HttpHeaders headers = new DefaultHttpHeaders();
         if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
