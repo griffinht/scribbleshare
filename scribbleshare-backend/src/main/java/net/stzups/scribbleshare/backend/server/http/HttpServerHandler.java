@@ -11,7 +11,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
@@ -291,7 +290,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);//todo
 
-            return dateFormatter.parse(ifModifiedSince).before(lastModified);
+            //round lastModified to nearest second and compare
+            System.out.println(Instant.ofEpochSecond(lastModified.getTime() / 1000) + " ----- " + dateFormatter.parse(ifModifiedSince).toInstant());
+            return Instant.ofEpochSecond(lastModified.getTime() / 1000).isAfter(dateFormatter.parse(ifModifiedSince).toInstant());
         }
 
         return true;
@@ -372,8 +373,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws Exception {
         setDateAndLastModified(headers, lastModified);
         if (isModifiedSince(request, lastModified)) {
+            System.out.println("refreshing");
             sendChunkedResource(ctx, request, headers, chunkedInput);
         } else {
+            System.out.println("cached");
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
             response.headers().set(headers);
 
