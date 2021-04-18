@@ -58,9 +58,11 @@ class Room {
 
     void end() {
         rooms.remove(document);
-        ByteBuf byteBuf = Unpooled.buffer();
-        canvas.serialize(byteBuf);
-        ScribbleshareRoom.getDatabase().updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo save interval and dirty flags
+        if (canvas.isDirty()) {
+            ByteBuf byteBuf = Unpooled.buffer();
+            canvas.serialize(byteBuf);
+            ScribbleshareRoom.getDatabase().updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
+        }
         //todo
         ScribbleshareRoom.getLogger().info("Ended room " + this);
     }

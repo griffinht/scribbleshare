@@ -24,8 +24,10 @@ public class Canvas {
     }
 
     private final Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
+    private boolean dirty = false;
 
     public Canvas() {
+        dirty = true;
     }
 
     /**
@@ -44,7 +46,14 @@ public class Canvas {
         }
     }
 
+    public boolean isDirty() {
+        boolean dirty = this.dirty;
+        this.dirty = false;
+        return dirty;
+    }
+
     public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
+        dirty = true;
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
             for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
@@ -54,6 +63,7 @@ public class Canvas {
     }
 
     public void delete(Map<CanvasObjectType, Map<Short, CanvasObject>> deleteCanvasObjects) {
+        dirty = true;
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : deleteCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.get(entry.getKey());
             if (map == null) {
