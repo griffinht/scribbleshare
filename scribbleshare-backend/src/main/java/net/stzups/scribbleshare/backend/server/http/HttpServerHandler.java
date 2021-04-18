@@ -183,7 +183,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 }
                                 send(ctx, request, data);
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(request.content())));
+                                Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
+                                if (document == null) {
+                                    ServerInitializer.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
+                                    break;
+                                }
+                                long id = ScribbleshareBackend.getDatabase().addResource(request.content());
+                                document.getResources().add(id);
+                                ScribbleshareBackend.getDatabase().updateDocument(document);
+                                send(ctx, request, Unpooled.copyLong(id));
                             } else {
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
