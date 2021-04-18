@@ -39,10 +39,8 @@ function uploadImage(file) {
             let request = new XMLHttpRequest();
             request.responseType = 'arraybuffer';
             request.open('POST', apiUrl + '/document/' + activeDocument.id);
-            console.log(output);
 
             let dataIndex = output.indexOf('data:') + 5;
-            console.log(output.substring(dataIndex, output.indexOf(';', dataIndex)));
             request.setRequestHeader('content-type', output.substring(dataIndex, output.indexOf(';', dataIndex)));
 
             request.addEventListener('load', (event) => {
@@ -59,9 +57,7 @@ function uploadImage(file) {
                 activeDocument.canvas.insert(CanvasObjectType.IMAGE, canvasId, object);
             });
 
-            let writer = new BufferWriter();
-            writer.writeBase64_32(output.substr(output.indexOf('base64,') + 7));
-            request.send(writer.getBuffer());
+            request.send(Uint8Array.from(atob(output.substr(output.indexOf('base64,') + 7)), c => c.charCodeAt(0))); //base64 string to binary
         });
         //todo verify client/server side that mime type is good
     });
