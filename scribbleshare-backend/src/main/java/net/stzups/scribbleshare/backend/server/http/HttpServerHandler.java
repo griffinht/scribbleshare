@@ -291,7 +291,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);//todo
 
             //round lastModified to nearest second and compare
-            System.out.println(Instant.ofEpochSecond(lastModified.getTime() / 1000) + " ----- " + dateFormatter.parse(ifModifiedSince).toInstant());
             return Instant.ofEpochSecond(lastModified.getTime() / 1000).isAfter(dateFormatter.parse(ifModifiedSince).toInstant());
         }
 
@@ -373,10 +372,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws Exception {
         setDateAndLastModified(headers, lastModified);
         if (isModifiedSince(request, lastModified)) {
-            System.out.println("refreshing");
+            ServerInitializer.getLogger(ctx).info("Uncached");
             sendChunkedResource(ctx, request, headers, chunkedInput);
         } else {
-            System.out.println("cached");
+            ServerInitializer.getLogger(ctx).info("Cached");
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
             response.headers().set(headers);
 
