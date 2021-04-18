@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.database;
 
+import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
@@ -29,15 +30,15 @@ public interface Database {
     /**
      * Add resource to database and return the corresponding id for the new resource
      */
-    long addResource(byte[] resource);
+    long addResource(ByteBuf resource);
 
     /**
      * Update resource with id, returns false if the resource does not exist
      */
-    boolean updateResource(long id, byte[] resource);
+    boolean updateResource(long id, ByteBuf resource);
 
     /**
      * Gets resource, or null if the resource does not exist
      */
-    byte[] getResource(long id);
+    ByteBuf getResource(long id);
 }

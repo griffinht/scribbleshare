@@ -1,6 +1,8 @@
 package net.stzups.scribbleshare.data.database;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
@@ -229,11 +231,11 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public long addResource(byte[] data) {
+    public long addResource(ByteBuf data) {
         long id = random.nextLong();
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES(?, ?)")) {
             preparedStatement.setLong(1, id);
-            preparedStatement.setBinaryStream(2, new ByteArrayInputStream(data));
+            preparedStatement.setBinaryStream(2, new ByteBufInputStream(data));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -242,9 +244,9 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public boolean updateResource(long id, byte[] data) {
+    public boolean updateResource(long id, ByteBuf data) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET data=? WHERE id=?")) {
-            preparedStatement.setBinaryStream(1, new ByteArrayInputStream(data));
+            preparedStatement.setBinaryStream(1, new ByteBufInputStream(data));
             preparedStatement.setLong(2, id);
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -255,12 +257,12 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public byte[] getResource(long id) {
+    public ByteBuf getResource(long id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getBinaryStream("data").readAllBytes();
+                    return Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes());
                 } else {
                     return null;
                 }

@@ -51,7 +51,7 @@ class Document {
         //this.addClient(localClient);
         let request = new XMLHttpRequest();
         request.responseType = 'arraybuffer';
-        request.addEventListener('load', (response) => {
+        request.addEventListener('load', (event) => {
             if (request.status !== 200) {
                 console.error(request.status + ' while fetching document');
                 return;

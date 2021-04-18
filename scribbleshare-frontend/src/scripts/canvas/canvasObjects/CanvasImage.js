@@ -6,8 +6,9 @@ import {apiUrl} from "../../main.js";
 export default class CanvasImage extends CanvasObject {
     constructor(reader) {
         super(reader);
+        this.id = reader.readBigInt64();
         this.image = document.createElement('img');
-        this.image.src = apiUrl + '/document/' + activeDocument.id + '/' + reader.readBigInt64();
+        this.image.src = apiUrl + '/document/' + activeDocument.id + '/' + this.id;
     }
 
     draw() {
@@ -16,14 +17,15 @@ export default class CanvasImage extends CanvasObject {
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeUint8(this.type);
+        writer.writeBigInt64(this.id);
     }
 
-    static create(x, y, image) {
+    static create(x, y, id, image) {
         let shape = Object.create(this.prototype);
         shape.x = x;
         shape.y = y;
-        shape.image = image;
+        shape.id = id;
+        this.image = image;
         return shape;
     }
 }

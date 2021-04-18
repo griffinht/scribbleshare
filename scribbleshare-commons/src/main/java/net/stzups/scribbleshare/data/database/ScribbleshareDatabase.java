@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.database;
 
+import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
@@ -94,17 +95,17 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public long addResource(byte[] resource) {
+    public long addResource(ByteBuf resource) {
         return postgres.addResource(resource);
     }
 
     @Override
-    public boolean updateResource(long id, byte[] resource) {
+    public boolean updateResource(long id, ByteBuf resource) {
         return postgres.updateResource(id, resource);
     }
 
     @Override
-    public byte[] getResource(long id) {
+    public ByteBuf getResource(long id) {
         return postgres.getResource(id);
     }
 }

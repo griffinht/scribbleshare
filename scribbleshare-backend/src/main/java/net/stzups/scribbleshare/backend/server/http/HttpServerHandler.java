@@ -176,12 +176,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                byte[] data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId);
                                 if (data == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.EMPTY_CANVAS);
                                 }
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(request.content().array())).array());
+                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(request.content())));
                             } else {
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -206,7 +206,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                     break;
                                 }
 
-                                byte[] data = ScribbleshareBackend.getDatabase().getResource(documentId);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId);
                                 if (data == null) {
                                     break;
                                 }
@@ -256,7 +256,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendFile(ctx, request, headers, file);
     }
 
-    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, byte[] responseContent) {
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, ByteBuf responseContent) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
         response.content().writeBytes(responseContent);

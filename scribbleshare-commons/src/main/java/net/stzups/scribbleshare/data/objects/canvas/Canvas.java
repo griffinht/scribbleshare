@@ -12,12 +12,11 @@ import java.util.Map;
 
 public class Canvas {
     // a serialized blank canvas
-    public static final byte[] EMPTY_CANVAS;
+    public static final ByteBuf EMPTY_CANVAS;
     static {
         Canvas canvas = new Canvas();
-        ByteBuf byteBuf = Unpooled.buffer();
-        canvas.serialize(byteBuf);
-        EMPTY_CANVAS = byteBuf.array();
+        EMPTY_CANVAS = Unpooled.buffer();
+        canvas.serialize(EMPTY_CANVAS);
     }
 
     private final Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
