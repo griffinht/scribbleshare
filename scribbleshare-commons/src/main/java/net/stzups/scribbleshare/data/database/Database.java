@@ -33,10 +33,10 @@ public interface Database {
     long addResource(long owner, ByteBuf resource);
 
     /** update resource */
-    void updateResource(long owner, long id, ByteBuf resource);
+    void updateResource(long id, long owner, ByteBuf resource);
 
     /**
      * Gets resource, or null if the resource does not exist
      */
-    ByteBuf getResource(long owner, long id);
+    ByteBuf getResource(long id, long owner);
 }

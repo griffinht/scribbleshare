@@ -176,7 +176,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, 0);
+                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
                                 if (data == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
                                     return;
