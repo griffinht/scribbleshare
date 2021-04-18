@@ -1,4 +1,4 @@
-export default class BufferWriter {//todo rename to buffered buffer writer?
+export default class BufferWriter {//auto resize buffer writer
     constructor(size) {
         if (size == null) {
             size = 0;
