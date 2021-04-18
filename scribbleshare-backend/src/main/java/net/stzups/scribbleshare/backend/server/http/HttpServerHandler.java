@@ -363,7 +363,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
-        //response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
         send(ctx, request, response);
     }
