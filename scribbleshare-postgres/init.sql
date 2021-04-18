@@ -39,6 +39,7 @@ CREATE TABLE documents(
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO scribbleshare_room;
+GRANT SELECT ON documents TO scribbleshare_backend;
 
 CREATE TABLE resources(
     owner bigint NOT NULL,
