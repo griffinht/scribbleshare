@@ -63,7 +63,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         pipeline
                 .addLast(new HttpServerCodec())
-                .addLast(new HttpObjectAggregator(65536))
+                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)) //2gb todo decrease
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(httpServerHandler);
