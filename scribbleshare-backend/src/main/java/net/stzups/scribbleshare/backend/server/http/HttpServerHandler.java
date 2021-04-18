@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.backend.server.http;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -10,6 +11,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
@@ -24,11 +26,13 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
+import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.objects.Document;
+import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
@@ -40,10 +44,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -56,6 +61,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final File HTTP_ROOT = new File(ScribbleshareBackend.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
     private static final int HTTP_CACHE_SECONDS = ScribbleshareBackend.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
 
+    private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
 
@@ -176,19 +182,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
-                                if (data == null) { //indicates an empty unsaved canvas, so serve that
+                                Resource resource = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
+                                if (resource == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
                                     return;
                                 }
-                                send(ctx, request, data);
+                                HttpHeaders headers = new DefaultHttpHeaders();
+                                headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
+                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
                                 Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
                                 if (document == null) {
                                     ServerInitializer.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                     break;
                                 }
-                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(document.getId(), request.content())));
+                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(document.getId(), new Resource(request.content()))));
                             } else {
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -209,12 +217,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                ByteBuf data = ScribbleshareBackend.getDatabase().getResource(resourceId, documentId);
-                                if (data == null) {
+                                Resource resource = ScribbleshareBackend.getDatabase().getResource(resourceId, documentId);
+                                if (resource == null) {
                                     break;
                                 }
 
-                                send(ctx, request, data);
+                                HttpHeaders headers = new DefaultHttpHeaders();
+                                headers.add(HttpHeaderNames.CACHE_CONTROL, "private,max-age=" + MAX_AGE_NO_EXPIRE + ",immutable");//cache and never revalidate - permanent
+                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())));
                             } else {
                                 sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -256,6 +266,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
             logIn(ctx, request, headers);
         }
+        headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + HTTP_CACHE_SECONDS);//cache but revalidate if stale todo set to private cache for resources behind authentication
         sendFile(ctx, request, headers, file);
     }
 
@@ -275,38 +286,25 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static boolean isCached(FullHttpRequest request, long lastModified) throws Exception {
+    private static boolean isModifiedSince(FullHttpRequest request, Timestamp lastModified) throws Exception {
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);//todo
 
-            // Only compare up to the second because the datetime format we send to the client does not have milliseconds
-            return (dateFormatter.parse(ifModifiedSince).getTime() / 1000) == (lastModified / 1000);
+            return dateFormatter.parse(ifModifiedSince).before(lastModified);
         }
 
-        return false;
+        return true;
     }
 
-    private static void setDate(HttpHeaders headers) {
-        setDateAndCache(headers, null);
-    }
-
-    private static void setDateAndCache(HttpHeaders headers, Long lastModified) {
+    private static void setDateAndLastModified(HttpHeaders headers, Timestamp lastModified) {//todo
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
         dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
 
-        // Date header
         Calendar time = new GregorianCalendar();
         headers.set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
 
-        if (lastModified == null) {
-            return;
-        }
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        headers.set(HttpHeaderNames.EXPIRES, dateFormatter.format(time.getTime()));
-        headers.set(HttpHeaderNames.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        headers.set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(new Date(lastModified)));
+        headers.set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(lastModified));
     }
 
     /** sets keep alive headers and returns whether the connection is keep alive */
@@ -321,20 +319,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-
-    private static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
-        response.headers().set(HttpHeaderNames.LOCATION, newUri);
-
-        send(ctx, request, response);
-    }
-
-    private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-
-        send(ctx, request, response);
-    }
 
     private static void send(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
@@ -370,21 +354,39 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, long lastModified) throws Exception {
-        if (isCached(request, lastModified)) {
+    private static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
+        response.headers().set(HttpHeaderNames.LOCATION, newUri);
+
+        send(ctx, request, response);
+    }
+
+    private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+
+        send(ctx, request, response);
+    }
+
+    /** sends if stale, otherwise sends not modified */
+    private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws Exception {
+        setDateAndLastModified(headers, lastModified);
+        if (isModifiedSince(request, lastModified)) {
+            sendChunkedResource(ctx, request, headers, chunkedInput);
+        } else {
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
             response.headers().set(headers);
-            setDate(response.headers());
 
             send(ctx, request, response);
-        } else {
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            response.headers().set(headers);
-            setDateAndCache(response.headers(), lastModified);
-
-            send(ctx, request, response, new HttpChunkedInput(chunkedInput));
         }
+    }
 
+    /** sends resource with headers */
+    private static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(headers);
+
+        send(ctx, request, response, new HttpChunkedInput(chunkedInput));
     }
 
     /** make sure the file being sent is valid */
@@ -405,8 +407,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
         headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
 
-        sendChunkedResource(ctx, request, headers, new ChunkedFile(raf, 0, fileLength, 8192), file.lastModified());
-
+        sendChunkedResource(ctx, request, headers, new ChunkedFile(raf, 0, fileLength, 8192), Timestamp.from(Instant.ofEpochMilli(file.lastModified())));
     }
 
 

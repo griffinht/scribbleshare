@@ -44,6 +44,7 @@ GRANT SELECT ON documents TO scribbleshare_backend;
 CREATE TABLE resources(
     id bigint NOT NULL,
     owner bigint NOT NULL,
+    last_modified timestamp NOT NULL,
     data bytea NOT NULL,
     PRIMARY KEY (id)
 );

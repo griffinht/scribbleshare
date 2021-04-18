@@ -39,6 +39,9 @@ class Document {
         });
         documents.set(this.id, this);
         this.canvas = new Canvas();
+        if (activeDocument == null) {
+            this.open();
+        }
     }
 
     open() {
@@ -133,9 +136,7 @@ socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateC
     }
 });
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
-    documents.set(serverMessageUpdateDocument.id,
-        new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""),
-            serverMessageUpdateDocument.id));
+    documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id));
 });
 socket.addEventListener(SocketEventType.OPEN, () => {
     let invite;

@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.database;
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
+import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
@@ -30,13 +31,13 @@ public interface Database {
     /**
      * Add resource to database and return the corresponding id for the new resource
      */
-    long addResource(long owner, ByteBuf resource);
+    long addResource(long owner, Resource resource);
 
     /** update resource */
-    void updateResource(long id, long owner, ByteBuf resource);
+    void updateResource(long id, long owner, Resource resource);
 
     /**
      * Gets resource, or null if the resource does not exist
      */
-    ByteBuf getResource(long id, long owner);
+    Resource getResource(long id, long owner);
 }

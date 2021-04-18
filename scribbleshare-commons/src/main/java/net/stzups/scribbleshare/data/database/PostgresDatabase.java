@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
+import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
@@ -20,6 +21,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -106,7 +109,7 @@ public class PostgresDatabase implements Database {
             e.printStackTrace();
             return null;
         }
-        addResource(document.getId(), document.getId(), Canvas.getEmptyCanvas());
+        addResource(document.getId(), document.getId(), new Resource(Canvas.getEmptyCanvas()));
         owner.getOwnedDocuments().add(document.getId());
         updateUser(owner);//todo
         return document;
@@ -230,17 +233,18 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public long addResource(long owner, ByteBuf data) {
+    public long addResource(long owner, Resource resource) {
         long id = random.nextLong();
-        addResource(id, owner, data);
+        addResource(id, owner, resource);
         return id;
     }
 
-    private void addResource(long id, long owner, ByteBuf data) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, owner, data) VALUES (?, ?, ?)")) {
+    private void addResource(long id, long owner, Resource resource) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, owner, last_modified, data) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, owner);
-            preparedStatement.setBinaryStream(3, new ByteBufInputStream(data));
+            preparedStatement.setTimestamp(3, resource.getLastModified());
+            preparedStatement.setBinaryStream(4, new ByteBufInputStream(resource.getData()));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -248,11 +252,12 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void updateResource(long id, long owner, ByteBuf data) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET data=? WHERE id=? AND owner=?")) {
-            preparedStatement.setBinaryStream(1, new ByteBufInputStream(data));
-            preparedStatement.setLong(2, id);
-            preparedStatement.setLong(3, owner);
+    public void updateResource(long id, long owner, Resource data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET last_modified=?, data=? WHERE id=? AND owner=?")) {
+            preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
+            preparedStatement.setBinaryStream(2, new ByteBufInputStream(data.getData()));
+            preparedStatement.setLong(3, id);
+            preparedStatement.setLong(4, owner);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -260,13 +265,13 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public ByteBuf getResource(long id, long owner) {
+    public Resource getResource(long id, long owner) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=? AND owner=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, owner);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes());
+                    return new Resource(resultSet.getTimestamp("last_modified"), Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
                     return null;
                 }

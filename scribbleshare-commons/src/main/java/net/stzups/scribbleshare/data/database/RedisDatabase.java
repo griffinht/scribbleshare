@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
+import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
@@ -89,17 +90,17 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public long addResource(long owner, ByteBuf resource) {
+    public long addResource(long owner, Resource resource) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateResource(long id, long owner, ByteBuf resource) {
+    public void updateResource(long id, long owner, Resource resource) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ByteBuf getResource(long id, long owner) {
+    public Resource getResource(long id, long owner) {
         throw new UnsupportedOperationException();
     }
 /*
