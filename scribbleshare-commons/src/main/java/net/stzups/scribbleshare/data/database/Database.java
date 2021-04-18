@@ -26,6 +26,18 @@ public interface Database {
     HttpSession getHttpSession(long id);
     void addHttpSession(HttpSession httpSession);
 
-    void addResource(long id, byte[] resource);
+    /**
+     * Add resource to database and return the corresponding id for the new resource
+     */
+    long addResource(byte[] resource);
+
+    /**
+     * Update resource with id, returns false if the resource does not exist
+     */
+    boolean updateResource(long id, byte[] resource);
+
+    /**
+     * Gets resource, or null if the resource does not exist
+     */
     byte[] getResource(long id);
 }

@@ -48,7 +48,7 @@ CREATE TABLE resources(
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE, DELETE ON resources TO scribbleshare_room;
-GRANT SELECT ON resources TO scribbleshare_backend;
+GRANT SELECT, INSERT ON resources TO scribbleshare_backend;
 
 CREATE TABLE invite_codes(
     code char(6) NOT NULL,

@@ -89,7 +89,12 @@ public class RedisDatabase implements Database {
     }
 
     @Override
-    public void addResource(long id, byte[] resource) {
+    public long addResource(byte[] resource) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean updateResource(long id, byte[] resource) {
         throw new UnsupportedOperationException();
     }
 

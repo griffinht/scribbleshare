@@ -94,8 +94,13 @@ public class ScribbleshareDatabase implements Database {
     }
 
     @Override
-    public void addResource(long id, byte[] resource) {
-        postgres.addResource(id, resource);
+    public long addResource(byte[] resource) {
+        return postgres.addResource(resource);
+    }
+
+    @Override
+    public boolean updateResource(long id, byte[] resource) {
+        return postgres.updateResource(id, resource);
     }
 
     @Override

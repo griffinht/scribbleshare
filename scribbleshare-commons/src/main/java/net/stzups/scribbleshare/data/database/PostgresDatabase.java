@@ -214,7 +214,7 @@ public class PostgresDatabase implements Database {
             preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentHttpSession.getHashedToken()));
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace();//todo error handling
         }
     }
 
@@ -229,20 +229,34 @@ public class PostgresDatabase implements Database {
     }
 
     @Override
-    public void addResource(long id, byte[] data) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES(?, ?) ON CONFLICT (document) DO UPDATE SET data=excluded.data")) {
+    public long addResource(byte[] data) {
+        long id = random.nextLong();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO resources(id, data) VALUES(?, ?)")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setBinaryStream(2, new ByteArrayInputStream(data));
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        throw new UnsupportedOperationException();
+        return id;
+    }
+
+    @Override
+    public boolean updateResource(long id, byte[] data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE resources SET data=? WHERE id=?")) {
+            preparedStatement.setBinaryStream(1, new ByteArrayInputStream(data));
+            preparedStatement.setLong(2, id);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
     public byte[] getResource(long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE document=?")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {

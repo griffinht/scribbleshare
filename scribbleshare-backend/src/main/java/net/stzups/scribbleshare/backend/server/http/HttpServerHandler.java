@@ -144,17 +144,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 switch (route[1]) {
                     case "resource": {
-                        if (route.length != 4) {
+                        if (route.length != 3 && route.length != 4) {
                             break;
                         }
 
-
-
                         Long userId = authenticate(ctx, request);
                         if (userId == null) {
-                            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-                            ctx.writeAndFlush(fullHttpResponse);
-                            ctx.close();
+                            sendError(ctx, request, HttpResponseStatus.UNAUTHORIZED);
                             return;
                         }
 
@@ -164,33 +160,52 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             break;
                         }
 
-                        user.getOwnedDocuments()
-
                         long documentId;
-                        long resourceId;
                         try {
                             documentId = Long.parseLong(route[2]);
-                            resourceId = Long.parseLong(route[3]);
                         } catch (NumberFormatException e) {
                             break;
                         }
-                        Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
-                        if (document == null) {
-                            break;
+
+                        if (!user.getOwnedDocuments().contains(documentId) && !user.getSharedDocuments().contains(documentId)) {
+                            break; //user cant do this to documents they don't have access to todo public documents
                         }
 
+                        // user has access to the document
 
-                        byte[] data = ScribbleshareBackend.getDatabase().getResource(resourceId);
-                        if (data == null) {
-                            break;
+                        if (route.length == 3) { // get document or submit new resource to document
+                            if (request.method().equals(HttpMethod.GET)) {
+                                if (!sendResource(ctx, request, documentId)) break;
+                            } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
+                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(request.content().array())).array());
+                            } else {
+                                sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                            }
+                        } else { // route.length == 4, get resource from document
+                            // does the document have this resource?
+                            long resourceId;
+                            try {
+                                resourceId = Long.parseLong(route[3]);
+                            } catch (NumberFormatException e) {
+                                break;
+                            }
+
+                            Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
+                            if (document == null) {
+                                ServerInitializer.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
+                                break;
+                            }
+
+                            if (request.method().equals(HttpMethod.GET)) {
+                                // get resource, resource must exist on the document
+                                if (!document.getResources().contains(resourceId)) {
+                                    break;
+                                }
+                                if (!sendResource(ctx, request, documentId)) break;
+                            } else {
+                                sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                            }
                         }
-
-                        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
-                        response.content().writeBytes(data);
-
-                        send(ctx, request, response);
-
 
                         return;
                     }
@@ -229,6 +244,25 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             logIn(ctx, request, headers);
         }
         sendFile(ctx, request, headers, file);
+    }
+
+    /** false if the resource was not found */
+    private static boolean sendResource(ChannelHandlerContext ctx, FullHttpRequest request, long resourceId) {
+        byte[] data = ScribbleshareBackend.getDatabase().getResource(resourceId);
+        if (data == null) {
+            return false;
+        }
+
+        send(ctx, request, data);
+        return true;
+    }
+
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, byte[] responseContent) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+        response.content().writeBytes(responseContent);
+
+        send(ctx, request, response);
     }
 
     @Override
