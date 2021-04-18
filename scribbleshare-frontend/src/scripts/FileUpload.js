@@ -1,6 +1,9 @@
 import {activeDocument, getDt, updateCanvas} from "./Document.js";
 import {apiUrl} from "./main.js";
 import BufferReader from "./protocol/BufferReader.js";
+import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
+import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
+import CanvasImage from "./canvas/canvasObjects/CanvasImage.js";
 const fileUploadButton = document.getElementById("fileUploadButton");
 
 fileUploadButton.addEventListener('change', (event) => {
@@ -22,14 +25,12 @@ function newFile(file) {
                 return;
             }
             let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
-            console.log(id);
-            /*    let image = document.createElement('img');
-            image.file = file;
-            document.body.append(image);//todo remove*/
-            /*let object = CanvasImage.create(0, 0, image);
-            let id = (Math.random() - 0.5) * 32000;
-            updateCanvas.update(CanvasObjectType.IMAGE, id, CanvasObjectWrapper.create(getDt(), object));
-            activeDocument.canvas.insert(CanvasObjectType.IMAGE, id, object);*/
+            let image = document.createElement('img');
+            image.file = file;//server should have the image but we could instead just use the local one
+            let object = CanvasImage.create(0, 0, id, image);
+            let canvasId = (Math.random() - 0.5) * 32000;
+            updateCanvas.update(CanvasObjectType.IMAGE, canvasId, CanvasObjectWrapper.create(getDt(), object));
+            activeDocument.canvas.insert(CanvasObjectType.IMAGE, canvasId, object);
         });
 
         request.send(fileReader.result);

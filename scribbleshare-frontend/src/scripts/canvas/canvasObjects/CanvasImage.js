@@ -12,6 +12,7 @@ export default class CanvasImage extends CanvasObject {
     }
 
     draw() {
+        console.log(this.image);
         ctx.drawImage(this.image, this.x, this.y);
     }
 
