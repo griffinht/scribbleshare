@@ -11,7 +11,7 @@ import java.util.Map;
 public class Shape extends CanvasObject {
     private enum Type {
         RECTANGLE(0),
-        CIRCLE(1),
+        ELLIPSE(1),
         ;
 
         private static final Map<Integer, Type> objectTypeMap = new IntObjectHashMap<>();
@@ -30,7 +30,7 @@ public class Shape extends CanvasObject {
         public static Type valueOf(int id) {
             Type objectType = objectTypeMap.get(id);
             if (objectType == null) {
-                throw new IllegalArgumentException("Unknown CanvasObjectType for given id " + id);
+                throw new IllegalArgumentException("Unknown Shape type for given id " + id);
             }
             return objectType;
         }
