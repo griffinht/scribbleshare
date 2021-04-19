@@ -13,8 +13,6 @@ import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
 import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
-import {apiUrl} from "./main.js";
-import BufferReader from "./protocol/BufferReader.js";
 
 const documents = new Map();
 export let activeDocument = null;
@@ -42,7 +40,6 @@ class Document {
     }
 
     open() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         activeDocument = this;
         inviteButton.style.visibility = 'visible';
         console.log('opened ' + this.name);
@@ -67,7 +64,7 @@ class Document {
 
     close() {
         localUpdate();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);//todo a loading screen?
+        //todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);
         })
@@ -179,10 +176,3 @@ function localUpdate() {
 export function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
-
-canvas.addEventListener('click', (event) => {
-    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    let id = (Math.random() - 0.5) * 32000;
-    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
-    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
-})

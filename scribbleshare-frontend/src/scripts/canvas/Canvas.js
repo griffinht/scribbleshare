@@ -1,11 +1,68 @@
 import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
+import {activeDocument, getDt, updateCanvas} from "../Document.js";
+import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
 const MAX_TIME = 2000;//todo copied from document.js
+const SELECT_PADDING = 10;
+
+const mouse = {
+    x:0,
+    y:0,
+    width:0,
+    height:0,
+    down:false,
+    drag:false
+};
+
+let selected = null;
+
+canvas.addEventListener('mousemove', (event) => {
+    mouse.x = event.offsetX;
+    mouse.y = event.offsetY;
+    if (mouse.down) {
+        mouse.drag = true;
+    }
+    if (mouse.drag && selected != null) {
+        selected.x += event.movementX;
+        selected.y += event.movementY;
+        //updateCanvas.update(selected);
+    }
+});
+
+canvas.addEventListener('mousedown', (event) => {
+    mouse.down = true;
+});
+
+canvas.addEventListener('mouseup', (event) => {
+    if (!mouse.drag) {
+        onclick(event);
+    }
+    mouse.down = false;
+    mouse.drag = false;
+});
+
+canvas.addEventListener('mouseleave', (event) => {
+    mouse.down = false;
+    mouse.drag = false;
+});
+
+canvas.addEventListener('mouseenter', (event) => {
+    if ((event.buttons & 1) === 1) {
+        mouse.down = true;
+    }
+});
+
+function onclick(event) {
+    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+    let id = (Math.random() - 0.5) * 32000;
+    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
+    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
+}
 
 export class Canvas {
     constructor(reader) {
@@ -26,6 +83,7 @@ export class Canvas {
     }
 
     draw(dt) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         dt = dt / MAX_TIME * 255;
         this.updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
@@ -48,9 +106,21 @@ export class Canvas {
                 ctx.translate(v.x, v.y);
                 ctx.rotate((v.rotation / 255) * (2 * Math.PI));
                 v.draw();
+                if (!mouse.drag && selected === null) {
+                    if (aabb(v, mouse, SELECT_PADDING)) {
+                        selected = v;
+                    }
+                }
+                if (v === selected) {
+                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, v.width + SELECT_PADDING, v.height + SELECT_PADDING);
+                }
                 ctx.restore();
-            })
-        })
+
+            });
+        });
+        if (selected !== null && !aabb(selected, mouse, SELECT_PADDING)) {
+            selected = null;
+        }
         //todo
         /*this.objects.forEach((type, objects) => {
             objects.forEach((object) => {
@@ -194,4 +264,12 @@ export function getCanvasObject(type, reader) {
             console.error('unknown type ' + type);
     }
     return object;
+}
+
+function aabb(rect1, rect2, padding) {
+    let p = padding;
+    return rect1.x - p < rect2.x + rect2.width &&
+        rect1.x + rect1.width + p > rect2.x &&
+        rect1.y - p < rect2.y + rect2.height &&
+        rect1.y + rect1.height + p > rect2.y;
 }
