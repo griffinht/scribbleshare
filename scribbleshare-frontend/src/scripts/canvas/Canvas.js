@@ -27,10 +27,14 @@ canvas.addEventListener('mousemove', (event) => {
     if (mouse.down) {
         mouse.drag = true;
     }
-    if (mouse.drag && selected != null) {
-        selected.x += event.movementX;
-        selected.y += event.movementY;
-        //updateCanvas.update(selected);
+    if (mouse.drag) {
+        if (selected != null) {
+            selected.x += event.movementX;
+            selected.y += event.movementY;
+            //updateCanvas.update(selected);
+        } else {
+            ondrag(event);
+        }
     }
 });
 
@@ -62,6 +66,10 @@ function onclick(event) {
     let id = (Math.random() - 0.5) * 32000;
     updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
     activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
+}
+
+function ondrag(event) {
+    //todo draw line
 }
 
 export class Canvas {
