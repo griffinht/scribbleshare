@@ -169,14 +169,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
-                                Resource resource = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
+                                //todo
+                                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                                return;
+                                /*Resource resource = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
                                 if (resource == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
                                     return;
                                 }
                                 HttpHeaders headers = new DefaultHttpHeaders();
                                 headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
-                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified
+                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
                                 Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
                                 if (document == null) {

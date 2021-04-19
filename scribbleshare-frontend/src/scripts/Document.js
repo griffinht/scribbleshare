@@ -39,12 +39,10 @@ class Document {
         });
         documents.set(this.id, this);
         this.canvas = new Canvas();
-        if (activeDocument == null) {
-            this.open();
-        }
     }
 
     open() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         activeDocument = this;
         inviteButton.style.visibility = 'visible';
         console.log('opened ' + this.name);
@@ -52,7 +50,8 @@ class Document {
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
         this.canvas.draw(-1);
         //this.addClient(localClient);
-        let request = new XMLHttpRequest();
+        //todo
+        /*let request = new XMLHttpRequest();
         request.responseType = 'arraybuffer';
         request.addEventListener('load', (event) => {
             if (request.status !== 200) {
@@ -63,7 +62,7 @@ class Document {
             console.log('GET', this.canvas);
         });
         request.open('GET', apiUrl + '/document/' + this.id);
-        request.send();
+        request.send();*/
     }
 
     close() {
@@ -128,6 +127,11 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveC
     console.log('Remove client ', serverMessageRemoveClient.id);
     activeDocument.removeClient(serverMessageRemoveClient.id)
 });
+socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
+    let document = documents.get(serverMessageOpenDocument.id);
+    document.canvas = serverMessageOpenDocument.canvas;
+    document.open();
+})
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateCanvas) => {
     if (activeDocument != null) {
         activeDocument.canvas.updateMultiple(serverMessageUpdateCanvas.canvasObjectWrappers);

@@ -10,6 +10,7 @@ import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
@@ -84,7 +85,7 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
+        client.sendMessage(new ServerMessageOpenDocument(document, canvas));//todo
         //for the existing clients
         queueMessage(new ServerMessageAddClient(client));
         client.queueMessage(new ServerMessageAddClient(clients));//todo

@@ -7,7 +7,8 @@ public enum ServerMessageType {
     UPDATE_DOCUMENT(3),
     ADD_USER(4),
     DELETE_DOCUMENT(5),
-    GET_INVITE(6)
+    GET_INVITE(6),
+    OPEN_DOCUMENT(7)
     ;
 
     private final int id;
