@@ -31,6 +31,8 @@ export default class Shape extends CanvasObject {
         shape.width = width;
         shape.height = height;
         shape.rotation = 0;
+
+        shape.type = Type.RECTANGLE;
         return shape;
     }
 }

@@ -26,7 +26,7 @@ export class Canvas {
     }
 
     draw(dt) {
-        dt = dt / 2000 * 255;
+        dt = dt / MAX_TIME * 255;
         this.updateCanvasObjects.forEach((value, key) => {
             let map = this.canvasObjects.get(key);
             if (map == null) {
