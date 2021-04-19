@@ -12,7 +12,7 @@ export default class CanvasImage extends CanvasObject {
     }
 
     draw() {
-        ctx.drawImage(this.image, this.x, this.y);
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
     }
 
     serialize(writer) {
@@ -24,6 +24,10 @@ export default class CanvasImage extends CanvasObject {
         let shape = Object.create(this.prototype);
         shape.x = x;
         shape.y = y;
+        shape.width = image.width;
+        shape.height = image.height;
+        shape.rotation = 0;
+
         shape.id = id;
         shape.image = image;
         return shape;

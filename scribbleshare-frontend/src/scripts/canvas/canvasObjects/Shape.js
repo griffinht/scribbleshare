@@ -4,18 +4,14 @@ import {ctx} from "../Canvas.js";
 export default class Shape extends CanvasObject {
     constructor(reader) {
         super(reader);
-        this.width = reader.readUint16();
-        this.height = reader.readUint16();
     }
 
     draw() {
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillRect(0, 0, this.width, this.height);
     }
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeInt16(this.width);
-        writer.writeInt16(this.height);
     }
 
     static create(x, y, width, height) {
@@ -24,6 +20,7 @@ export default class Shape extends CanvasObject {
         shape.y = y;
         shape.width = width;
         shape.height = height;
+        shape.rotation = 0;
         return shape;
     }
 }

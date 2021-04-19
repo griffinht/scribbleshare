@@ -45,7 +45,8 @@ export class Canvas {
         this.canvasObjects.forEach((value, key) => {
             value.forEach((v, k) => {
                 ctx.save();
-                ctx.translate(value.x, value.y);
+                ctx.translate(v.x, v.y);
+                ctx.rotate((v.rotation / 255) * (2 * Math.PI));
                 v.draw();
                 ctx.restore();
             })

@@ -55,8 +55,6 @@ function uploadImage(file) {
                     return;
                 }
                 let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
-                let image = document.createElement('img');
-                image.file = file;//server should have the image but we could instead just use the local one
                 let object = CanvasImage.create(0, 0, id, image);
                 let canvasId = (Math.random() - 0.5) * 32000;
                 updateCanvas.update(CanvasObjectType.IMAGE, canvasId, CanvasObjectWrapper.create(getDt(), object));
