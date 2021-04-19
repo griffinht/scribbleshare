@@ -1,76 +1,13 @@
 import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
-import {activeDocument, getDt, updateCanvas} from "../Document.js";
+import {activeDocument} from "../Document.js";
 import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
+import socket from "../protocol/WebSocketHandler.js";
+import ClientMessageUpdateCanvas from "../protocol/client/messages/ClientMessageUpdateCanvas.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
-
-const MAX_TIME = 2000;//todo copied from document.js
-const SELECT_PADDING = 10;
-
-const mouse = {
-    x:0,
-    y:0,
-    width:0,
-    height:0,
-    down:false,
-    drag:false
-};
-
-let selected = null;
-
-canvas.addEventListener('mousemove', (event) => {
-    mouse.x = event.offsetX;
-    mouse.y = event.offsetY;
-    if (mouse.down) {
-        mouse.drag = true;
-    }
-    if (mouse.drag) {
-        if (selected != null) {
-            selected.x += event.movementX;
-            selected.y += event.movementY;
-            //updateCanvas.update(selected);
-        } else {
-            ondrag(event);
-        }
-    }
-});
-
-canvas.addEventListener('mousedown', (event) => {
-    mouse.down = true;
-});
-
-canvas.addEventListener('mouseup', (event) => {
-    if (!mouse.drag) {
-        onclick(event);
-    }
-    mouse.down = false;
-    mouse.drag = false;
-});
-
-canvas.addEventListener('mouseleave', (event) => {
-    mouse.down = false;
-    mouse.drag = false;
-});
-
-canvas.addEventListener('mouseenter', (event) => {
-    if ((event.buttons & 1) === 1) {
-        mouse.down = true;
-    }
-});
-
-function onclick(event) {
-    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    let id = (Math.random() - 0.5) * 32000;
-    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
-    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
-}
-
-function ondrag(event) {
-    //todo draw line
-}
 
 export class Canvas {
     constructor(reader) {
@@ -281,3 +218,98 @@ function aabb(rect1, rect2, padding) {
         rect1.y - p < rect2.y + rect2.height &&
         rect1.y + rect1.height + p > rect2.y;
 }
+
+const MAX_TIME = 2000;//todo copied from document.js
+const SELECT_PADDING = 10;
+
+const mouse = {
+    x:0,
+    y:0,
+    width:0,
+    height:0,
+    down:false,
+    drag:false
+};
+
+let selected = null;
+
+canvas.addEventListener('mousemove', (event) => {
+    mouse.x = event.offsetX;
+    mouse.y = event.offsetY;
+    if (mouse.down) {
+        mouse.drag = true;
+    }
+    if (mouse.drag) {
+        if (selected != null) {
+            selected.x += event.movementX;
+            selected.y += event.movementY;
+        } else {
+            ondrag(event);
+        }
+    }
+});
+
+canvas.addEventListener('mousedown', (event) => {
+    mouse.down = true;
+});
+
+canvas.addEventListener('mouseup', (event) => {
+    if (!mouse.drag) {
+        onclick(event);
+    }
+    mouse.down = false;
+    mouse.drag = false;
+});
+
+canvas.addEventListener('mouseleave', (event) => {
+    mouse.down = false;
+    mouse.drag = false;
+});
+
+canvas.addEventListener('mouseenter', (event) => {
+    if ((event.buttons & 1) === 1) {
+        mouse.down = true;
+    }
+});
+
+function getDt() {
+    return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
+}
+
+export function update(canvasObjectType, id, canvasObject) {
+    updateCanvas.update(canvasObjectType, id, CanvasObjectWrapper.create(getDt(), canvasObject));
+}
+
+const UPDATE_INTERVAL = 1000;
+let lastUpdate = 0;
+let updateCanvas = new Canvas();
+setInterval(localUpdate, UPDATE_INTERVAL);
+export function localUpdate() {
+    if (selected != null && mouse.drag) {
+        activeDocument.canvas.canvasObjects.forEach((value, key) => {
+            value.forEach((v, k) => {
+                if (v === selected) {
+                    update(key, k, v);
+                    //todo break;
+                }
+            })
+        });
+    }
+    lastUpdate = window.performance.now();
+    if (updateCanvas.updateCanvasObjects.size > 0) {
+        socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
+        updateCanvas.updateCanvasObjects.clear();
+    }
+}
+
+function onclick(event) {
+    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+    let id = (Math.random() - 0.5) * 32000;
+    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
+    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
+}
+
+function ondrag(event) {
+    //todo draw line
+}
+

@@ -1,4 +1,4 @@
-import {canvas, Canvas, ctx} from "./canvas/Canvas.js";
+import {canvas, Canvas, ctx, localUpdate} from "./canvas/Canvas.js";
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './protocol/WebSocketHandler.js'
@@ -159,20 +159,3 @@ inviteButton.addEventListener('click', (event) => {
 socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
     window.alert('Join at localhost/index.html?invite=' + serverMessageGetInvite.code);
 })
-
-const MAX_TIME = 2000;
-const UPDATE_INTERVAL = 1000;
-let lastUpdate = 0;
-export let updateCanvas = new Canvas();
-setInterval(localUpdate, UPDATE_INTERVAL);
-function localUpdate() {
-    lastUpdate = window.performance.now();
-    if (updateCanvas.updateCanvasObjects.size > 0) {
-        socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
-        updateCanvas.updateCanvasObjects.clear();
-    }
-}
-
-export function getDt() {
-    return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
-}
