@@ -241,6 +241,7 @@ canvas.addEventListener('mousemove', (event) => {
     }
     if (mouse.drag) {
         if (selected != null) {
+            selected.dirty = true;
             selected.x += event.movementX;
             selected.y += event.movementY;
         } else {
@@ -276,8 +277,9 @@ function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
 
-export function update(canvasObjectType, id, canvasObject) {
-    updateCanvas.update(canvasObjectType, id, CanvasObjectWrapper.create(getDt(), canvasObject));
+export function insert(canvasObjectType, canvasObject) {
+    let id = (Math.random() - 0.5) * 32000;
+    activeDocument.canvas.insert(canvasObjectType, id, canvasObject);
 }
 
 const UPDATE_INTERVAL = 1000;
@@ -285,16 +287,17 @@ let lastUpdate = 0;
 let updateCanvas = new Canvas();
 setInterval(localUpdate, UPDATE_INTERVAL);
 export function localUpdate() {
-    if (selected != null && mouse.drag) {
-        activeDocument.canvas.canvasObjects.forEach((value, key) => {
-            value.forEach((v, k) => {
-                if (v === selected) {
-                    update(key, k, v);
-                    //todo break;
-                }
-            })
-        });
+    if (activeDocument == null) {
+        return;
     }
+    activeDocument.canvas.canvasObjects.forEach((value, key) => {
+        value.forEach((v, k) => {
+            if (v.dirty) {
+                v.dirty = false;
+                updateCanvas.update(key, k, CanvasObjectWrapper.create(getDt(), v));
+            }
+        })
+    });
     lastUpdate = window.performance.now();
     if (updateCanvas.updateCanvasObjects.size > 0) {
         socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
@@ -304,9 +307,7 @@ export function localUpdate() {
 
 function onclick(event) {
     let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    let id = (Math.random() - 0.5) * 32000;
-    updateCanvas.update(CanvasObjectType.SHAPE, id, CanvasObjectWrapper.create(getDt(), shape));
-    activeDocument.canvas.insert(CanvasObjectType.SHAPE, id, shape);
+    insert(CanvasObjectType.SHAPE, shape);
 }
 
 function ondrag(event) {

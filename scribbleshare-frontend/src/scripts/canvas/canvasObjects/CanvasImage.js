@@ -22,6 +22,7 @@ export default class CanvasImage extends CanvasObject {
 
     static create(x, y, id, image) {
         let shape = Object.create(this.prototype);
+        shape.dirty = true;
         shape.x = x;
         shape.y = y;
         shape.width = image.width;

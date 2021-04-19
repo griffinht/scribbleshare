@@ -7,10 +7,6 @@ import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageO
 import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
-import ClientMessageUpdateCanvas from "./protocol/client/messages/ClientMessageUpdateCanvas.js";
-import Shape from "./canvas/canvasObjects/Shape.js";
-import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
-import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 
