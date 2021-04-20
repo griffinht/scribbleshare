@@ -72,7 +72,7 @@ class Room {
         return document;
     }
 
-    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
+    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> canvasObjects) {
         canvas.update(canvasObjects);
         ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
         queueMessageExcept(serverMessageUpdateCanvas, client);

@@ -4,7 +4,7 @@ import ClientMessage from "../ClientMessage.js";
 export default class ClientMessageUpdateCanvas extends ClientMessage {
     constructor(canvasObjects) {
         super(ClientMessageType.UPDATE_CANVAS);
-        this.canvasObjectWrappers = canvasObjects;//CanvasObjectWrapper
+        this.canvasObjectWrappers = canvasObjects;
     }
 
     serialize(writer) {
@@ -13,9 +13,12 @@ export default class ClientMessageUpdateCanvas extends ClientMessage {
         this.canvasObjectWrappers.forEach((map, canvasObjectType) => {
             writer.writeUint8(canvasObjectType);
             writer.writeUint16(map.size);
-            map.forEach((canvasObjectWrapper, id) => {
+            map.forEach((canvasObjectWrappers, id) => {
                 writer.writeInt16(id);
-                canvasObjectWrapper.serialize(writer);
+                writer.writeUint8(canvasObjectWrappers.length);
+                canvasObjectWrappers.forEach((canvasObjectWrapper) => {
+                    canvasObjectWrapper.serialize(writer);
+                });
             });
         });
     }

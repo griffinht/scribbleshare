@@ -141,14 +141,21 @@ export class Canvas {
 
     //for remote drawing, places into queue for being updated
     updateMultiple(updateCanvasObjectWrappers) {
-        updateCanvasObjectWrappers.forEach((value, key) => {
-            let map = this.updateCanvasObjects.get(key);
+        updateCanvasObjectWrappers.forEach((canvasObjectWrappersMap, canvasObjectType) => {
+            let map = this.updateCanvasObjects.get(canvasObjectType);
             if (map == null) {
                 map = new Map();
-                this.updateCanvasObjects.set(key, map);
+                this.updateCanvasObjects.set(canvasObjectType, map);
             }
-            value.forEach((v, k) => {
-                map.set(k, v);
+            canvasObjectWrappersMap.forEach((canvasObjectWrappers, id) => {
+                let array = map.get(id);
+                if (array == null) {
+                    array = [];
+                    map.set(id, array);
+                }
+                canvasObjectWrappers.forEach((canvasObjectWrapper) => {
+                    array.push(canvasObjectWrapper);
+                })
             });
         });
     }
@@ -159,7 +166,12 @@ export class Canvas {
             map = new Map();
             this.updateCanvasObjects.set(canvasObjectType, map);
         }
-        map.set(id, canvasObjectWrapper);
+        let array = map.get(id);
+        if (array === undefined) {
+            array = [];
+            map.set(id, array);
+        }
+        array.push(canvasObjectWrapper);
     }
 
     //for local drawing, updates canvas instantly
@@ -225,6 +237,8 @@ const SELECT_PADDING = 10;
 const mouse = {
     x:0,
     y:0,
+    dx:0,
+    dy:0,
     width:0,
     height:0,
     down:false,
@@ -236,6 +250,13 @@ let selected = null;
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = event.offsetX;
     mouse.y = event.offsetY;
+    mouse.dx += event.movementX;
+    mouse.dy += event.movementY;
+    if (Math.max(mouse.dx, mouse.dy) > 10) {
+        mouse.dx = 0;
+        mouse.dy = 0;
+        update();
+    }
     if (mouse.down) {
         mouse.drag = true;
     }
@@ -299,6 +320,7 @@ function update() {
         })
     });
 }
+
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
 let updateCanvas = new Canvas();

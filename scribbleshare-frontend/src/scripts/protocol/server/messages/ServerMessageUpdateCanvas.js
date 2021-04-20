@@ -13,7 +13,13 @@ export default class ServerMessageUpdateCanvas extends ServerMessage {
             this.canvasObjectWrappers.set(type, map);
             let lengthJ = reader.readUint16();
             for (let j = 0; j < lengthJ; j++) {
-                map.set(reader.readInt16(), new CanvasObjectWrapper(type, reader));
+                let id = reader.readInt16();
+                let canvasObjectWrappers = [];
+                let lengthK = reader.readUint8();
+                for (let k = 0; k < lengthK; k++) {
+                    canvasObjectWrappers[k] = new CanvasObjectWrapper(type, reader);
+                }
+                map.set(id, canvasObjectWrappers);
             }
         }
     }

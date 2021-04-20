@@ -9,9 +9,9 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMess
 import java.util.Map;
 
 public class ServerMessageUpdateCanvas extends ServerMessage {
-    private final  Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects;
+    private final  Map<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> canvasObjects;
 
-    public ServerMessageUpdateCanvas(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
+    public ServerMessageUpdateCanvas(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> canvasObjects) {
         super(ServerMessageType.UPDATE_CANVAS);
         this.canvasObjects = canvasObjects;
     }
@@ -19,12 +19,15 @@ public class ServerMessageUpdateCanvas extends ServerMessage {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeByte((byte) canvasObjects.size());
-        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : canvasObjects.entrySet()) {
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> entry : canvasObjects.entrySet()) {
             byteBuf.writeByte((byte) entry.getKey().getId());
             byteBuf.writeShort((short) entry.getValue().size());
-            for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
+            for (Map.Entry<Short, CanvasObjectWrapper[]> entry1 : entry.getValue().entrySet()) {
                 byteBuf.writeShort(entry1.getKey());
-                entry1.getValue().serialize(byteBuf);
+                byteBuf.writeByte((byte) entry1.getValue().length);
+                for (CanvasObjectWrapper canvasObjectWrapper : entry1.getValue()) {
+                    canvasObjectWrapper.serialize(byteBuf);
+                }
             }
         }
     }

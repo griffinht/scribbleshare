@@ -52,12 +52,12 @@ public class Canvas {
         return dirty;
     }
 
-    public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> updateCanvasObjects) {
+    public void update(Map<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> updateCanvasObjects) {
         dirty = true;
-        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper>> entry : updateCanvasObjects.entrySet()) {
+        for (Map.Entry<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> entry : updateCanvasObjects.entrySet()) {
             Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
-            for (Map.Entry<Short, CanvasObjectWrapper> entry1 : entry.getValue().entrySet()) {
-                map.put(entry1.getKey(), entry1.getValue().getCanvasObject());
+            for (Map.Entry<Short, CanvasObjectWrapper[]> entry1 : entry.getValue().entrySet()) {
+                map.put(entry1.getKey(), entry1.getValue()[entry1.getValue().length - 1].getCanvasObject());
             }
         }
     }
