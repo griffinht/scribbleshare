@@ -77,7 +77,7 @@ class WebSocketHandler {
     send(message) {
         if (this.socket.readyState === WebSocket.OPEN) {
             console.log('send', message);
-            let writer = new BufferWriter(message.getBufferSize());
+            let writer = new BufferWriter();
             message.serialize(writer);
             this.socket.send(writer.getBuffer());
         } else {

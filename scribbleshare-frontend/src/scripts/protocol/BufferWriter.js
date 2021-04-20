@@ -1,4 +1,4 @@
-export default class BufferWriter {//auto resize buffer writer
+export default class BufferWriter {//auto resize buffer writer todo improve efficiency/speed of resizes todo merge with BufferReader
     constructor(size) {
         if (size == null) {
             size = 0;

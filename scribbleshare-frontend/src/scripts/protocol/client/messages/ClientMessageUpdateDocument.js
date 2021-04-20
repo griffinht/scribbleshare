@@ -8,10 +8,6 @@ export default class ClientMessageUpdateDocument extends ClientMessage {
         this.name = document.name;
     }
 
-    getBufferSize() {
-        return super.getBufferSize() + 8;
-    }
-
     serialize(writer) {
         super.serialize(writer);
         writer.writeBigInt64(this.id);
