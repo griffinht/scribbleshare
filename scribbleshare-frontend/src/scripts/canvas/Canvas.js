@@ -255,9 +255,6 @@ canvas.addEventListener('mousedown', (event) => {
 });
 
 canvas.addEventListener('mouseup', (event) => {
-    if (!mouse.drag) {
-        onclick(event);
-    }
     mouse.down = false;
     mouse.drag = false;
 });
@@ -273,6 +270,13 @@ canvas.addEventListener('mouseenter', (event) => {
     }
 });
 
+canvas.addEventListener('click', (event) => {
+    if (selected === null) {
+        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+        insert(CanvasObjectType.SHAPE, shape);
+    }
+});
+
 function getDt() {
     return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
 }
@@ -282,11 +286,7 @@ export function insert(canvasObjectType, canvasObject) {
     activeDocument.canvas.insert(canvasObjectType, id, canvasObject);
 }
 
-const UPDATE_INTERVAL = 1000;
-let lastUpdate = 0;
-let updateCanvas = new Canvas();
-setInterval(localUpdate, UPDATE_INTERVAL);
-export function localUpdate() {
+function update() {
     if (activeDocument == null) {
         return;
     }
@@ -298,16 +298,18 @@ export function localUpdate() {
             }
         })
     });
+}
+const UPDATE_INTERVAL = 1000;
+let lastUpdate = 0;
+let updateCanvas = new Canvas();
+setInterval(localUpdate, UPDATE_INTERVAL);
+export function localUpdate() {
+    update();
     lastUpdate = window.performance.now();
     if (updateCanvas.updateCanvasObjects.size > 0) {
         socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
         updateCanvas.updateCanvasObjects.clear();
     }
-}
-
-function onclick(event) {
-    let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-    insert(CanvasObjectType.SHAPE, shape);
 }
 
 function ondrag(event) {
