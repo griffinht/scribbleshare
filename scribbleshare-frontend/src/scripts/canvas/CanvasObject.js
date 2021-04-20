@@ -2,7 +2,6 @@ import {ctx} from "./Canvas.js";
 
 export default class CanvasObject {
     constructor(reader) {
-        this.dirty = false;
         this.x = reader.readInt16();
         this.y = reader.readInt16();
         this.width = reader.readUint16();

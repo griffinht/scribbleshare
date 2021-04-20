@@ -5,14 +5,18 @@ import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+import net.stzups.scribbleshare.data.objects.canvas.CanvasDelete;
+import net.stzups.scribbleshare.data.objects.canvas.CanvasInsert;
+import net.stzups.scribbleshare.data.objects.canvas.CanvasMove;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasDelete;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasInsert;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
-import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasMove;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,10 +76,20 @@ class Room {
         return document;
     }
 
-    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper[]>> canvasObjects) {
-        canvas.update(canvasObjects);
-        ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
-        queueMessageExcept(serverMessageUpdateCanvas, client);
+    //todo i don't like these three methods
+    void canvasInsert(Client client, Map<CanvasObjectType, CanvasInsert[]> canvasInsertsMap) {
+        canvas.insert(canvasInsertsMap);
+        queueMessageExcept(new ServerMessageCanvasInsert(canvasInsertsMap), client);
+    }
+
+    void canvasDelete(Client client, CanvasDelete[] canvasDeletes) {
+        canvas.delete(canvasDeletes);
+        queueMessageExcept(new ServerMessageCanvasDelete(canvasDeletes), client);
+    }
+
+    void canvasMove(Client client, Map<Short, CanvasMove[]> canvasMovesMap) {
+        canvas.move(canvasMovesMap);
+        queueMessageExcept(new ServerMessageCanvasMove(canvasMovesMap), client);
     }
 
     /**

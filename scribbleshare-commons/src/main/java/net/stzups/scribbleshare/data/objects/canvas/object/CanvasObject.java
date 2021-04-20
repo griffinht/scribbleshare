@@ -1,15 +1,15 @@
 package net.stzups.scribbleshare.data.objects.canvas.object;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.canvas.object.objects.CanvasImage;
-import net.stzups.scribbleshare.data.objects.canvas.object.objects.Shape;
+import net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects.CanvasImage;
+import net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects.Shape;
 
 public class CanvasObject {
-    private final short x;
-    private final short y;
-    private final short width;
-    private final short height;
-    private final short rotation;
+    private short x;
+    private short y;
+    private short width;
+    private short height;
+    private short rotation;
 
     public CanvasObject(ByteBuf byteBuf) {
         x = byteBuf.readShort();
@@ -17,6 +17,14 @@ public class CanvasObject {
         width = byteBuf.readShort();
         height = byteBuf.readShort();
         rotation = byteBuf.readByte();
+    }
+
+    public void update(CanvasObject canvasObject) {
+        this.x = canvasObject.x;
+        this.y = canvasObject.y;
+        this.width = canvasObject.width;
+        this.height = canvasObject.height;
+        this.rotation = canvasObject.rotation;
     }
 
     public void serialize(ByteBuf byteBuf) {

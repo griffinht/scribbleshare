@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.data.objects.canvas.object.objects;
+package net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObject;

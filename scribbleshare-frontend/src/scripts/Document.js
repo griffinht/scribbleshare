@@ -127,7 +127,7 @@ socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDoc
 })
 socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateCanvas) => {
     if (activeDocument != null) {
-        activeDocument.canvas.updateMultiple(serverMessageUpdateCanvas.canvasObjectWrappers);
+        activeDocument.canvas.updateMultiple(serverMessageUpdateCanvas.canvasObjectWrappersMap);
     } else {
         console.warn('oops');
     }

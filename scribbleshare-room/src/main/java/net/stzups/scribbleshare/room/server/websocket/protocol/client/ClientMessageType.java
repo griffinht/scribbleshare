@@ -7,12 +7,14 @@ import java.util.Map;
 
 public enum ClientMessageType {
     OPEN_DOCUMENT(0),
-    UPDATE_CANVAS(1),
-    CREATE_DOCUMENT(2),
-    HANDSHAKE(3),
-    DELETE_DOCUMENT(4),
-    UPDATE_DOCUMENT(5),
-    GET_INVITE(6)
+    CREATE_DOCUMENT(1),
+    HANDSHAKE(2),
+    DELETE_DOCUMENT(3),
+    UPDATE_DOCUMENT(4),
+    GET_INVITE(5),
+    CANVAS_INSERT(6),
+    CANVAS_DELETE(7),
+    CANVAS_MOVE(8)
     ;
 
     private static final Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();

@@ -1,6 +1,5 @@
 import ServerMessageAddClient from "./messages/ServerMessageAddClient.js";
 import ServerMessageRemoveClient from "./messages/ServerMessageRemoveClient.js";
-import ServerMessageUpdateCanvas from "./messages/ServerMessageUpdateCanvas.js";
 import ServerMessageAddUser from "./messages/ServerMessageAddUser.js";
 import ServerMessageDeleteDocument from "./messages/ServerMessageDeleteDocument.js";
 import ServerMessageUpdateDocument from "./messages/ServerMessageUpdateDocument.js";
@@ -10,12 +9,14 @@ import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
 const ServerMessageType = {
     ADD_CLIENT:0,
     REMOVE_CLIENT:1,
-    UPDATE_CANVAS:2,
-    UPDATE_DOCUMENT:3,
-    ADD_USER:4,
-    DELETE_DOCUMENT:5,
-    GET_INVITE:6,
-    OPEN_DOCUMENT:7,
+    UPDATE_DOCUMENT:2,
+    ADD_USER:3,
+    DELETE_DOCUMENT:4,
+    GET_INVITE:5,
+    OPEN_DOCUMENT:6,
+    CANVAS_INSERT:7,
+    CANVAS_DELETE:8,
+    CANVAS_MOVE:9,
 };
 export default ServerMessageType;
 

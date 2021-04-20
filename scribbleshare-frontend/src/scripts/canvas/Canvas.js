@@ -4,7 +4,7 @@ import CanvasImage from "./canvasObjects/CanvasImage.js";
 import {activeDocument} from "../Document.js";
 import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
 import socket from "../protocol/WebSocketHandler.js";
-import ClientMessageUpdateCanvas from "../protocol/client/messages/ClientMessageUpdateCanvas.js";
+import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageUpdateCanvas.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -57,20 +57,22 @@ export class Canvas {
                 ctx.translate(canvasObject.x, canvasObject.y);
                 ctx.rotate((canvasObject.rotation / 255) * (2 * Math.PI));
                 canvasObject.draw();
-                if (!mouse.drag && selected === null) {
+                if (!mouse.drag && selected.canvasObject === null) {
                     if (aabb(canvasObject, mouse, SELECT_PADDING)) {
-                        selected = canvasObject;
+                        selected.type = type;
+                        selected.id = id;
+                        selected.canvasObject = canvasObject;
                     }
                 }
-                if (canvasObject === selected) {
+                if (canvasObject === selected.canvasObject) {
                     ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObject.width + SELECT_PADDING, canvasObject.height + SELECT_PADDING);
                 }
                 ctx.restore();
 
             });
         });
-        if (selected !== null && !aabb(selected, mouse, SELECT_PADDING)) {
-            selected = null;
+        if (selected.canvasObject !== null && !aabb(selected.canvasObject, mouse, SELECT_PADDING)) {
+            selected.canvasObject = null;
         }
         //todo
         /*this.objects.forEach((type, objects) => {
@@ -146,23 +148,16 @@ export class Canvas {
     }
 
     //for remote drawing, places into queue for being updated
-    updateMultiple(updateCanvasObjectWrappers) {
-        updateCanvasObjectWrappers.forEach((canvasObjectWrappersMap, canvasObjectType) => {
-            let map = this.updateCanvasObjects.get(canvasObjectType);
-            if (map == null) {
-                map = new Map();
-                this.updateCanvasObjects.set(canvasObjectType, map);
+    updateMultiple(updateCanvasObjectWrappersMap) {
+        updateCanvasObjectWrappersMap.forEach((value, id) => {
+            let canvasObjectWrappers = this.updateCanvasObjects.get(id);
+            if (canvasObjectWrappers == null) {
+                this.updateCanvasObjects.set(id, value);
+            } else {
+                value.forEach((canvasObjectWrapper) => {
+                    canvasObjectWrappers.push(canvasObjectWrapper);
+                });
             }
-            canvasObjectWrappersMap.forEach((canvasObjectWrappers, id) => {
-                let array = map.get(id);
-                if (array == null) {
-                    array = [];
-                    map.set(id, array);
-                }
-                canvasObjectWrappers.forEach((canvasObjectWrapper) => {
-                    array.push(canvasObjectWrapper);
-                })
-            });
         });
     }
 
@@ -251,7 +246,12 @@ const mouse = {
     drag:false
 };
 
-let selected = null;
+let selected = {
+    canvasObjectType:0,
+    id:0,
+    canvasObject:null,
+    dirty:false,
+};
 
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = event.offsetX;
@@ -261,16 +261,16 @@ canvas.addEventListener('mousemove', (event) => {
     if (Math.max(mouse.dx, mouse.dy) > 10) {
         mouse.dx = 0;
         mouse.dy = 0;
-        update();
+        flushActive();
     }
     if (mouse.down) {
         mouse.drag = true;
     }
     if (mouse.drag) {
-        if (selected != null) {
+        if (selected.canvasObject !== null) {
+            selected.canvasObject.x += event.movementX;
+            selected.canvasObject.y += event.movementY;
             selected.dirty = true;
-            selected.x += event.movementX;
-            selected.y += event.movementY;
         } else {
             ondrag(event);
         }
@@ -298,33 +298,34 @@ canvas.addEventListener('mouseenter', (event) => {
 });
 
 canvas.addEventListener('click', (event) => {
-    if (selected === null) {
+    if (selected.canvasObject === null) {
         let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
         insert(CanvasObjectType.SHAPE, shape);
     }
 });
 
 function getDt() {
-    return (window.performance.now() - lastUpdate) / MAX_TIME * 255;
+    let a = (window.performance.now() - lastUpdate) / MAX_TIME * 255;
+    console.log('ENCODE' + (window.performance.now() - lastUpdate) + ', ' + a);
+    return a;
 }
 
 export function insert(canvasObjectType, canvasObject) {
     let id = (Math.random() - 0.5) * 32000;
     activeDocument.canvas.insert(canvasObjectType, id, canvasObject);
+    updateCanvas.update(canvasObjectType, id, canvasObject);
 }
 
-function update() {
+function flushActive() {
     if (activeDocument == null) {
         return;
     }
-    activeDocument.canvas.canvasObjects.forEach((value, key) => {
-        value.forEach((v, k) => {
-            if (v.dirty) {
-                v.dirty = false;
-                updateCanvas.update(key, k, CanvasObjectWrapper.create(getDt(), v));
-            }
-        })
-    });
+    if (selected.canvasObject !== null) {
+        if (selected.dirty) {
+            selected.dirty = false;
+            updateCanvas.update(selected.canvasObjectType, selected.canvasObject, CanvasObjectWrapper.create(getDt(), selected.canvasObject));
+        }
+    }
 }
 
 const UPDATE_INTERVAL = 1000;
@@ -332,10 +333,10 @@ let lastUpdate = 0;
 let updateCanvas = new Canvas();
 setInterval(localUpdate, UPDATE_INTERVAL);
 export function localUpdate() {
-    update();
+    flushActive();
     lastUpdate = window.performance.now();
     if (updateCanvas.updateCanvasObjects.size > 0) {
-        socket.send(new ClientMessageUpdateCanvas(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
+        socket.send(new ClientMessageCanvasUpdate(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
         updateCanvas.updateCanvasObjects.clear();
     }
 }
