@@ -46,7 +46,7 @@ export class Canvas {
                     }
                 }
                 if (canvasObject !== null) {
-                    insert(canvasObjectType, canvasObject);
+                    this.insert(canvasObjectType, id, canvasObject);
                 }
             });
         });
