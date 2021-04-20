@@ -30,34 +30,40 @@ export class Canvas {
     draw(dt) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         dt = dt / MAX_TIME * 255;
-        this.updateCanvasObjects.forEach((value, key) => {
-            let map = this.canvasObjects.get(key);
+        this.updateCanvasObjects.forEach((canvasObjectWrappersMap, canvasObjectType) => {
+            let map = this.canvasObjects.get(canvasObjectType);
             if (map == null) {
                 map = new Map();
-                this.canvasObjects.set(key, map);
+                this.canvasObjects.set(canvasObjectType, map);
             }
-            value.forEach((v, key) => {
-                v.dt -= dt;
-                if (v.dt <= 0) {
-                    map.set(key, v.canvasObject);
-                    value.delete(key);//is this bad? (concurrent modification???)
-                }
-            })
-        });
-        //console.log('draw1', this.canvasObjects);
-        this.canvasObjects.forEach((value, key) => {
-            value.forEach((v, k) => {
-                ctx.save();
-                ctx.translate(v.x, v.y);
-                ctx.rotate((v.rotation / 255) * (2 * Math.PI));
-                v.draw();
-                if (!mouse.drag && selected === null) {
-                    if (aabb(v, mouse, SELECT_PADDING)) {
-                        selected = v;
+            canvasObjectWrappersMap.forEach((canvasObjectWrappers, id) => {
+                let canvasObject = null;
+                for (let i = 0; i < canvasObjectWrappers.length; i++) {
+                    canvasObjectWrappers[i].dt -= dt;
+                    if (canvasObjectWrappers[i].dt <= 0) {
+                        canvasObject = canvasObjectWrappers[i].canvasObject;
+                        canvasObjectWrappers.splice(i--, 1);
                     }
                 }
-                if (v === selected) {
-                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, v.width + SELECT_PADDING, v.height + SELECT_PADDING);
+                if (canvasObject !== null) {
+                    insert(canvasObjectType, canvasObject);
+                }
+            });
+        });
+        //console.log('draw1', this.canvasObjects);
+        this.canvasObjects.forEach((canvasObjectMap, type) => {
+            canvasObjectMap.forEach((canvasObject, id) => {
+                ctx.save();
+                ctx.translate(canvasObject.x, canvasObject.y);
+                ctx.rotate((canvasObject.rotation / 255) * (2 * Math.PI));
+                canvasObject.draw();
+                if (!mouse.drag && selected === null) {
+                    if (aabb(canvasObject, mouse, SELECT_PADDING)) {
+                        selected = canvasObject;
+                    }
+                }
+                if (canvasObject === selected) {
+                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObject.width + SELECT_PADDING, canvasObject.height + SELECT_PADDING);
                 }
                 ctx.restore();
 
@@ -161,17 +167,17 @@ export class Canvas {
     }
 
     update(canvasObjectType, id, canvasObjectWrapper) {
-        let map = this.updateCanvasObjects.get(canvasObjectType);
-        if (map == null) {
-            map = new Map();
-            this.updateCanvasObjects.set(canvasObjectType, map);
+        let canvasObjectWrappersMap = this.updateCanvasObjects.get(canvasObjectType);
+        if (canvasObjectWrappersMap == null) {
+            canvasObjectWrappersMap = new Map();
+            this.updateCanvasObjects.set(canvasObjectType, canvasObjectWrappersMap);
         }
-        let array = map.get(id);
-        if (array === undefined) {
-            array = [];
-            map.set(id, array);
+        let canvasObjectWrappers = canvasObjectWrappersMap.get(id);
+        if (canvasObjectWrappers === undefined) {
+            canvasObjectWrappers = [];
+            canvasObjectWrappersMap.set(id, canvasObjectWrappers);
         }
-        array.push(canvasObjectWrapper);
+        canvasObjectWrappers.push(canvasObjectWrapper);
     }
 
     //for local drawing, updates canvas instantly
