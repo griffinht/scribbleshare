@@ -125,13 +125,6 @@ socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDoc
     document.canvas = serverMessageOpenDocument.canvas;
     document.open();
 })
-socket.addMessageListener(ServerMessageType.UPDATE_CANVAS, (serverMessageUpdateCanvas) => {
-    if (activeDocument != null) {
-        activeDocument.canvas.updateMultiple(serverMessageUpdateCanvas.canvasObjectWrappersMap);
-    } else {
-        console.warn('oops');
-    }
-});
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
     documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id));
 });

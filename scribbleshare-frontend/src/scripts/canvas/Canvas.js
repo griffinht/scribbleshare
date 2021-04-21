@@ -377,7 +377,7 @@ export function localUpdate() {
     flushActive();
     lastUpdate = window.performance.now();
     //todo client side message aggregation/queue and server side understanding
-    if (updateCanvas.canvasInserts.size > 0) {
+    if (updateCanvas.canvasInsertsMap.size > 0) {
         socket.send(new ClientMessageCanvasInsert(updateCanvas.canvasInsertsMap));
     }
     if (updateCanvas.canvasMovesMap.size > 0) {

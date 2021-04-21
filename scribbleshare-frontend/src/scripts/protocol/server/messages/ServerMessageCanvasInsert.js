@@ -1,5 +1,6 @@
 import CanvasMove from "../../../canvas/CanvasMove.js";
 import ServerMessageType from "../ServerMessageType.js";
+import ServerMessage from "../ServerMessage.js";
 
 export default class ServerMessageCanvasInsert extends ServerMessage {
     constructor(reader) {
