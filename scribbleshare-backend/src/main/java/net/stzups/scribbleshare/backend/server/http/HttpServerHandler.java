@@ -264,7 +264,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
         HttpHeaders headers = new DefaultHttpHeaders();
-        if (uri.equals(PersistentHttpSession.LOGIN_PATH)) {
+        if (path.equals(PersistentHttpSession.LOGIN_PATH)) {
             logIn(ctx, request, headers);
         }
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + HTTP_CACHE_SECONDS);//cache but revalidate if stale todo set to private cache for resources behind authentication
