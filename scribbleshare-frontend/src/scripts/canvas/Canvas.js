@@ -66,7 +66,7 @@ export class Canvas {
                     console.warn('oopsie');
                     return;
                 }
-                canvasObject.update(canvasMoves[i].canvasObject);
+                canvasObject.update(canvasMoves[canvasMoves.length - 1].canvasObject);
             }
         });
         for (let i = 0; i < this.canvasDeletes.length; i++) {
@@ -74,7 +74,7 @@ export class Canvas {
             this.canvasDeletes[i].dt -= dt;
             if (this.canvasDeletes[i].dt <= 0) {
                 this.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
-                this.canvasObjectWrappers.splice(i--, 1);
+                this.canvasDeletes.splice(i--, 1);
             }
         }
         //console.log('draw1', this.canvasObjects);
@@ -311,6 +311,7 @@ canvas.addEventListener('mousemove', (event) => {
         if (selected.canvasObjectWrapper !== null) {
             selected.canvasObjectWrapper.canvasObject.x += event.movementX;
             selected.canvasObjectWrapper.canvasObject.y += event.movementY;
+            if (!selected.dirty) console.log(selected.dirty);
             selected.dirty = true;
         } else {
             ondrag(event);
