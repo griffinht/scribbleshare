@@ -28,4 +28,13 @@ export default class CanvasObject {
         writer.writeUint16(this.height);
         writer.writeUint8(this.rotation);
     }
+
+    static create(canvasObject) {
+        let object = Object.create(this.prototype);
+        object.x = canvasObject.x;
+        object.y = canvasObject.y;
+        object.width = canvasObject.width;
+        object.rotation = canvasObject.rotation;
+        return object;
+    }
 }

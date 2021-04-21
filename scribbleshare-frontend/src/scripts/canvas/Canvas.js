@@ -54,19 +54,20 @@ export class Canvas {
             for (let i = 0; i < canvasMoves.length; i++) {
                 //console.log('moves', canvasMoves[i].dt);
                 canvasMoves[i].dt -= dt;
-                if (canvasMoves[i].dt <= 0) {
-                    canvasMoves.splice(i--, 1);
-                }
             }
             if (canvasMoves.length > 0) {
-                this.canvasMovesMap.delete(id);
-            } else {
-                let canvasObject = this.canvasObjectWrappers.get(id);
-                if (canvasObject === undefined) {
-                    console.warn('oopsie');
-                    return;
+                if (canvasMoves[0].dt <= 0) {
+                    canvasMoves.splice(0, 1);
+                    let canvasObject = this.canvasObjectWrappers.get(id);
+                    if (canvasObject === undefined) {
+                        console.warn('oopsie');
+                        return;
+                    }
+                    canvasObject.update(canvasMoves[canvasMoves.length - 1].canvasObject);//todo interpolate
                 }
-                canvasObject.update(canvasMoves[canvasMoves.length - 1].canvasObject);
+                //todo interpolate
+            } else {
+                this.canvasMovesMap.delete(id);
             }
         });
         for (let i = 0; i < this.canvasDeletes.length; i++) {
@@ -299,7 +300,7 @@ canvas.addEventListener('mousemove', (event) => {
     mouse.y = event.offsetY;
     mouse.dx += event.movementX;
     mouse.dy += event.movementY;
-    if (Math.max(mouse.dx, mouse.dy) > 10) {
+    if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
         mouse.dx = 0;
         mouse.dy = 0;
         flushActive();
@@ -311,7 +312,6 @@ canvas.addEventListener('mousemove', (event) => {
         if (selected.canvasObjectWrapper !== null) {
             selected.canvasObjectWrapper.canvasObject.x += event.movementX;
             selected.canvasObjectWrapper.canvasObject.y += event.movementY;
-            if (!selected.dirty) console.log(selected.dirty);
             selected.dirty = true;
         } else {
             ondrag(event);

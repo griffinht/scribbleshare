@@ -25,7 +25,6 @@ export default ServerMessageType;
 
 
 export function getServerMessage(type, reader) {
-    console.log(type);
     let message;
     switch (type) {
         case ServerMessageType.ADD_CLIENT:
