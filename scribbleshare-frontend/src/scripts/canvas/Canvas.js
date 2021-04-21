@@ -43,7 +43,7 @@ export class Canvas {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         dt = dt / MAX_TIME * 255;
         for (let i = 0; i < this.canvasInserts.length; i++) {
-            console.log('inserts', this.canvasInserts[i].dt);
+            //console.log('inserts', this.canvasInserts[i].dt);
             this.canvasInserts[i].dt -= dt;
             if (this.canvasInserts[i].dt <= 0) {
                 this.canvasObjectWrappers.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObjectWrapper);
@@ -52,7 +52,7 @@ export class Canvas {
         }
         this.canvasMovesMap.forEach((canvasMoves, id) => {
             for (let i = 0; i < canvasMoves.length; i++) {
-                console.log('moves', canvasMoves[i].dt);
+                //console.log('moves', canvasMoves[i].dt);
                 canvasMoves[i].dt -= dt;
                 if (canvasMoves[i].dt <= 0) {
                     canvasMoves.splice(i--, 1);
@@ -70,7 +70,7 @@ export class Canvas {
             }
         });
         for (let i = 0; i < this.canvasDeletes.length; i++) {
-            console.log('deletes', this.canvasDeletes[i].dt);
+            //console.log('deletes', this.canvasDeletes[i].dt);
             this.canvasDeletes[i].dt -= dt;
             if (this.canvasDeletes[i].dt <= 0) {
                 this.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
@@ -340,8 +340,17 @@ canvas.addEventListener('mouseenter', (event) => {
 
 canvas.addEventListener('click', (event) => {
     if (selected.canvasObjectWrapper === null) {
-        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-        insert(CanvasObjectType.SHAPE, shape);
+        if ((event.buttons & 1) === 0) {
+            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+            insert(CanvasObjectType.SHAPE, shape);
+        }
+    }
+});
+
+canvas.addEventListener('contextmenu', (event) => {
+    if (selected.canvasObjectWrapper !== null) {
+        deletee(selected.id);
+        event.preventDefault();
     }
 });
 
@@ -355,6 +364,11 @@ export function insert(canvasObjectType, canvasObject) {
     let id = (Math.random() - 0.5) * 32000;
     activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
     updateCanvas.insert(canvasObjectType, id, canvasObject);
+}
+
+export function deletee(id) {
+    activeDocument.canvas.canvasObjectWrappers.delete(id);
+    updateCanvas.delete(id);
 }
 
 function flushActive() {
