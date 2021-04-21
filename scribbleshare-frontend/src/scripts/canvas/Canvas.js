@@ -2,9 +2,9 @@ import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
 import {activeDocument} from "../Document.js";
-import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
+import CanvasObjectWrapperr from "./CanvasObjectWrapperr.js";
 import socket from "../protocol/WebSocketHandler.js";
-import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageUpdateCanvas.js";
+import CanvasObjectWrapper from "./CanvasObjectWrapperr.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -12,7 +12,9 @@ export const ctx = canvas.getContext('2d');
 export class Canvas {
     constructor(reader) {
         this.canvasObjects = new Map();
-        this.updateCanvasObjects = new Map();
+        this.canvasInserts = [];
+        this.canvasMovesMap = new Map();
+        this.canvasDeletes = [];
         if (reader != null) {
             let length = reader.readUint8();
             for (let i = 0; i < length; i++) {
@@ -30,29 +32,41 @@ export class Canvas {
     draw(dt) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         dt = dt / MAX_TIME * 255;
-        this.updateCanvasObjects.forEach((canvasObjectWrappersMap, canvasObjectType) => {
-            let map = this.canvasObjects.get(canvasObjectType);
-            if (map == null) {
-                map = new Map();
-                this.canvasObjects.set(canvasObjectType, map);
+        for (let i = 0; i < this.canvasInserts.length; i++) {
+            this.canvasInserts[i].dt -= dt;
+            if (this.canvasInserts[i].dt <= 0) {
+                this.canvasObjects.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObject);
+                this.canvasInserts.splice(i--, 1);
             }
-            canvasObjectWrappersMap.forEach((canvasObjectWrappers, id) => {
-                let canvasObject = null;
-                for (let i = 0; i < canvasObjectWrappers.length; i++) {
-                    canvasObjectWrappers[i].dt -= dt;
-                    if (canvasObjectWrappers[i].dt <= 0) {
-                        canvasObject = canvasObjectWrappers[i].canvasObject;
-                        canvasObjectWrappers.splice(i--, 1);
-                    }
+        }
+        this.canvasMovesMap.forEach((canvasMoves, id) => {
+            for (let i = 0; i < canvasMoves.length; i++) {
+                canvasMoves[i].dt -= dt;
+                if (canvasMoves[i].dt <= 0) {
+                    canvasMoves.splice(i--, 1);
                 }
-                if (canvasObject !== null) {
-                    this.insert(canvasObjectType, id, canvasObject);
+            }
+            if (canvasMoves.length > 0) {
+                this.canvasMovesMap.delete(id);
+            } else {
+                let canvasObject = this.canvasObjects.get(id);
+                if (canvasObject === undefined) {
+                    console.warn('oopsie');
+                    return;
                 }
-            });
+                canvasObject.update(canvasMoves[i].canvasObject);
+            }
         });
+        for (let i = 0; i < this.canvasDeletes.length; i++) {
+            this.canvasDeletes[i].dt -= dt;
+            if (this.canvasDeletes[i].dt <= 0) {
+                this.canvasObjects.delete(this.canvasDeletes[i].id);
+                this.canvasObjects.splice(i--, 1);
+            }
+        }
         //console.log('draw1', this.canvasObjects);
-        this.canvasObjects.forEach((canvasObjectMap, type) => {
-            canvasObjectMap.forEach((canvasObject, id) => {
+        this.canvasObjects.forEach((canvasObjectsMap, type) => {
+            canvasObjectsMap.forEach((canvasObject, id) => {
                 ctx.save();
                 ctx.translate(canvasObject.x, canvasObject.y);
                 ctx.rotate((canvasObject.rotation / 255) * (2 * Math.PI));
@@ -148,17 +162,20 @@ export class Canvas {
     }
 
     //for remote drawing, places into queue for being updated
-    updateMultiple(updateCanvasObjectWrappersMap) {
-        updateCanvasObjectWrappersMap.forEach((value, id) => {
-            let canvasObjectWrappers = this.updateCanvasObjects.get(id);
-            if (canvasObjectWrappers == null) {
-                this.updateCanvasObjects.set(id, value);
-            } else {
-                value.forEach((canvasObjectWrapper) => {
-                    canvasObjectWrappers.push(canvasObjectWrapper);
-                });
-            }
+    updateInsert(canvasInsertsMap) {
+        canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
+            canvasInserts.forEach((canvasInsert) => {
+                this.canvasInserts.push(new CanvasObjectWrapper(canvasObjectType, canvasInsert));
+            });
         });
+    }
+
+    updateMove(canvasMovesMap) {
+
+    }
+
+    updateDelete(canvasDeletes) {
+
     }
 
     update(canvasObjectType, id, canvasObjectWrapper) {
@@ -323,7 +340,7 @@ function flushActive() {
     if (selected.canvasObject !== null) {
         if (selected.dirty) {
             selected.dirty = false;
-            updateCanvas.update(selected.canvasObjectType, selected.canvasObject, CanvasObjectWrapper.create(getDt(), selected.canvasObject));
+            updateCanvas.update(selected.canvasObjectType, selected.canvasObject, CanvasObjectWrapperr.create(getDt(), selected.canvasObject));
         }
     }
 }

@@ -13,6 +13,14 @@ export default class CanvasObject {
         ctx.fillRect(0, 0, this.width, this.height);
     }
 
+    update(canvasObject) {
+        this.x = canvasObject.x;
+        this.y = canvasObject.y;
+        this.width = canvasObject.width;
+        this.height = canvasObject.height;
+        this.rotation = canvasObject.rotation;
+    }
+
     serialize(writer) {
         writer.writeInt16(this.x);
         writer.writeInt16(this.y);
