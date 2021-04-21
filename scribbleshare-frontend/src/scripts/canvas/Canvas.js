@@ -82,15 +82,16 @@ export class Canvas {
             ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
             ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
             canvasObjectWrapper.canvasObject.draw();
-            if (selected.canvasObjectWrapper !== null) {
+            if (selected.canvasObjectWrapper === null) {
                 if (!mouse.drag) {
                     if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
                         selected.id = id;
                         selected.canvasObjectWrapper = canvasObjectWrapper;
                     }
                 }
+            } else {
                 if (canvasObjectWrapper.canvasObject === selected.canvasObjectWrapper.canvasObject) {
-                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObject.width + SELECT_PADDING, canvasObject.height + SELECT_PADDING);
+                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
                 }
             }
             ctx.restore();
