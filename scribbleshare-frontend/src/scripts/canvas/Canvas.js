@@ -177,7 +177,7 @@ export class Canvas {
     updateInsert(canvasInsertsMap) {
         canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
             canvasInserts.forEach((canvasInsert) => {
-                this.canvasInserts.push(new CanvasObjectWrapper(canvasObjectType, canvasInsert));
+                this.canvasInserts.push(canvasInsert);
             });
         });
     }
