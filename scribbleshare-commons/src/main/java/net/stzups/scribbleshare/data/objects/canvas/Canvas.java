@@ -61,7 +61,8 @@ public class Canvas {
         dirty = true;
         for (Map.Entry<Short, CanvasMove[]> entry : canvasMovesMap.entrySet()) {
             CanvasObjectWrapper canvasObjectWrapper = canvasObjects.get(entry.getKey());
-            if (canvasObjectWrapper == null) {
+            if (canvasObjectWrapper == null || entry.getValue().length == 0) {
+                System.out.println("oopsie " + entry);
                 continue;
             }
 

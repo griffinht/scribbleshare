@@ -295,7 +295,7 @@ const mouse = {
 
 
 canvas.addEventListener('mousemove', (event) => {
-    mouse.x = event.offsetX;
+    mouse.x = event.offsetX;//todo left click drag only
     mouse.y = event.offsetY;
     mouse.dx += event.movementX;
     mouse.dy += event.movementY;

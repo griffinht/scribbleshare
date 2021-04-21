@@ -9,7 +9,7 @@ export default class ClientMessageCanvasDelete extends ClientMessage {
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeUint8(this.canvasDeletes.size);
+        writer.writeUint8(this.canvasDeletes.length);
         this.canvasDeletes.forEach((canvasDelete) => {
             canvasDelete.serialize(writer);
         });
