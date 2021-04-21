@@ -25,10 +25,14 @@ public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
             ServerInitializer.getLogger(ctx).warning(((TextWebSocketFrame) webSocketFrame).text());//debug
         } else if (webSocketFrame instanceof BinaryWebSocketFrame) {
             ByteBuf byteBuf = webSocketFrame.content();
-            ClientMessageType clientMessageType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
-            ClientMessage clientMessage = ClientMessage.getClientMessage(clientMessageType, byteBuf);
-            ServerInitializer.getLogger(ctx).info("recv " + clientMessage.getClass().getSimpleName());//debug
-            list.add(clientMessage);
+            StringBuilder string = new StringBuilder("recv ");//debug
+            while (byteBuf.isReadable()) {
+                ClientMessageType clientMessageType = ClientMessageType.valueOf(byteBuf.readUnsignedByte());
+                ClientMessage clientMessage = ClientMessage.getClientMessage(clientMessageType, byteBuf);
+                list.add(clientMessage);
+                string.append(clientMessage.getClass().getSimpleName()).append(", ");//debug
+            }
+            ServerInitializer.getLogger(ctx).info(string.toString());//debug
         }
     }
 }

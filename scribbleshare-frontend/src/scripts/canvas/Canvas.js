@@ -391,17 +391,16 @@ setInterval(localUpdate, UPDATE_INTERVAL);
 export function localUpdate() {
     flushActive();
     lastUpdate = window.performance.now();
-    //todo client side message aggregation/queue and server side understanding
     if (updateCanvas.canvasInsertsMap.size > 0) {
-        socket.send(new ClientMessageCanvasInsert(updateCanvas.canvasInsertsMap));
+        socket.queue(new ClientMessageCanvasInsert(updateCanvas.canvasInsertsMap));
     }
     if (updateCanvas.canvasMovesMap.size > 0) {
-        socket.send(new ClientMessageCanvasMove(updateCanvas.canvasMovesMap));
+        socket.queue(new ClientMessageCanvasMove(updateCanvas.canvasMovesMap));
     }
     if (updateCanvas.canvasDeletes.length > 0) {
-        socket.send(new ClientMessageCanvasDelete(updateCanvas.canvasDeletes));
+        socket.queue(new ClientMessageCanvasDelete(updateCanvas.canvasDeletes));
     }
-    //todo flush
+    socket.flush();
     updateCanvas.clear();
 }
 
