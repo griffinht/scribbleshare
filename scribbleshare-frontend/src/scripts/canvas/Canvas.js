@@ -2,9 +2,8 @@ import Shape from "./canvasObjects/Shape.js";
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
 import {activeDocument} from "../Document.js";
-import CanvasObjectWrapperr from "./CanvasObjectWrapperr.js";
 import socket from "../protocol/WebSocketHandler.js";
-import CanvasObjectWrapper from "./CanvasObjectWrapperr.js";
+import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import ClientMessageCanvasInsert from "../protocol/client/messages/ClientMessageCanvasInsert.js";
 import ClientMessageCanvasMove from "../protocol/client/messages/ClientMessageCanvasMove.js";
@@ -16,9 +15,15 @@ import CanvasMove from "./CanvasMove.js";
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
+let selected = {
+    id:0,
+    canvasObjectWrapper:null,
+    dirty:false,
+};
+
 export class Canvas {
     constructor(reader) {
-        this.canvasObjects = new Map();
+        this.canvasObjectWrappers = new Map();
         this.canvasInserts = [];
         this.canvasMovesMap = new Map();
         this.canvasDeletes = [];
@@ -27,7 +32,7 @@ export class Canvas {
             for (let i = 0; i < length; i++) {
                 let type = reader.readUint8();
                 let map = new Map();
-                this.canvasObjects.set(type, map);
+                this.canvasObjectWrappers.set(type, map);
                 let lengthJ = reader.readUint16();
                 for (let j = 0; j < lengthJ; j++) {
                     map.set(reader.readInt16(), getCanvasObject(type, reader));
@@ -42,7 +47,7 @@ export class Canvas {
         for (let i = 0; i < this.canvasInserts.length; i++) {
             this.canvasInserts[i].dt -= dt;
             if (this.canvasInserts[i].dt <= 0) {
-                this.canvasObjects.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObject);
+                this.canvasObjectWrappers.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObjectWrapper);
                 this.canvasInserts.splice(i--, 1);
             }
         }
@@ -56,7 +61,7 @@ export class Canvas {
             if (canvasMoves.length > 0) {
                 this.canvasMovesMap.delete(id);
             } else {
-                let canvasObject = this.canvasObjects.get(id);
+                let canvasObject = this.canvasObjectWrappers.get(id);
                 if (canvasObject === undefined) {
                     console.warn('oopsie');
                     return;
@@ -67,33 +72,31 @@ export class Canvas {
         for (let i = 0; i < this.canvasDeletes.length; i++) {
             this.canvasDeletes[i].dt -= dt;
             if (this.canvasDeletes[i].dt <= 0) {
-                this.canvasObjects.delete(this.canvasDeletes[i].id);
-                this.canvasObjects.splice(i--, 1);
+                this.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
+                this.canvasObjectWrappers.splice(i--, 1);
             }
         }
         //console.log('draw1', this.canvasObjects);
-        this.canvasObjects.forEach((canvasObjectsMap, type) => {
-            canvasObjectsMap.forEach((canvasObject, id) => {
-                ctx.save();
-                ctx.translate(canvasObject.x, canvasObject.y);
-                ctx.rotate((canvasObject.rotation / 255) * (2 * Math.PI));
-                canvasObject.draw();
-                if (!mouse.drag && selected.canvasObject === null) {
-                    if (aabb(canvasObject, mouse, SELECT_PADDING)) {
-                        selected.type = type;
+        this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
+            ctx.save();
+            ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
+            ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
+            canvasObjectWrapper.canvasObject.draw();
+            if (selected.canvasObjectWrapper !== null) {
+                if (!mouse.drag) {
+                    if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
                         selected.id = id;
-                        selected.canvasObject = canvasObject;
+                        selected.canvasObjectWrapper = canvasObjectWrapper;
                     }
                 }
-                if (canvasObject === selected.canvasObject) {
+                if (canvasObjectWrapper.canvasObject === selected.canvasObjectWrapper.canvasObject) {
                     ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObject.width + SELECT_PADDING, canvasObject.height + SELECT_PADDING);
                 }
-                ctx.restore();
-
-            });
+            }
+            ctx.restore();
         });
-        if (selected.canvasObject !== null && !aabb(selected.canvasObject, mouse, SELECT_PADDING)) {
-            selected.canvasObject = null;
+        if (selected.canvasObjectWrapper !== null && !aabb(selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+            selected.canvasObjectWrapper = null;
         }
         //todo
         /*this.objects.forEach((type, objects) => {
@@ -287,12 +290,7 @@ const mouse = {
     drag:false
 };
 
-let selected = {
-    canvasObjectType:0,
-    id:0,
-    canvasObject:null,
-    dirty:false,
-};
+
 
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = event.offsetX;
@@ -308,9 +306,9 @@ canvas.addEventListener('mousemove', (event) => {
         mouse.drag = true;
     }
     if (mouse.drag) {
-        if (selected.canvasObject !== null) {
-            selected.canvasObject.x += event.movementX;
-            selected.canvasObject.y += event.movementY;
+        if (selected.canvasObjectWrapper !== null) {
+            selected.canvasObjectWrapper.canvasObject.x += event.movementX;
+            selected.canvasObjectWrapper.canvasObject.y += event.movementY;
             selected.dirty = true;
         } else {
             ondrag(event);
@@ -339,7 +337,7 @@ canvas.addEventListener('mouseenter', (event) => {
 });
 
 canvas.addEventListener('click', (event) => {
-    if (selected.canvasObject === null) {
+    if (selected.canvasObjectWrapper === null) {
         let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
         insert(CanvasObjectType.SHAPE, shape);
     }
@@ -353,7 +351,7 @@ function getDt() {
 
 export function insert(canvasObjectType, canvasObject) {
     let id = (Math.random() - 0.5) * 32000;
-    activeDocument.canvas.insert(canvasObjectType, id, canvasObject);
+    activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
     updateCanvas.insert(canvasObjectType, id, canvasObject);
 }
 
@@ -361,10 +359,10 @@ function flushActive() {
     if (activeDocument == null) {
         return;
     }
-    if (selected.canvasObject !== null) {
+    if (selected.canvasObjectWrapper !== null) {
         if (selected.dirty) {
             selected.dirty = false;
-            updateCanvas.move(selected.id, selected.canvasObject);
+            updateCanvas.move(selected.id, selected.canvasObjectWrapper.canvasObject);
         }
     }
 }
