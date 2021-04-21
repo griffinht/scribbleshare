@@ -15,6 +15,7 @@ public class ServerMessageCanvasMove extends ServerMessage {
         this.canvasMovesMap = canvasMovesMap;
     }
 
+    @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeByte((byte) canvasMovesMap.size());

@@ -1,11 +1,10 @@
 import {getCanvasObject} from "./Canvas.js";
-import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
 
 export default class CanvasInsert {
     constructor(canvasObjectType, reader) {
         this.dt = reader.readUint8();
         this.id = reader.readInt16();
-        this.canvasObject = new CanvasObjectWrapper(canvasObjectType, getCanvasObject(canvasObjectType, reader));
+        this.canvasObject = getCanvasObject(canvasObjectType, reader);
     }
 
     serialize(writer) {

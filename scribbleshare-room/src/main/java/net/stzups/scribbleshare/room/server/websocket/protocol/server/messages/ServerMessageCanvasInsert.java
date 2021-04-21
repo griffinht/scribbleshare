@@ -16,7 +16,9 @@ public class ServerMessageCanvasInsert extends ServerMessage {
         this.canvasInsertsMap = canvasInsertsMap;
     }
 
+    @Override
     public void serialize(ByteBuf byteBuf) {
+        super.serialize(byteBuf);
         byteBuf.writeByte((byte) canvasInsertsMap.size());
         for (Map.Entry<CanvasObjectType, CanvasInsert[]> entry : canvasInsertsMap.entrySet()) {
             byteBuf.writeByte((byte) entry.getKey().getId());
