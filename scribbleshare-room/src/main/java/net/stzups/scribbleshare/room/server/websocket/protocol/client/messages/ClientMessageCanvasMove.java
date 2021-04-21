@@ -19,7 +19,7 @@ public class ClientMessageCanvasMove extends ClientMessage {
             short id = byteBuf.readShort();
             CanvasMove[] canvasObjectWrappers = new CanvasMove[byteBuf.readUnsignedByte()];
             for (int j = 0; j < canvasObjectWrappers.length; j++) {
-                canvasObjectWrappers[i] = new CanvasMove(byteBuf);
+                canvasObjectWrappers[j] = new CanvasMove(byteBuf);
             }
             canvasMovesMap.put(id, canvasObjectWrappers);
         }

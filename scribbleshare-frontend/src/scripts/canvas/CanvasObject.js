@@ -34,6 +34,7 @@ export default class CanvasObject {
         object.x = canvasObject.x;
         object.y = canvasObject.y;
         object.width = canvasObject.width;
+        object.height = canvasObject.height;
         object.rotation = canvasObject.rotation;
         return object;
     }
