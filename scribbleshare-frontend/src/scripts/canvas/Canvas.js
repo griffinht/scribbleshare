@@ -57,13 +57,14 @@ export class Canvas {
             }
             if (canvasMoves.length > 0) {
                 if (canvasMoves[0].dt <= 0) {
-                    canvasMoves.splice(0, 1);
-                    let canvasObject = this.canvasObjectWrappers.get(id);
-                    if (canvasObject === undefined) {
+                    let canvasObjectWrapper = this.canvasObjectWrappers.get(id);
+                    if (canvasObjectWrapper === undefined) {
                         console.warn('oopsie');
                         return;
                     }
-                    canvasObject.update(canvasMoves[canvasMoves.length - 1].canvasObject);//todo interpolate
+                    canvasObjectWrapper.canvasObject.update(canvasMoves[0].canvasObject);//todo interpolate
+
+                    canvasMoves.splice(0, 1);
                 }
                 //todo interpolate
             } else {
