@@ -12,7 +12,7 @@ export default class ClientMessageCanvasInsert extends ClientMessage {
         writer.writeUint8(this.canvasInsertsMap.size);
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
             writer.writeUint8(canvasObjectType);
-            writer.writeUint8(canvasInserts.size);
+            writer.writeUint8(canvasInserts.length);
             canvasInserts.forEach((canvasInsert) => {
                 canvasInsert.serialize(writer);
             });

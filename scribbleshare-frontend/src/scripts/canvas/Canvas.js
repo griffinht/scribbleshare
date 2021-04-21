@@ -45,6 +45,7 @@ export class Canvas {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         dt = dt / MAX_TIME * 255;
         for (let i = 0; i < this.canvasInserts.length; i++) {
+            console.log('inserts', this.canvasInserts[i].dt);
             this.canvasInserts[i].dt -= dt;
             if (this.canvasInserts[i].dt <= 0) {
                 this.canvasObjectWrappers.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObjectWrapper);
@@ -53,6 +54,7 @@ export class Canvas {
         }
         this.canvasMovesMap.forEach((canvasMoves, id) => {
             for (let i = 0; i < canvasMoves.length; i++) {
+                console.log('moves', canvasMoves[i].dt);
                 canvasMoves[i].dt -= dt;
                 if (canvasMoves[i].dt <= 0) {
                     canvasMoves.splice(i--, 1);
@@ -70,6 +72,7 @@ export class Canvas {
             }
         });
         for (let i = 0; i < this.canvasDeletes.length; i++) {
+            console.log('deletes', this.canvasDeletes[i].dt);
             this.canvasDeletes[i].dt -= dt;
             if (this.canvasDeletes[i].dt <= 0) {
                 this.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
