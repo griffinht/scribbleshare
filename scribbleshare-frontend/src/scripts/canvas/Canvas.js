@@ -51,24 +51,23 @@ export class Canvas {
             }
         }
         this.canvasMovesMap.forEach((canvasMoves, id) => {
-            for (let i = 0; i < canvasMoves.length; i++) {
-                //console.log('moves', canvasMoves[i].dt);
-                canvasMoves[i].dt -= dt;
+            let canvasObjectWrapper = this.canvasObjectWrappers.get(id);
+            if (canvasObjectWrapper === undefined) {
+                console.warn('oopsie');
+                return;
             }
-            if (canvasMoves.length > 0) {
-                if (canvasMoves[0].dt <= 0) {
-                    let canvasObjectWrapper = this.canvasObjectWrappers.get(id);
-                    if (canvasObjectWrapper === undefined) {
-                        console.warn('oopsie');
-                        return;
-                    }
-                    canvasObjectWrapper.canvasObject.update(canvasMoves[0].canvasObject);//todo interpolate
 
-                    canvasMoves.splice(0, 1);
-                }
-                //todo interpolate
-            } else {
+            if (canvasMoves.length === 0) {
+                canvasObjectWrapper.canvasObject.dt = 0;
                 this.canvasMovesMap.delete(id);
+            } else {
+                canvasObjectWrapper.canvasObject.dt += dt;
+                if (canvasObjectWrapper.canvasObject.dt > canvasMoves[0].dt) {
+                    canvasMoves.shift();
+                }
+                if (canvasMoves.length > 0) {
+                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt);
+                }//will be removed on the next go around
             }
         });
         for (let i = 0; i < this.canvasDeletes.length; i++) {
@@ -210,9 +209,8 @@ export class Canvas {
     }
 }
 
-function lerp(v0, v1, t) {
-    return v0 * (1 - t) + v1 * t;
-}
+
+
 
 
 export function getCanvasObject(type, reader) {

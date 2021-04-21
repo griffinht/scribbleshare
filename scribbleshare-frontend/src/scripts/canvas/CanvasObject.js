@@ -7,18 +7,17 @@ export default class CanvasObject {
         this.width = reader.readUint16();
         this.height = reader.readUint16();
         this.rotation = reader.readUint8();
+        this.original = CanvasObject.create(this);
+        this.dt = 0;
+    }
+
+    lerp(canvasObject, t) {
+        this.x = lerp(this.original.x, canvasObject.x, t);
+        this.y = lerp(this.original.y, canvasObject.y, t);
     }
 
     draw() {
         ctx.fillRect(0, 0, this.width, this.height);
-    }
-
-    update(canvasObject) {
-        this.x = canvasObject.x;
-        this.y = canvasObject.y;
-        this.width = canvasObject.width;
-        this.height = canvasObject.height;
-        this.rotation = canvasObject.rotation;
     }
 
     serialize(writer) {
@@ -38,4 +37,8 @@ export default class CanvasObject {
         object.rotation = canvasObject.rotation;
         return object;
     }
+}
+
+function lerp(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t;
 }
