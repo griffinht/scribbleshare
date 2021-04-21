@@ -8,4 +8,11 @@ export default class CanvasDelete {
         writer.writeUint8(this.dt);
         writer.writeInt16(this.id);
     }
+
+    static create(dt, id) {
+        let object = Object.create(this.prototype);
+        object.dt = dt;
+        object.id = id;
+        return object;
+    }
 }

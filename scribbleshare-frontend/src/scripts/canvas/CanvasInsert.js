@@ -12,4 +12,12 @@ export default class CanvasInsert {
         writer.writeInt16(this.id);
         this.canvasObject.serialize(writer);
     }
+
+    static create(dt, id, canvasObject) {
+        let object = Object.create(this.prototype);
+        object.dt = dt;
+        object.id = id;
+        object.canvasObject = canvasObject;
+        return object;
+    }
 }

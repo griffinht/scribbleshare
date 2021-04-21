@@ -10,4 +10,11 @@ export default class CanvasMove {
         writer.writeUint8(this.dt);
         this.canvasObject.serialize(writer);
     }
+
+    static create(dt, canvasObject) {
+        let object = Object.create(this.prototype);
+        object.dt = dt;
+        object.canvasObject = canvasObject;
+        return object;
+    }
 }

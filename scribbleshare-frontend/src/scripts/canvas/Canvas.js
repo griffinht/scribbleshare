@@ -5,6 +5,13 @@ import {activeDocument} from "../Document.js";
 import CanvasObjectWrapperr from "./CanvasObjectWrapperr.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./CanvasObjectWrapperr.js";
+import ServerMessageType from "../protocol/server/ServerMessageType.js";
+import ClientMessageCanvasInsert from "../protocol/client/messages/ClientMessageCanvasInsert.js";
+import ClientMessageCanvasMove from "../protocol/client/messages/ClientMessageCanvasMove.js";
+import ClientMessageCanvasDelete from "../protocol/client/messages/ClientMessageCanvasDelete.js";
+import CanvasDelete from "./CanvasDelete.js";
+import CanvasInsert from "./CanvasInsert.js";
+import CanvasMove from "./CanvasMove.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -171,47 +178,22 @@ export class Canvas {
     }
 
     updateMove(canvasMovesMap) {
-
+        canvasMovesMap.forEach((value, id) => {
+            let canvasMoves = this.canvasMovesMap.get(id);
+            if (canvasMoves === undefined) {
+                this.canvasMovesMap.set(id, value);
+            } else {
+                value.forEach(canvasMove => {
+                   canvasMoves.push(canvasMove);
+                });
+            }
+        });
     }
 
     updateDelete(canvasDeletes) {
-
-    }
-
-    update(canvasObjectType, id, canvasObjectWrapper) {
-        let canvasObjectWrappersMap = this.updateCanvasObjects.get(canvasObjectType);
-        if (canvasObjectWrappersMap == null) {
-            canvasObjectWrappersMap = new Map();
-            this.updateCanvasObjects.set(canvasObjectType, canvasObjectWrappersMap);
-        }
-        let canvasObjectWrappers = canvasObjectWrappersMap.get(id);
-        if (canvasObjectWrappers === undefined) {
-            canvasObjectWrappers = [];
-            canvasObjectWrappersMap.set(id, canvasObjectWrappers);
-        }
-        canvasObjectWrappers.push(canvasObjectWrapper);
-    }
-
-    //for local drawing, updates canvas instantly
-    insert(canvasObjectType, id, canvasObject) {
-        let map = this.canvasObjects.get(canvasObjectType);
-        if (map == null) {
-            map = new Map();
-            this.canvasObjects.set(canvasObjectType, map);
-        }
-        map.set(id, canvasObject);//todo random id is bad
-    }
-
-    delete(deleteCanvasObjects) {
-        deleteCanvasObjects.forEach((value, key) => {
-            let map = this.canvasObjects.get(key);
-            if (map == null) {
-                console.warn('cant delete ' + key + ' its already gone');
-            } else {
-                value.forEach((v, k) => {
-                    map.remove(k);
-                });
-            }
+        //todo check if length 0 then just reassign
+        canvasDeletes.forEach((canvasDelete) => {
+            this.canvasDeletes.push(canvasDelete);
         });
     }
 
@@ -248,6 +230,48 @@ function aabb(rect1, rect2, padding) {
         rect1.y - p < rect2.y + rect2.height &&
         rect1.y + rect1.height + p > rect2.y;
 }
+
+
+
+
+
+class UpdateCanvas {
+    constructor() {
+        this.canvasInsertsMap = new Map();
+        this.canvasMovesMap = new Map();
+        this.canvasDeletes = [];
+    }
+
+    insert(canvasObjectType, id, canvasObject) {
+        let canvasInserts = this.canvasInsertsMap.get(canvasObjectType);
+        if (canvasInserts === undefined) {
+            canvasInserts = [];
+            this.canvasInsertsMap.set(canvasObjectType, canvasInserts);
+        }
+        canvasInserts.push(CanvasInsert.create(getDt(), id, canvasObject));//todo
+    }
+
+    move(id, canvasObject) {
+        let canvasMoves = this.canvasMovesMap.get(id);
+        if (canvasMoves === undefined) {
+            canvasMoves = [];
+            this.canvasMovesMap.set(id, canvasMoves);
+        }
+        canvasMoves.push(CanvasMove.create(getDt(), canvasObject));
+    }
+
+    delete(id) {
+        this.canvasDeletes.push(CanvasDelete.create(getDt(), id))
+    }
+
+    clear() {
+        this.canvasInsertsMap.clear();
+        this.canvasMovesMap.clear();
+        this.canvasDeletes.length = 0;
+    }
+}
+
+let updateCanvas = new UpdateCanvas();
 
 const MAX_TIME = 2000;//todo copied from document.js
 const SELECT_PADDING = 10;
@@ -330,7 +354,7 @@ function getDt() {
 export function insert(canvasObjectType, canvasObject) {
     let id = (Math.random() - 0.5) * 32000;
     activeDocument.canvas.insert(canvasObjectType, id, canvasObject);
-    updateCanvas.update(canvasObjectType, id, canvasObject);
+    updateCanvas.insert(canvasObjectType, id, canvasObject);
 }
 
 function flushActive() {
@@ -340,23 +364,47 @@ function flushActive() {
     if (selected.canvasObject !== null) {
         if (selected.dirty) {
             selected.dirty = false;
-            updateCanvas.update(selected.canvasObjectType, selected.canvasObject, CanvasObjectWrapperr.create(getDt(), selected.canvasObject));
+            updateCanvas.move(selected.id, selected.canvasObject);
         }
     }
 }
 
 const UPDATE_INTERVAL = 1000;
 let lastUpdate = 0;
-let updateCanvas = new Canvas();
+
 setInterval(localUpdate, UPDATE_INTERVAL);
 export function localUpdate() {
     flushActive();
     lastUpdate = window.performance.now();
-    if (updateCanvas.updateCanvasObjects.size > 0) {
-        socket.send(new ClientMessageCanvasUpdate(updateCanvas.updateCanvasObjects));//todo breaks the server when the size is 0
-        updateCanvas.updateCanvasObjects.clear();
+    //todo client side message aggregation/queue and server side understanding
+    if (updateCanvas.canvasInserts.size > 0) {
+        socket.send(new ClientMessageCanvasInsert(updateCanvas.canvasInsertsMap));
     }
+    if (updateCanvas.canvasMovesMap.size > 0) {
+        socket.send(new ClientMessageCanvasMove(updateCanvas.canvasMovesMap));
+    }
+    if (updateCanvas.canvasDeletes.length > 0) {
+        socket.send(new ClientMessageCanvasDelete(updateCanvas.canvasDeletes));
+    }
+    //todo flush
+    updateCanvas.clear();
 }
+
+socket.addMessageListener(ServerMessageType.CANVAS_INSERT, (serverMessageCanvasInsert) => {
+    if (activeDocument !== null) {
+        activeDocument.canvas.updateInsert(serverMessageCanvasInsert.canvasInsertsMap);
+    }
+});
+socket.addMessageListener(ServerMessageType.CANVAS_MOVE, (serverMessageCanvasMove) => {
+   if (activeDocument !== null) {
+       activeDocument.canvas.updateMove(serverMessageCanvasMove.canvasMovesMap);
+   }
+});
+socket.addMessageListener(ServerMessageType.CANVAS_DELETE, (serverMessageCanvasDelete) => {
+    if (activeDocument !== null) {
+        activeDocument.canvas.updateDelete(serverMessageCanvasDelete.canvasDeletes);
+    }
+})
 
 function ondrag(event) {
     //todo draw line
