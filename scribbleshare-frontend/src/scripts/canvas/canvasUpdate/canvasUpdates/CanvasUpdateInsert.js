@@ -48,7 +48,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         });
     }
 
-    serialize() {
+    serialize(writer) {
         super.serialize(writer);
         writer.writeUint8(this.canvasInsertsMap.size);
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {

@@ -96,7 +96,7 @@ class CanvasMove {
     static create(dt, canvasObject) {
         let object = Object.create(this.prototype);
         object.dt = dt;
-        object.canvasObject = canvasObject;
+        object.canvasObject = CanvasObject.create(canvasObject);
         return object;
     }
 }
