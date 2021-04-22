@@ -9,12 +9,14 @@ import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
-import {mouse} from "../Mouse.js";
+import Mouse from "../Mouse.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
 const SELECT_PADDING = 10;
+
+const mouse = new Mouse(canvas);
 
 let canvasUpdateInsert = CanvasUpdateInsert.create();//todo these could be instance variables but idk
 let canvasUpdateMove = CanvasUpdateMove.create();

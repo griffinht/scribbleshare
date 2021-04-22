@@ -1,7 +1,5 @@
-import {canvas} from "./canvas/Canvas.js";
-
-class Mouse {
-    constructor() {
+export default class Mouse {
+    constructor(element) {
         this.x = 0;
         this.y = 0;
         this.dx = 0;
@@ -10,6 +8,34 @@ class Mouse {
         this.height = 0;
         this.down = false;
         this.drag = false;
+        element.addEventListener('mousemove', (event) => {
+            this.x = event.offsetX;//todo left click drag only
+            this.y = event.offsetY;
+            this.dx += event.movementX;
+            element.dy += event.movementY;
+            if (this.down) {
+                this.drag = true;
+            }
+        });
+        element.addEventListener('mousedown', (event) => {
+            this.down = true;
+        });
+
+        element.addEventListener('mouseup', (event) => {
+            this.down = false;
+            this.drag = false;
+        });
+
+        element.addEventListener('mouseleave', (event) => {
+            this.down = false;
+            this.drag = false;
+        });
+        element.addEventListener('mouseenter', (event) => {
+            if ((event.buttons & 1) === 1) {
+                this.down = true;
+            }
+        });
+
     }
 
     reset() {
@@ -17,33 +43,3 @@ class Mouse {
         this.dy = 0;
     }
 }
-export const mouse = new Mouse();
-
-canvas.addEventListener('mousemove', (event) => {
-    mouse.x = event.offsetX;//todo left click drag only
-    mouse.y = event.offsetY;
-    mouse.dx += event.movementX;
-    mouse.dy += event.movementY;
-    if (mouse.down) {
-        mouse.drag = true;
-    }
-});
-
-canvas.addEventListener('mousedown', (event) => {
-    mouse.down = true;
-});
-
-canvas.addEventListener('mouseup', (event) => {
-    mouse.down = false;
-    mouse.drag = false;
-});
-
-canvas.addEventListener('mouseleave', (event) => {
-    mouse.down = false;
-    mouse.drag = false;
-});
-canvas.addEventListener('mouseenter', (event) => {
-    if ((event.buttons & 1) === 1) {
-        mouse.down = true;
-    }
-});
