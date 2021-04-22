@@ -77,6 +77,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 
     static create() {
         let object = Object.create(this.prototype);
+        object.canvasUpdateType = CanvasUpdateType.DELETE;
         object.canvasMovesMap = new Map();
         return object;
     }

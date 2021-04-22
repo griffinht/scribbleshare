@@ -62,6 +62,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
 
     static create() {
         let object = Object.create(this.prototype);
+        object.canvasUpdateType = CanvasUpdateType.DELETE;
         object.canvasInsertsMap = new Map();
         return object;
     }

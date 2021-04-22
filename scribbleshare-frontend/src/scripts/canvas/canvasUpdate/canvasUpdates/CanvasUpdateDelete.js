@@ -42,6 +42,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
 
     static create() {
         let object = Object.create(this.prototype);
+        object.canvasUpdateType = CanvasUpdateType.DELETE;
         object.canvasDeletes = [];
         return object;
     }

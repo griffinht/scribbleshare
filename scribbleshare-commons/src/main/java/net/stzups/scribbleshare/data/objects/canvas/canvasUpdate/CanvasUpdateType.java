@@ -31,7 +31,7 @@ public enum CanvasUpdateType {
     public static CanvasUpdateType valueOf(int id) {
         CanvasUpdateType messageType = messageTypeMap.get(id);
         if (messageType == null) {
-            throw new IllegalArgumentException("Unknown PacketType for given id " + id);
+            throw new IllegalArgumentException("Unknown CanvasUpdateType for given id " + id);
         }
         return messageType;
     }
