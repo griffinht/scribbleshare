@@ -6,8 +6,8 @@ import java.util.EnumSet;
 import java.util.Map;
 
 public enum CanvasUpdateType {
-    MOVE(0),
-    INSERT(1),
+    INSERT(0),
+    MOVE(1),
     DELETE(2),
     ;
 
