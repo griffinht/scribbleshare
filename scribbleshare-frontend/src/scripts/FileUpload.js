@@ -3,7 +3,6 @@ import {apiUrl} from "./main.js";
 import BufferReader from "./protocol/BufferReader.js";
 import {CanvasObjectType} from "./canvas/canvasObject/CanvasObjectType.js";
 import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
-import {insert} from "./canvas/Canvas.js";
 
 const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1280;
@@ -56,7 +55,7 @@ function uploadImage(file) {
                 }
                 let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
                 let object = CanvasImage.create(0, 0, id, image);
-                insert(CanvasObjectType.IMAGE, object);
+                activeDocument.canvas.insert(CanvasObjectType.IMAGE, object);
             });
 
             request.send(Uint8Array.from(atob(output.substr(output.indexOf('base64,') + 7)), c => c.charCodeAt(0))); //base64 string to binary

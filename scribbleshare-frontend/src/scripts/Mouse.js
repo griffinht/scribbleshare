@@ -1,15 +1,23 @@
 import {canvas} from "./canvas/Canvas.js";
 
-export const mouse = {
-    x:0,
-    y:0,
-    dx:0,
-    dy:0,
-    width:0,
-    height:0,
-    down:false,
-    drag:false
-};
+class Mouse {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.dx = 0;
+        this.dy = 0;
+        this.width = 0;
+        this.height = 0;
+        this.down = false;
+        this.drag = false;
+    }
+
+    reset() {
+        this.dx = 0;
+        this.dy = 0;
+    }
+}
+export const mouse = new Mouse();
 
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = event.offsetX;//todo left click drag only

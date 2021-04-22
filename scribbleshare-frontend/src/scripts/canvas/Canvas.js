@@ -134,8 +134,7 @@ export class Canvas {
         switch (event.type) {
             case 'movemouse': {
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
-                    mouse.dx = 0;
-                    mouse.dy = 0;
+                    mouse.reset();
                     this.flushActive();
                 }
                 if (mouse.drag) {
