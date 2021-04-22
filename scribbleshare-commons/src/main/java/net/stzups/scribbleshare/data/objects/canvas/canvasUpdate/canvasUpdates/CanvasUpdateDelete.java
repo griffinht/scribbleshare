@@ -48,6 +48,7 @@ public class CanvasUpdateDelete extends CanvasUpdate {
 
     @Override
     public void serialize(ByteBuf byteBuf) {
+        super.serialize(byteBuf);
         byteBuf.writeByte((byte) canvasDeletes.length);
         for (CanvasDelete canvasDelete : canvasDeletes) {
             canvasDelete.serialize(byteBuf);
