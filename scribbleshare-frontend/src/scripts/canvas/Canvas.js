@@ -72,7 +72,7 @@ export class Canvas {
         for (let i = 0; i < this.canvasUpdates.length; i++) {
             this.canvasUpdates[i].draw(this, dt)
             if (!this.canvasUpdates[i].isDirty()) {
-                this.canvasUpdates.slice(i--, 1);
+                this.canvasUpdates.splice(i--, 1);
             }
         }
 

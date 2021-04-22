@@ -42,8 +42,11 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
             for (let i = 0; i < canvasInserts.length; i++) {
                 if (canvasInserts[i].dt >= dt) {
                     canvas.canvasObjectWrappers.set(canvasInserts[i].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[i].canvasObject));
-                    canvasInserts.slice(i--, 1);
+                    canvasInserts.splice(i--, 1);
                 }
+            }
+            if (canvasInserts.length === 0) {
+                this.canvasInsertsMap.delete(canvasObjectType);
             }
         });
     }

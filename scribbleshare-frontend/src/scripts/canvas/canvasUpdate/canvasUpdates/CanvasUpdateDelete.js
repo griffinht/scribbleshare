@@ -24,7 +24,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     }
 
     draw(canvas, dt) {
-        for (let i = 0; i <this.canvasDeletes.length; i++) {
+        for (let i = 0; i < this.canvasDeletes.length; i++) {
             if (this.canvasDeletes[i].dt >= dt) {
                 canvas.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
                 this.canvasDeletes.splice(i--, 1);
