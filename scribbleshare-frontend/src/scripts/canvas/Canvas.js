@@ -9,6 +9,7 @@ import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
+import {mouse} from "../Mouse.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -132,17 +133,10 @@ export class Canvas {
     onEvent(event) {
         switch (event.type) {
             case 'movemouse': {
-                mouse.x = event.offsetX;//todo left click drag only
-                mouse.y = event.offsetY;
-                mouse.dx += event.movementX;
-                mouse.dy += event.movementY;
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     mouse.dx = 0;
                     mouse.dy = 0;
                     this.flushActive();
-                }
-                if (mouse.down) {
-                    mouse.drag = true;
                 }
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
@@ -202,35 +196,6 @@ resizeCanvas();
 
 
 
-const mouse = {
-    x:0,
-    y:0,
-    dx:0,
-    dy:0,
-    width:0,
-    height:0,
-    down:false,
-    drag:false
-};
-
-canvas.addEventListener('mousedown', (event) => {
-    mouse.down = true;
-});
-
-canvas.addEventListener('mouseup', (event) => {
-    mouse.down = false;
-    mouse.drag = false;
-});
-
-canvas.addEventListener('mouseleave', (event) => {
-    mouse.down = false;
-    mouse.drag = false;
-});
-canvas.addEventListener('mouseenter', (event) => {
-    if ((event.buttons & 1) === 1) {
-        mouse.down = true;
-    }
-});
 
 function onEvent(event) {
     if (activeDocument !== null) {
