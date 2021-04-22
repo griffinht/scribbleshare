@@ -106,11 +106,10 @@ export class Canvas {
 }
 
 function aabb(rect1, rect2, padding) {
-    let p = padding;
-    return rect1.x - p < rect2.x + rect2.width &&
-        rect1.x + rect1.width + p > rect2.x &&
-        rect1.y - p < rect2.y + rect2.height &&
-        rect1.y + rect1.height + p > rect2.y;
+    return rect1.x - padding < rect2.x + rect2.width &&
+        rect1.x + rect1.width + padding > rect2.x &&
+        rect1.y - padding < rect2.y + rect2.height &&
+        rect1.y + rect1.height + padding > rect2.y;
 }
 
 window.addEventListener('resize', resizeCanvas);
