@@ -1,7 +1,7 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import {CanvasUpdateType} from "../CanvasUpdateType.js";
-import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
 import {getCanvasObject} from "../../canvasObject/getCanvasObject.js";
+import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
     constructor(reader) {
@@ -19,11 +19,32 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         }
     }
 
-    update(canvas) {
+    isDirty() {
+        return this.canvasInsertsMap.size > 0;
+    }
+
+    clear() {
+        this.canvasInsertsMap.clear();
+    }
+
+
+    insert(canvasObjectType, dt, id, canvasObject) {
+        let canvasInserts = this.canvasInsertsMap.get(canvasObjectType);
+        if (canvasInserts === undefined) {
+            canvasInserts = [];
+            this.canvasInsertsMap.set(canvasObjectType, canvasInserts);
+        }
+        canvasInserts.push(CanvasInsert.create(dt, id, canvasObject));
+    }
+
+    draw(canvas, dt) {
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
-            canvasInserts.forEach((canvasInsert) => {
-                canvas.canvasInserts.push(canvasInsert);
-            });
+            for (let i = 0; i < canvasInserts.length; i++) {
+                if (canvasInserts[i].dt >= dt) {
+                    canvas.canvasObjectWrappers.set(canvasInserts[i].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[i].canvasObject));
+                    canvasInserts.slice(i--, 1);
+                }
+            }
         });
     }
 
@@ -39,9 +60,9 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         });
     }
 
-    static create(canvasInsertsMap) {
+    static create() {
         let object = Object.create(this.prototype);
-        object.canvasInsertsMap = canvasInsertsMap;
+        object.canvasInsertsMap = new Map();
         return object;
     }
 }
@@ -50,20 +71,20 @@ class CanvasInsert {
     constructor(canvasObjectType, reader) {
         this.dt = reader.readUint8();
         this.id = reader.readInt16();
-        this.canvasObjectWrapper = new CanvasObjectWrapper(canvasObjectType, getCanvasObject(canvasObjectType, reader));
+        this.canvasObject = getCanvasObject(canvasObjectType, reader);
     }
 
     serialize(writer) {
         writer.writeUint8(this.dt);
         writer.writeInt16(this.id);
-        this.canvasObjectWrapper.serialize(writer);
+        this.canvasObject.serialize(writer);
     }
 
-    static create(dt, id, canvasObjectWrapper) {
+    static create(dt, id, canvasObject) {
         let object = Object.create(this.prototype);
         object.dt = dt;
         object.id = id;
-        object.canvasObjectWrapper = canvasObjectWrapper;
+        object.canvasObject = canvasObject;
         return object;
     }
 }

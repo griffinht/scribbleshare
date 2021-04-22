@@ -1,6 +1,7 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObject from "../../canvasObject/CanvasObject.js";
+import {ctx} from "../../Canvas.js";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
     constructor(reader) {
@@ -18,15 +19,46 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         }
     }
 
-    update(canvas) {
-        this.canvasMovesMap.forEach((value, id) => {
-            let canvasMoves = canvas.canvasMovesMap.get(id);
-            if (canvasMoves === undefined) {
-                canvas.canvasMovesMap.set(id, value);
+    isDirty() {
+        return this.canvasMovesMap.size > 0;
+    }
+
+    clear() {
+        this.canvasMovesMap.clear();
+    }
+
+    move(id, dt, canvasObject) {
+        let canvasMoves = this.canvasMovesMap.get(id);
+        if (canvasMoves === undefined) {
+            return;
+        }
+
+        canvasMoves.push(CanvasMove.create(dt, canvasObject));
+    }
+
+    draw(canvas, dt) {
+        this.canvasMovesMap.forEach((canvasMoves, id) => {
+            let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
+            if (canvasObjectWrapper === undefined) {
+                this.clear();
+            }
+
+            if (canvasMoves.length === 0) {
+                canvasObjectWrapper.canvasObject.dt = 0;
+                this.canvasMovesMap.delete(id);
             } else {
-                value.forEach(canvasMove => {
-                    canvasMoves.push(canvasMove);
-                });
+                ctx.fillText('' + canvasObjectWrapper.canvasObject.dt + ', ' + canvasMoves[0].dt, 300, 50)
+                canvasObjectWrapper.canvasObject.dt += dt;
+                if (canvasObjectWrapper.canvasObject.dt > canvasMoves[0].dt) {
+                    console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
+                    canvasObjectWrapper.canvasObject.dt = 0;
+                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
+                    canvasMoves.shift();
+                }
+                if (canvasMoves.length > 0) {
+                    ctx.fillText('' + canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt, 50, 50)
+                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt);
+                }//will be removed on the next go around
             }
         });
     }
@@ -43,9 +75,9 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         });
     }
 
-    static create(canvasMovesMap) {
+    static create() {
         let object = Object.create(this.prototype);
-        object.canvasMovesMap = canvasMovesMap;
+        object.canvasMovesMap = new Map();
         return object;
     }
 }
@@ -64,7 +96,7 @@ class CanvasMove {
     static create(dt, canvasObject) {
         let object = Object.create(this.prototype);
         object.dt = dt;
-        object.canvasObject = CanvasObject.create(canvasObject);
+        object.canvasObject = canvasObject;
         return object;
     }
 }

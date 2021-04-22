@@ -11,10 +11,25 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         }
     }
 
-    update(canvas) {
-        this.canvasDeletes.forEach((canvasDelete) => {
-            canvas.canvasDeletes.push(canvasDelete);
-        });
+    isDirty() {
+        return this.canvasDeletes.length > 0;
+    }
+
+    clear() {
+        this.canvasDeletes.length = 0;
+    }
+
+    delete(dt, id) {
+        this.canvasDeletes.push(CanvasDelete.create(dt, id));
+    }
+
+    draw(canvas, dt) {
+        for (let i = 0; i <this.canvasDeletes.length; i++) {
+            if (this.canvasDeletes[i].dt >= dt) {
+                canvas.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
+                this.canvasDeletes.splice(i--, 1);
+            }
+        }
     }
 
     serialize(writer) {
@@ -25,10 +40,10 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         });
     }
 
-    static create(canvasDeletes) {
+    static create() {
         let object = Object.create(this.prototype);
-        object.canvasDeletes = canvasDeletes;
-        return canvasDeletes;
+        object.canvasDeletes = [];
+        return object;
     }
 }
 

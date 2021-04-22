@@ -5,6 +5,10 @@ import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
+import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
+import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
+import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
+import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -18,9 +22,7 @@ let selected = {
 export class Canvas {
     constructor(reader) {
         this.canvasObjectWrappers = new Map();
-        this.canvasInserts = [];
-        this.canvasMovesMap = new Map();
-        this.canvasDeletes = [];
+        this.canvasUpdates = [];
         if (reader != null) {
             let length = reader.readUint8();
             for (let i = 0; i < length; i++) {
@@ -34,56 +36,16 @@ export class Canvas {
     }
 
     draw(dt) {
+        for (let i = 0; i < this.canvasUpdates.length; i++) {
+            this.canvasUpdates[i].draw(this, dt)
+            if (!this.canvasUpdates[i].isDirty()) {
+                this.canvasUpdates.slice(i--, 1);
+            }
+        }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillText('fps:' + (1000 / dt), 50, 150);
-        dt = dt / MAX_TIME * 255;
+        dt = convertTime(dt);
         ctx.fillText('' + dt, 50, 100);
-        a += dt;
-        if (a > 255) {
-            a = 0;
-        }
-        ctx.fillText('' + a, 50 , 200);
-        for (let i = 0; i < this.canvasInserts.length; i++) {
-            //console.log('inserts', this.canvasInserts[i].dt);
-            this.canvasInserts[i].dt -= dt;
-            if (this.canvasInserts[i].dt <= 0) {
-                this.canvasObjectWrappers.set(this.canvasInserts[i].id, this.canvasInserts[i].canvasObjectWrapper);
-                this.canvasInserts.splice(i--, 1);
-            }
-        }
-        this.canvasMovesMap.forEach((canvasMoves, id) => {
-            let canvasObjectWrapper = this.canvasObjectWrappers.get(id);
-            if (canvasObjectWrapper === undefined) {
-                console.warn('oopsie');
-                return;
-            }
-
-            if (canvasMoves.length === 0) {
-                canvasObjectWrapper.canvasObject.dt = 0;
-                this.canvasMovesMap.delete(id);
-            } else {
-                ctx.fillText('' + canvasObjectWrapper.canvasObject.dt + ', ' + canvasMoves[0].dt, 300, 50)
-                canvasObjectWrapper.canvasObject.dt += dt;
-                if (canvasObjectWrapper.canvasObject.dt > canvasMoves[0].dt) {
-                    console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
-                    canvasObjectWrapper.canvasObject.dt = 0;
-                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
-                    canvasMoves.shift();
-                }
-                if (canvasMoves.length > 0) {
-                    ctx.fillText('' + canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt, 50, 50)
-                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt);
-                }//will be removed on the next go around
-            }
-        });
-        for (let i = 0; i < this.canvasDeletes.length; i++) {
-            //console.log('deletes', this.canvasDeletes[i].dt);
-            this.canvasDeletes[i].dt -= dt;
-            if (this.canvasDeletes[i].dt <= 0) {
-                this.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
-                this.canvasDeletes.splice(i--, 1);
-            }
-        }
         //console.log('draw1', this.canvasObjects);
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
             ctx.save();
@@ -111,8 +73,8 @@ export class Canvas {
 
     update(canvasUpdates) {
         canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.update(this);
-        });
+            this.canvasUpdates.push(canvasUpdate);
+        })
     }
 
     resize() {
@@ -120,11 +82,6 @@ export class Canvas {
         //todo redraw?
     }
 }
-
-
-
-
-
 
 function aabb(rect1, rect2, padding) {
     let p = padding;
@@ -134,51 +91,6 @@ function aabb(rect1, rect2, padding) {
         rect1.y + rect1.height + p > rect2.y;
 }
 
-
-
-
-
-class UpdateCanvas {
-    constructor() {
-        this.canvasInsertsMap = new Map();
-        this.canvasMovesMap = new Map();
-        this.canvasDeletes = [];
-    }
-
-    insert(canvasObjectType, id, canvasObject) {
-        let canvasInserts = this.canvasInsertsMap.get(canvasObjectType);
-        if (canvasInserts === undefined) {
-            canvasInserts = [];
-            this.canvasInsertsMap.set(canvasObjectType, canvasInserts);
-        }
-        canvasInserts.push(CanvasInsert.create(getDt(), id, canvasObject));//todo
-    }
-
-    move(id, canvasObject) {
-        let canvasMoves = this.canvasMovesMap.get(id);
-        if (canvasMoves === undefined) {
-            canvasMoves = [];
-            this.canvasMovesMap.set(id, canvasMoves);
-        }
-
-        let dt = getNow();
-        if (canvasMoves.length > 0) {
-            dt -= canvasMoves[0].dt;
-        }
-        console.log(dt);
-        canvasMoves.push(CanvasMove.create(dt, canvasObject));
-    }
-
-    delete(id) {
-        this.canvasDeletes.push(CanvasDelete.create(getNow(), id))
-    }
-
-    clear() {
-        this.canvasInsertsMap.clear();
-        this.canvasMovesMap.clear();
-        this.canvasDeletes.length = 0;
-    }
-}
 //todo move to canvas class and turn on/off
 let lastDraw = performance.now();
 function draw(now) {
@@ -193,7 +105,44 @@ function draw(now) {
 }
 window.requestAnimationFrame(draw);
 
-let updateCanvas = new UpdateCanvas();
+window.addEventListener('resize', resizeCanvas);
+function resizeCanvas() {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let rect = canvas.parentNode.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    ctx.putImageData(imageData, 0, 0);
+    if (activeDocument != null) {
+        activeDocument.canvas.resize();
+    }
+}
+resizeCanvas();
+
+
+
+
+
+
+
+let canvasUpdateInsert = CanvasUpdateInsert.create();
+export function insert(canvasObjectType, canvasObject) {
+    let id = (Math.random() - 0.5) * 32000;//todo i don't like this
+    activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
+    canvasUpdateInsert.insert(canvasObjectType,getNow(), id, canvasObject);
+}
+
+let canvasUpdateMove = CanvasUpdateMove.create();
+function move(id, canvasObject) {
+    canvasUpdateMove.move(id, getNow(), canvasObject);
+}
+
+let canvasUpdateDelete = CanvasUpdateDelete.create();
+function deletee(id) {
+    activeDocument.canvas.canvasObjectWrappers.delete(id);
+    canvasUpdateDelete.delete(getNow(), id);
+}
+
+
 
 const SELECT_PADDING = 10;
 
@@ -207,8 +156,6 @@ const mouse = {
     down:false,
     drag:false
 };
-
-
 
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = event.offsetX;//todo left click drag only
@@ -270,17 +217,6 @@ canvas.addEventListener('contextmenu', (event) => {
     }
 });
 
-export function insert(canvasObjectType, canvasObject) {
-    let id = (Math.random() - 0.5) * 32000;
-    activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
-    updateCanvas.insert(canvasObjectType, id, canvasObject);
-}
-
-export function deletee(id) {
-    activeDocument.canvas.canvasObjectWrappers.delete(id);
-    updateCanvas.delete(id);
-}
-
 function flushActive() {
     if (activeDocument == null) {
         return;
@@ -288,45 +224,58 @@ function flushActive() {
     if (selected.canvasObjectWrapper !== null) {
         if (selected.dirty) {
             selected.dirty = false;
-            updateCanvas.move(selected.id, selected.canvasObjectWrapper.canvasObject);
+            move(selected.id, selected.canvasObjectWrapper.canvasObject);
         }
     }
 }
 
 export const UPDATE_INTERVAL = 1000;
 
-function getNow() {
-    return convertTime(window.performance.now());
-}
+let lastUpdate = 0;
 
 function convertTime(time) {
     return time / UPDATE_INTERVAL * 255;
 }
 
-let canvasUpdates = [];
-let lastUpdate = 0;
+function getNow() {
+    return convertTime(window.performance.now()) - lastUpdate;
+}
 
 socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate) => {
     if (activeDocument !== null) {
-        activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
+        flushActive();
+
+        //assemble local updates
+        let canvasUpdates = [];
+        if (canvasUpdateInsert.isDirty()) {
+            canvasUpdates.push(canvasUpdateInsert);
+        }
+        if (canvasUpdateMove.isDirty()) {
+            canvasUpdates.push(canvasUpdateMove);
+        }
+        if (canvasUpdateDelete.isDirty()) {
+            canvasUpdates.push(canvasUpdateDelete);
+        }
+
+        //send local updates
         socket.send(new ClientMessageCanvasUpdate(canvasUpdates));
-        canvasUpdates.length = 0;
         lastUpdate = convertTime(window.performance.now());
+
+        //clean up
+        canvasUpdates.forEach((canvasUpdate) => {
+            canvasUpdate.clear();
+        })
+        canvasUpdates.length = 0;
+
+        //apply remote updates
+        activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
+    } else {
+        //shouldn't happen
+        console.warn('update with no open document');
     }
 });
 
-window.addEventListener('resize', resizeCanvas);
-function resizeCanvas() {
-    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let rect = canvas.parentNode.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    ctx.putImageData(imageData, 0, 0);
-    if (activeDocument != null) {
-        activeDocument.canvas.resize();
-    }
-}
-resizeCanvas();
+
 
 function ondrag(event) {
     //todo draw line
