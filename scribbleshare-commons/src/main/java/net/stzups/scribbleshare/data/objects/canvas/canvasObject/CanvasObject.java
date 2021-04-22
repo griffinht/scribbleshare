@@ -1,8 +1,8 @@
-package net.stzups.scribbleshare.data.objects.canvas.object;
+package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects.CanvasImage;
-import net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects.Shape;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.CanvasImage;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Shape;
 
 public class CanvasObject {
     private short x;

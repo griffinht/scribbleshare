@@ -1,8 +1,8 @@
 import {activeDocument} from "./Document.js";
 import {apiUrl} from "./main.js";
 import BufferReader from "./protocol/BufferReader.js";
-import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
-import CanvasImage from "./canvas/canvasObjects/CanvasImage.js";
+import {CanvasObjectType} from "./canvas/canvasObject/CanvasObjectType.js";
+import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
 import {insert} from "./canvas/Canvas.js";
 
 const MAX_WIDTH = 1280;

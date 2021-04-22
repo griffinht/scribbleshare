@@ -1,7 +1,7 @@
 import CanvasObject from "../CanvasObject.js";
-import {ctx} from "../Canvas.js";
-import {activeDocument} from "../../Document.js";
-import {apiUrl} from "../../main.js";
+import {ctx} from "../../Canvas.js";
+import {activeDocument} from "../../../Document.js";
+import {apiUrl} from "../../../main.js";
 
 export default class CanvasImage extends CanvasObject {
     constructor(reader) {

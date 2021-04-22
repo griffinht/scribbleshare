@@ -1,4 +1,4 @@
-import {ctx} from "./Canvas.js";
+import {ctx} from "../Canvas.js";
 
 export default class CanvasObject {
     constructor(reader) {

@@ -8,9 +8,7 @@ public enum ServerMessageType {
     DELETE_DOCUMENT(4),
     GET_INVITE(5),
     OPEN_DOCUMENT(6),
-    CANVAS_INSERT(7),
-    CANVAS_DELETE(8),
-    CANVAS_MOVE(9),
+    CANVAS_UPDATE(7),
     ;
 
     private final int id;

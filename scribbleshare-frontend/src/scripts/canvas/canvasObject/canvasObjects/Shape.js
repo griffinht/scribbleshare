@@ -1,5 +1,5 @@
 import CanvasObject from "../CanvasObject.js";
-import {ctx} from "../Canvas.js";
+import {ctx} from "../../Canvas.js";
 
 export default class Shape extends CanvasObject {
     constructor(reader) {

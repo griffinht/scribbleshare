@@ -41,7 +41,6 @@ class Document {
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
-        this.canvas.draw(-1);
         //this.addClient(localClient);
         //todo
         /*let request = new XMLHttpRequest();
@@ -81,34 +80,6 @@ document.getElementById('add').addEventListener('click', () => {
     if (activeDocument != null) activeDocument.close();
     socket.send(new ClientMessageCreateDocument());
 });
-
-window.addEventListener('resize', resizeCanvas);
-function resizeCanvas() {
-    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let rect = canvas.parentNode.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    ctx.putImageData(imageData, 0, 0);
-    if (activeDocument != null) {
-        activeDocument.canvas.resize();
-    }
-}
-resizeCanvas();
-
-let last = performance.now();
-
-function draw(now) {
-    let dt = (now - last);
-    last = now;
-
-    if (activeDocument != null) {
-        activeDocument.canvas.draw(dt);
-    }
-
-    window.requestAnimationFrame(draw);
-}
-window.requestAnimationFrame(draw);
-
 socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient) => {
     serverMessageAddClient.clients.forEach((value) => {
         let client = new Client(value.id, User.getUser(value.userId));

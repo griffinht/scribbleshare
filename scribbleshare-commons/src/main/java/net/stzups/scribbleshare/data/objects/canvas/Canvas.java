@@ -2,8 +2,9 @@ package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObject;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,41 +43,20 @@ public class Canvas {
         }
     }
 
+    public Map<Short, CanvasObjectWrapper> getCanvasObjects() {
+        return canvasObjects;
+    }
+
     public boolean isDirty() {
         boolean dirty = this.dirty;
         this.dirty = false;
         return dirty;
     }
 
-    public void insert(Map<CanvasObjectType, CanvasInsert[]> canvasInsertsMap) {
+    public void update(CanvasUpdate[] canvasUpdates) {
         dirty = true;
-        for (Map.Entry<CanvasObjectType, CanvasInsert[]> entry : canvasInsertsMap.entrySet()) {
-            for (CanvasInsert canvasInsert : entry.getValue()) {
-                canvasObjects.put(canvasInsert.getId(), new CanvasObjectWrapper(entry.getKey(), canvasInsert.getCanvasObject()));
-            }
-        }
-    }
-
-    public void move(Map<Short, CanvasMove[]> canvasMovesMap) {
-        dirty = true;
-        for (Map.Entry<Short, CanvasMove[]> entry : canvasMovesMap.entrySet()) {
-            CanvasObjectWrapper canvasObjectWrapper = canvasObjects.get(entry.getKey());
-            if (canvasObjectWrapper == null || entry.getValue().length == 0) {
-                System.out.println("oopsie " + canvasObjectWrapper);
-                continue;
-            }
-
-            canvasObjectWrapper.getCanvasObject().update(entry.getValue()[entry.getValue().length - 1].getCanvasObject());
-        }
-    }
-
-    public void delete(CanvasDelete[] canvasDeletes) {
-        dirty = true;
-        for (CanvasDelete canvasDelete : canvasDeletes) {
-            CanvasObjectWrapper canvasObjectWrapper = canvasObjects.remove(canvasDelete.getId());
-            if (canvasObjectWrapper == null) {
-                System.out.println("Tried to delete object that does not exist"); //todo
-            }
+        for (CanvasUpdate canvasUpdate : canvasUpdates) {
+            canvasUpdate.update(this);
         }
     }
 

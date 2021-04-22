@@ -5,9 +5,7 @@ import ServerMessageDeleteDocument from "./messages/ServerMessageDeleteDocument.
 import ServerMessageUpdateDocument from "./messages/ServerMessageUpdateDocument.js";
 import ServerMessageGetInvite from "./messages/ServerMessageGetInvite.js";
 import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
-import ServerMessageCanvasDelete from "./messages/ServerMessageCanvasDelete.js";
-import ServerMessageCanvasMove from "./messages/ServerMessageCanvasMove.js";
-import ServerMessageCanvasInsert from "./messages/ServerMessageCanvasInsert.js";
+import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
 
 const ServerMessageType = {
     ADD_CLIENT:0,
@@ -17,9 +15,7 @@ const ServerMessageType = {
     DELETE_DOCUMENT:4,
     GET_INVITE:5,
     OPEN_DOCUMENT:6,
-    CANVAS_INSERT:7,
-    CANVAS_DELETE:8,
-    CANVAS_MOVE:9,
+    CANVAS_UPDATE:7,
 };
 export default ServerMessageType;
 
@@ -33,14 +29,8 @@ export function getServerMessage(type, reader) {
         case ServerMessageType.REMOVE_CLIENT:
             message = new ServerMessageRemoveClient(reader);
             break;
-        case ServerMessageType.CANVAS_INSERT:
-            message = new ServerMessageCanvasInsert(reader);
-            break;
-        case ServerMessageType.CANVAS_DELETE:
-            message = new ServerMessageCanvasDelete(reader);
-            break;
-        case ServerMessageType.CANVAS_MOVE:
-            message = new ServerMessageCanvasMove(reader);
+        case ServerMessageType.CANVAS_UPDATE:
+            message = new ServerMessageCanvasUpdate(reader);
             break;
         case ServerMessageType.UPDATE_DOCUMENT:
             message = new ServerMessageUpdateDocument(reader);

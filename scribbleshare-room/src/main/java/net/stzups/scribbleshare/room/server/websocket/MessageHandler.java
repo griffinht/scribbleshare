@@ -6,18 +6,18 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasDelete;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasInsert;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasMove;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddUser;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
@@ -103,16 +103,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
             }
             case READY: {
                 switch (message.getMessageType()) {
-                    case CANVAS_INSERT: {
-                        room.canvasInsert(client, ((ClientMessageCanvasInsert) message).getCanvasInsertsMap());
-                        break;
-                    }
-                    case CANVAS_DELETE: {
-                        room.canvasDelete(client, ((ClientMessageCanvasDelete) message).getCanvasDeletes());
-                        break;
-                    }
-                    case CANVAS_MOVE: {
-                        room.canvasMove(client, ((ClientMessageCanvasMove) message).getCanvasMovesMap());
+                    case CANVAS_UPDATE: {
+                        CanvasUpdate[] canvasUpdates = ((ClientMessageCanvasUpdate) message).getCanvasUpdates();
+                        room.getCanvas().update(canvasUpdates);
+                        room.queueMessageExcept(new ServerMessageCanvasUpdate(canvasUpdates), client);
                         break;
                     }
                     case OPEN_DOCUMENT: {

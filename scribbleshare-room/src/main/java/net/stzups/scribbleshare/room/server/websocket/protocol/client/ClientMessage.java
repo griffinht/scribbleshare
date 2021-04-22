@@ -1,14 +1,12 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasDelete;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasInsert;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
 import java.nio.charset.StandardCharsets;
@@ -39,14 +37,8 @@ public abstract class ClientMessage {
             case OPEN_DOCUMENT:
                 message = new ClientMessageOpenDocument(byteBuf);
                 break;
-            case CANVAS_MOVE:
-                message = new ClientMessageCanvasMove(byteBuf);
-                break;
-            case CANVAS_INSERT:
-                message = new ClientMessageCanvasInsert(byteBuf);
-                break;
-            case CANVAS_DELETE:
-                message = new ClientMessageCanvasDelete(byteBuf);
+            case CANVAS_UPDATE:
+                message = new ClientMessageCanvasUpdate(byteBuf);
                 break;
             case CREATE_DOCUMENT:
                 message = new ClientMessageCreateDocument(byteBuf);

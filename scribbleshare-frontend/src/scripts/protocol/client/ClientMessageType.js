@@ -5,8 +5,6 @@ const ClientMessageType = {
     DELETE_DOCUMENT:3,
     UPDATE_DOCUMENT:4,
     GET_INVITE:5,
-    CANVAS_INSERT:6,
-    CANVAS_DELETE:7,
-    CANVAS_MOVE:8
+    CANVAS_UPDATE:6,
 };
 export default ClientMessageType;

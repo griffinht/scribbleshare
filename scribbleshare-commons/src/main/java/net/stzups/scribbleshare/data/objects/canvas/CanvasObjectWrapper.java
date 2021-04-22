@@ -1,13 +1,13 @@
 package net.stzups.scribbleshare.data.objects.canvas;
 
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObject;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 
-class CanvasObjectWrapper {
+public class CanvasObjectWrapper {
     private final CanvasObjectType type;
     private final CanvasObject canvasObject;
 
-    CanvasObjectWrapper(CanvasObjectType type, CanvasObject canvasObject) {
+    public CanvasObjectWrapper(CanvasObjectType type, CanvasObject canvasObject) {
         this.type = type;
         this.canvasObject = canvasObject;
     }
@@ -16,7 +16,7 @@ class CanvasObjectWrapper {
         return type;
     }
 
-    CanvasObject getCanvasObject() {
+    public CanvasObject getCanvasObject() {
         return canvasObject;
     }
 }

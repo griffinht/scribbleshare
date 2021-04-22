@@ -1,16 +1,10 @@
-import Shape from "./canvasObjects/Shape.js";
-import {CanvasObjectType} from "./CanvasObjectType.js";
-import CanvasImage from "./canvasObjects/CanvasImage.js";
+import Shape from "./canvasObject/canvasObjects/Shape.js";
+import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
 import {activeDocument} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
-import CanvasObjectWrapper from "./CanvasObjectWrapper.js";
+import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
-import ClientMessageCanvasInsert from "../protocol/client/messages/ClientMessageCanvasInsert.js";
-import ClientMessageCanvasMove from "../protocol/client/messages/ClientMessageCanvasMove.js";
-import ClientMessageCanvasDelete from "../protocol/client/messages/ClientMessageCanvasDelete.js";
-import CanvasDelete from "./CanvasDelete.js";
-import CanvasInsert from "./CanvasInsert.js";
-import CanvasMove from "./CanvasMove.js";
+import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -41,7 +35,14 @@ export class Canvas {
 
     draw(dt) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText('fps:' + (1000 / dt), 50, 150);
         dt = dt / MAX_TIME * 255;
+        ctx.fillText('' + dt, 50, 100);
+        a += dt;
+        if (a > 255) {
+            a = 0;
+        }
+        ctx.fillText('' + a, 50 , 200);
         for (let i = 0; i < this.canvasInserts.length; i++) {
             //console.log('inserts', this.canvasInserts[i].dt);
             this.canvasInserts[i].dt -= dt;
@@ -61,11 +62,16 @@ export class Canvas {
                 canvasObjectWrapper.canvasObject.dt = 0;
                 this.canvasMovesMap.delete(id);
             } else {
+                ctx.fillText('' + canvasObjectWrapper.canvasObject.dt + ', ' + canvasMoves[0].dt, 300, 50)
                 canvasObjectWrapper.canvasObject.dt += dt;
                 if (canvasObjectWrapper.canvasObject.dt > canvasMoves[0].dt) {
+                    console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
+                    canvasObjectWrapper.canvasObject.dt = 0;
+                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
                     canvasMoves.shift();
                 }
                 if (canvasMoves.length > 0) {
+                    ctx.fillText('' + canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt, 50, 50)
                     canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt);
                 }//will be removed on the next go around
             }
@@ -103,32 +109,9 @@ export class Canvas {
         }
     }
 
-    //for remote drawing, places into queue for being updated
-    updateInsert(canvasInsertsMap) {
-        canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
-            canvasInserts.forEach((canvasInsert) => {
-                this.canvasInserts.push(canvasInsert);
-            });
-        });
-    }
-
-    updateMove(canvasMovesMap) {
-        canvasMovesMap.forEach((value, id) => {
-            let canvasMoves = this.canvasMovesMap.get(id);
-            if (canvasMoves === undefined) {
-                this.canvasMovesMap.set(id, value);
-            } else {
-                value.forEach(canvasMove => {
-                   canvasMoves.push(canvasMove);
-                });
-            }
-        });
-    }
-
-    updateDelete(canvasDeletes) {
-        //todo check if length 0 then just reassign
-        canvasDeletes.forEach((canvasDelete) => {
-            this.canvasDeletes.push(canvasDelete);
+    update(canvasUpdates) {
+        canvasUpdates.forEach((canvasUpdate) => {
+            canvasUpdate.update(this);
         });
     }
 
@@ -142,20 +125,6 @@ export class Canvas {
 
 
 
-export function getCanvasObject(type, reader) {
-    let object;
-    switch (type) {
-        case CanvasObjectType.SHAPE:
-            object = new Shape(reader);
-            break;
-        case CanvasObjectType.IMAGE:
-            object = new CanvasImage(reader);
-            break;
-        default:
-            console.error('unknown type ' + type);
-    }
-    return object;
-}
 
 function aabb(rect1, rect2, padding) {
     let p = padding;
@@ -191,11 +160,17 @@ class UpdateCanvas {
             canvasMoves = [];
             this.canvasMovesMap.set(id, canvasMoves);
         }
-        canvasMoves.push(CanvasMove.create(getDt(), canvasObject));
+
+        let dt = getNow();
+        if (canvasMoves.length > 0) {
+            dt -= canvasMoves[0].dt;
+        }
+        console.log(dt);
+        canvasMoves.push(CanvasMove.create(dt, canvasObject));
     }
 
     delete(id) {
-        this.canvasDeletes.push(CanvasDelete.create(getDt(), id))
+        this.canvasDeletes.push(CanvasDelete.create(getNow(), id))
     }
 
     clear() {
@@ -204,10 +179,22 @@ class UpdateCanvas {
         this.canvasDeletes.length = 0;
     }
 }
+//todo move to canvas class and turn on/off
+let lastDraw = performance.now();
+function draw(now) {
+    let dt = (now - lastDraw);
+    lastDraw = now;
+
+    if (activeDocument != null) {
+        activeDocument.canvas.draw(dt);
+    }
+
+    window.requestAnimationFrame(draw);
+}
+window.requestAnimationFrame(draw);
 
 let updateCanvas = new UpdateCanvas();
 
-const MAX_TIME = 2000;//todo copied from document.js
 const SELECT_PADDING = 10;
 
 const mouse = {
@@ -283,12 +270,6 @@ canvas.addEventListener('contextmenu', (event) => {
     }
 });
 
-function getDt() {
-    let a = (window.performance.now() - lastUpdate) / MAX_TIME * 255;
-    console.log('ENCODE' + (window.performance.now() - lastUpdate) + ', ' + a);
-    return a;
-}
-
 export function insert(canvasObjectType, canvasObject) {
     let id = (Math.random() - 0.5) * 32000;
     activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
@@ -312,41 +293,40 @@ function flushActive() {
     }
 }
 
-const UPDATE_INTERVAL = 1000;
-let lastUpdate = 0;
+export const UPDATE_INTERVAL = 1000;
 
-setInterval(localUpdate, UPDATE_INTERVAL);
-export function localUpdate() {
-    flushActive();
-    lastUpdate = window.performance.now();
-    if (updateCanvas.canvasInsertsMap.size > 0) {
-        socket.queue(new ClientMessageCanvasInsert(updateCanvas.canvasInsertsMap));
-    }
-    if (updateCanvas.canvasMovesMap.size > 0) {
-        socket.queue(new ClientMessageCanvasMove(updateCanvas.canvasMovesMap));
-    }
-    if (updateCanvas.canvasDeletes.length > 0) {
-        socket.queue(new ClientMessageCanvasDelete(updateCanvas.canvasDeletes));
-    }
-    socket.flush();
-    updateCanvas.clear();
+function getNow() {
+    return convertTime(window.performance.now());
 }
 
-socket.addMessageListener(ServerMessageType.CANVAS_INSERT, (serverMessageCanvasInsert) => {
+function convertTime(time) {
+    return time / UPDATE_INTERVAL * 255;
+}
+
+let canvasUpdates = [];
+let lastUpdate = 0;
+
+socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate) => {
     if (activeDocument !== null) {
-        activeDocument.canvas.updateInsert(serverMessageCanvasInsert.canvasInsertsMap);
+        activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
+        socket.send(new ClientMessageCanvasUpdate(canvasUpdates));
+        canvasUpdates.length = 0;
+        lastUpdate = convertTime(window.performance.now());
     }
 });
-socket.addMessageListener(ServerMessageType.CANVAS_MOVE, (serverMessageCanvasMove) => {
-   if (activeDocument !== null) {
-       activeDocument.canvas.updateMove(serverMessageCanvasMove.canvasMovesMap);
-   }
-});
-socket.addMessageListener(ServerMessageType.CANVAS_DELETE, (serverMessageCanvasDelete) => {
-    if (activeDocument !== null) {
-        activeDocument.canvas.updateDelete(serverMessageCanvasDelete.canvasDeletes);
+
+window.addEventListener('resize', resizeCanvas);
+function resizeCanvas() {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let rect = canvas.parentNode.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    ctx.putImageData(imageData, 0, 0);
+    if (activeDocument != null) {
+        activeDocument.canvas.resize();
     }
-})
+}
+resizeCanvas();
 
 function ondrag(event) {
     //todo draw line

@@ -1,8 +1,8 @@
-package net.stzups.scribbleshare.data.objects.canvas.object.canvasObjects;
+package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 
 import java.util.EnumSet;
 import java.util.Map;

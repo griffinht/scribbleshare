@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.data.objects.canvas.object;
+package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
 import io.netty.util.collection.IntObjectHashMap;
 
