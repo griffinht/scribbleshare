@@ -37,6 +37,7 @@ class Document {
 
     open() {
         activeDocument = this;
+        this.canvas.open();
         inviteButton.style.visibility = 'visible';
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
@@ -58,7 +59,7 @@ class Document {
     }
 
     close() {
-        localUpdate();
+        this.canvas.close();
         //todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);

@@ -21,6 +21,8 @@ let selected = {
 
 export class Canvas {
     constructor(reader) {
+        this.isOpen = false;
+        this.last = 0;
         this.canvasObjectWrappers = new Map();
         this.canvasUpdates = [];
         if (reader != null) {
@@ -35,18 +37,36 @@ export class Canvas {
         }
     }
 
-    draw(dt) {
+    open() {
+        this.isOpen = true;
+        window.requestAnimationFrame(this.draw);
+    }
+
+    close() {
+        this.isOpen = false;
+    }
+
+    draw(now) {
+        if (!this.isOpen) {
+            return;
+        }
+
+        let dt = (now - this.last);
+        this.last = now;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText('fps:' + (1000 / dt), 50, 150);
+        dt = convertTime(dt);
+        ctx.fillText('' + dt, 50, 100);
+        //console.log('draw1', this.canvasObjects);
+
         for (let i = 0; i < this.canvasUpdates.length; i++) {
             this.canvasUpdates[i].draw(this, dt)
             if (!this.canvasUpdates[i].isDirty()) {
                 this.canvasUpdates.slice(i--, 1);
             }
         }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText('fps:' + (1000 / dt), 50, 150);
-        dt = convertTime(dt);
-        ctx.fillText('' + dt, 50, 100);
-        //console.log('draw1', this.canvasObjects);
+
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
             ctx.save();
             ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
@@ -69,6 +89,8 @@ export class Canvas {
         if (selected.canvasObjectWrapper !== null && !aabb(selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             selected.canvasObjectWrapper = null;
         }
+
+        window.requestAnimationFrame(this.draw);
     }
 
     update(canvasUpdates) {
@@ -90,20 +112,6 @@ function aabb(rect1, rect2, padding) {
         rect1.y - p < rect2.y + rect2.height &&
         rect1.y + rect1.height + p > rect2.y;
 }
-
-//todo move to canvas class and turn on/off
-let lastDraw = performance.now();
-function draw(now) {
-    let dt = (now - lastDraw);
-    lastDraw = now;
-
-    if (activeDocument != null) {
-        activeDocument.canvas.draw(dt);
-    }
-
-    window.requestAnimationFrame(draw);
-}
-window.requestAnimationFrame(draw);
 
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
