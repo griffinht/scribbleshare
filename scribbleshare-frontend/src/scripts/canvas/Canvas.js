@@ -39,7 +39,7 @@ export class Canvas {
 
     open() {
         this.isOpen = true;
-        window.requestAnimationFrame(() => this.draw);
+        window.requestAnimationFrame((now) => this.draw(now));
     }
 
     close() {
@@ -90,7 +90,7 @@ export class Canvas {
             selected.canvasObjectWrapper = null;
         }
 
-        window.requestAnimationFrame(() => this.draw);
+        window.requestAnimationFrame((now) => this.draw(now));
     }
 
     update(canvasUpdates) {
