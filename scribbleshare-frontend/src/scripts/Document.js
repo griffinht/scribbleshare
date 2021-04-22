@@ -1,4 +1,4 @@
-import {canvas, Canvas, ctx, localUpdate} from "./canvas/Canvas.js";
+import {Canvas} from "./canvas/Canvas.js";
 import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './protocol/WebSocketHandler.js'

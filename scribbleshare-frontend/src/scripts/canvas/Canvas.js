@@ -98,11 +98,6 @@ export class Canvas {
             this.canvasUpdates.push(canvasUpdate);
         })
     }
-
-    resize() {
-
-        //todo redraw?
-    }
 }
 
 function aabb(rect1, rect2, padding) {
@@ -119,9 +114,6 @@ function resizeCanvas() {
     canvas.width = rect.width;
     canvas.height = rect.height;
     ctx.putImageData(imageData, 0, 0);
-    if (activeDocument != null) {
-        activeDocument.canvas.resize();
-    }
 }
 resizeCanvas();
 
