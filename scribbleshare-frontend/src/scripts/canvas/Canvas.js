@@ -154,7 +154,7 @@ export class Canvas {
                 if (this.selected.canvasObjectWrapper === null) {
                     if ((event.buttons & 1) === 0) {
                         let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-                        insert(CanvasObjectType.SHAPE, shape);
+                        this.insert(CanvasObjectType.SHAPE, shape);
                     }
                 }
                 break;
