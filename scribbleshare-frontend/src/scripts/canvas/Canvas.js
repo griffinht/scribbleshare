@@ -52,6 +52,7 @@ export class Canvas {
 
     close() {
         this.isOpen = false;
+        update();
     }
 
     draw(now) {
@@ -232,7 +233,7 @@ socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasU
     activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
 });
 
-setInterval(() => {
+function update() {
     if (activeDocument !== null) {
         activeDocument.canvas.flushActive();
 
@@ -263,7 +264,8 @@ setInterval(() => {
         //shouldn't happen
         console.warn('update with no open document');
     }
-}, UPDATE_INTERVAL);
+}
+setInterval(update, UPDATE_INTERVAL);
 
 
 function ondrag(event) {

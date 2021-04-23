@@ -30,6 +30,8 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     move(id, dt, canvasObject) {
         let canvasMoves = this.canvasMovesMap.get(id);
         if (canvasMoves === undefined) {
+            canvasMoves = [];
+            this.canvasMovesMap.set(id, canvasMoves);
             return;
         }
 
