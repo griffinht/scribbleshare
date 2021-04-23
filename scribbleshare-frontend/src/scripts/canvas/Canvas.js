@@ -67,6 +67,7 @@ export class Canvas {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillText('fps:' + (1000 / dt), 50, 150);
         ctx.fillText('' + remoteTime, 50, 100);
+        ctx.fillText(mouse.dx + ', ' + mouse.dy, 50, 250);
         //console.log('draw1', this.canvasObjects);
 
         for (let i = 0; i < this.canvasUpdates.length; i++) {
@@ -135,7 +136,7 @@ export class Canvas {
 
     onEvent(event) {
         switch (event.type) {
-            case 'movemouse': {
+            case 'mousemove': {
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     mouse.reset();
                     this.flushActive();

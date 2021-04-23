@@ -12,7 +12,7 @@ export default class Mouse {
             this.x = event.offsetX;//todo left click drag only
             this.y = event.offsetY;
             this.dx += event.movementX;
-            element.dy += event.movementY;
+            this.dy += event.movementY;
             if (this.down) {
                 this.drag = true;
             }
