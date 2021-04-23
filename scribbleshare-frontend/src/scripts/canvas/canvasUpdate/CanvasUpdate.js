@@ -16,7 +16,6 @@ export default class CanvasUpdate {
     }
 
     serialize(writer) {
-        console.log(this.canvasUpdateType);
         writer.writeUint8(this.canvasUpdateType);
     }
 }

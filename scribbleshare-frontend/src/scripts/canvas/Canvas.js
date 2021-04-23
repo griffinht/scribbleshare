@@ -70,9 +70,9 @@ export class Canvas {
         ctx.fillText('' + remoteTime, 50, 100);
         ctx.fillText(mouse.dx + ', ' + mouse.dy, 50, 250);
         //console.log('draw1', this.canvasObjects);
-
+        dt = convertTime(dt);
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            this.canvasUpdates[i].draw(this, remoteTime)
+            this.canvasUpdates[i].draw(this, dt)
             if (!this.canvasUpdates[i].isDirty()) {
                 this.canvasUpdates.splice(i--, 1);
             }

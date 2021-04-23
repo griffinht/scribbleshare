@@ -7,7 +7,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.INSERT);
         this.canvasInsertsMap = new Map();
-        this.lastInsert = 0;
+        this.time = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             let canvasObjectType = reader.readUint8();
@@ -26,31 +26,27 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
 
     clear() {
         this.canvasInsertsMap.clear();
+        this.time = 0;
     }
 
 
-    insert(canvasObjectType, dt, id, canvasObject) {
+    insert(canvasObjectType, time, id, canvasObject) {
         let canvasInserts = this.canvasInsertsMap.get(canvasObjectType);
         if (canvasInserts === undefined) {
             canvasInserts = [];
             this.canvasInsertsMap.set(canvasObjectType, canvasInserts);
         }
-        let canvasInsert = CanvasInsert.create(dt, id, canvasObject);
-        if (canvasInserts.length > 0) {
-            canvasInsert.dt -= this.lastInsert;
-        }
-        this.lastInsert = dt;
-        canvasInserts.push(canvasInsert);
+        canvasInserts.push(CanvasInsert.create(time - this.time, id, canvasObject));
+        this.time = time;
     }
 
     draw(canvas, dt) {
+        this.time += dt; //accumulated dt
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
             while (canvasInserts.length > 0) {
-                if (canvasInserts[0].dt <= dt) {
+                if (canvasInserts[0].dt <= this.time) {
+                    this.time -= canvasInserts[0].dt;
                     canvas.canvasObjectWrappers.set(canvasInserts[0].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[0].canvasObject));
-                    if (canvasInserts.length >= 2) {//canvasInserts[0].dt is delta, so apply it to the next one
-                        canvasInserts[1].dt += canvasInserts[0].dt;
-                    }
                     canvasInserts.shift();
                 } else {
                     break;
@@ -78,6 +74,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.INSERT;
         object.canvasInsertsMap = new Map();
+        object.time = 0;
         return object;
     }
 }

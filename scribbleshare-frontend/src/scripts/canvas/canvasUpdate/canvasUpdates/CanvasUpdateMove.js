@@ -7,6 +7,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.MOVE);
         this.canvasMovesMap = new Map();
+        this.time = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             let id = reader.readInt16();
@@ -25,9 +26,10 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 
     clear() {
         this.canvasMovesMap.clear();
+        this.time = 0;
     }
 
-    move(id, dt, canvasObject) {
+    move(id, time, canvasObject) {
         let canvasMoves = this.canvasMovesMap.get(id);
         if (canvasMoves === undefined) {
             canvasMoves = [];
@@ -35,28 +37,33 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             return;
         }
 
-        canvasMoves.push(CanvasMove.create(dt, canvasObject));
+        canvasMoves.push(CanvasMove.create(time, canvasObject));
+        this.time = time;
     }
 
     draw(canvas, dt) {
+        this.time += dt;
         this.canvasMovesMap.forEach((canvasMoves, id) => {
             let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
             if (canvasObjectWrapper === undefined) {
                 this.clear();
             }
 
-            if (canvasMoves.length === 0) {
-                this.canvasMovesMap.delete(id);
-            } else {
+            while (canvasMoves.length > 0) {
+                ctx.fillText(((dt - canvasObjectWrapper.canvasObject.dt) + ', ' +  canvasMoves[0].dt) + '', 300, 100);
+                console.log(((dt - canvasObjectWrapper.canvasObject.dt) +', ' + canvasMoves[0].dt));
+                canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
                 ctx.fillText('' + dt + ', ' + canvasMoves[0].dt, 300, 50)
-                if (dt >= canvasMoves[1].dt) {
-                    //console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
+                if (canvasMoves[0].dt <= this.time) {
+                    this.time -= canvasMoves[0].dt;
                     canvasMoves.shift();
+                } else {
+                    break;
                 }
-                if (canvasMoves.length >= 2) {
-                    ctx.fillText('' + canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt, 50, 50)
-                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasMoves[1].canvasObject, (canvasMoves[0].dt - dt) / (canvasMoves[1].dt - dt));
-                }//will be removed on the next go around
+            }
+            if (canvasMoves.length === 0) {
+                canvasObjectWrapper.canvasObject.dt = 0;
+                this.canvasMovesMap.delete(id);
             }
         });
     }
@@ -77,6 +84,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.MOVE;
         object.canvasMovesMap = new Map();
+        object.time = 0;
         return object;
     }
 }
