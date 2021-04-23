@@ -5,6 +5,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.DELETE);
         this.canvasDeletes = [];
+        this.lastDt = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             this.canvasDeletes.push(new CanvasDelete(reader));
@@ -20,14 +21,22 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     }
 
     delete(dt, id) {
-        this.canvasDeletes.push(CanvasDelete.create(dt, id));
+        let canvasDelete = CanvasDelete.create(dt, id);
+        if (this.canvasDeletes.length > 0) {
+            canvasDelete.dt -= this.lastDt;
+        }
+        this.lastDt = dt;
+        this.canvasDeletes.push(canvasDelete);
     }
 
     draw(canvas, dt) {
         for (let i = 0; i < this.canvasDeletes.length; i++) {
-            if (this.canvasDeletes[i].dt <= dt) {
-                canvas.canvasObjectWrappers.delete(this.canvasDeletes[i].id);
-                this.canvasDeletes.splice(i--, 1);
+            if (this.canvasDeletes[0].dt <= dt) {
+                canvas.canvasObjectWrappers.delete(this.canvasDeletes[0].id);
+                if (this.canvasDeletes.length >= 2) {
+                    this.canvasDeletes[1].dt += this.canvasDeletes[0].dt;
+                }
+                this.canvasDeletes.shift();
             }
         }
     }

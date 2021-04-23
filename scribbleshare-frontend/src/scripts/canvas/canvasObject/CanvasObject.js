@@ -7,13 +7,11 @@ export default class CanvasObject {
         this.width = reader.readUint16();
         this.height = reader.readUint16();
         this.rotation = reader.readUint8();
-        this.original = CanvasObject.create(this);
-        this.dt = 0;
     }
 
-    lerp(canvasObject, t) {
-        this.x = lerp(this.original.x, canvasObject.x, t);
-        this.y = lerp(this.original.y, canvasObject.y, t);
+    lerp(original, target, t) {
+        this.x = lerp(original.x, target.x, t);
+        this.y = lerp(original.y, target.y, t);
     }
 
     draw() {

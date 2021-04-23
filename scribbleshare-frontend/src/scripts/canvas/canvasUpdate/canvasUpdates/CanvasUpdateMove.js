@@ -46,20 +46,16 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             }
 
             if (canvasMoves.length === 0) {
-                canvasObjectWrapper.canvasObject.dt = 0;
                 this.canvasMovesMap.delete(id);
             } else {
-                ctx.fillText('' + canvasObjectWrapper.canvasObject.dt + ', ' + canvasMoves[0].dt, 300, 50)
-                canvasObjectWrapper.canvasObject.dt += dt;
-                if (canvasObjectWrapper.canvasObject.dt > canvasMoves[0].dt) {
-                    console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
-                    canvasObjectWrapper.canvasObject.dt = 0;
-                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
+                ctx.fillText('' + dt + ', ' + canvasMoves[0].dt, 300, 50)
+                if (dt >= canvasMoves[1].dt) {
+                    //console.log(canvasObjectWrapper.canvasObject.dt, canvasMoves[0].dt);
                     canvasMoves.shift();
                 }
-                if (canvasMoves.length > 0) {
+                if (canvasMoves.length >= 2) {
                     ctx.fillText('' + canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt, 50, 50)
-                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasObjectWrapper.canvasObject.dt / canvasMoves[0].dt);
+                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, canvasMoves[1].canvasObject, (canvasMoves[0].dt - dt) / (canvasMoves[1].dt - dt));
                 }//will be removed on the next go around
             }
         });
