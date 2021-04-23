@@ -9,6 +9,7 @@ public enum CanvasUpdateType {
     INSERT(0),
     MOVE(1),
     DELETE(2),
+    MOUSEMOVE(3),
     ;
 
     private static final Map<Integer, CanvasUpdateType> messageTypeMap = new IntObjectHashMap<>();

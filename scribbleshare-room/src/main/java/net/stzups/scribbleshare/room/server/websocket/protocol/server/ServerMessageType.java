@@ -9,6 +9,7 @@ public enum ServerMessageType {
     GET_INVITE(5),
     OPEN_DOCUMENT(6),
     CANVAS_UPDATE(7),
+    HANDSHAKE(8),
     ;
 
     private final int id;

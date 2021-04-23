@@ -100,6 +100,9 @@ export class Canvas {
         if (this.selected.canvasObjectWrapper !== null && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             this.selected.canvasObjectWrapper = null;
         }
+        activeDocument.clients.forEach((client) => {
+            ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
+        })
 
         this.last = now;
         window.requestAnimationFrame((now) => this.draw(now));

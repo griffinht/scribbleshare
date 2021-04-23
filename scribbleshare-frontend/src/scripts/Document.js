@@ -13,6 +13,8 @@ import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetI
 const documents = new Map();
 export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
+let localClientId = 0;
+let localClient = null;
 
 class Document {
     constructor(name, id) {
@@ -84,6 +86,9 @@ document.getElementById('add').addEventListener('click', () => {
 socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient) => {
     serverMessageAddClient.clients.forEach((value) => {
         let client = new Client(value.id, User.getUser(value.userId));
+        if (client.id === localClientId) {
+            localClient = client;
+        }
         activeDocument.addClient(client);
         console.log('Add client ', client);
     })
@@ -100,6 +105,9 @@ socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDoc
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
     documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id));
 });
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
+    localClientId = serverMessageHandshake.client;
+})
 socket.addEventListener(SocketEventType.OPEN, () => {
     let invite;
     let index = document.location.href.lastIndexOf('invite=');

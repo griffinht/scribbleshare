@@ -6,5 +6,6 @@ const ClientMessageType = {
     UPDATE_DOCUMENT:4,
     GET_INVITE:5,
     CANVAS_UPDATE:6,
+    MOUSE_MOVE:7,
 };
 export default ClientMessageType;

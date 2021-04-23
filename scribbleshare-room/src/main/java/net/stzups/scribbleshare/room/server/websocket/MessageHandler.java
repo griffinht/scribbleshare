@@ -20,6 +20,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
@@ -64,6 +65,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
 
                         state = State.READY;
                         client = new Client(user, ctx.channel());
+                        client.queueMessage(new ServerMessageHandshake(client));
                         InviteCode inviteCode = ScribbleshareRoom.getDatabase().getInviteCode(clientPacketHandshake.getCode());
                         client.queueMessage(new ServerMessageAddUser(client.getUser()));
                         //figure out which document to open first

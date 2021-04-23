@@ -2,6 +2,8 @@ export default class Client {
     constructor(id, user) {
         this.id = id;
         this.user = user;
+        this.mouseX = 0;
+        this.mouseY = 0;
         //tooltip
         this.icon = document.createElement('img');
         this.icon.setAttribute('src', 'assets/default.png');
