@@ -11,56 +11,11 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
 
-public class RedisDatabase implements Database {
+public class RedisDatabase extends AbstractDatabase {
     private final Jedis jedis;
 
     public RedisDatabase(String host) {
         jedis = new Jedis(host);
-    }
-
-    @Override
-    public User createUser() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public User getUser(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateUser(User user) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Document createDocument(User owner) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Document getDocument(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateDocument(Document document) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteDocument(Document document) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public InviteCode getInviteCode(String code) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public InviteCode getInviteCode(Document document) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -89,20 +44,6 @@ public class RedisDatabase implements Database {
         jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }
 
-    @Override
-    public long addResource(long owner, Resource resource) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateResource(long id, long owner, Resource resource) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Resource getResource(long id, long owner) {
-        throw new UnsupportedOperationException();
-    }
 /*
     @Override
     public void addResource(long id, byte[] resource) {

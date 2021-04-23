@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase implements Database {
+public class PostgresDatabase extends AbstractDatabase {
     private static final Random random = new Random();
     private Connection connection;
 
