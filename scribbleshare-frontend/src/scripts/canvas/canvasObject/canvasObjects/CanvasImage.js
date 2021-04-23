@@ -1,7 +1,7 @@
 import CanvasObject from "../CanvasObject.js";
-import {ctx} from "../Canvas.js";
-import {activeDocument} from "../../Document.js";
-import {apiUrl} from "../../main.js";
+import {ctx} from "../../Canvas.js";
+import {activeDocument} from "../../../Document.js";
+import {apiUrl} from "../../../main.js";
 
 export default class CanvasImage extends CanvasObject {
     constructor(reader) {
@@ -12,7 +12,7 @@ export default class CanvasImage extends CanvasObject {
     }
 
     draw() {
-        ctx.drawImage(this.image, this.x, this.y);
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
     }
 
     serialize(writer) {
@@ -22,8 +22,13 @@ export default class CanvasImage extends CanvasObject {
 
     static create(x, y, id, image) {
         let shape = Object.create(this.prototype);
+        shape.dirty = true;
         shape.x = x;
         shape.y = y;
+        shape.width = image.width;
+        shape.height = image.height;
+        shape.rotation = 0;
+
         shape.id = id;
         shape.image = image;
         return shape;

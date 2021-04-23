@@ -8,6 +8,7 @@ const HTTPS_PORT = 443;
 
 class WebSocketHandler {
     constructor() {
+        this.messageQueue = [];
         this.socketEvents = {};
         Object.keys(SocketEventType).forEach((key, value) => {
             this.socketEvents[value] = [];
@@ -74,14 +75,28 @@ class WebSocketHandler {
         this.serverMessageEvents[serverMessage.type].forEach(onServerMessage => onServerMessage(serverMessage));
     }
 
-    send(message) {
+    queue(message) {
+        this.messageQueue.push(message);
+    }
+
+    flush() {
+        this.send(this.messageQueue);
+        this.messageQueue.length = 0;
+    }
+
+    send(messages) {
+        if (!Array.isArray(messages)) messages = [messages];
+        if (messages.length === 0) return;
+
         if (this.socket.readyState === WebSocket.OPEN) {
-            console.log('send', message);
-            let writer = new BufferWriter(message.getBufferSize());
-            message.serialize(writer);
+            let writer = new BufferWriter();
+            messages.forEach((message) => {
+                message.serialize(writer);
+                console.log('send', message);
+            });
             this.socket.send(writer.getBuffer());
         } else {
-            console.error('tried to send message while websocket was closed', message);
+            console.error('tried to send messages while websocket was closed', messages);
         }
     }
 }

@@ -7,10 +7,6 @@ export default class ClientMessageHandshake extends ClientMessage {
         this.invite = invite;
     }
 
-    getBufferSize() {
-        return super.getBufferSize();
-    }
-
     serialize(writer) {
         super.serialize(writer);
         writer.writeString8(this.invite);

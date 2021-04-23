@@ -1,12 +1,13 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
 import java.nio.charset.StandardCharsets;
@@ -37,8 +38,8 @@ public abstract class ClientMessage {
             case OPEN_DOCUMENT:
                 message = new ClientMessageOpenDocument(byteBuf);
                 break;
-            case UPDATE_CANVAS:
-                message = new ClientMessageUpdateCanvas(byteBuf);
+            case CANVAS_UPDATE:
+                message = new ClientMessageCanvasUpdate(byteBuf);
                 break;
             case CREATE_DOCUMENT:
                 message = new ClientMessageCreateDocument(byteBuf);
@@ -54,6 +55,9 @@ public abstract class ClientMessage {
                 break;
             case GET_INVITE:
                 message = new ClientMessageGetInvite(byteBuf);
+                break;
+            case MOUSE_MOVE:
+                message = new ClientMessageMouseMove(byteBuf);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported message type " + clientMessageType + " while decoding");

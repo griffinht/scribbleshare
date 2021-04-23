@@ -138,3 +138,7 @@ Canvas features, add api for server resources like documents
 CanvasImage upload, add api
 - Ability to upload images on to the scribbleshare
 - API: http://localhost/api/document/id 
+
+### v0.5.1
+Canvas manipulation
+- Objects can be dragged/resized

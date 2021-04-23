@@ -12,7 +12,7 @@ RUN gradle shadowJar
 #
 # Store resulting binaries in fresh layer (significantly cuts down on size) for other Docker images to use
 #
-FROM scratch
+FROM bash
 
 WORKDIR /usr/src/app
 
@@ -20,3 +20,5 @@ COPY --from=scribbleshare-gradle-build /usr/src/app/scribbleshare-backend/build/
 COPY --from=scribbleshare-gradle-build /usr/src/app/scribbleshare-room/build/libs/scribbleshare-room-all.jar scribbleshare-room.jar
 # Example usage from other image
 # COPY --from=scribbleshare-gradle /usr/src/app/example.ext .
+
+CMD sleep 0

@@ -5,13 +5,11 @@ import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectType;
-import net.stzups.scribbleshare.data.objects.canvas.object.CanvasObjectWrapper;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
-import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateCanvas;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,10 +69,8 @@ class Room {
         return document;
     }
 
-    void updateClient(Client client, Map<CanvasObjectType, Map<Short, CanvasObjectWrapper>> canvasObjects) {
-        canvas.update(canvasObjects);
-        ServerMessageUpdateCanvas serverMessageUpdateCanvas = new ServerMessageUpdateCanvas(canvasObjects);
-        queueMessageExcept(serverMessageUpdateCanvas, client);
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     /**
@@ -84,7 +80,7 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        //client.sendMessage(new ServerMessageOpenDocument(document));todo remove
+        client.sendMessage(new ServerMessageOpenDocument(document, canvas));//todo
         //for the existing clients
         queueMessage(new ServerMessageAddClient(client));
         client.queueMessage(new ServerMessageAddClient(clients));//todo

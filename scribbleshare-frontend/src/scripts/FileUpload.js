@@ -1,9 +1,8 @@
-import {activeDocument, getDt, updateCanvas} from "./Document.js";
+import {activeDocument} from "./Document.js";
 import {apiUrl} from "./main.js";
 import BufferReader from "./protocol/BufferReader.js";
-import CanvasObjectWrapper from "./canvas/CanvasObjectWrapper.js";
-import {CanvasObjectType} from "./canvas/CanvasObjectType.js";
-import CanvasImage from "./canvas/canvasObjects/CanvasImage.js";
+import {CanvasObjectType} from "./canvas/canvasObject/CanvasObjectType.js";
+import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
 
 const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1280;
@@ -55,12 +54,8 @@ function uploadImage(file) {
                     return;
                 }
                 let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
-                let image = document.createElement('img');
-                image.file = file;//server should have the image but we could instead just use the local one
                 let object = CanvasImage.create(0, 0, id, image);
-                let canvasId = (Math.random() - 0.5) * 32000;
-                updateCanvas.update(CanvasObjectType.IMAGE, canvasId, CanvasObjectWrapper.create(getDt(), object));
-                activeDocument.canvas.insert(CanvasObjectType.IMAGE, canvasId, object);
+                activeDocument.canvas.insert(CanvasObjectType.IMAGE, object);
             });
 
             request.send(Uint8Array.from(atob(output.substr(output.indexOf('base64,') + 7)), c => c.charCodeAt(0))); //base64 string to binary

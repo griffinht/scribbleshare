@@ -6,21 +6,24 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
-import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateCanvas;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddUser;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
-
-import java.util.logging.Logger;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private enum State {
@@ -64,6 +67,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
 
                         state = State.READY;
                         client = new Client(user, ctx.channel());
+                        client.queueMessage(new ServerMessageHandshake(client));
                         InviteCode inviteCode = ScribbleshareRoom.getDatabase().getInviteCode(clientPacketHandshake.getCode());
                         client.queueMessage(new ServerMessageAddUser(client.getUser()));
                         //figure out which document to open first
@@ -103,8 +107,14 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
             }
             case READY: {
                 switch (message.getMessageType()) {
-                    case UPDATE_CANVAS: {
-                        room.updateClient(client, ((ClientMessageUpdateCanvas) message).getCanvasObjects());
+                    case MOUSE_MOVE: {
+                        room.queueMessageExcept(new ServerMessageMouseMove(client, ((ClientMessageMouseMove) message).getMouseMoves()), client);
+                        break;
+                    }
+                    case CANVAS_UPDATE: {
+                        CanvasUpdate[] canvasUpdates = ((ClientMessageCanvasUpdate) message).getCanvasUpdates();
+                        room.getCanvas().update(canvasUpdates);
+                        room.queueMessageExcept(new ServerMessageCanvasUpdate(canvasUpdates), client);
                         break;
                     }
                     case OPEN_DOCUMENT: {

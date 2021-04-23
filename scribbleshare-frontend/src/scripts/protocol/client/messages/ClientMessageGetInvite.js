@@ -6,10 +6,6 @@ export default class ClientMessageGetInvite extends ClientMessage {
         super(ClientMessageType.GET_INVITE);
     }
 
-    getBufferSize() {
-        return super.getBufferSize();
-    }
-
     serialize(writer) {
         super.serialize(writer);
     }

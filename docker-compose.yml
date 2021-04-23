@@ -7,6 +7,8 @@ services:
         ports:
             - "8080:80"
         depends_on:
+            scribbleshare-gradle:
+                condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
             scribbleshare-keydb:
@@ -23,6 +25,10 @@ services:
         build:
             context: scribbleshare-backend
         depends_on:
+            scribbleshare-gradle:
+                condition: service_started
+            scribbleshare-frontend:
+                condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
             scribbleshare-keydb:
@@ -36,7 +42,9 @@ services:
 # Reverse proxy
     scribbleshare-nginx:
         image: scribbleshare-nginx
-# todo wait for scribbleshare-backend to start
+        depends_on:
+            scribbleshare-backend:
+                condition: service_started
         build:
             context: scribbleshare-nginx
         ports:

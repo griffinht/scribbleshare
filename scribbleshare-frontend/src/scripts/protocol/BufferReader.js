@@ -26,6 +26,7 @@ export default class BufferReader {
         return new TextDecoder().decode(this.view.buffer.slice(this.position - length, this.position));
     }
 
+    //todo b64 operations are probably broken
     readBase64_8() {
         return btoa(this.readString8());
     }

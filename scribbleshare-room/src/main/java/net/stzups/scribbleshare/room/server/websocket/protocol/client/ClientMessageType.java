@@ -7,12 +7,13 @@ import java.util.Map;
 
 public enum ClientMessageType {
     OPEN_DOCUMENT(0),
-    UPDATE_CANVAS(1),
-    CREATE_DOCUMENT(2),
-    HANDSHAKE(3),
-    DELETE_DOCUMENT(4),
-    UPDATE_DOCUMENT(5),
-    GET_INVITE(6)
+    CREATE_DOCUMENT(1),
+    HANDSHAKE(2),
+    DELETE_DOCUMENT(3),
+    UPDATE_DOCUMENT(4),
+    GET_INVITE(5),
+    CANVAS_UPDATE(6),
+    MOUSE_MOVE(7),
     ;
 
     private static final Map<Integer, ClientMessageType> messageTypeMap = new IntObjectHashMap<>();
@@ -35,7 +36,7 @@ public enum ClientMessageType {
     public static ClientMessageType valueOf(int id) {
         ClientMessageType messageType = messageTypeMap.get(id);
         if (messageType == null) {
-            throw new IllegalArgumentException("Unknown PacketType for given id " + id);
+            throw new IllegalArgumentException("Unknown ClientMessageType for given id " + id);
         }
         return messageType;
     }
