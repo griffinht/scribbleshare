@@ -12,7 +12,7 @@ RUN gradle shadowJar
 #
 # Store resulting binaries in fresh layer (significantly cuts down on size) for other Docker images to use
 #
-FROM scratch
+FROM bash
 
 WORKDIR /usr/src/app
 

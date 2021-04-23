@@ -20,7 +20,7 @@ RUN npx rollup -c;
 #
 # Store result in fresh layer (significantly cuts down on size) for other Docker images to use
 #
-FROM scratch
+FROM bash
 
 WORKDIR /usr/src/app
 
