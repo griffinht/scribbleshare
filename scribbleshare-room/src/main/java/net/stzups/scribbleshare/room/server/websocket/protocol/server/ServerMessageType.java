@@ -10,6 +10,7 @@ public enum ServerMessageType {
     OPEN_DOCUMENT(6),
     CANVAS_UPDATE(7),
     HANDSHAKE(8),
+    MOUSE_MOVE(9)
     ;
 
     private final int id;

@@ -108,6 +108,9 @@ socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdat
 socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
     localClientId = serverMessageHandshake.client;
 })
+socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove) => {
+    activeDocument.clients.get(serverMessageMouseMove.id).mouseMoves = serverMessageMouseMove.mouseMoves;
+})
 socket.addEventListener(SocketEventType.OPEN, () => {
     let invite;
     let index = document.location.href.lastIndexOf('invite=');

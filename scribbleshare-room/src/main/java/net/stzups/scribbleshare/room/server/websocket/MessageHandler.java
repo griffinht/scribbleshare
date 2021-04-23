@@ -14,6 +14,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddUser;
@@ -21,6 +22,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
@@ -105,6 +107,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
             }
             case READY: {
                 switch (message.getMessageType()) {
+                    case MOUSE_MOVE: {
+                        room.queueMessageExcept(new ServerMessageMouseMove(client, ((ClientMessageMouseMove) message).getMouseMoves()), client);
+                        break;
+                    }
                     case CANVAS_UPDATE: {
                         CanvasUpdate[] canvasUpdates = ((ClientMessageCanvasUpdate) message).getCanvasUpdates();
                         room.getCanvas().update(canvasUpdates);

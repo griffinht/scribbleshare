@@ -6,6 +6,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.C
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageHandshake;
+import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageMouseMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageUpdateDocument;
 
@@ -54,6 +55,9 @@ public abstract class ClientMessage {
                 break;
             case GET_INVITE:
                 message = new ClientMessageGetInvite(byteBuf);
+                break;
+            case MOUSE_MOVE:
+                message = new ClientMessageMouseMove(byteBuf);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported message type " + clientMessageType + " while decoding");

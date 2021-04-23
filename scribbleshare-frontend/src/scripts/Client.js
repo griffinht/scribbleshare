@@ -4,6 +4,7 @@ export default class Client {
         this.user = user;
         this.mouseX = 0;
         this.mouseY = 0;
+        this.mouseMoves = [];
         //tooltip
         this.icon = document.createElement('img');
         this.icon.setAttribute('src', 'assets/default.png');
