@@ -103,19 +103,21 @@ export class Canvas {
             this.selected.canvasObjectWrapper = null;
         }
         activeDocument.clients.forEach((client) => {
-            while (client.mouseMoves.length > 0) {
-                //todo lerp
-                if (client.mouseMoves[0].dt <= client.time) {
-                    client.time -= client.mouseMoves[0].dt;
-                    client.mouseX = client.mouseMoves[0].x;
-                    client.mouseY = client.mouseMoves[0].y;
-                    client.mouseMoves.shift();
-                } else {
-                    break;
-                }
-            }
             if (client !== localClient) {
                 ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
+                while (client.mouseMoves.length > 0) {
+                    //todo lerp
+                    client.time += remoteTime;
+                    if (client.mouseMoves[0].dt <= client.time) {
+                        client.time -= client.mouseMoves[0].dt;
+                        client.mouseX = client.mouseMoves[0].x;
+                        client.mouseY = client.mouseMoves[0].y;
+                        console.log(client.time, getNow(), remoteTime, client.mouseX, client.mouseY);
+                        client.mouseMoves.shift();
+                    } else {
+                        break;
+                    }
+                }
             }
         })
 
@@ -126,7 +128,7 @@ export class Canvas {
     insert(canvasObjectType, canvasObject) {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
         activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
-        canvasUpdateInsert.insert(canvasObjectType,getNow(), id, canvasObject);
+        canvasUpdateInsert.insert(canvasObjectType, getNow(), id, canvasObject);
     }
 
     move(id, canvasObject) {
@@ -159,7 +161,10 @@ export class Canvas {
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     this.flushActive();
                     if (mouse.dx > 0 || mouse.dy > 0) {
-                        localClient.mouseMoves.push(MouseMove.create(getNow(), mouse.x, mouse.y));
+                        let mouseMove = MouseMove.create(getNow() - localClient.time, mouse.x, mouse.y);
+                        localClient.time = getNow();
+
+                        localClient.mouseMoves.push(mouseMove);
                     }
                     mouse.reset();
                 }
@@ -283,6 +288,7 @@ function update() {
 
         //clean up
         localClient.mouseMoves.length = 0;
+        localClient.time = 0;
         canvasUpdates.forEach((canvasUpdate) => {
             canvasUpdate.clear();
         })
