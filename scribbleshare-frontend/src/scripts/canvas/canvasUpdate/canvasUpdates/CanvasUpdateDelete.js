@@ -30,13 +30,15 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     }
 
     draw(canvas, dt) {
-        for (let i = 0; i < this.canvasDeletes.length; i++) {
+        while(this.canvasDeletes.length > 0) {
             if (this.canvasDeletes[0].dt <= dt) {
                 canvas.canvasObjectWrappers.delete(this.canvasDeletes[0].id);
                 if (this.canvasDeletes.length >= 2) {
                     this.canvasDeletes[1].dt += this.canvasDeletes[0].dt;
                 }
                 this.canvasDeletes.shift();
+            } else {
+                break;
             }
         }
     }

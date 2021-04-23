@@ -7,6 +7,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.INSERT);
         this.canvasInsertsMap = new Map();
+        this.lastDt = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             let canvasObjectType = reader.readUint8();
@@ -34,15 +35,26 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
             canvasInserts = [];
             this.canvasInsertsMap.set(canvasObjectType, canvasInserts);
         }
-        canvasInserts.push(CanvasInsert.create(dt, id, canvasObject));
+        let canvasInsert = CanvasInsert.create(dt, id, canvasObject);
+        if (canvasInserts.length > 0) {
+            canvasInsert.dt -= this.lastDt;
+        }
+        this.lastDt = dt;
+        canvasInserts.push(canvasInsert);
     }
 
     draw(canvas, dt) {
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
-            for (let i = 0; i < canvasInserts.length; i++) {
-                if (canvasInserts[i].dt <= dt) {
-                    canvas.canvasObjectWrappers.set(canvasInserts[i].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[i].canvasObject));
-                    canvasInserts.splice(i--, 1);
+
+            while (canvasInserts.length > 0) {
+                if (canvasInserts[0].dt <= dt) {
+                    canvas.canvasObjectWrappers.set(canvasInserts[0].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[0].canvasObject));
+                    if (canvasInserts.length >= 2) {
+                        canvasInserts[1].dt += canvasInserts[0].dt;
+                    }
+                    canvasInserts.shift();
+                } else {
+                    break;
                 }
             }
             if (canvasInserts.length === 0) {
