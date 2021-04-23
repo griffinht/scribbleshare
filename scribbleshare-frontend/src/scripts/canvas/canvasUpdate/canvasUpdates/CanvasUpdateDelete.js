@@ -5,7 +5,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.DELETE);
         this.canvasDeletes = [];
-        this.lastDt = 0;
+        this.lastDelete = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             this.canvasDeletes.push(new CanvasDelete(reader));
@@ -23,9 +23,9 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     delete(dt, id) {
         let canvasDelete = CanvasDelete.create(dt, id);
         if (this.canvasDeletes.length > 0) {
-            canvasDelete.dt -= this.lastDt;
+            canvasDelete.dt -= this.lastDelete;
         }
-        this.lastDt = dt;
+        this.lastDelete = dt;
         this.canvasDeletes.push(canvasDelete);
     }
 

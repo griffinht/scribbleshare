@@ -7,7 +7,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.INSERT);
         this.canvasInsertsMap = new Map();
-        this.lastDt = 0;
+        this.lastInsert = 0;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             let canvasObjectType = reader.readUint8();
@@ -37,19 +37,18 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         }
         let canvasInsert = CanvasInsert.create(dt, id, canvasObject);
         if (canvasInserts.length > 0) {
-            canvasInsert.dt -= this.lastDt;
+            canvasInsert.dt -= this.lastInsert;
         }
-        this.lastDt = dt;
+        this.lastInsert = dt;
         canvasInserts.push(canvasInsert);
     }
 
     draw(canvas, dt) {
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
-
             while (canvasInserts.length > 0) {
                 if (canvasInserts[0].dt <= dt) {
                     canvas.canvasObjectWrappers.set(canvasInserts[0].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[0].canvasObject));
-                    if (canvasInserts.length >= 2) {
+                    if (canvasInserts.length >= 2) {//canvasInserts[0].dt is delta, so apply it to the next one
                         canvasInserts[1].dt += canvasInserts[0].dt;
                     }
                     canvasInserts.shift();
