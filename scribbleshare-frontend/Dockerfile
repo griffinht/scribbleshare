@@ -28,4 +28,4 @@ COPY --from=scribbleshare-frontend-build /usr/src/app/dist dist/
 # Example usage from other image
 # COPY --from=scribbleshare-frontend /usr/src/app/dist .
 
-# todo add CMD/ENTRYPOINT or something to make docker stop complaining not being able to start this service
+CMD sleep 0
