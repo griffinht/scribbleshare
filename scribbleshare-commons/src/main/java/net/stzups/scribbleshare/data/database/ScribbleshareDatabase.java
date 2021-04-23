@@ -1,6 +1,5 @@
 package net.stzups.scribbleshare.data.database;
 
-import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
@@ -8,14 +7,13 @@ import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.util.config.Config;
 
 import java.util.logging.Logger;
 
 public class ScribbleshareDatabase implements Database {
     private final PostgresDatabase postgres;
-    private final RedisDatabase keyDB;
+    private final RedisDatabase redis;
 
     public ScribbleshareDatabase(Logger logger, Config config) throws Exception {
         logger.info("Connecting to Postgres database...");
@@ -27,7 +25,7 @@ public class ScribbleshareDatabase implements Database {
         logger.info("Connected to Postgres database");
 
         logger.info("Connecting to Redis database...");
-        keyDB = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));
+        redis = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));
         logger.info("Connected to Redis database");
     }
     @Override
@@ -87,12 +85,12 @@ public class ScribbleshareDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        return keyDB.getHttpSession(id);
+        return redis.getHttpSession(id);
     }
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-        keyDB.addHttpSession(httpSession);
+        redis.addHttpSession(httpSession);
     }
 
     @Override
