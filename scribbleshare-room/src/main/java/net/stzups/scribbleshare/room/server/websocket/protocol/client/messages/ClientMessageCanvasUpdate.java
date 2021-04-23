@@ -5,7 +5,6 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateDelete;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateInsert;
-import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateMouseMove;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateMove;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessageType;
@@ -27,9 +26,6 @@ public class ClientMessageCanvasUpdate extends ClientMessage {
                     break;
                 case DELETE:
                     canvasUpdate = new CanvasUpdateDelete(byteBuf);
-                    break;
-                case MOUSEMOVE:
-                    canvasUpdate = new CanvasUpdateMouseMove(byteBuf);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown ClientMessageType ");

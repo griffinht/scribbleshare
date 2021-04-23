@@ -6,6 +6,8 @@ import ServerMessageUpdateDocument from "./messages/ServerMessageUpdateDocument.
 import ServerMessageGetInvite from "./messages/ServerMessageGetInvite.js";
 import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
 import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
+import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
+import ServerMessageMouseMove from "./messages/ServerMessageMouseMove.js";
 
 const ServerMessageType = {
     ADD_CLIENT:0,
@@ -48,6 +50,12 @@ export function getServerMessage(type, reader) {
             break;
         case ServerMessageType.OPEN_DOCUMENT:
             message = new ServerMessageOpenDocument(reader);
+            break;
+        case ServerMessageType.HANDSHAKE:
+            message = new ServerMessageHandshake(reader);
+            break;
+        case ServerMessageType.MOUSE_MOVE:
+            message = new ServerMessageMouseMove(reader);
             break;
         default:
             console.error('unknown payload type ' + type + ', offset ' + reader.position + ', event ', event);

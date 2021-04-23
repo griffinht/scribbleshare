@@ -1,6 +1,6 @@
 import Shape from "./canvasObject/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
-import {activeDocument} from "../Document.js";
+import {activeDocument, localClient} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
@@ -10,6 +10,8 @@ import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import Mouse from "../Mouse.js";
+import MouseMove from "../MouseMove.js";
+import ClientMessageMouseMove from "../protocol/client/messages/ClientMessageMouseMove.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -101,7 +103,20 @@ export class Canvas {
             this.selected.canvasObjectWrapper = null;
         }
         activeDocument.clients.forEach((client) => {
-            ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
+            while (client.mouseMoves.length > 0) {
+                //todo lerp
+                if (client.mouseMoves[0].dt <= client.time) {
+                    client.time -= client.mouseMoves[0].dt;
+                    client.mouseX = client.mouseMoves[0].x;
+                    client.mouseY = client.mouseMoves[0].y;
+                    client.mouseMoves.shift();
+                } else {
+                    break;
+                }
+            }
+            if (client !== localClient) {
+                ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
+            }
         })
 
         this.last = now;
@@ -142,8 +157,11 @@ export class Canvas {
         switch (event.type) {
             case 'mousemove': {
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
-                    mouse.reset();
                     this.flushActive();
+                    if (mouse.dx > 0 || mouse.dy > 0) {
+                        localClient.mouseMoves.push(MouseMove.create(getNow(), mouse.x, mouse.y));
+                    }
+                    mouse.reset();
                 }
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
@@ -251,14 +269,19 @@ function update() {
         if (canvasUpdateDelete.isDirty()) {
             canvasUpdates.push(canvasUpdateDelete);
         }
+        if (localClient.mouseMoves.length > 0 && activeDocument.clients.length > 1) {
+            socket.send(new ClientMessageMouseMove(localClient.mouseMoves));
+        }
 
         //send local updates
         if (canvasUpdates.length > 0) {
-            socket.send(new ClientMessageCanvasUpdate(canvasUpdates));
+            socket.queue(new ClientMessageCanvasUpdate(canvasUpdates));
         }
+        socket.flush();
         lastUpdate = window.performance.now();
 
         //clean up
+        localClient.mouseMoves.length = 0;
         canvasUpdates.forEach((canvasUpdate) => {
             canvasUpdate.clear();
         })

@@ -14,7 +14,7 @@ const documents = new Map();
 export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
 let localClientId = 0;
-let localClient = null;
+export let localClient = null;
 
 class Document {
     constructor(name, id) {
