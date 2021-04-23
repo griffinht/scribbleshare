@@ -37,12 +37,12 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             return;
         }
 
-        canvasMoves.push(CanvasMove.create(time, canvasObject));
+        canvasMoves.push(CanvasMove.create(time - this.time, canvasObject));
         this.time = time;
     }
 
-    draw(canvas, dt) {
-        this.time += dt;
+    draw(canvas, time) {
+        this.time += time;
         this.canvasMovesMap.forEach((canvasMoves, id) => {
             let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
             if (canvasObjectWrapper === undefined) {
@@ -50,19 +50,17 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             }
 
             while (canvasMoves.length > 0) {
-                ctx.fillText(((dt - canvasObjectWrapper.canvasObject.dt) + ', ' +  canvasMoves[0].dt) + '', 300, 100);
-                console.log(((dt - canvasObjectWrapper.canvasObject.dt) +', ' + canvasMoves[0].dt));
+                console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
                 canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
-                ctx.fillText('' + dt + ', ' + canvasMoves[0].dt, 300, 50)
                 if (canvasMoves[0].dt <= this.time) {
                     this.time -= canvasMoves[0].dt;
+                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
                     canvasMoves.shift();
                 } else {
                     break;
                 }
             }
             if (canvasMoves.length === 0) {
-                canvasObjectWrapper.canvasObject.dt = 0;
                 this.canvasMovesMap.delete(id);
             }
         });
