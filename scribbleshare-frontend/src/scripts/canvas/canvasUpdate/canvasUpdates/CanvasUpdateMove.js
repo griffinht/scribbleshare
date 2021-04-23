@@ -1,7 +1,6 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObject from "../../canvasObject/CanvasObject.js";
-import {ctx} from "../../Canvas.js";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
     constructor(reader) {
@@ -50,7 +49,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             }
 
             while (canvasMoves.length > 0) {
-                console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
+                //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
                 canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
                 if (canvasMoves[0].dt <= this.time) {
                     this.time -= canvasMoves[0].dt;
