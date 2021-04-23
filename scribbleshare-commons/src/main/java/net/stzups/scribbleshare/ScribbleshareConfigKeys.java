@@ -12,7 +12,7 @@ public class ScribbleshareConfigKeys {
     public static final ConfigKey<String> POSTGRES_PASSWORD = new RequiredConfigKey<>("postgres.password");
     public static final ConfigKey<Integer> POSTGRES_RETRIES = new OptionalConfigKey<>("postgres.retries", 3);
 
-    public static final ConfigKey<String> REDIS_URL = new RequiredConfigKey<>("redis.url");
+    //public static final ConfigKey<String> REDIS_URL = new RequiredConfigKey<>("redis.url");
 
     public static final ConfigKey<Boolean> DEBUG_LOG_TRAFFIC = new OptionalConfigKey<>("debug.log.traffic", false);
 }
