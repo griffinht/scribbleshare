@@ -54,3 +54,11 @@ CREATE TABLE invite_codes(
     PRIMARY KEY (code)
 );
 GRANT SELECT, INSERT, DELETE ON invite_codes TO scribbleshare_room;
+
+CREATE TABLE key_value(
+    key bigint NOT NULL,
+    value bytea NOT NULL,
+    PRIMARY KEY (key)
+);
+GRANT SELECT, INSERT ON key_value TO scribbleshare_backend;
+GRANT SELECT ON key_value TO scribbleshare_room;

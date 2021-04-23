@@ -1,6 +1,8 @@
 package net.stzups.scribbleshare.data.database;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
@@ -220,12 +222,32 @@ public class PostgresDatabase implements Database {
 
     @Override
     public HttpSession getHttpSession(long id) {
-        throw new UnsupportedOperationException();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT value FROM key_value WHERE key=?")) {
+            preparedStatement.setLong(1, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new HttpSession(id, Unpooled.wrappedBuffer(resultSet.getBinaryStream("value").readAllBytes()));
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-        throw new UnsupportedOperationException();
+        ByteBuf byteBuf = Unpooled.buffer(56, 56);
+        httpSession.serialize(byteBuf);
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO key_value(key, value) VALUES (?, ?)")) {
+            preparedStatement.setLong(1, httpSession.getId());
+            preparedStatement.setBinaryStream(2, new ByteBufInputStream(byteBuf));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

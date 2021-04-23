@@ -1,13 +1,11 @@
 package net.stzups.scribbleshare.data.database;
 
-import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 
 public interface Database {
     User createUser();

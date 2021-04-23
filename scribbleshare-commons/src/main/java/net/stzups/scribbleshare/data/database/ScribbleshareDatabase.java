@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class ScribbleshareDatabase implements Database {
     private final PostgresDatabase postgres;
-    private final RedisDatabase redis;
+    //private final RedisDatabase redis;
 
     public ScribbleshareDatabase(Logger logger, Config config) throws Exception {
         logger.info("Connecting to Postgres database...");
@@ -23,10 +23,10 @@ public class ScribbleshareDatabase implements Database {
                 config.getInteger(ScribbleshareConfigKeys.POSTGRES_RETRIES));
 
         logger.info("Connected to Postgres database");
-
+/*
         logger.info("Connecting to Redis database...");
         redis = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));
-        logger.info("Connected to Redis database");
+        logger.info("Connected to Redis database");*/
     }
     @Override
     public User createUser() {
@@ -82,7 +82,7 @@ public class ScribbleshareDatabase implements Database {
     public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
         postgres.addPersistentHttpSession(persistentHttpSession);
     }
-
+/*
     @Override
     public HttpSession getHttpSession(long id) {
         return redis.getHttpSession(id);
@@ -91,6 +91,17 @@ public class ScribbleshareDatabase implements Database {
     @Override
     public void addHttpSession(HttpSession httpSession) {
         redis.addHttpSession(httpSession);
+    }*/
+
+
+    @Override
+    public HttpSession getHttpSession(long id) {
+        return postgres.getHttpSession(id);
+    }
+
+    @Override
+    public void addHttpSession(HttpSession httpSession) {
+        postgres.addHttpSession(httpSession);
     }
 
     @Override
