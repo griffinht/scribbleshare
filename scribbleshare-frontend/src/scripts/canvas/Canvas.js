@@ -60,16 +60,17 @@ export class Canvas {
             return;
         }
 
-        let remoteDt = convertTime(now - lastRemoteUpdate);
+        let dt = (now - this.last);
+        let remoteTime = convertTime(now - lastRemoteUpdate);
 
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText('fps:' + (1000 / (now - this.last)), 50, 150);
-        ctx.fillText('' + remoteDt, 50, 100);
+        ctx.fillText('fps:' + (1000 / dt), 50, 150);
+        ctx.fillText('' + remoteTime, 50, 100);
         //console.log('draw1', this.canvasObjects);
 
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            this.canvasUpdates[i].draw(this, remoteDt)
+            this.canvasUpdates[i].draw(this, remoteTime)
             if (!this.canvasUpdates[i].isDirty()) {
                 this.canvasUpdates.splice(i--, 1);
             }
