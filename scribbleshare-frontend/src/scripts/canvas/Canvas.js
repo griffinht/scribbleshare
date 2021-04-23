@@ -60,16 +60,16 @@ export class Canvas {
             return;
         }
 
-        let dt = convertTime(now - lastUpdate);
+        let remoteDt = convertTime(now - lastRemoteUpdate);
 
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillText('fps:' + (1000 / (now - this.last)), 50, 150);
-        ctx.fillText('' + dt, 50, 100);
+        ctx.fillText('' + remoteDt, 50, 100);
         //console.log('draw1', this.canvasObjects);
 
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            this.canvasUpdates[i].draw(this, dt)
+            this.canvasUpdates[i].draw(this, remoteDt)
             if (!this.canvasUpdates[i].isDirty()) {
                 this.canvasUpdates.splice(i--, 1);
             }
@@ -223,8 +223,10 @@ function getNow() {
     return convertTime(window.performance.now() - lastUpdate);
 }
 
+let lastRemoteUpdate = 0;
 socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate) => {
     //apply remote updates
+    lastRemoteUpdate = window.performance.now();
     activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
 });
 
