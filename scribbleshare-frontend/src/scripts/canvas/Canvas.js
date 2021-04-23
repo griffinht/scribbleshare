@@ -60,12 +60,11 @@ export class Canvas {
             return;
         }
 
-        let dt = (now - this.last);
-        this.last = now;
+        let dt = convertTime(now - lastUpdate);
+
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText('fps:' + (1000 / dt), 50, 150);
-        dt = convertTime(dt);
+        ctx.fillText('fps:' + (1000 / (now - this.last)), 50, 150);
         ctx.fillText('' + dt, 50, 100);
         //console.log('draw1', this.canvasObjects);
 
@@ -99,6 +98,7 @@ export class Canvas {
             this.selected.canvasObjectWrapper = null;
         }
 
+        this.last = now;
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
@@ -220,7 +220,7 @@ function convertTime(time) {
 }
 
 function getNow() {
-    return convertTime(window.performance.now()) - lastUpdate;
+    return convertTime(window.performance.now() - lastUpdate);
 }
 
 socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate) => {
@@ -248,7 +248,7 @@ setInterval(() => {
         if (canvasUpdates.length > 0) {
             socket.send(new ClientMessageCanvasUpdate(canvasUpdates));
         }
-        lastUpdate = convertTime(window.performance.now());
+        lastUpdate = window.performance.now();
 
         //clean up
         canvasUpdates.forEach((canvasUpdate) => {

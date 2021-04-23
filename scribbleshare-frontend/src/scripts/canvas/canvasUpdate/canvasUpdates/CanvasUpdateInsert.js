@@ -40,7 +40,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     draw(canvas, dt) {
         this.canvasInsertsMap.forEach((canvasInserts, canvasObjectType) => {
             for (let i = 0; i < canvasInserts.length; i++) {
-                if (canvasInserts[i].dt >= dt) {
+                if (canvasInserts[i].dt <= dt) {
                     canvas.canvasObjectWrappers.set(canvasInserts[i].id, new CanvasObjectWrapper(canvasObjectType, canvasInserts[i].canvasObject));
                     canvasInserts.splice(i--, 1);
                 }
