@@ -269,7 +269,8 @@ function update() {
         if (canvasUpdateDelete.isDirty()) {
             canvasUpdates.push(canvasUpdateDelete);
         }
-        if (localClient.mouseMoves.length > 0 && activeDocument.clients.length > 1) {
+
+        if (localClient.mouseMoves.length > 0 && activeDocument.clients.size > 1) {
             socket.send(new ClientMessageMouseMove(localClient.mouseMoves));
         }
 
