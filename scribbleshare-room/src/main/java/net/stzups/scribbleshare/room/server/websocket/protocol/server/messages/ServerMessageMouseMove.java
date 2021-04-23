@@ -19,7 +19,7 @@ public class ServerMessageMouseMove extends ServerMessage {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        client.serialize(byteBuf);
+        byteBuf.writeShort(client.getId());
         byteBuf.writeByte((byte) mouseMoves.length);
         for (MouseMove mouseMove : mouseMoves) {
             mouseMove.serialize(byteBuf);

@@ -1,5 +1,6 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
+import MouseMove from "../../../MouseMove.js";
 
 export default class ServerMessageMouseMove extends ServerMessage {
     constructor(reader) {
