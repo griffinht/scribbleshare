@@ -107,12 +107,12 @@ export class Canvas {
                 ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
                 while (client.mouseMoves.length > 0) {
                     //todo lerp
-                    client.time += remoteTime;
+                    client.time += dt;
                     if (client.mouseMoves[0].dt <= client.time) {
                         client.time -= client.mouseMoves[0].dt;
                         client.mouseX = client.mouseMoves[0].x;
                         client.mouseY = client.mouseMoves[0].y;
-                        console.log(client.time, getNow(), remoteTime, client.mouseX, client.mouseY);
+                        console.log(client.time, getNow(), dt, client.mouseMoves[0]);
                         client.mouseMoves.shift();
                     } else {
                         break;
