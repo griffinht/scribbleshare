@@ -1,19 +1,16 @@
 CREATE DATABASE scribbleshare;
 
--- Connect to scribbleshare database (currently on default postgres database)
 \c scribbleshare
+
 REVOKE CONNECT ON DATABASE scribbleshare FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 
-CREATE USER scribbleshare_backend PASSWORD 'changeme';
 GRANT CONNECT ON DATABASE scribbleshare TO scribbleshare_backend;
 GRANT USAGE ON SCHEMA public TO scribbleshare_backend;
 
-CREATE USER scribbleshare_room PASSWORD 'changeme';
 GRANT CONNECT ON DATABASE scribbleshare TO scribbleshare_room;
 GRANT USAGE ON SCHEMA public TO scribbleshare_room;
 
--- Create tables and grant permissions
 CREATE TABLE persistent_user_sessions(
      id bigint NOT NULL,
      "user" bigint NOT NULL,

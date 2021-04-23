@@ -11,14 +11,14 @@ services:
                 condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
-            scribbleshare-keydb:
-                condition: service_healthy
+#            scribbleshare-keydb:
+#                condition: service_healthy
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
-            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
+#            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # HTTP backend
     scribbleshare-backend:
         image: scribbleshare-backend
@@ -31,14 +31,14 @@ services:
                 condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
-            scribbleshare-keydb:
-                condition: service_healthy
+#            scribbleshare-keydb:
+#                condition: service_healthy
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_backend"
             scribbleshare.postgres.password: "changeme"
-            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
+#            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
     scribbleshare-nginx:
         image: scribbleshare-nginx
@@ -62,16 +62,16 @@ services:
             retries: 5
         environment:
             POSTGRES_PASSWORD: "changeme"
-    scribbleshare-keydb:
-        build:
-            context: scribbleshare-keydb
-        ports:
-            - "6379:6379"
-        healthcheck:
-            test: [ "CMD", "keydb-cli", "ping" ]
-            interval: 3s
-            timeout: 3s
-            retries: 5
+#    scribbleshare-keydb:
+#        build:
+#            context: scribbleshare-keydb
+#        ports:
+#            - "6379:6379"
+#        healthcheck:
+#            test: [ "CMD", "keydb-cli", "ping" ]
+#            interval: 3s
+#            timeout: 3s
+#            retries: 5
 
 #
 # Build
