@@ -5,10 +5,10 @@ import socket from './protocol/WebSocketHandler.js'
 import * as User from "./User.js";
 import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageOpenDocument.js";
 import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
-import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import SocketEventType from "./protocol/SocketEventType.js";
-import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
+import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
+import {getInvite} from "./Invite.js";
 
 const documents = new Map();
 export let activeDocument = null;
@@ -112,22 +112,5 @@ socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove)
     activeDocument.clients.get(serverMessageMouseMove.client).mouseMoves = serverMessageMouseMove.mouseMoves;
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
-    let invite;
-    let index = document.location.href.lastIndexOf('invite=');
-    if (index === -1) {
-        invite = '';
-    } else {
-        invite = document.location.href.substring(index + 7, index + 7 + 6);
-    }
-    socket.send(new ClientMessageHandshake(invite));
+    socket.send(new ClientMessageHandshake(getInvite()));
 });
-
-const inviteButton = document.getElementById("inviteButton");
-
-inviteButton.addEventListener('click', (event) => {
-    socket.send(new ClientMessageGetInvite());
-})
-
-socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
-    window.alert('Join at localhost/index.html?invite=' + serverMessageGetInvite.code);
-})

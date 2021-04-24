@@ -11,7 +11,7 @@ export default {
   plugins: [
     nodeResolve(),
     replace({
-      'localhost':'room.scribbleshare.com'
+      'localhost':'scribbleshare.com'
     }),
     terser(),
   ]
