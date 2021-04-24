@@ -9,15 +9,13 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
+import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.util.LogFactory;
 
 /**
  * Uses netty to create an HTTP/WebSocket server on the specified port
  */
 public class Server {
-    private static final int HTTP_PORT = 80;
-    private static final int HTTPS_PORT = 443;
-
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
@@ -26,9 +24,8 @@ public class Server {
      */
     public ChannelFuture start() throws Exception {
         SslContext sslContext;
-        int port;
 
-        port = HTTP_PORT;
+        int port = ScribbleshareBackend.getConfig().getInteger(ScribbleshareBackendConfigKeys.PORT);
 
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();

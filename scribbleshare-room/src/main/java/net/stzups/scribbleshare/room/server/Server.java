@@ -32,14 +32,13 @@ public class Server {
      */
     public ChannelFuture start() throws Exception {
         SslContext sslContext;
-        int port;
+        int port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.PORT);
 
         Boolean ssl = ScribbleshareRoom.getConfig().getBoolean(ScribbleshareRoomConfigKeys.SSL);
 
         if (!ssl) {
             ScribbleshareRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
-            port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.WS_PORT);
         } else {
             String keystorePath = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PATH);
             String passphrase = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
@@ -54,7 +53,6 @@ public class Server {
                 sslContext = SslContextBuilder.forServer(keyManagerFactory)
                         .sslProvider(SslProvider.JDK)
                         .build();
-                port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.WSS_PORT);
             } catch (IOException | GeneralSecurityException e) {
                 throw new Exception("Exception while getting SSL context", e);
             }

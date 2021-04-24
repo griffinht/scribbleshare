@@ -5,7 +5,7 @@ import net.stzups.scribbleshare.util.config.OptionalConfigKey;
 import net.stzups.scribbleshare.util.config.RequiredConfigKey;
 
 public class ScribbleshareConfigKeys {
-    public static final ConfigKey<String> BOARD_PROPERTIES = new OptionalConfigKey<>("scribbleshare.properties", "scribbleshare.properties");
+    public static final ConfigKey<String> PROPERTIES = new OptionalConfigKey<>("properties", "scribbleshare.properties");
 
     public static final ConfigKey<String> POSTGRES_URL = new RequiredConfigKey<>("postgres.url");
     public static final ConfigKey<String> POSTGRES_USER = new RequiredConfigKey<>("postgres.user");

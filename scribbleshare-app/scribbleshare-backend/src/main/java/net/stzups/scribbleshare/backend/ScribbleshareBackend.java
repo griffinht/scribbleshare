@@ -26,7 +26,7 @@ public class ScribbleshareBackend {
         config.addConfigProvider(new ArgumentConfig(args))
                 .addConfigProvider(new EnvironmentVariableConfig("scribbleshare."));
         //this is added last in case the other config strategies have a different value for this
-        config.addConfigProvider(new PropertiesConfig(config.getString(ScribbleshareConfigKeys.BOARD_PROPERTIES)));
+        config.addConfigProvider(new PropertiesConfig(config.getString(ScribbleshareConfigKeys.PROPERTIES)));
 
         database = new ScribbleshareDatabase(logger, config);
 
