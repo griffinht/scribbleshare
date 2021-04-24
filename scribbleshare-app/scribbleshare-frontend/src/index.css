@@ -62,7 +62,7 @@ aside button:active {
 }
 
 .active {
-    background-color: red;
+    background-color: gray;
 }
 
 #clientsToolbar {
