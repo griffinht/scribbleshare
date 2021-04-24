@@ -14,6 +14,11 @@ services:
                 condition: service_healthy
 #            scribbleshare-keydb:
 #                condition: service_healthy
+#        healthcheck:
+#            test: [ "CMD", "curl -sf http://localhost:52853/healthcheck || exit 1" ]
+#            interval: 5s
+#            timeout: 5s
+#            retries: 5
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.port: "52853"
@@ -27,6 +32,8 @@ services:
         image: stzups/scribbleshare-app
         networks:
             - scribbleshare-network
+        ports:
+        - "80:80"
         build:
             context: scribbleshare-app
         depends_on:
@@ -34,6 +41,11 @@ services:
                 condition: service_healthy
 #            scribbleshare-keydb:
 #                condition: service_healthy
+#        healthcheck:
+#            test: [ "CMD", "curl -sf http://localhost:80/ || exit 1" ]
+#            interval: 5s
+#            timeout: 5s
+#            retries: 5
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
@@ -42,18 +54,18 @@ services:
             scribbleshare.domain: "scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
-    scribbleshare-nginx:
-        image: stzups/scribbleshare-nginx
-        networks:
-            - scribbleshare-network
-            - scribbleshare-external-network
-        build:
-            context: scribbleshare-nginx
-        depends_on:
-            scribbleshare-app:
-                condition: service_started
-        ports:
-            - "80:80"
+#    scribbleshare-nginx:
+#        image: stzups/scribbleshare-nginx
+#        networks:
+#            - scribbleshare-network
+#            - scribbleshare-external-network
+#        build:
+#            context: scribbleshare-nginx
+#        depends_on:
+#            scribbleshare-app:
+#                condition: service_healthy
+#        ports:
+#            - "80:80"
 # Database
     scribbleshare-postgres:
         image: stzups/scribbleshare-postgres
