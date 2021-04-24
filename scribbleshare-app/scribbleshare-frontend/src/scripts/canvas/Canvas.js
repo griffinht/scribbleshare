@@ -294,8 +294,7 @@ function update() {
         })
         canvasUpdates.length = 0;
     } else {
-        //shouldn't happen
-        console.warn('update with no open document');
+        //happens if there is no document open
     }
 }
 setInterval(update, UPDATE_INTERVAL);
