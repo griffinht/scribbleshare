@@ -34,7 +34,7 @@ public class Server {
      */
     public ChannelFuture start() throws Exception {
         SslContext sslContext;
-        int port = Scribbleshare.getConfig().getInteger(ScribbleshareRoomConfigKeys.PORT);
+        int port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
 
         Boolean ssl = Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL);
 

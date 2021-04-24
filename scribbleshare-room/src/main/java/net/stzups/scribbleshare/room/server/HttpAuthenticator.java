@@ -25,19 +25,31 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
+        ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
+
         if (request.decoderResult().isFailure()) {
             send(ctx, request, HttpResponseStatus.BAD_REQUEST);
             ServerInitializer.getLogger(ctx).info("Bad request");
             return;
         }
 
-        if (request.method().equals(HttpMethod.GET) && request.uri().equals("/healthcheck")) {
-            send(ctx, request, HttpResponseStatus.OK);
-            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
+        if (!request.method().equals(HttpMethod.GET)) {
+            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            ServerInitializer.getLogger(ctx).info("Bad method");
             return;
         }
 
-        ServerInitializer.getLogger(ctx).info(request.method() + ": " + request.uri());
+/*        if (request.uri().equals("/healthcheck")) {
+            send(ctx, request, HttpResponseStatus.OK);
+            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
+            return;
+        }*/
+
+        if (!request.uri().equals(ServerInitializer.WEBSOCKET_PATH)) {
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
+            ServerInitializer.getLogger(ctx).info("Bad uri");
+            return;
+        }
 
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {

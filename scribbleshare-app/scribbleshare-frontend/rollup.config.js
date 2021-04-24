@@ -11,7 +11,8 @@ export default {
   plugins: [
     nodeResolve(),
     replace({
-      'localhost':'scribbleshare.com'
+      'localhost':'scribbleshare.com',
+      ':18080':':8080'
     }),
     terser(),
   ]

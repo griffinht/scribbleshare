@@ -27,7 +27,7 @@ public class Server {
     public ChannelFuture start() throws Exception {
         SslContext sslContext;
 
-        int port = Scribbleshare.getConfig().getInteger(ScribbleshareBackendConfigKeys.PORT);
+        int port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
 
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();

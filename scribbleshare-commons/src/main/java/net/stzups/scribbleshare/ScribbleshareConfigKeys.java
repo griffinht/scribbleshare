@@ -5,6 +5,7 @@ import net.stzups.scribbleshare.util.config.OptionalConfigKey;
 import net.stzups.scribbleshare.util.config.RequiredConfigKey;
 
 public class ScribbleshareConfigKeys {
+    public static final ConfigKey<Integer> PORT = new OptionalConfigKey<>("port", 80);
     public static final ConfigKey<String> ENVIRONMENT_VARIABLE_PREFIX = new OptionalConfigKey<>("environment.variable.prefix", "scribbleshare.");
     public static final ConfigKey<String> PROPERTIES = new OptionalConfigKey<>("properties", "scribbleshare.properties");
 

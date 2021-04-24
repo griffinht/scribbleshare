@@ -2,13 +2,10 @@ services:
 # WebSocket backend
     scribbleshare-room:
         image: stzups/scribbleshare-room
-        networks:
-            - scribbleshare-network
-            - scribbleshare-external-network
         build:
             context: scribbleshare-room
         ports:
-            - "52853:52853"
+            - "8080:80"
         depends_on:
             scribbleshare-postgres:
                 condition: service_healthy
@@ -21,7 +18,6 @@ services:
 #            retries: 5
         environment:
             scribbleshare.ssl: "false"
-            scribbleshare.port: "52853"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
@@ -30,10 +26,8 @@ services:
 # App backend
     scribbleshare-app:
         image: stzups/scribbleshare-app
-        networks:
-            - scribbleshare-network
         ports:
-        - "80:80"
+            - "80:80"
         build:
             context: scribbleshare-app
         depends_on:
@@ -69,8 +63,6 @@ services:
 # Database
     scribbleshare-postgres:
         image: stzups/scribbleshare-postgres
-        networks:
-            - scribbleshare-network
         build:
             context: scribbleshare-postgres
 #        ports:
@@ -92,8 +84,3 @@ services:
 #            interval: 5s
 #            timeout: 5s
 #            retries: 5
-networks:
-    scribbleshare-external-network:
-        driver: bridge
-    scribbleshare-network:
-        driver: bridge
