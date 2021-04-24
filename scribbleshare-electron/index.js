@@ -6,11 +6,18 @@ let window;
 
 function createWindow() {
     window = new BrowserWindow({
-        width: 800,
-        height: 800,
-        fullscreen: true,
+        icon: 'favicon.ico',
+        title: 'scribbleshare',
+        show: false,
     });
-    window.loadURL('http://scribbleshare.com/');
+    window.removeMenu();
+    window.once('ready-to-show', () => {
+        window.maximize();
+        window.show()
+    })
+    window.loadURL('http://scribbleshare.com/').then(() => {
+
+    });
 }
 
 app.whenReady().then(() => {
