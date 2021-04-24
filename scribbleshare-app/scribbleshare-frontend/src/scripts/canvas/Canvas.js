@@ -20,6 +20,9 @@ const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
+const pointerImage = document.createElement('img');
+pointerImage.src = '/assets/pointer.png';
+
 let canvasUpdateInsert = CanvasUpdateInsert.create();//todo these could be instance variables but idk
 let canvasUpdateMove = CanvasUpdateMove.create();
 let canvasUpdateDelete = CanvasUpdateDelete.create();
@@ -104,7 +107,7 @@ export class Canvas {
         }
         activeDocument.clients.forEach((client) => {
             if (client !== localClient) {
-                ctx.fillRect(client.mouseX, client.mouseY, 5, 5);
+                ctx.drawImage(pointerImage, client.mouseX, client.mouseY, );
                 while (client.mouseMoves.length > 0) {
                     //todo lerp
                     client.time += dt;
