@@ -8,7 +8,7 @@ import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessag
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
-import {getInvite} from "./Invite.js";
+import invite from "./Invite.js";
 
 const documents = new Map();
 export let activeDocument = null;
@@ -40,7 +40,7 @@ class Document {
     open() {
         activeDocument = this;
         this.canvas.open();
-        inviteButton.style.visibility = 'visible';
+        invite.setVisible(true);
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
@@ -62,6 +62,7 @@ class Document {
 
     close() {
         this.canvas.close();
+        invite.setVisible(false);
         //todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);
@@ -112,5 +113,5 @@ socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove)
     activeDocument.clients.get(serverMessageMouseMove.client).mouseMoves = serverMessageMouseMove.mouseMoves;
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
-    socket.send(new ClientMessageHandshake(getInvite()));
+    socket.send(new ClientMessageHandshake(invite.getInvite()));
 });
