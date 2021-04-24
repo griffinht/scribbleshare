@@ -1,7 +1,7 @@
 services:
 # WebSocket backend
     scribbleshare-room:
-        image: scribbleshare-room:0.0
+        image: stzups/scribbleshare-room:0.0
         build:
             context: scribbleshare-room
         ports:
@@ -19,7 +19,7 @@ services:
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # App backend
     scribbleshare-app:
-        image: scribbleshare-app:0.0
+        image: stzups/scribbleshare-app:0.0
         build:
             context: scribbleshare-app
         depends_on:
@@ -35,7 +35,7 @@ services:
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
     scribbleshare-nginx:
-        image: scribbleshare-nginx:0.0
+        image: stzups/scribbleshare-nginx:0.0
         build:
             context: scribbleshare-nginx
         depends_on:
@@ -45,7 +45,7 @@ services:
             - "80:80"
 # Database
     scribbleshare-postgres:
-        image: scribbleshare-postgres:0.0
+        image: stzups/scribbleshare-postgres:0.0
         build:
             context: scribbleshare-postgres
         ports:
