@@ -3,8 +3,7 @@ import BufferWriter from "./BufferWriter.js";
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import SocketEventType from "./SocketEventType.js";
 
-const HTTP_PORT = 8080;
-const HTTPS_PORT = 443;
+const webSocketUrl = 'ws://localhost:8080';
 
 class WebSocketHandler {
     constructor() {
@@ -19,13 +18,6 @@ class WebSocketHandler {
             this.serverMessageEvents[value] = [];
         });
 
-        let webSocketUrl;
-        if (window.location.protocol === 'https:') {
-            webSocketUrl = 'wss://localhost:' + HTTPS_PORT + '/';
-        } else {
-            console.warn('Insecure connection, this better be a development environment');//todo disable/disallow
-            webSocketUrl = 'ws://localhost:' + HTTP_PORT + '/';
-        }
         console.log('Opening WebSocket connection to ' + webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);
         this.socket.binaryType = 'arraybuffer';
