@@ -8,13 +8,33 @@ const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1280;
 const JPEG_QUALITY = 0.69; // very nice quality with a relatively small file size
 
-const fileUploadButton = document.getElementById("fileUploadButton");
+const fileUploadModal = document.getElementById("fileUploadModal");
 
-fileUploadButton.addEventListener('change', (event) => {
-    uploadImage(event.target.files[0]);
-}, false);
+document.body.addEventListener('dragover', (event) => {
+    if (activeDocument !== null && event.dataTransfer.items.length > 0 && event.dataTransfer.items[0].kind === 'file') {
+        fileUploadModal.style.visibility = 'visible';
+    } else {
+        fileUploadModal.style.visibility = 'hidden';
+    }
+    event.preventDefault();
+});
 
-function uploadImage(file) {
+document.body.addEventListener('dragleave', (event) => {
+    fileUploadModal.style.visibility = 'hidden';
+    console.log('sfd');
+    event.preventDefault();
+})
+
+document.body.addEventListener('drop', (event) => {
+    console.log(event);
+    if (activeDocument === null || event.dataTransfer.files.length === 0) {
+        return;
+    }
+    event.preventDefault();
+    let file = event.dataTransfer.files[0];
+
+    fileUploadModal.innerText = 'Uploading file';
+
     let fileReader = new FileReader();
     fileReader.addEventListener('load', (event) => {
         // draw image file to canvas
@@ -49,6 +69,8 @@ function uploadImage(file) {
             request.setRequestHeader('content-type', output.substring(dataIndex, output.indexOf(';', dataIndex)));
 
             request.addEventListener('load', (event) => {
+                fileUploadModal.style.visibility = 'hidden';
+                fileUploadModal.innerText = 'Upload file';
                 if (request.status !== 200) {
                     console.error(request.status + ' while fetching image id');
                     return;
@@ -58,11 +80,15 @@ function uploadImage(file) {
                 activeDocument.canvas.insert(CanvasObjectType.IMAGE, object);
             });
 
+            request.addEventListener('progress', (event) => {
+                //todo
+            });
+
             request.send(Uint8Array.from(atob(output.substr(output.indexOf('base64,') + 7)), c => c.charCodeAt(0))); //base64 string to binary
         });
         //todo verify client/server side that mime type is good
     });
 
     //fileReader.readAsArrayBuffer(file);
-    fileReader.readAsDataURL(file)
-}
+    fileReader.readAsDataURL(file);
+});

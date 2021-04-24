@@ -14,3 +14,13 @@ button:focus {
 button:active {
     box-shadow: inset 0 0 .5em #c1c1c1;
 }
+
+.modal {
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+    border: solid black 1px;
+    background-color: white;
+    visibility: hidden;
+}

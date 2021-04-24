@@ -12,7 +12,8 @@ export default {
     nodeResolve(),
     replace({
       'localhost':'scribbleshare.com',
-      ':18080':':8080'
+      ':18080':':8080',
+      ':3456':':80'
     }),
     terser(),
   ]
