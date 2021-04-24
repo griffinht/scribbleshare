@@ -1,15 +1,20 @@
 import socket from "./protocol/WebSocketHandler.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
+import Modal from "./Modal.js";
 
 const inviteButton = document.getElementById("inviteButton");
+const inviteModal = new Modal(document.getElementById('inviteModal'));
+const text = inviteModal.modal.getElementsByTagName("p")[0];
+
 class Invite {
     constructor() {
         inviteButton.addEventListener('click', (event) => {
             socket.send(new ClientMessageGetInvite());
         })
         socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
-            window.alert('Join at localhost/?invite=' + serverMessageGetInvite.code);
+            text.innerText = 'Join at localhost/?invite=' + serverMessageGetInvite.code;
+            inviteModal.show();
         })
         this.setVisible(false);
     }
@@ -34,4 +39,10 @@ class Invite {
     }
 
 }
-export default new Invite();
+const invite = new Invite();
+export default invite;
+
+
+document.getElementById('inviteModalClose').addEventListener('click', (event) => {
+    inviteModal.hide();
+})
