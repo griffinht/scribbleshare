@@ -3,24 +3,25 @@ import {apiUrl} from "./main.js";
 import BufferReader from "./protocol/BufferReader.js";
 import {CanvasObjectType} from "./canvas/canvasObject/CanvasObjectType.js";
 import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
+import Modal from "./Modal.js";
 
 const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1280;
 const JPEG_QUALITY = 0.69; // very nice quality with a relatively small file size
 
-const fileUploadModal = document.getElementById("fileUploadModal");
+const fileUploadModal = new Modal(document.getElementById("fileUploadModal"));
 
 document.body.addEventListener('dragover', (event) => {
     if (activeDocument !== null && event.dataTransfer.items.length > 0 && event.dataTransfer.items[0].kind === 'file') {
-        fileUploadModal.style.visibility = 'visible';
+        fileUploadModal.show();
     } else {
-        fileUploadModal.style.visibility = 'hidden';
+        fileUploadModal.hide();
     }
     event.preventDefault();
 });
 
 document.body.addEventListener('dragleave', (event) => {
-    fileUploadModal.style.visibility = 'hidden';
+    fileUploadModal.hide();
     console.log('sfd');
     event.preventDefault();
 })
@@ -33,7 +34,7 @@ document.body.addEventListener('drop', (event) => {
     event.preventDefault();
     let file = event.dataTransfer.files[0];
 
-    fileUploadModal.innerText = 'Uploading ' + file.name + '...';
+    fileUploadModal.modal.innerText = 'Uploading ' + file.name + '...';
 
     let fileReader = new FileReader();
     fileReader.addEventListener('load', (event) => {
@@ -69,8 +70,8 @@ document.body.addEventListener('drop', (event) => {
             request.setRequestHeader('content-type', output.substring(dataIndex, output.indexOf(';', dataIndex)));
 
             request.addEventListener('load', (event) => {
-                fileUploadModal.style.visibility = 'hidden';
-                fileUploadModal.innerText = 'Upload file';
+                fileUploadModal.hide()
+                fileUploadModal.modal.innerText = 'Upload file';
                 if (request.status !== 200) {
                     console.error(request.status + ' while fetching image id');
                     return;
