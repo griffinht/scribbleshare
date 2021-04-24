@@ -1,11 +1,16 @@
 package net.stzups.scribbleshare.room.server;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AttributeKey;
@@ -20,6 +25,20 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
+        if (request.decoderResult().isFailure()) {
+            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+            ServerInitializer.getLogger(ctx).info("Bad request");
+            return;
+        }
+
+        if (request.method().equals(HttpMethod.GET) && request.uri().equals("/healthcheck")) {
+            send(ctx, request, HttpResponseStatus.OK);
+            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
+            return;
+        }
+
+        ServerInitializer.getLogger(ctx).info(request.method() + ": " + request.uri());
+
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
             HttpSession httpSession = ScribbleshareRoom.getDatabase().getHttpSession(cookie.getId());
@@ -33,16 +52,24 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             } else {
                 ServerInitializer.getLogger(ctx).warning("Bad authentication");
                 //bad authentication attempt
-                FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
                 //todo rate limit timeout server a proper response???
-                ctx.writeAndFlush(fullHttpResponse);
-                ctx.close();
+                send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             }
         } else {
             ServerInitializer.getLogger(ctx).info("No authentication");
-            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-            ctx.writeAndFlush(fullHttpResponse);
-            ctx.close();
+            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
         }
+    }
+
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        if (request == null) { // assume no keep alive
+            ctx.writeAndFlush(response);
+            return;
+        }
+
+        ChannelFuture flushPromise = ctx.writeAndFlush(response);
+        flushPromise.addListener(ChannelFutureListener.CLOSE);
     }
 }
