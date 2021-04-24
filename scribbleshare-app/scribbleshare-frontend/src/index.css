@@ -15,12 +15,11 @@ body {
 }
 
 header {
-    background-color: black;
+    background-color: lightgray;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    height: 5em;
 }
 
 header * {
@@ -35,6 +34,7 @@ aside {
 }
 #side * {
     padding: .2em;
+    width: 100%;
 }
 
 #canvasWrapper {
