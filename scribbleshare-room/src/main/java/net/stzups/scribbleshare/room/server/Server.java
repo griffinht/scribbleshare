@@ -10,6 +10,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
+import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.util.LogFactory;
@@ -32,16 +34,16 @@ public class Server {
      */
     public ChannelFuture start() throws Exception {
         SslContext sslContext;
-        int port = ScribbleshareRoom.getConfig().getInteger(ScribbleshareRoomConfigKeys.PORT);
+        int port = Scribbleshare.getConfig().getInteger(ScribbleshareRoomConfigKeys.PORT);
 
-        Boolean ssl = ScribbleshareRoom.getConfig().getBoolean(ScribbleshareRoomConfigKeys.SSL);
+        Boolean ssl = Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL);
 
         if (!ssl) {
-            ScribbleshareRoom.getLogger().warning("Starting server using insecure http:// protocol without SSL");
+            Scribbleshare.getLogger().warning("Starting server using insecure http:// protocol without SSL");
             sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
         } else {
-            String keystorePath = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PATH);
-            String passphrase = ScribbleshareRoom.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
+            String keystorePath = Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PATH);
+            String passphrase = Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
             try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 keyStore.load(fileInputStream, passphrase.toCharArray());
@@ -65,7 +67,7 @@ public class Server {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
                 .childHandler(new ServerInitializer(sslContext));
-        ScribbleshareRoom.getLogger().info("Binding to port " + port);
+        Scribbleshare.getLogger().info("Binding to port " + port);
         return serverBootstrap.bind(port).sync().channel().closeFuture();
     }
 

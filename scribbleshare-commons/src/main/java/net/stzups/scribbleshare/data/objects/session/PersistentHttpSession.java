@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
+import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -30,11 +32,11 @@ public class PersistentHttpSession extends HttpSession {
 
     private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain("localhost"); //todo
+        cookie.setDomain(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.DOMAIN));
         cookie.setPath(LOGIN_PATH);
-        //todo ssl cookie.setSecure(true);
+        if (Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL)) cookie.setSecure(true);
         cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Lax); //todo strict
+        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));

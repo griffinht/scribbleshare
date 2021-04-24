@@ -12,6 +12,8 @@ import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
+import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
@@ -79,13 +81,12 @@ public class HttpSession extends Session {
 
     private void setCookie(HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain("localhost"); //todo
+        cookie.setDomain(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.DOMAIN));
         //not used cookie.setPath("");
-        //todo ssl cookie.setSecure(true);
+        if (Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL)) cookie.setSecure(true);
         cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Lax); //todo strict
-        //session cookie
-
+        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
+        //session cookie, so no max age
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 }

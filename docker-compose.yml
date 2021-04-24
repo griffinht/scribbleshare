@@ -5,7 +5,7 @@ services:
         build:
             context: scribbleshare-room
         ports:
-            - "8080:8080"
+            - "52853:52853"
         depends_on:
             scribbleshare-postgres:
                 condition: service_healthy
@@ -13,10 +13,11 @@ services:
 #                condition: service_healthy
         environment:
             scribbleshare.ssl: "false"
-            scribbleshare.port: "8080"
+            scribbleshare.port: "52853"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
+            scribbleshare.domain: "scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # App backend
     scribbleshare-app:
@@ -33,6 +34,7 @@ services:
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_backend"
             scribbleshare.postgres.password: "changeme"
+            scribbleshare.domain: "scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
     scribbleshare-nginx:

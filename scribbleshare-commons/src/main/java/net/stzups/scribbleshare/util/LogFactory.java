@@ -23,10 +23,19 @@ public class LogFactory {
      */
     public static Logger getLogger(String name) {
         Logger logger = Logger.getLogger(name);
+
+        setLogger(logger, name);
+
+        return logger;
+    }
+
+    /**
+     * Formats an existing logger with a name
+     */
+    public static void setLogger(Logger logger, String name) {
         logger.setUseParentHandlers(false);
         Handler handler = new ConsoleHandler();
         logger.addHandler(handler);
-
         handler.setFormatter(new Formatter() {
             private final SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd] [HH:mm:ss] ");
 
@@ -40,7 +49,5 @@ public class LogFactory {
                         + System.lineSeparator();
             }
         });
-
-        return logger;
     }
 }

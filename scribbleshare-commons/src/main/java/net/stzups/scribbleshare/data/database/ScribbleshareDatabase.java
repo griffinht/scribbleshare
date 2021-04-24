@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.database;
 
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
@@ -15,14 +16,14 @@ public class ScribbleshareDatabase implements Database {
     private final PostgresDatabase postgres;
     //private final RedisDatabase redis;
 
-    public ScribbleshareDatabase(Logger logger, Config config) throws Exception {
-        logger.info("Connecting to Postgres database...");
-        postgres = new PostgresDatabase(config.getString(ScribbleshareConfigKeys.POSTGRES_URL),
-                config.getString(ScribbleshareConfigKeys.POSTGRES_USER),
-                config.getString(ScribbleshareConfigKeys.POSTGRES_PASSWORD),
-                config.getInteger(ScribbleshareConfigKeys.POSTGRES_RETRIES));
+    public ScribbleshareDatabase() throws Exception {
+        Scribbleshare.getLogger().info("Connecting to Postgres database...");
+        postgres = new PostgresDatabase(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_URL),
+                Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_USER),
+                Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_PASSWORD),
+                Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.POSTGRES_RETRIES));
 
-        logger.info("Connected to Postgres database");
+        Scribbleshare.getLogger().info("Connected to Postgres database");
 /*
         logger.info("Connecting to Redis database...");
         redis = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));

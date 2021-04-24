@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.room.server.websocket;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
@@ -43,7 +44,7 @@ class Room {
         ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId(), document.getId()).getData();
         this.canvas = new Canvas(canvas);
         rooms.put(document, this);
-        ScribbleshareRoom.getLogger().info("Started " + this);
+        Scribbleshare.getLogger().info("Started " + this);
     }
 
     static Room getRoom(Document document) {
@@ -62,7 +63,7 @@ class Room {
             ScribbleshareRoom.getDatabase().updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
         }
         //todo
-        ScribbleshareRoom.getLogger().info("Ended room " + this);
+        Scribbleshare.getLogger().info("Ended room " + this);
     }
 
     Document getDocument() {
@@ -86,7 +87,7 @@ class Room {
         client.queueMessage(new ServerMessageAddClient(clients));//todo
         clients.add(client);
         flushMessages();
-        ScribbleshareRoom.getLogger().info("Added " + client + " to " + this);
+        Scribbleshare.getLogger().info("Added " + client + " to " + this);
     }
 
     /**
@@ -97,7 +98,7 @@ class Room {
     void removeClient(Client client) {
         clients.remove(client);
         sendMessage(new ServerMessageRemoveClient(client));
-        ScribbleshareRoom.getLogger().info("Removed " + client + " to " + this);
+        Scribbleshare.getLogger().info("Removed " + client + " to " + this);
         if (clients.isEmpty()) {
             end();
         }

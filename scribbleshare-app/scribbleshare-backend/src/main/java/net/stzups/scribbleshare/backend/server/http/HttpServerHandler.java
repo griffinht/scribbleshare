@@ -26,6 +26,8 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.stream.ChunkedStream;
+import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
@@ -55,8 +57,8 @@ import java.util.regex.Pattern;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final File HTTP_ROOT = new File(ScribbleshareBackend.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
-    private static final int HTTP_CACHE_SECONDS = ScribbleshareBackend.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
+    private static final File HTTP_ROOT = new File(Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
+    private static final int HTTP_CACHE_SECONDS = Scribbleshare.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
 
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -73,7 +75,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
     static {
-        String path = ScribbleshareBackend.getConfig().getString(ScribbleshareBackendConfigKeys.MIME_TYPES_FILE_PATH);
+        String path = Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.MIME_TYPES_FILE_PATH);
         try {
             MimeTypes.load(new FileInputStream(path));
         } catch (IOException e) {

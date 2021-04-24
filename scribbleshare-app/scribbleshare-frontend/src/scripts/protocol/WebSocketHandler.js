@@ -3,7 +3,7 @@ import BufferWriter from "./BufferWriter.js";
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import SocketEventType from "./SocketEventType.js";
 
-const webSocketUrl = 'ws://localhost:8080';
+const webSocketUrl = 'ws://localhost:52853';
 
 class WebSocketHandler {
     constructor() {
