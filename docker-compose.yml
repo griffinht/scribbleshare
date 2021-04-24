@@ -2,6 +2,9 @@ services:
 # WebSocket backend
     scribbleshare-room:
         image: stzups/scribbleshare-room
+        networks:
+            - scribbleshare-network
+            - scribbleshare-external-network
         build:
             context: scribbleshare-room
         ports:
@@ -22,6 +25,8 @@ services:
 # App backend
     scribbleshare-app:
         image: stzups/scribbleshare-app
+        networks:
+            - scribbleshare-network
         build:
             context: scribbleshare-app
         depends_on:
@@ -39,6 +44,9 @@ services:
 # Reverse proxy
     scribbleshare-nginx:
         image: stzups/scribbleshare-nginx
+        networks:
+            - scribbleshare-network
+            - scribbleshare-external-network
         build:
             context: scribbleshare-nginx
         depends_on:
@@ -49,10 +57,12 @@ services:
 # Database
     scribbleshare-postgres:
         image: stzups/scribbleshare-postgres
+        networks:
+            - scribbleshare-network
         build:
             context: scribbleshare-postgres
-        ports:
-            - "5432:5432"
+#        ports:
+#            - "5432:5432"
         healthcheck:
             test: [ "CMD-SHELL", "pg_isready -U postgres" ]
             interval: 5s
@@ -70,3 +80,8 @@ services:
 #            interval: 5s
 #            timeout: 5s
 #            retries: 5
+networks:
+    scribbleshare-external-network:
+        driver: bridge
+    scribbleshare-network:
+        driver: bridge
