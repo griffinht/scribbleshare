@@ -1,9 +1,11 @@
 {
   "name": "scribbleshare-electron",
-  "description": "",
-  "main": "index.js",
+  "description": "scribbleshare electron",
+  "version": "1.0.0",
+  "main": "src/index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . scribbleshare --platform=win32"
   },
   "keywords": [],
   "author": "",
