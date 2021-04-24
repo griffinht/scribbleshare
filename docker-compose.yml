@@ -1,14 +1,12 @@
 services:
 # WebSocket backend
     scribbleshare-room:
-        image: scribbleshare-room
+        image: scribbleshare-room:0.0
         build:
             context: scribbleshare-room
         ports:
             - "8080:80"
         depends_on:
-            scribbleshare-gradle:
-                condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
 #            scribbleshare-keydb:
@@ -19,16 +17,12 @@ services:
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
-# HTTP backend
-    scribbleshare-backend:
-        image: scribbleshare-backend
+# App backend
+    scribbleshare-app:
+        image: scribbleshare-app:0.0
         build:
-            context: scribbleshare-backend
+            context: scribbleshare-app
         depends_on:
-            scribbleshare-gradle:
-                condition: service_started
-            scribbleshare-frontend:
-                condition: service_started
             scribbleshare-postgres:
                 condition: service_healthy
 #            scribbleshare-keydb:
@@ -41,16 +35,17 @@ services:
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
     scribbleshare-nginx:
-        image: scribbleshare-nginx
-        depends_on:
-            scribbleshare-backend:
-                condition: service_started
+        image: scribbleshare-nginx:0.0
         build:
             context: scribbleshare-nginx
+        depends_on:
+            scribbleshare-app:
+                condition: service_started
         ports:
             - "80:80"
 # Database
     scribbleshare-postgres:
+        image: scribbleshare-postgres:0.0
         build:
             context: scribbleshare-postgres
         ports:
@@ -72,17 +67,3 @@ services:
 #            interval: 3s
 #            timeout: 3s
 #            retries: 5
-
-#
-# Build
-#
-# Build jars with Gradle for scribbleshare-room and scribbleshare-backend
-    scribbleshare-gradle:
-        image: scribbleshare-gradle
-        build:
-            context: .
-# Minify/compress HTML/JS/CSS/Assets
-    scribbleshare-frontend:
-        image: scribbleshare-frontend
-        build:
-            context: scribbleshare-frontend
