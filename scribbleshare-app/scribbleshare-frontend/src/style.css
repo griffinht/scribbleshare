@@ -23,4 +23,5 @@ button:active {
     border: solid black 1px;
     background-color: white;
     visibility: hidden;
+    padding: 1em;
 }

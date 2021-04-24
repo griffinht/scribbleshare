@@ -33,7 +33,7 @@ document.body.addEventListener('drop', (event) => {
     event.preventDefault();
     let file = event.dataTransfer.files[0];
 
-    fileUploadModal.innerText = 'Uploading file';
+    fileUploadModal.innerText = 'Uploading ' + file.name + '...';
 
     let fileReader = new FileReader();
     fileReader.addEventListener('load', (event) => {
