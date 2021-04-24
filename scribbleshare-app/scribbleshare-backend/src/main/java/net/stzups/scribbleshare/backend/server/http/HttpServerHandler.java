@@ -453,7 +453,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
                     user = ScribbleshareBackend.getDatabase().getUser(persistentHttpSession.getUser());
                 } else {
-                    return false;
+                    //return false; todo
+                    user = ScribbleshareBackend.getDatabase().createUser();
                 }
             } else {
                 user = ScribbleshareBackend.getDatabase().createUser();
