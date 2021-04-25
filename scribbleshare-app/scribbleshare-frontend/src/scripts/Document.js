@@ -78,6 +78,11 @@ class Document {
         request.send();*/
     }
 
+    update(serverMessageUpdateDocument) {
+        this.name = serverMessageUpdateDocument.name;
+        this.sidebarItem.button.innerText = this.name;
+    }
+
     remove() {
         this.close();
         this.sidebarItem.remove();
@@ -141,7 +146,12 @@ socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDoc
     document.open();
 })
 socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument) => {
-    documents.set(serverMessageUpdateDocument.id, new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id));
+    let document = documents.get(serverMessageUpdateDocument.id);
+    if (document === undefined) {
+        new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id);
+    } else {
+        document.update(serverMessageUpdateDocument);
+    }
 });
 socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) => {
     localClientId = serverMessageHandshake.client;
