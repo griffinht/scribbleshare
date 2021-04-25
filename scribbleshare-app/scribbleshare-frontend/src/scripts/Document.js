@@ -157,7 +157,10 @@ socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) 
     localClientId = serverMessageHandshake.client;
 })
 socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove) => {
-    activeDocument.clients.get(serverMessageMouseMove.client).mouseMoves = serverMessageMouseMove.mouseMoves;
+    let client = activeDocument.clients.get(serverMessageMouseMove.client);
+    client.mouseMoves = serverMessageMouseMove.mouseMoves;
+    client.time = 0;
+    client.first = true;
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
     socket.send(new ClientMessageHandshake(invite.getInvite()));

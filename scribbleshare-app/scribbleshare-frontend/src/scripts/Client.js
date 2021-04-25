@@ -3,6 +3,7 @@ export default class Client {
         this.id = id;
         this.user = user;
         this.mouseX = 0;
+        this.first = false;
         this.mouseY = 0;
         this.mouseMoves = [];
         this.time = 0;

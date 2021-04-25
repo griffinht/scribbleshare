@@ -1,4 +1,4 @@
-import {ctx} from "../Canvas.js";
+import {ctx, lerp} from "../Canvas.js";
 
 export default class CanvasObject {
     constructor(reader) {
@@ -36,8 +36,4 @@ export default class CanvasObject {
         object.rotation = canvasObject.rotation;
         return object;
     }
-}
-
-function lerp(v0, v1, t) {
-    return v0 * (1 - t) + v1 * t;
 }

@@ -107,20 +107,58 @@ export class Canvas {
         }
         activeDocument.clients.forEach((client) => {
             if (client !== localClient) {
-                ctx.drawImage(pointerImage, client.mouseX, client.mouseY, );
+                client.time += dt;
+
+                if (client.mouseMoves.length === 0) {
+                    ctx.drawImage(pointerImage, client.mouseX, client.mouseY);
+                }
                 while (client.mouseMoves.length > 0) {
-                    //todo lerp
-                    client.time += dt;
+                    //console.log(client.first);
+                    if (!client.first) {
+                        let t = client.time / client.mouseMoves[0].dt;
+                        //console.log(t);
+                        ctx.drawImage(pointerImage, lerp(client.mouseX, client.mouseMoves[0].x, t), lerp(client.mouseY, client.mouseMoves[0].y, t));
+                    } else {
+                        ctx.drawImage(pointerImage, client.mouseX, client.mouseY);
+                    }
                     if (client.mouseMoves[0].dt <= client.time) {
+                        client.first = false;
                         client.time -= client.mouseMoves[0].dt;
                         client.mouseX = client.mouseMoves[0].x;
                         client.mouseY = client.mouseMoves[0].y;
-                        console.log(client.time, getNow(), dt, client.mouseMoves[0]);
+                        //console.log(client.time, getNow(), dt, client.mouseMoves[0]);
                         client.mouseMoves.shift();
                     } else {
                         break;
                     }
                 }
+                if (client.mouseMoves.length === 0) {
+                    client.first = false;
+                }
+                /*
+            let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
+            if (canvasObjectWrapper === undefined) {
+                this.clear();
+            }
+
+            while (canvasMoves.length > 0) {
+                //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
+                if (!this.first) {
+                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
+                }
+                if (canvasMoves[0].dt <= this.time) {
+                    this.time -= canvasMoves[0].dt;
+                    this.first = false;
+                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
+                    canvasMoves.shift();
+                } else {
+                    break;
+                }
+            }
+            if (canvasMoves.length === 0) {
+                this.canvasMovesMap.delete(id);
+            }
+                 */
             }
         })
 
@@ -307,3 +345,7 @@ function ondrag(event) {
     //todo draw line
 }
 
+
+export function lerp(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t;
+}
