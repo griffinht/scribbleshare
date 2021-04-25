@@ -88,7 +88,7 @@ export class Canvas {
         //console.log('draw1', this.canvasObjects);
         dt = convertTime(dt);
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            if (this.canvasUpdates[i].draw(this, dt)) {
+            if (this.canvasUpdates[i].draw(this, remoteTime)) {
                 this.canvasUpdates.splice(i--, 1);
             }
         }

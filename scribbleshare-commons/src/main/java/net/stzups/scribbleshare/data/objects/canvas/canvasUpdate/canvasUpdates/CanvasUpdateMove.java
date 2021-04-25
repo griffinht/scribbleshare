@@ -32,13 +32,11 @@ public class CanvasUpdateMove extends CanvasUpdate {
     }
 
     private final short id;
-    private final byte first;
     private final CanvasMove[] canvasMoves;
 
     public CanvasUpdateMove(ByteBuf byteBuf) {
         super(CanvasUpdateType.MOVE);
         id = byteBuf.readShort();
-        first = byteBuf.readByte();
         canvasMoves = new CanvasMove[byteBuf.readUnsignedByte()];
         for (int i = 0; i < canvasMoves.length; i++) {
             canvasMoves[i] = new CanvasMove(byteBuf);
@@ -67,7 +65,6 @@ public class CanvasUpdateMove extends CanvasUpdate {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeShort(id);
-        byteBuf.writeByte(first);
         byteBuf.writeByte((byte) canvasMoves.length);
         for (CanvasMove canvasMove : canvasMoves) {
             canvasMove.serialize(byteBuf);
