@@ -7,6 +7,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         super(CanvasUpdateType.MOVE);
         this.canvasMovesMap = new Map();
         this.time = 0;
+        this.first = true;
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
             let id = reader.readInt16();
@@ -50,9 +51,12 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 
             while (canvasMoves.length > 0) {
                 //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
-                canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
+                if (!this.first) {
+                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
+                }
                 if (canvasMoves[0].dt <= this.time) {
                     this.time -= canvasMoves[0].dt;
+                    this.first = false;
                     canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
                     canvasMoves.shift();
                 } else {
