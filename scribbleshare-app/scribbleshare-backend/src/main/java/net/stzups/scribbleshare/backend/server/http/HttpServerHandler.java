@@ -469,7 +469,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return true;
         } else {
             HttpSession httpSession = ScribbleshareBackend.getDatabase().getHttpSession(cookie.getId());
-            return httpSession != null && httpSession.validate(cookie.getToken());
+            if (httpSession != null && httpSession.validate(cookie.getToken())) {
+                return true;
+            } else {
+                //todo copied and bad
+                User user = ScribbleshareBackend.getDatabase().createUser();
+                httpSession = new HttpSession(user, headers);
+                ScribbleshareBackend.getDatabase().addHttpSession(httpSession);
+
+                //this is single use and always refreshed
+                PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, headers);
+                ScribbleshareBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+                return true;
+            }
         }
     }
 
