@@ -26,4 +26,14 @@ export default class SidebarItem {
             }
         });
     }
+
+    remove() {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i] === this) {
+                items.splice(i, 1);
+                sidebar.removeChild(this.button);
+                break;
+            }
+        }
+    }
 }

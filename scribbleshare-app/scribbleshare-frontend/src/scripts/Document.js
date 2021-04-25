@@ -78,6 +78,11 @@ class Document {
         request.send();*/
     }
 
+    remove() {
+        this.close();
+        this.sidebarItem.remove();
+    }
+
     close() {
         this.canvas.close();
         invite.setVisible(false);
@@ -146,4 +151,12 @@ socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove)
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
     socket.send(new ClientMessageHandshake(invite.getInvite()));
+});
+socket.addMessageListener(ServerMessageType.DELETE_DOCUMENT, (serverMessageDeleteDocument) => {
+    let document = documents.get(serverMessageDeleteDocument.id);
+    if (document === undefined) {
+        return;
+    }
+
+    document.remove();
 });
