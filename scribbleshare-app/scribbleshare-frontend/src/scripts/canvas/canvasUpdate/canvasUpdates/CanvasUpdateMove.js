@@ -16,6 +16,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     }
 
     move(time, canvasObject) {
+        console.log(canvasObject);
         this.canvasMoves.push(CanvasMove.create(time - this.time, canvasObject));
         this.time = time;
     }

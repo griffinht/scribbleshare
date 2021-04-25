@@ -142,6 +142,7 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveC
 });
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
     let document = documents.get(serverMessageOpenDocument.id);
+    document.canvas.close();
     document.canvas = serverMessageOpenDocument.canvas;
     document.open();
 })

@@ -27,7 +27,9 @@ export class Canvas {
     constructor(reader) {
         this.isOpen = false;
         this.last = 0;
-        this.lastFlush = 0;
+        this.lastFlushSelected = 0;
+        this.lastFlushMouse = 0;
+        this.lastFlushLine = 0;
         this.canvasObjectWrappers = new Map();
         this.canvasUpdates = [];
         this.selected = {
@@ -69,6 +71,8 @@ export class Canvas {
             console.log(this.isOpen);
             return;
         }
+
+        this.flush();
 
         let dt = (now - this.last);
         let remoteTime = convertTime(now - lastRemoteUpdate);
@@ -133,23 +137,40 @@ export class Canvas {
         })
     }
 
-    flushActive() {
-        this.lastFlush = window.performance.now();
+    flush() {
+        this.flushSelected();
+        this.flushMouse();
+        this.flushLine();
+    }
+
+    flushSelected() {
         if (this.selected.canvasObjectWrapper !== null) {
             if (this.selected.dirty) {
-                this.selected.dirty = false;
                 if (canvasUpdateMove !== null) {
+                    this.selected.dirty = false;
                     canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
+                    this.lastFlushSelected = window.performance.now();
                 }
             }
         }
-        if (Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) {
-            if (mouseUpdateMove === null) {
-                mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
+
+    }
+
+    flushMouse() {
+        if (false && mouseUpdateMove !== null) {
+            if (((Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) && this.last - this.lastFlushMouse > 100)
+                || (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30)) {
+                mouseUpdateMove.move(getNow(), this.localMouse);
+                //console.log(this.last - this.lastFlushMouse)
+                this.lastFlushMouse = window.performance.now();
+                mouse.reset();
             }
-            mouseUpdateMove.move(getNow(), this.localMouse);
         }
-        mouse.reset();
+    }
+
+    flushLine() {
+
+        this.lastFlushLine = window.performance.now();
     }
 
     onEvent(event) {
@@ -157,10 +178,7 @@ export class Canvas {
             case 'mousemove': {
                 this.localMouse.x = mouse.x;
                 this.localMouse.y = mouse.y;
-                if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
-                    this.flushActive();
-                    //mouse.reset();
-                }
+                //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
                         if (canvasUpdateMove === null) {
@@ -197,13 +215,6 @@ export class Canvas {
         }
     }
 }
-
-//todo fix
-setInterval(() => {
-    if (activeDocument !== null) {
-        activeDocument.canvas.flushActive();
-    }
-}, 100);
 
 function aabb(rect1, rect2, padding) {
     return rect1.x - padding < rect2.x + rect2.width &&
@@ -263,7 +274,7 @@ socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (a) => {
 
 function update() {
     if (activeDocument !== null) {
-        activeDocument.canvas.flushActive();
+        activeDocument.canvas.flush();
 
         //assemble local updates
         if (canvasUpdateMove !== null) {
@@ -290,10 +301,6 @@ function update() {
 }
 setInterval(update, UPDATE_INTERVAL);
 
-
-function ondrag(event) {
-    //todo draw line
-}
 
 
 export function lerp(v0, v1, t) {
