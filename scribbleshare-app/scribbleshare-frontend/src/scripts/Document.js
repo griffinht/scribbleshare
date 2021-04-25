@@ -15,7 +15,7 @@ import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessag
 const documents = new Map();
 export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
-let localClientId = 0;
+export let localClientId = 0;
 export let localClient = null;
 const updateBar = document.getElementById('sideBottom');
 updateBar.style.visibility = 'hidden';

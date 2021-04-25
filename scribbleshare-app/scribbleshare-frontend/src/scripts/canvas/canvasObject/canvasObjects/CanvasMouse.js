@@ -3,10 +3,9 @@ import CanvasObject from "../CanvasObject.js";
 const pointerImage = document.createElement('img');
 pointerImage.src = '/assets/pointer.png';
 
-export default class Mouse extends CanvasObject {
+export default class CanvasMouse extends CanvasObject {
     constructor(reader) {
         super(reader);
-        this.client = reader.readInt16();
     }
 
     draw() {
@@ -16,14 +15,12 @@ export default class Mouse extends CanvasObject {
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeInt16(this.client);
     }
 
-    static create(client) {
+    static create() {
         let object = Object.create(this.prototype);
         object.x = 0;
         object.y = 0;
-        object.client = client;
         return object;
     }
 }

@@ -1,6 +1,6 @@
 import Shape, {ShapeType} from "./canvasObject/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
-import {activeDocument, localClient} from "../Document.js";
+import {activeDocument, localClient, localClientId} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
@@ -10,6 +10,7 @@ import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import Mouse from "../Mouse.js";
 import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
+import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -20,6 +21,7 @@ const mouse = new Mouse(canvas);
 
 let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
+let mouseUpdateMove = null;
 
 export class Canvas {
     constructor(reader) {
@@ -32,6 +34,7 @@ export class Canvas {
             canvasObjectWrapper:null,
             dirty:false,
         };
+        this.localMouse = null;
         if (reader != null) {
             let length = reader.readUint8();
             for (let i = 0; i < length; i++) {
@@ -46,6 +49,12 @@ export class Canvas {
 
     open() {
         this.isOpen = true;
+        if (this.localMouse === null) {
+            this.localMouse = CanvasMouse.create();
+        }
+        let canvasObjectWrapper = new CanvasObjectWrapper(CanvasObjectType.MOUSE, this.localMouse);
+        activeDocument.canvas.canvasObjectWrappers.set(localClientId, canvasObjectWrapper);
+        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), localClientId, canvasObjectWrapper));
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
@@ -105,8 +114,9 @@ export class Canvas {
 
     insert(canvasObjectType, canvasObject) {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
-        activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
-        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, new CanvasObjectWrapper(canvasObjectType, canvasObject)));
+        let canvasObjectWrapper = new CanvasObjectWrapper(canvasObjectType, canvasObject);
+        activeDocument.canvas.canvasObjectWrappers.set(id, canvasObjectWrapper);
+        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
     }
 
     delete(id) {
@@ -134,13 +144,15 @@ export class Canvas {
     onEvent(event) {
         switch (event.type) {
             case 'mousemove': {
+                this.localMouse.x = mouse.x;
+                this.localMouse.y = mouse.y;
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     this.flushActive();
                     if (mouse.dx > 0 || mouse.dy > 0) {
-/*                        let mouseMove = MouseMove.create(getNow() - localClient.time, mouse.x, mouse.y);
-                        localClient.time = getNow();
-//todo
-                        localClient.mouseMoves.push(mouseMove);*/
+                        if (mouseUpdateMove === null) {
+                            mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
+                        }
+                        mouseUpdateMove.move(getNow(), this.localMouse);
                     }
                     mouse.reset();
                 }
@@ -245,6 +257,10 @@ function update() {
         if (canvasUpdateMove !== null) {
             canvasUpdates.push(canvasUpdateMove);
             canvasUpdateMove = null;
+        }
+        if (mouseUpdateMove !== null) {
+            canvasUpdates.push(mouseUpdateMove);
+            mouseUpdateMove = null;
         }
 
         //send local updates
