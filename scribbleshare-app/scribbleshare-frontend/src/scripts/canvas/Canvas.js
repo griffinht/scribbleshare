@@ -128,7 +128,10 @@ export class Canvas {
         if (this.selected.canvasObjectWrapper !== null) {
             if (this.selected.dirty) {
                 this.selected.dirty = false;
-                canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
+                if (canvasUpdateMove !== null) {
+
+                    canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
+                }
             }
         }
     }
@@ -157,6 +160,9 @@ export class Canvas {
                     } else {
                         ondrag(event);
                     }
+                } else if (canvasUpdateMove !== null) {
+                    canvasUpdates.push(canvasUpdateMove);
+                    canvasUpdateMove = null;
                 }
                 break;
             }
@@ -253,6 +259,10 @@ function update() {
         }
         if (canvasUpdateDelete.isDirty()) {
             canvasUpdates.push(canvasUpdateDelete);
+        }
+        if (canvasUpdateMove !== null) {
+            canvasUpdates.push(canvasUpdateMove);
+            canvasUpdateMove = null;
         }
 
         //send local updates

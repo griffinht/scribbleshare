@@ -54,7 +54,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeInt16(id);
+        writer.writeInt16(this.id);
         writer.writeUint8(this.first);
         writer.writeUint8(this.canvasMoves.length);
         this.canvasMoves.forEach((canvasMove) => {
@@ -66,6 +66,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.MOVE;
         object.time = 0;
+        object.canvasMoves = [];
         object.first = time;
         object.id = id;
         return object;

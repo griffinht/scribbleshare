@@ -39,8 +39,8 @@ public class CanvasUpdateMove extends CanvasUpdate {
         id = byteBuf.readShort();
         first = byteBuf.readByte();
         canvasMoves = new CanvasMove[byteBuf.readUnsignedByte()];
-        for (int j = 0; j < canvasMoves.length; j++) {
-            canvasMoves[j] = new CanvasMove(byteBuf);
+        for (int i = 0; i < canvasMoves.length; i++) {
+            canvasMoves[i] = new CanvasMove(byteBuf);
         }
     }
 
