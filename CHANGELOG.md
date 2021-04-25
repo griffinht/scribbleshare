@@ -142,3 +142,5 @@ CanvasImage upload, add api
 ### v0.5.1
 Canvas manipulation
 - Objects can be dragged/resized
+
+asdf
