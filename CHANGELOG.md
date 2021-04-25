@@ -113,12 +113,12 @@ Invite codes, better state management
 Docker deployment improvements
 - Fix credential typo
 - Minify javascript
-- Add retry logic to board-room
+- Add retry logic to scribbleshare-room
 
 ### v0.4.2
-Swap Maven for Gradle, add board-http, Database rework
+Swap Maven for Gradle, add scribbleshare-http, Database rework
 - Add Redis
-- Add board-backend and refactor common Java code into Maven module
+- Add scribbleshare-backend and refactor common Java code into Maven module
 
 ### v0.4.3
 Proper cookie authentication
@@ -136,5 +136,11 @@ Canvas features, add api for server resources like documents
 
 ### v0.5.0
 CanvasImage upload, add api
-- Ability to upload images on to the board
-- API: http://localhost/api/document/id
+- Ability to upload images on to the scribbleshare
+- API: http://localhost/api/document/id 
+
+### v0.5.1
+Canvas manipulation
+- Objects can be dragged/resized
+
+asdf

@@ -1,2 +1,3 @@
-rootProject.name = 'Board'
-include('board-room', 'board-backend', ':board-commons')
+rootProject.name = 'scribbleshare'
+include('scribbleshare-room', 'scribbleshare-backend', ':scribbleshare-commons')
+project(':scribbleshare-backend').projectDir = new File('scribbleshare-app/scribbleshare-backend')

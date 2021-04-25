@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>scribbleshare</title>
+        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="index.css">
+        <script type="module" src="scripts/main.js"></script>
+    </head>
+    <body>
+        <aside>
+            <header>
+                <img src="assets/scribbleshare.png" alt="scribbleshare">
+            </header>
+            <div id="side">
+                <button id="add">+</button>
+            </div>
+            <div id="sideBottom">
+                <input type="text" id="renameInput">
+                <button id="deleteButton"><img src="assets/trash.png"></button>
+            </div>
+        </aside>
+        <div id="canvasWrapper">
+            <canvas id="canvas"></canvas>
+            <div id="clientsToolbar">
+                <button id="inviteButton">+</button>
+            </div>
+        </div>
+        <div id="fileUploadModal" class="modal">
+            <p>Upload file</p>
+        </div>
+        <div id="inviteModal" class="modal">
+            <p>Invite</p>
+            <button type="button" id="inviteModalClose">Close</button>
+        </div>
+    </body>
+</html>
