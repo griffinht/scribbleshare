@@ -3,14 +3,6 @@ export default class CanvasUpdate {
         this.canvasUpdateType = canvasUpdateType;
     }
 
-    isDirty() {//todo abstract es6 method?
-        return false;
-    }
-
-    clear() {
-
-    }
-
     draw(canvas, dt) {
 
     }

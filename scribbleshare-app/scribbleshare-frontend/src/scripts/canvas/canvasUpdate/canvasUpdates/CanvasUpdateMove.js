@@ -15,10 +15,6 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         }
     }
 
-    isDirty() {
-        return this.canvasMoves.length > 0;
-    }
-
     move(time, canvasObject) {
         this.canvasMoves.push(CanvasMove.create(time - this.time, canvasObject));
         this.time = time;
@@ -27,9 +23,6 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     draw(canvas, time) {
         this.time += time;
         let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
-        if (canvasObjectWrapper === undefined) {
-            this.clear();
-        }
 
         if (this.first !== 0 && this.first <= this.time) {
             this.time -= this.first;
@@ -49,7 +42,9 @@ export default class CanvasUpdateMove extends CanvasUpdate {
                     break;
                 }
             }
+
         }
+        return this.canvasMoves.length === 0;
     }
 
     serialize(writer) {

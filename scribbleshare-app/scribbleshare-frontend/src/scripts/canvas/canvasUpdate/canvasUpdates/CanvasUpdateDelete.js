@@ -9,18 +9,11 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         this.time = 0;
     }
 
-    isDirty() {
-        return this.id !== null;
-    }
-
     draw(canvas, dt) {
-        if (this.dt === null) {
-            return;
-        }
         this.time += dt;
         if (this.dt <= this.time) {
             canvas.canvasObjectWrappers.delete(this.id);
-            this.id = null;
+            return true;
         }
     }
 

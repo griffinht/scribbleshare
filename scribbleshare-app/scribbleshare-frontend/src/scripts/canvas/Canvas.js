@@ -7,9 +7,9 @@ import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
-import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import Mouse from "../Mouse.js";
 import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
+import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -18,7 +18,6 @@ const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
-let canvasUpdateInsert = CanvasUpdateInsert.create();
 let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
 
@@ -72,8 +71,7 @@ export class Canvas {
         //console.log('draw1', this.canvasObjects);
         dt = convertTime(dt);
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            this.canvasUpdates[i].draw(this, dt)
-            if (!this.canvasUpdates[i].isDirty()) {
+            if (this.canvasUpdates[i].draw(this, dt)) {
                 this.canvasUpdates.splice(i--, 1);
             }
         }
@@ -108,7 +106,7 @@ export class Canvas {
     insert(canvasObjectType, canvasObject) {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
         activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
-        canvasUpdateInsert.insert(canvasObjectType, getNow(), id, canvasObject);
+        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, new CanvasObjectWrapper(canvasObjectType, canvasObject)));
     }
 
     delete(id) {
@@ -127,7 +125,6 @@ export class Canvas {
             if (this.selected.dirty) {
                 this.selected.dirty = false;
                 if (canvasUpdateMove !== null) {
-
                     canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
                 }
             }
@@ -205,13 +202,6 @@ resizeCanvas();
 
 
 
-
-
-
-
-
-
-
 function onEvent(event) {
     if (activeDocument !== null) {
         activeDocument.canvas.onEvent(event);
@@ -252,9 +242,6 @@ function update() {
         activeDocument.canvas.flushActive();
 
         //assemble local updates
-        if (canvasUpdateInsert.isDirty()) {
-            canvasUpdates.push(canvasUpdateInsert);
-        }
         if (canvasUpdateMove !== null) {
             canvasUpdates.push(canvasUpdateMove);
             canvasUpdateMove = null;
@@ -268,9 +255,6 @@ function update() {
         lastUpdate = window.performance.now();
 
         //clean up
-        canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.clear();
-        })
         canvasUpdates.length = 0;
     } else {
         //happens if there is no document open
