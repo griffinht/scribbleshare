@@ -1,7 +1,7 @@
-import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
+import EntityCanvasObject from "../EntityCanvasObject.js";
 
-export default class Shape extends CanvasObject {
+export default class Shape extends EntityCanvasObject {
     constructor(reader) {
         super(reader);
         this.type = reader.readUint8();

@@ -2,12 +2,12 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 
 import java.util.EnumSet;
 import java.util.Map;
 
-public class Shape extends CanvasObject {
+public class Shape extends EntityCanvasObject {
     private enum Type {
         RECTANGLE(0),
         ELLIPSE(1),

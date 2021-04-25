@@ -1,9 +1,9 @@
-import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
 import {activeDocument} from "../../../Document.js";
 import {apiUrl} from "../../../main.js";
+import EntityCanvasObject from "../EntityCanvasObject.js";
 
-export default class CanvasImage extends CanvasObject {
+export default class CanvasImage extends EntityCanvasObject {
     constructor(reader) {
         super(reader);
         this.id = reader.readBigInt64();
