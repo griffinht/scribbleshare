@@ -61,7 +61,6 @@ public class CanvasUpdateMove extends CanvasUpdate {
         byteBuf.writeShort(id);
         byteBuf.writeByte(first);
         byteBuf.writeByte((byte) canvasMoves.length);
-        byteBuf.writeByte((byte) canvasMoves.length);
         for (CanvasMove canvasMove : canvasMoves) {
             canvasMove.serialize(byteBuf);
         }
