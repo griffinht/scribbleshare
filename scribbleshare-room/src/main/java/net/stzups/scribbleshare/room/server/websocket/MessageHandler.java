@@ -76,7 +76,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             if (document != null) {
                                 //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
                                 if (document.getOwner() != client.getUser().getId()) {
-                                    if (!client.getUser().getSharedDocuments().add(document.getId())) {
+                                    if (client.getUser().getSharedDocuments().add(document.getId())) {
                                         ScribbleshareRoom.getDatabase().updateUser(client.getUser());
                                     }
                                 }
