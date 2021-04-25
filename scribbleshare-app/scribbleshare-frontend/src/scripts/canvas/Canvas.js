@@ -96,7 +96,6 @@ export class Canvas {
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
             if (id !== localClientId) {
                 if (canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
-
                     ctx.save();
                     ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
                     //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
