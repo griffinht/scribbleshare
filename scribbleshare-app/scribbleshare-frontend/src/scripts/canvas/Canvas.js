@@ -5,12 +5,11 @@ import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
-import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import Mouse from "../Mouse.js";
-import ClientMessageMouseMove from "../protocol/client/messages/ClientMessageMouseMove.js";
+import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -19,9 +18,8 @@ const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
-let canvasUpdateInsert = CanvasUpdateInsert.create();//todo these could be instance variables but idk
-let canvasUpdateDelete = CanvasUpdateDelete.create();
-let canvasUpdates = [];
+let canvasUpdateInsert = CanvasUpdateInsert.create();
+let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
 
 export class Canvas {
@@ -115,7 +113,7 @@ export class Canvas {
 
     delete(id) {
         this.canvasObjectWrappers.delete(id);
-        canvasUpdateDelete.delete(getNow(), id);
+        canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
 
     update(canvasUpdates) {
@@ -256,9 +254,6 @@ function update() {
         //assemble local updates
         if (canvasUpdateInsert.isDirty()) {
             canvasUpdates.push(canvasUpdateInsert);
-        }
-        if (canvasUpdateDelete.isDirty()) {
-            canvasUpdates.push(canvasUpdateDelete);
         }
         if (canvasUpdateMove !== null) {
             canvasUpdates.push(canvasUpdateMove);
