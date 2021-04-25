@@ -52,7 +52,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             while (canvasMoves.length > 0) {
                 //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
                 if (this.first) {
-                    canvasObjectWrapper.canvasObject.original = canvasObjectWrapper.canvasObject.create(Object.create(Object.getPrototypeOf(canvasObjectWrapper.canvasObject)));
+                    canvasObjectWrapper.canvasObject.original = CanvasObject.clone(canvasObjectWrapper.canvasObject);
                 } else {
                     canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
                 }
