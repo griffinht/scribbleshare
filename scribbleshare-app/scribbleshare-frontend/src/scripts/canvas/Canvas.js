@@ -141,6 +141,12 @@ export class Canvas {
                 }
             }
         }
+        if (Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) {
+            if (mouseUpdateMove === null) {
+                mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
+            }
+            mouseUpdateMove.move(getNow(), this.localMouse);
+        }
     }
 
     onEvent(event) {
@@ -150,12 +156,6 @@ export class Canvas {
                 this.localMouse.y = mouse.y;
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     this.flushActive();
-                    if (mouse.dx > 0 || mouse.dy > 0) {
-                        if (mouseUpdateMove === null) {
-                            mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
-                        }
-                        mouseUpdateMove.move(getNow(), this.localMouse);
-                    }
                     mouse.reset();
                 }
                 if (mouse.drag) {
