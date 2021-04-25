@@ -10,10 +10,10 @@ export default class Shape extends EntityCanvasObject {
     draw() {
         switch (this.type) {
             case ShapeType.RECTANGLE:
-                ctx.fillRect(0, 0, this.width, this.height);
+                ctx.fillRect(this.x, this.y, this.width, this.height);
                 break;
             case ShapeType.ELLIPSE:
-                ctx.ellipse(0, 0, this.width, this.height, 0, 0, Math.PI * 2);
+                ctx.ellipse(this.x, this.y, this.width, this.height, 0, 0, Math.PI * 2);
                 break;
         }
 

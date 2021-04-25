@@ -11,6 +11,7 @@ import Mouse from "../Mouse.js";
 import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
+import Line from "./canvasObject/canvasObjects/Line.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -22,6 +23,7 @@ const mouse = new Mouse(canvas);
 let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
 let mouseUpdateMove = null;
+let line = null;
 
 export class Canvas {
     constructor(reader) {
@@ -93,8 +95,8 @@ export class Canvas {
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
             if (id !== localClientId) {
                 ctx.save();
-                ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
-                ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
+                //ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
+                //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
                 canvasObjectWrapper.canvasObject.draw();
                 if (this.selected.canvasObjectWrapper === null) {
                     if (!mouse.drag) {
@@ -188,7 +190,13 @@ export class Canvas {
                         this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
                         this.selected.dirty = true;
                     } else {
-                        ondrag(event);
+                        if (line === null) {
+                            line = Line.create(event.offsetX, event.offsetY);
+                            this.insert(CanvasObjectType.LINE, line);
+                        } else {
+                            line.pushPoint(event.offsetX, event.offsetY);
+                            this.flushLine();
+                        }
                     }
                 } else if (canvasUpdateMove !== null) {
                     canvasUpdates.push(canvasUpdateMove);
@@ -196,11 +204,15 @@ export class Canvas {
                 }
                 break;
             }
-            case 'click': {
-                if (this.selected.canvasObjectWrapper === null) {
-                    if ((event.buttons & 1) === 0) {
-                        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
-                        this.insert(CanvasObjectType.SHAPE, shape);
+            case 'mouseup': {
+                if (line !== null) {
+                    line = null;
+                } else {
+                    if (this.selected.canvasObjectWrapper === null) {
+                        if ((event.buttons & 1) === 0) {
+                            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
+                            this.insert(CanvasObjectType.SHAPE, shape);
+                        }
                     }
                 }
                 break;
@@ -244,6 +256,7 @@ function onEvent(event) {
 }
 
 canvas.addEventListener('mousemove', onEvent);
+canvas.addEventListener('mouseup', onEvent);
 canvas.addEventListener('click', onEvent);
 canvas.addEventListener('contextmenu', onEvent);
 

@@ -9,7 +9,7 @@ export default class CanvasMouse extends CanvasObject {
     }
 
     draw() {
-        ctx.drawImage(pointerImage, 0, 0);
+        ctx.drawImage(pointerImage, this.x, this.y);
 
     }
 

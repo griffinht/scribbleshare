@@ -32,7 +32,6 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         object.canvasUpdateType = CanvasUpdateType.INSERT;
         object.dt = dt;
         object.id = id;
-        console.log(id);
         object.canvasObjectWrapper = canvasObjectWrapper;
         object.time = 0;
         return object;
