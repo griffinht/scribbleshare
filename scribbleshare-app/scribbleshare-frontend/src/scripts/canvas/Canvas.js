@@ -86,23 +86,25 @@ export class Canvas {
         }
 
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
-            ctx.save();
-            ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
-            ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
-            canvasObjectWrapper.canvasObject.draw();
-            if (this.selected.canvasObjectWrapper === null) {
-                if (!mouse.drag) {
-                    if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-                        this.selected.id = id;
-                        this.selected.canvasObjectWrapper = canvasObjectWrapper;
+            if (id !== localClientId) {
+                ctx.save();
+                ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
+                ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
+                canvasObjectWrapper.canvasObject.draw();
+                if (this.selected.canvasObjectWrapper === null) {
+                    if (!mouse.drag) {
+                        if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+                            this.selected.id = id;
+                            this.selected.canvasObjectWrapper = canvasObjectWrapper;
+                        }
+                    }
+                } else {
+                    if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
+                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
                     }
                 }
-            } else {
-                if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
-                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
-                }
+                ctx.restore();
             }
-            ctx.restore();
         });
         if (this.selected.canvasObjectWrapper !== null && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             this.selected.canvasObjectWrapper = null;
