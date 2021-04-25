@@ -58,9 +58,9 @@ export class Canvas {
 /*        if (this.localMouse === null) {
             this.localMouse = CanvasMouse.create();
         }*/
-        let canvasObjectWrapper = new CanvasObjectWrapper(CanvasObjectType.MOUSE, this.localMouse);
-        activeDocument.canvas.canvasObjectWrappers.set(localClientId, canvasObjectWrapper);
-        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), localClientId, canvasObjectWrapper));
+/*        let canvasObjectWrapper = new CanvasObjectWrapper(CanvasObjectType.MOUSE, this.localMouse);
+        activeDocument.canvas.canvasObjectWrappers.set(localClientId, canvasObjectWrapper);*/
+/*        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), localClientId, canvasObjectWrapper));*/
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
@@ -299,10 +299,10 @@ function update() {
             canvasUpdates.push(canvasUpdateMove);
             canvasUpdateMove = null;
         }
-        if (mouseUpdateMove !== null) {
+/*        if (mouseUpdateMove !== null) {
             canvasUpdates.push(mouseUpdateMove);
             mouseUpdateMove = null;
-        }
+        }*/
 
         //send local updates
         if (canvasUpdates.length > 0) {
