@@ -45,7 +45,7 @@ class Document {
 
     rename(name) {
         this.name = name;
-        this.sidebarItem.button.
+        this.sidebarItem.button.innerText = name;
         socket.send(new ClientMessageUpdateDocument(this));
     }
 
