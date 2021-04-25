@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.objects.canvas;
 
+import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 
@@ -10,6 +11,16 @@ public class CanvasObjectWrapper {
     public CanvasObjectWrapper(CanvasObjectType type, CanvasObject canvasObject) {
         this.type = type;
         this.canvasObject = canvasObject;
+    }
+
+    public CanvasObjectWrapper(ByteBuf byteBuf) {
+        this.type = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
+        this.canvasObject = CanvasObject.getCanvasObject(type, byteBuf);
+    }
+
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeByte((byte) type.getId());
+        canvasObject.serialize(byteBuf);
     }
 
     CanvasObjectType getType() {

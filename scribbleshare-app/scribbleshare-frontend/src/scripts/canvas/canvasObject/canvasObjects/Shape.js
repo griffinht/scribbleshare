@@ -1,7 +1,7 @@
-import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
+import EntityCanvasObject from "../EntityCanvasObject.js";
 
-export default class Shape extends CanvasObject {
+export default class Shape extends EntityCanvasObject {
     constructor(reader) {
         super(reader);
         this.type = reader.readUint8();
@@ -9,10 +9,10 @@ export default class Shape extends CanvasObject {
 
     draw() {
         switch (this.type) {
-            case Type.RECTANGLE:
+            case ShapeType.RECTANGLE:
                 ctx.fillRect(0, 0, this.width, this.height);
                 break;
-            case Type.ELLIPSE:
+            case ShapeType.ELLIPSE:
                 ctx.ellipse(0, 0, this.width, this.height, 0, 0, Math.PI * 2);
                 break;
         }
@@ -24,21 +24,19 @@ export default class Shape extends CanvasObject {
         writer.writeUint8(this.type);
     }
 
-    static create(x, y, width, height) {
-        let shape = Object.create(this.prototype);
-        shape.dirty = true;
-        shape.x = x;
-        shape.y = y;
-        shape.width = width;
-        shape.height = height;
-        shape.rotation = 0;
-
-        shape.type = Type.RECTANGLE;
-        return shape;
+    static create(x, y, width, height, type) {
+        let object = Object.create(this.prototype);
+        object.x = x;
+        object.y = y;
+        object.width = width;
+        object.height = height;
+        object.rotation = 0;
+        object.type = type;
+        return object;
     }
 }
 
-const Type = {
+export const ShapeType = {
     RECTANGLE:0,
     ELLIPSE:1,
 }

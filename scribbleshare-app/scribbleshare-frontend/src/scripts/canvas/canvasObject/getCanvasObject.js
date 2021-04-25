@@ -1,6 +1,7 @@
 import {CanvasObjectType} from "./CanvasObjectType.js";
 import Shape from "./canvasObjects/Shape.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
+import CanvasMouse from "./canvasObjects/CanvasMouse.js";
 
 export function getCanvasObject(canvasObjectType, reader) {
     let object;
@@ -10,6 +11,9 @@ export function getCanvasObject(canvasObjectType, reader) {
             break;
         case CanvasObjectType.IMAGE:
             object = new CanvasImage(reader);
+            break;
+        case CanvasObjectType.MOUSE:
+            object = new CanvasMouse(reader);
             break;
         default:
             console.error('unknown canvasObjectType ' + canvasObjectType);

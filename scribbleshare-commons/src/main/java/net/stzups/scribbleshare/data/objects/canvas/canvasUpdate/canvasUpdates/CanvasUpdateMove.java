@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.CanvasObjectWrapper;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Line;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
 
@@ -30,44 +31,44 @@ public class CanvasUpdateMove extends CanvasUpdate {
         }
     }
 
-    private final Map<Short, CanvasMove[]> canvasMovesMap = new HashMap<>();
+    private final short id;
+    private final byte first;
+    private final CanvasMove[] canvasMoves;
 
     public CanvasUpdateMove(ByteBuf byteBuf) {
         super(CanvasUpdateType.MOVE);
-        int length = byteBuf.readUnsignedByte();
-        for (int i = 0; i < length; i++) {
-            short id = byteBuf.readShort();
-            CanvasMove[] canvasMoves = new CanvasMove[byteBuf.readUnsignedByte()];
-            for (int j = 0; j < canvasMoves.length; j++) {
-                canvasMoves[j] = new CanvasMove(byteBuf);
-            }
-            canvasMovesMap.put(id, canvasMoves);
+        id = byteBuf.readShort();
+        first = byteBuf.readByte();
+        canvasMoves = new CanvasMove[byteBuf.readUnsignedByte()];
+        for (int i = 0; i < canvasMoves.length; i++) {
+            canvasMoves[i] = new CanvasMove(byteBuf);
         }
     }
 
     @Override
     public void update(Canvas canvas) {
-        for (Map.Entry<Short, CanvasMove[]> entry : canvasMovesMap.entrySet()) {
-            CanvasObjectWrapper canvasObjectWrapper = canvas.getCanvasObjects().get(entry.getKey());
-            if (canvasObjectWrapper == null || entry.getValue().length == 0) {
-                System.out.println("oopsie " + canvasObjectWrapper);
-                continue;
-            }
+        CanvasObjectWrapper canvasObjectWrapper = canvas.getCanvasObjects().get(id);
+        if (canvasObjectWrapper == null || canvasMoves.length == 0) {
+            new RuntimeException("oopsie " + canvasObjectWrapper + ", "  + canvasMoves.length).printStackTrace();
+            return;
+        }
 
-            canvasObjectWrapper.getCanvasObject().update(entry.getValue()[entry.getValue().length - 1].getCanvasObject());
+        if (canvasObjectWrapper.getCanvasObject() instanceof Line) {
+            Line line = (Line) canvasObjectWrapper.getCanvasObject();
+            line.getPoints()
+        } else {
+            canvasObjectWrapper.getCanvasObject().update(canvasMoves[canvasMoves.length - 1].canvasObject);
         }
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeByte((byte) canvasMovesMap.size());
-        for (Map.Entry<Short, CanvasMove[]> entry : canvasMovesMap.entrySet()) {
-            byteBuf.writeShort(entry.getKey());
-            byteBuf.writeByte((byte) entry.getValue().length);
-            for (CanvasMove canvasMove : entry.getValue()) {
-                canvasMove.serialize(byteBuf);
-            }
+        byteBuf.writeShort(id);
+        byteBuf.writeByte(first);
+        byteBuf.writeByte((byte) canvasMoves.length);
+        for (CanvasMove canvasMove : canvasMoves) {
+            canvasMove.serialize(byteBuf);
         }
     }
 }

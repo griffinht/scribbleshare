@@ -1,17 +1,17 @@
-import Shape from "./canvasObject/canvasObjects/Shape.js";
+import Shape, {ShapeType} from "./canvasObject/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
-import {activeDocument, localClient} from "../Document.js";
+import {activeDocument, localClient, localClientId} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
-import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
-import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import Mouse from "../Mouse.js";
-import MouseMove from "../MouseMove.js";
-import ClientMessageMouseMove from "../protocol/client/messages/ClientMessageMouseMove.js";
+import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
+import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
+import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
+import Line from "./canvasObject/canvasObjects/Line.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -20,17 +20,18 @@ const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
-const pointerImage = document.createElement('img');
-pointerImage.src = '/assets/pointer.png';
-
-let canvasUpdateInsert = CanvasUpdateInsert.create();//todo these could be instance variables but idk
-let canvasUpdateMove = CanvasUpdateMove.create();
-let canvasUpdateDelete = CanvasUpdateDelete.create();
+let canvasUpdates = [];//todo these could be instance variables but idk
+let canvasUpdateMove = null;
+let mouseUpdateMove = null;
+let line = null;
 
 export class Canvas {
     constructor(reader) {
         this.isOpen = false;
         this.last = 0;
+        this.lastFlushSelected = 0;
+        this.lastFlushMouse = 0;
+        this.lastFlushLine = 0;
         this.canvasObjectWrappers = new Map();
         this.canvasUpdates = [];
         this.selected = {
@@ -38,6 +39,7 @@ export class Canvas {
             canvasObjectWrapper:null,
             dirty:false,
         };
+        this.localMouse = null;
         if (reader != null) {
             let length = reader.readUint8();
             for (let i = 0; i < length; i++) {
@@ -52,6 +54,12 @@ export class Canvas {
 
     open() {
         this.isOpen = true;
+        if (this.localMouse === null) {
+            this.localMouse = CanvasMouse.create();
+        }
+        let canvasObjectWrapper = new CanvasObjectWrapper(CanvasObjectType.MOUSE, this.localMouse);
+        activeDocument.canvas.canvasObjectWrappers.set(localClientId, canvasObjectWrapper);
+        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), localClientId, canvasObjectWrapper));
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
@@ -66,6 +74,8 @@ export class Canvas {
             return;
         }
 
+        this.flush();
+
         let dt = (now - this.last);
         let remoteTime = convertTime(now - lastRemoteUpdate);
 
@@ -77,52 +87,35 @@ export class Canvas {
         //console.log('draw1', this.canvasObjects);
         dt = convertTime(dt);
         for (let i = 0; i < this.canvasUpdates.length; i++) {
-            this.canvasUpdates[i].draw(this, dt)
-            if (!this.canvasUpdates[i].isDirty()) {
+            if (this.canvasUpdates[i].draw(this, dt)) {
                 this.canvasUpdates.splice(i--, 1);
             }
         }
 
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
-            ctx.save();
-            ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
-            ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
-            canvasObjectWrapper.canvasObject.draw();
-            if (this.selected.canvasObjectWrapper === null) {
-                if (!mouse.drag) {
-                    if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-                        this.selected.id = id;
-                        this.selected.canvasObjectWrapper = canvasObjectWrapper;
+            if (id !== localClientId) {
+                ctx.save();
+                //ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
+                //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
+                canvasObjectWrapper.canvasObject.draw();
+                if (this.selected.canvasObjectWrapper === null) {
+                    if (!mouse.drag) {
+                        if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+                            this.selected.id = id;
+                            this.selected.canvasObjectWrapper = canvasObjectWrapper;
+                        }
+                    }
+                } else {
+                    if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
+                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
                     }
                 }
-            } else {
-                if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
-                    ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
-                }
+                ctx.restore();
             }
-            ctx.restore();
         });
         if (this.selected.canvasObjectWrapper !== null && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             this.selected.canvasObjectWrapper = null;
         }
-        activeDocument.clients.forEach((client) => {
-            if (client !== localClient) {
-                ctx.drawImage(pointerImage, client.mouseX, client.mouseY, );
-                while (client.mouseMoves.length > 0) {
-                    //todo lerp
-                    client.time += dt;
-                    if (client.mouseMoves[0].dt <= client.time) {
-                        client.time -= client.mouseMoves[0].dt;
-                        client.mouseX = client.mouseMoves[0].x;
-                        client.mouseY = client.mouseMoves[0].y;
-                        console.log(client.time, getNow(), dt, client.mouseMoves[0]);
-                        client.mouseMoves.shift();
-                    } else {
-                        break;
-                    }
-                }
-            }
-        })
 
         this.last = now;
         window.requestAnimationFrame((now) => this.draw(now));
@@ -130,17 +123,14 @@ export class Canvas {
 
     insert(canvasObjectType, canvasObject) {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
-        activeDocument.canvas.canvasObjectWrappers.set(id, new CanvasObjectWrapper(canvasObjectType, canvasObject));
-        canvasUpdateInsert.insert(canvasObjectType, getNow(), id, canvasObject);
-    }
-
-    move(id, canvasObject) {
-        canvasUpdateMove.move(id, getNow(), canvasObject);
+        let canvasObjectWrapper = new CanvasObjectWrapper(canvasObjectType, canvasObject);
+        activeDocument.canvas.canvasObjectWrappers.set(id, canvasObjectWrapper);
+        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
     }
 
     delete(id) {
         this.canvasObjectWrappers.delete(id);
-        canvasUpdateDelete.delete(getNow(), id);
+        canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
 
     update(canvasUpdates) {
@@ -149,44 +139,80 @@ export class Canvas {
         })
     }
 
-    flushActive() {
+    flush() {
+        this.flushSelected();
+        this.flushMouse();
+        this.flushLine();
+    }
+
+    flushSelected() {
         if (this.selected.canvasObjectWrapper !== null) {
             if (this.selected.dirty) {
-                this.selected.dirty = false;
-                this.move(this.selected.id, this.selected.canvasObjectWrapper.canvasObject);
+                if (canvasUpdateMove !== null) {
+                    this.selected.dirty = false;
+                    canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
+                    this.lastFlushSelected = window.performance.now();
+                }
             }
         }
+
+    }
+
+    flushMouse() {
+        if (false && mouseUpdateMove !== null) {
+            if (((Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) && this.last - this.lastFlushMouse > 100)
+                || (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30)) {
+                mouseUpdateMove.move(getNow(), this.localMouse);
+                //console.log(this.last - this.lastFlushMouse)
+                this.lastFlushMouse = window.performance.now();
+                mouse.reset();
+            }
+        }
+    }
+
+    flushLine() {
+
+        this.lastFlushLine = window.performance.now();
     }
 
     onEvent(event) {
         switch (event.type) {
             case 'mousemove': {
-                if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
-                    this.flushActive();
-                    if (mouse.dx > 0 || mouse.dy > 0) {
-                        let mouseMove = MouseMove.create(getNow() - localClient.time, mouse.x, mouse.y);
-                        localClient.time = getNow();
-
-                        localClient.mouseMoves.push(mouseMove);
-                    }
-                    mouse.reset();
-                }
+                this.localMouse.x = mouse.x;
+                this.localMouse.y = mouse.y;
+                //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
+                        if (canvasUpdateMove === null) {
+                            canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
+                        }
                         this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
                         this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
                         this.selected.dirty = true;
                     } else {
-                        ondrag(event);
+                        if (line === null) {
+                            line = Line.create(event.offsetX, event.offsetY);
+                            this.insert(CanvasObjectType.LINE, line);
+                        } else {
+                            line.pushPoint(event.offsetX, event.offsetY);
+                            this.flushLine();
+                        }
                     }
+                } else if (canvasUpdateMove !== null) {
+                    canvasUpdates.push(canvasUpdateMove);
+                    canvasUpdateMove = null;
                 }
                 break;
             }
-            case 'click': {
-                if (this.selected.canvasObjectWrapper === null) {
-                    if ((event.buttons & 1) === 0) {
-                        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
-                        this.insert(CanvasObjectType.SHAPE, shape);
+            case 'mouseup': {
+                if (line !== null) {
+                    line = null;
+                } else {
+                    if (this.selected.canvasObjectWrapper === null) {
+                        if ((event.buttons & 1) === 0) {
+                            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
+                            this.insert(CanvasObjectType.SHAPE, shape);
+                        }
                     }
                 }
                 break;
@@ -223,13 +249,6 @@ resizeCanvas();
 
 
 
-
-
-
-
-
-
-
 function onEvent(event) {
     if (activeDocument !== null) {
         activeDocument.canvas.onEvent(event);
@@ -237,6 +256,7 @@ function onEvent(event) {
 }
 
 canvas.addEventListener('mousemove', onEvent);
+canvas.addEventListener('mouseup', onEvent);
 canvas.addEventListener('click', onEvent);
 canvas.addEventListener('contextmenu', onEvent);
 
@@ -261,25 +281,22 @@ socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasU
     lastRemoteUpdate = window.performance.now();
     activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
 });
+socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (a) => {
+    lastRemoteUpdate = window.performance.now();
+})
 
 function update() {
     if (activeDocument !== null) {
-        activeDocument.canvas.flushActive();
+        activeDocument.canvas.flush();
 
         //assemble local updates
-        let canvasUpdates = [];
-        if (canvasUpdateInsert.isDirty()) {
-            canvasUpdates.push(canvasUpdateInsert);
-        }
-        if (canvasUpdateMove.isDirty()) {
+        if (canvasUpdateMove !== null) {
             canvasUpdates.push(canvasUpdateMove);
+            canvasUpdateMove = null;
         }
-        if (canvasUpdateDelete.isDirty()) {
-            canvasUpdates.push(canvasUpdateDelete);
-        }
-
-        if (localClient.mouseMoves.length > 0 && activeDocument.clients.size > 1) {
-            socket.send(new ClientMessageMouseMove(localClient.mouseMoves));
+        if (mouseUpdateMove !== null) {
+            canvasUpdates.push(mouseUpdateMove);
+            mouseUpdateMove = null;
         }
 
         //send local updates
@@ -290,11 +307,6 @@ function update() {
         lastUpdate = window.performance.now();
 
         //clean up
-        localClient.mouseMoves.length = 0;
-        localClient.time = 0;
-        canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.clear();
-        })
         canvasUpdates.length = 0;
     } else {
         //happens if there is no document open
@@ -303,7 +315,7 @@ function update() {
 setInterval(update, UPDATE_INTERVAL);
 
 
-function ondrag(event) {
-    //todo draw line
-}
 
+export function lerp(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t;
+}

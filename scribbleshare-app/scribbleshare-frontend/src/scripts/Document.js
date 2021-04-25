@@ -15,7 +15,7 @@ import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessag
 const documents = new Map();
 export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
-let localClientId = 0;
+export let localClientId = 0;
 export let localClient = null;
 const updateBar = document.getElementById('sideBottom');
 updateBar.style.visibility = 'hidden';
@@ -142,6 +142,7 @@ socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveC
 });
 socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument) => {
     let document = documents.get(serverMessageOpenDocument.id);
+    document.canvas.close();
     document.canvas = serverMessageOpenDocument.canvas;
     document.open();
 })
@@ -157,7 +158,10 @@ socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake) 
     localClientId = serverMessageHandshake.client;
 })
 socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove) => {
-    activeDocument.clients.get(serverMessageMouseMove.client).mouseMoves = serverMessageMouseMove.mouseMoves;
+    let client = activeDocument.clients.get(serverMessageMouseMove.client);
+    client.mouseMoves = serverMessageMouseMove.mouseMoves;
+    client.time = 0;
+    client.first = true;
 })
 socket.addEventListener(SocketEventType.OPEN, () => {
     socket.send(new ClientMessageHandshake(invite.getInvite()));
