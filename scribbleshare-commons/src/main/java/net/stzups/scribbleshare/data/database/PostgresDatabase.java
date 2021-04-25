@@ -150,8 +150,9 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public void deleteDocument(Document document) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM documents WHERE id=?; DELETE FROM canvases WHERE document=?; DELETE FROM invite_codes WHERE document=?")) {
+    public void deleteDocument(Document document) {//todo
+        documents.remove(document.getId());
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM documents WHERE id=?; DELETE FROM resources WHERE owner=?; DELETE FROM invite_codes WHERE document=?;")) {
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getId());
             preparedStatement.setLong(3, document.getId());
