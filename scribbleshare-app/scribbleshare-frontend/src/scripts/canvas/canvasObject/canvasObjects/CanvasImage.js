@@ -21,16 +21,14 @@ export default class CanvasImage extends EntityCanvasObject {
     }
 
     static create(x, y, id, image) {
-        let shape = Object.create(this.prototype);
-        shape.dirty = true;
-        shape.x = x;
-        shape.y = y;
-        shape.width = image.width;
-        shape.height = image.height;
-        shape.rotation = 0;
-
-        shape.id = id;
-        shape.image = image;
-        return shape;
+        let object = Object.create(this.prototype);
+        object.x = x;
+        object.y = y;
+        object.width = image.width;
+        object.height = image.height;
+        object.rotation = 0;
+        object.id = id;
+        object.image = image;
+        return object;
     }
 }

@@ -24,7 +24,6 @@ export default class Mouse extends CanvasObject {
         object.x = 0;
         object.y = 0;
         object.client = client;
-
         return object;
     }
 }

@@ -1,4 +1,4 @@
-import Shape from "./canvasObject/canvasObjects/Shape.js";
+import Shape, {ShapeType} from "./canvasObject/canvasObjects/Shape.js";
 import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
 import {activeDocument, localClient} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
@@ -150,20 +150,20 @@ export class Canvas {
                     mouse.reset();
                 }
                 if (mouse.drag) {
-/*                    if (this.selected.canvasObjectWrapper !== null) {
+                    if (this.selected.canvasObjectWrapper !== null) {
                         this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
                         this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
                         this.selected.dirty = true;
                     } else {
                         ondrag(event);
-                    }*/
+                    }
                 }
                 break;
             }
             case 'click': {
                 if (this.selected.canvasObjectWrapper === null) {
                     if ((event.buttons & 1) === 0) {
-                        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50);
+                        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
                         this.insert(CanvasObjectType.SHAPE, shape);
                     }
                 }
@@ -259,10 +259,6 @@ function update() {
             canvasUpdates.push(canvasUpdateDelete);
         }
 
-        if (localClient.mouseMoves.length > 0 && activeDocument.clients.size > 1) {
-            socket.send(new ClientMessageMouseMove(localClient.mouseMoves));
-        }
-
         //send local updates
         if (canvasUpdates.length > 0) {
             socket.queue(new ClientMessageCanvasUpdate(canvasUpdates));
@@ -271,8 +267,6 @@ function update() {
         lastUpdate = window.performance.now();
 
         //clean up
-        localClient.mouseMoves.length = 0;
-        localClient.time = 0;
         canvasUpdates.forEach((canvasUpdate) => {
             canvasUpdate.clear();
         })
