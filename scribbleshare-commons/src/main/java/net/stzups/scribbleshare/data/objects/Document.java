@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Document {
     private static final Random random = new Random();
-    private static final String DEFAULT_DOCUMENT_NAME = "Untitled Document";
+    private static final String DEFAULT_DOCUMENT_NAME = "New Scribble";
 
     private final long id;
     private final long owner;
