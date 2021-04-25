@@ -147,6 +147,7 @@ export class Canvas {
             }
             mouseUpdateMove.move(getNow(), this.localMouse);
         }
+        mouse.reset();
     }
 
     onEvent(event) {
@@ -156,7 +157,7 @@ export class Canvas {
                 this.localMouse.y = mouse.y;
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     this.flushActive();
-                    mouse.reset();
+                    //mouse.reset();
                 }
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
