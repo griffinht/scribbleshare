@@ -12,6 +12,7 @@ import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
 import Line from "./canvasObject/canvasObjects/Line.js";
+import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -94,23 +95,28 @@ export class Canvas {
 
         this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
             if (id !== localClientId) {
-                ctx.save();
-                //ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
-                //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
-                canvasObjectWrapper.canvasObject.draw();
-                if (this.selected.canvasObjectWrapper === null) {
-                    if (!mouse.drag) {
-                        if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-                            this.selected.id = id;
-                            this.selected.canvasObjectWrapper = canvasObjectWrapper;
+                if (canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
+
+                    ctx.save();
+                    ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
+                    //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
+                    canvasObjectWrapper.canvasObject.draw();
+                    if (this.selected.canvasObjectWrapper === null) {
+                        if (!mouse.drag) {
+                            if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+                                this.selected.id = id;
+                                this.selected.canvasObjectWrapper = canvasObjectWrapper;
+                            }
+                        }
+                    } else {
+                        if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
+                            ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
                         }
                     }
+                    ctx.restore();
                 } else {
-                    if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
-                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
-                    }
+                    canvasObjectWrapper.canvasObject.draw();
                 }
-                ctx.restore();
             }
         });
         if (this.selected.canvasObjectWrapper !== null && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
