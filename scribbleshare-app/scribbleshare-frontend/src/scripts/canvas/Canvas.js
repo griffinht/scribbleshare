@@ -183,8 +183,8 @@ export class Canvas {
     onEvent(event) {
         switch (event.type) {
             case 'mousemove': {
-                this.localMouse.x = mouse.x;
-                this.localMouse.y = mouse.y;
+/*                this.localMouse.x = mouse.x;
+                this.localMouse.y = mouse.y;*/
                 //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
