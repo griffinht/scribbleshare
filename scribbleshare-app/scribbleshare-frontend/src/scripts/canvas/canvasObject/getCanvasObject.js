@@ -14,6 +14,7 @@ export function getCanvasObject(canvasObjectType, reader) {
             break;
         case CanvasObjectType.MOUSE:
             object = new Mouse(reader);
+            break;
         default:
             console.error('unknown canvasObjectType ' + canvasObjectType);
     }

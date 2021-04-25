@@ -20,15 +20,11 @@ export default class Mouse extends CanvasObject {
     }
 
     static create(client) {
-        let shape = Object.create(this.prototype);
-        shape.dirty = true;
-        shape.x = 0;
-        shape.y = 0;
-        shape.width = 0;
-        shape.height = 0;
-        shape.rotation = 0;
-        shape.client = client;
+        let object = Object.create(this.prototype);
+        object.x = 0;
+        object.y = 0;
+        object.client = client;
 
-        return shape;
+        return object;
     }
 }

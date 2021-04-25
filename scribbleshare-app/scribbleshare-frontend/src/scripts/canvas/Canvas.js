@@ -10,7 +10,6 @@ import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
 import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
 import Mouse from "../Mouse.js";
-import MouseMove from "../MouseMove.js";
 import ClientMessageMouseMove from "../protocol/client/messages/ClientMessageMouseMove.js";
 
 export const canvas = document.getElementById('canvas');
@@ -143,21 +142,21 @@ export class Canvas {
                 if (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30) {
                     this.flushActive();
                     if (mouse.dx > 0 || mouse.dy > 0) {
-                        let mouseMove = MouseMove.create(getNow() - localClient.time, mouse.x, mouse.y);
+/*                        let mouseMove = MouseMove.create(getNow() - localClient.time, mouse.x, mouse.y);
                         localClient.time = getNow();
 //todo
-                        localClient.mouseMoves.push(mouseMove);
+                        localClient.mouseMoves.push(mouseMove);*/
                     }
                     mouse.reset();
                 }
                 if (mouse.drag) {
-                    if (this.selected.canvasObjectWrapper !== null) {
+/*                    if (this.selected.canvasObjectWrapper !== null) {
                         this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
                         this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
                         this.selected.dirty = true;
                     } else {
                         ondrag(event);
-                    }
+                    }*/
                 }
                 break;
             }

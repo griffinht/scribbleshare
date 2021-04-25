@@ -1,4 +1,5 @@
 import CanvasObject from "./CanvasObject.js";
+import {lerp} from "../Canvas.js";
 
 export default class EntityCanvasObject extends CanvasObject {
     constructor(reader) {
@@ -13,5 +14,31 @@ export default class EntityCanvasObject extends CanvasObject {
         writer.writeInt16(this.width);
         writer.writeInt16(this.height);
         writer.writeUint8(this.rotation);
+    }
+
+    lerp(target, t) {
+        super.lerp(target, t);
+        this.width = lerp(this.original.width, target.width, t);
+        this.height = lerp(this.original.height, target.height, t);
+        this.rotation = lerp(this.original.rotation, target.rotation, t);
+    }
+
+    create(entityCanvasObject) {
+        super.create(entityCanvasObject);
+        entityCanvasObject.width = this.width;
+        entityCanvasObject.height = this.height;
+        entityCanvasObject.rotation = this.rotation;
+        return entityCanvasObject;
+    }
+
+
+    static create(entityCanvasObject) {
+        let object = Object.create(this.prototype);
+        object.x = entityCanvasObject.x;
+        object.y = entityCanvasObject.y;
+        object.width = entityCanvasObject.width;
+        object.height = entityCanvasObject.height;
+        object.rotation = entityCanvasObject.rotation;
+        return object;
     }
 }
