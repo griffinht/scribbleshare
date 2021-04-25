@@ -26,7 +26,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 
     draw(canvas, time) {
         this.time += time;
-        let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
+        let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
         if (canvasObjectWrapper === undefined) {
             this.clear();
         }
@@ -39,7 +39,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         if (this.first === 0) {
             while (this.canvasMoves.length > 0) {
                 //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
-                console.log(canvasObjectWrapper.canvasObject.original, this.canvasMoves[0].canvasObject)
+                //console.log(canvasObjectWrapper.canvasObject.original, this.canvasMoves[0].canvasObject)
                 canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[0].canvasObject, this.time / this.canvasMoves[0].dt);
                 if (this.canvasMoves[0].dt <= this.time) {
                     this.time -= this.canvasMoves[0].dt;
@@ -68,6 +68,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         object.time = 0;
         object.canvasMoves = [];
         object.first = time;
+        object.time = time;
         object.id = id;
         return object;
     }
