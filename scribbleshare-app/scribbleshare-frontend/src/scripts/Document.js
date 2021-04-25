@@ -9,12 +9,18 @@ import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import invite from "./Invite.js";
+import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
+import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
 
 const documents = new Map();
 export let activeDocument = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
 let localClientId = 0;
 export let localClient = null;
+const updateBar = document.getElementById('sideBottom');
+updateBar.style.visibility = 'hidden';
+const renameInput = document.getElementById('renameInput');
+const deleteButton = document.getElementById('deleteButton');
 
 class Document {
     constructor(name, id) {
@@ -37,12 +43,24 @@ class Document {
         this.canvas = new Canvas();
     }
 
+    rename(name) {
+        this.name = name;
+        this.sidebarItem.button.
+        socket.send(new ClientMessageUpdateDocument(this));
+    }
+
+    delete() {
+        socket.send(new ClientMessageDeleteDocument(this));
+    }
+
     open() {
         activeDocument = this;
         this.canvas.open();
         invite.setVisible(true);
         console.log('opened ' + this.name);
         this.sidebarItem.setActive(false);
+        renameInput.value = this.name;
+        updateBar.style.visibility = 'visible';
         //window.history.pushState(document.name, document.title, '/d/' + this.id); todo
         //this.addClient(localClient);
         //todo
@@ -63,6 +81,7 @@ class Document {
     close() {
         this.canvas.close();
         invite.setVisible(false);
+        updateBar.style.visibility = 'hidden';
         //todo a loading screen?
         this.clients.forEach((client) => {
             this.removeClient(client.id);
@@ -79,6 +98,19 @@ class Document {
         this.clients.delete(id);
     }
 }
+
+renameInput.addEventListener('input', (event) => {
+    console.log(event);
+    if (activeDocument !== null) {
+        activeDocument.rename(event.target.value);
+    }
+});
+
+deleteButton.addEventListener('click', (event) => {
+    if (activeDocument !== null) {
+        activeDocument.delete();
+    }
+})
 
 document.getElementById('add').addEventListener('click', () => {
     if (activeDocument != null) activeDocument.close();

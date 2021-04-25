@@ -78,3 +78,13 @@ aside button:active {
     height: 50px;
     margin: .5em;
 }
+
+#sideBottom {
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+}
+
+#renameInput {
+    width: 100%;
+}

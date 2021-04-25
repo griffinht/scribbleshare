@@ -11,5 +11,6 @@ export default class ClientMessageUpdateDocument extends ClientMessage {
     serialize(writer) {
         super.serialize(writer);
         writer.writeBigInt64(this.id);
+        writer.writeString8(this.name);
     }
 }
