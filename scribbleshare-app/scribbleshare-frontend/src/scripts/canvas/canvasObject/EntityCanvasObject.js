@@ -16,23 +16,16 @@ export default class EntityCanvasObject extends CanvasObject {
         writer.writeUint8(this.rotation);
     }
 
-    lerp(target, t) {
+/*    lerp(target, t) {
         super.lerp(target, t);
         this.width = lerp(this.original.width, target.width, t);
         this.height = lerp(this.original.height, target.height, t);
         this.rotation = lerp(this.original.rotation, target.rotation, t);
-    }
-
-    create(entityCanvasObject) {
-        super.create(entityCanvasObject);
-        entityCanvasObject.width = this.width;
-        entityCanvasObject.height = this.height;
-        entityCanvasObject.rotation = this.rotation;
-        return entityCanvasObject;
-    }
+    }*/
 
 
-    static create(entityCanvasObject) {
+
+/*    static create(entityCanvasObject) {
         let object = Object.create(this.prototype);
         object.x = entityCanvasObject.x;
         object.y = entityCanvasObject.y;
@@ -40,5 +33,5 @@ export default class EntityCanvasObject extends CanvasObject {
         object.height = entityCanvasObject.height;
         object.rotation = entityCanvasObject.rotation;
         return object;
-    }
+    }*/
 }

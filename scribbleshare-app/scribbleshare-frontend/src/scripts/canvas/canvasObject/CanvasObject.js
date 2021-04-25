@@ -21,16 +21,10 @@ export default class CanvasObject {
         writer.writeInt16(this.y);
     }
 
-    create(canvasObject) {
-        canvasObject.x = this.x;
-        canvasObject.y = this.y;
-        return canvasObject;
-    }
-
-    static create(x, y) {
+    static clone(canvasObject) {
         let object = Object.create(this.prototype);
-        object.x = x;
-        object.y = y;
+        object.x = canvasObject.x;
+        object.y = canvasObject.y;
         return object;
     }
 }

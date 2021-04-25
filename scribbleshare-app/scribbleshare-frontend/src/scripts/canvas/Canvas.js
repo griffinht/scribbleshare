@@ -163,7 +163,7 @@ export class Canvas {
             case 'click': {
                 if (this.selected.canvasObjectWrapper === null) {
                     if ((event.buttons & 1) === 0) {
-                        let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
+                        let shape = Shape.clone(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
                         this.insert(CanvasObjectType.SHAPE, shape);
                     }
                 }

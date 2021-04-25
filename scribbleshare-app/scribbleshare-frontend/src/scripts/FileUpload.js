@@ -77,7 +77,7 @@ document.body.addEventListener('drop', (event) => {
                     return;
                 }
                 let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
-                let object = CanvasImage.create(0, 0, id, image);
+                let object = CanvasImage.clone(0, 0, id, image);
                 activeDocument.canvas.insert(CanvasObjectType.IMAGE, object);
             });
 
