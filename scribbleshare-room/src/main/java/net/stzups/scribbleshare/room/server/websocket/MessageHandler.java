@@ -91,12 +91,24 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                                 ScribbleshareRoom.getDatabase().createDocument(client.getUser());
                             }
                         }
-                        for (long id : client.getUser().getOwnedDocuments()) {
-                            client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id)));//todo aggregate
-                        }
-                        for (long id : client.getUser().getSharedDocuments()) {
-                            client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id), true));
-                        }
+                        client.getUser().getOwnedDocuments().removeIf((id) -> {
+                            Document document = ScribbleshareRoom.getDatabase().getDocument(id);
+                            if (document == null) {
+                                return true;
+                            } else {
+                                client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id)));
+                                return false;
+                            }
+                        });//todo this is bad
+                        client.getUser().getSharedDocuments().removeIf((id) -> {
+                            Document document = ScribbleshareRoom.getDatabase().getDocument(id);
+                            if (document == null) {
+                                return true;
+                            } else {
+                                client.queueMessage(new ServerMessageUpdateDocument(ScribbleshareRoom.getDatabase().getDocument(id)));
+                                return false;
+                            }
+                        });
                         client.flushMessages();
                         break;
                     }
