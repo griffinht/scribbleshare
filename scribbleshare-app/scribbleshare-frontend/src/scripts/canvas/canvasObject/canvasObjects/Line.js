@@ -4,8 +4,6 @@ import {ctx} from "../../Canvas.js";
 export default class LineCanvasObject extends CanvasObject {
     constructor(reader) {
         super(reader);
-        this.x = reader.readInt16();
-        this.y = reader.readInt16();
         this.points = [];
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
@@ -27,10 +25,20 @@ export default class LineCanvasObject extends CanvasObject {
     }
 
     serialize(writer) {
-        writer.writeUint8();
+        super.serialize(writer);
+
+        let lastPoint = this.points[0];
+        let realPoints = [];
         this.points.forEach((point) => {
-            point.serialize(writer);
-        })
+            if (Math.sqrt(Math.pow(lastPoint.x - point.x, 2) + Math.pow(lastPoint.y - point.y, 2)) > 10) {
+                realPoints.push(point);
+            }
+        });
+
+        writer.writeUint8(realPoints.length);
+        realPoints.forEach((realPoint) => {
+            realPoint.serialize(writer);
+        });
     }
 
     static create(x, y) {

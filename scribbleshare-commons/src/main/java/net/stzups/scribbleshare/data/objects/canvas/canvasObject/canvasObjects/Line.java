@@ -43,6 +43,7 @@ public class Line extends CanvasObject {
 
     @Override
     public void serialize(ByteBuf byteBuf) {
+        super.serialize(byteBuf);
         byteBuf.writeByte((byte) points.size());
         for (Point point : points) {
             point.serialize(byteBuf);
