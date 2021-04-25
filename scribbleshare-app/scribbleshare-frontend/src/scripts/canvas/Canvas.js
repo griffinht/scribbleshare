@@ -55,9 +55,9 @@ export class Canvas {
 
     open() {
         this.isOpen = true;
-        if (this.localMouse === null) {
+/*        if (this.localMouse === null) {
             this.localMouse = CanvasMouse.create();
-        }
+        }*/
         let canvasObjectWrapper = new CanvasObjectWrapper(CanvasObjectType.MOUSE, this.localMouse);
         activeDocument.canvas.canvasObjectWrappers.set(localClientId, canvasObjectWrapper);
         canvasUpdates.push(CanvasUpdateInsert.create(getNow(), localClientId, canvasObjectWrapper));

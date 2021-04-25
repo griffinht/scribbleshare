@@ -1,6 +1,7 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObject from "../../canvasObject/CanvasObject.js";
+import {ctx} from "../../Canvas.js";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
     constructor(reader) {
@@ -22,6 +23,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     }
 
     draw(canvas, time) {
+        ctx.fillText(time, 10, 10);
         this.time += time;
         let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
 
