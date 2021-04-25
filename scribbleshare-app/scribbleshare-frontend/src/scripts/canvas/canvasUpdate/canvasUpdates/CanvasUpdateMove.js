@@ -5,89 +5,69 @@ import CanvasObject from "../../canvasObject/CanvasObject.js";
 export default class CanvasUpdateMove extends CanvasUpdate {
     constructor(reader) {
         super(CanvasUpdateType.MOVE);
-        this.canvasMovesMap = new Map();
+        this.canvasMoves = [];
         this.time = 0;
-        this.first = true;
+        this.id = reader.readInt16();
+        this.first = reader.readUint8();
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
-            let id = reader.readInt16();
-            let canvasMoves = [];
-            let lengthJ = reader.readUint8();
-            for (let j = 0; j < lengthJ; j++) {
-                canvasMoves.push(new CanvasMove(reader));
-            }
-            this.canvasMovesMap.set(id, canvasMoves);
+            this.canvasMoves.push(new CanvasMove(reader));
         }
     }
 
     isDirty() {
-        return this.canvasMovesMap.size > 0;
+        return this.canvasMoves.length > 0;
     }
 
-    clear() {
-        this.canvasMovesMap.clear();
-        this.time = 0;
-    }
-
-    move(id, time, canvasObject) {
-        let canvasMoves = this.canvasMovesMap.get(id);
-        if (canvasMoves === undefined) {
-            canvasMoves = [];
-            this.canvasMovesMap.set(id, canvasMoves);
-            return;
-        }
-
-        canvasMoves.push(CanvasMove.create(time - this.time, canvasObject));
+    move(time, canvasObject) {
+        this.canvasMoves.push(CanvasMove.create(time - this.time, canvasObject));
         this.time = time;
     }
 
     draw(canvas, time) {
         this.time += time;
-        this.canvasMovesMap.forEach((canvasMoves, id) => {
-            let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
-            if (canvasObjectWrapper === undefined) {
-                this.clear();
-            }
+        let canvasObjectWrapper = canvas.canvasObjectWrappers.get(id);
+        if (canvasObjectWrapper === undefined) {
+            this.clear();
+        }
 
-            while (canvasMoves.length > 0) {
+        if (this.first !== 0 && this.first <= this.time) {
+            this.time -= this.first;
+            this.first = 0;
+            canvasObjectWrapper.canvasObject.original = CanvasObject.clone(canvasObjectWrapper.canvasObject);
+        }
+        if (this.first === 0) {
+            while (this.canvasMoves.length > 0) {
                 //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
-                if (this.first) {
-                    canvasObjectWrapper.canvasObject.original = CanvasObject.clone(canvasObjectWrapper.canvasObject);
-                } else {
-                    canvasObjectWrapper.canvasObject.lerp(canvasMoves[0].canvasObject, this.time / canvasMoves[0].dt);
-                }
-                if (canvasMoves[0].dt <= this.time) {
-                    this.time -= canvasMoves[0].dt;
-                    this.first = false;
-                    canvasObjectWrapper.canvasObject.original = canvasMoves[0].canvasObject;
-                    canvasMoves.shift();
+                console.log(canvasObjectWrapper.canvasObject.original, this.canvasMoves[0].canvasObject)
+                canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[0].canvasObject, this.time / this.canvasMoves[0].dt);
+                if (this.canvasMoves[0].dt <= this.time) {
+                    this.time -= this.canvasMoves[0].dt;
+                    canvasObjectWrapper.canvasObject.original = this.canvasMoves[0].canvasObject;
+                    this.canvasMoves.shift();
                 } else {
                     break;
                 }
             }
-            if (canvasMoves.length === 0) {
-                this.canvasMovesMap.delete(id);
-            }
-        });
+        }
     }
 
     serialize(writer) {
         super.serialize(writer);
-        writer.writeUint8(this.canvasMovesMap.size);
-        this.canvasMovesMap.forEach((canvasMoves, id) => {
-            writer.writeInt16(id);
-            writer.writeUint8(canvasMoves.length);
-            canvasMoves.forEach((canvasMove) => {
-                canvasMove.serialize(writer);
-            });
+        writer.writeInt16(id);
+        writer.writeUint8(this.first);
+        writer.writeUint8(this.canvasMoves.length);
+        this.canvasMoves.forEach((canvasMove) => {
+            canvasMove.serialize(writer);
         });
     }
 
-    static create() {
+    static create(id, time) {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.MOVE;
-        object.canvasMovesMap = new Map();
         object.time = 0;
+        object.first = time;
+        object.id = id;
         return object;
     }
 }

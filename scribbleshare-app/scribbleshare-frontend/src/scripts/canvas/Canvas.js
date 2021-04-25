@@ -20,8 +20,9 @@ const SELECT_PADDING = 10;
 const mouse = new Mouse(canvas);
 
 let canvasUpdateInsert = CanvasUpdateInsert.create();//todo these could be instance variables but idk
-let canvasUpdateMove = CanvasUpdateMove.create();
 let canvasUpdateDelete = CanvasUpdateDelete.create();
+let canvasUpdates = [];
+let canvasUpdateMove = null;
 
 export class Canvas {
     constructor(reader) {
@@ -112,10 +113,6 @@ export class Canvas {
         canvasUpdateInsert.insert(canvasObjectType, getNow(), id, canvasObject);
     }
 
-    move(id, canvasObject) {
-        canvasUpdateMove.move(id, getNow(), canvasObject);
-    }
-
     delete(id) {
         this.canvasObjectWrappers.delete(id);
         canvasUpdateDelete.delete(getNow(), id);
@@ -131,7 +128,7 @@ export class Canvas {
         if (this.selected.canvasObjectWrapper !== null) {
             if (this.selected.dirty) {
                 this.selected.dirty = false;
-                this.move(this.selected.id, this.selected.canvasObjectWrapper.canvasObject);
+                canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
             }
         }
     }
@@ -151,6 +148,9 @@ export class Canvas {
                 }
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
+                        if (canvasUpdateMove === null) {
+                            canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
+                        }
                         this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
                         this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
                         this.selected.dirty = true;
@@ -248,12 +248,8 @@ function update() {
         activeDocument.canvas.flushActive();
 
         //assemble local updates
-        let canvasUpdates = [];
         if (canvasUpdateInsert.isDirty()) {
             canvasUpdates.push(canvasUpdateInsert);
-        }
-        if (canvasUpdateMove.isDirty()) {
-            canvasUpdates.push(canvasUpdateMove);
         }
         if (canvasUpdateDelete.isDirty()) {
             canvasUpdates.push(canvasUpdateDelete);
