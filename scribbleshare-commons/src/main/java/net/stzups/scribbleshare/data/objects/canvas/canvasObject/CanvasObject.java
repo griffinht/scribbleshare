@@ -15,6 +15,14 @@ public class CanvasObject {
         y = byteBuf.readShort();
     }
 
+    public short getX() {
+        return x;
+    }
+
+    public short getY() {
+        return y;
+    }
+
     public void update(CanvasObject canvasObject) {
         this.x = canvasObject.x;
         this.y = canvasObject.y;

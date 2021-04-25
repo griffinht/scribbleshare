@@ -3,8 +3,11 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Line extends CanvasObject {
-    private static class Point {
+    public static class Point {
         private final short x;
         private final short y;
 
@@ -13,29 +16,34 @@ public class Line extends CanvasObject {
             this.y = byteBuf.readShort();
         }
 
+        public Point(short x, short y) {
+            this.x = x;
+            this.y = y;
+        }
+
         private void serialize(ByteBuf byteBuf) {
             byteBuf.writeShort(x);
             byteBuf.writeShort(y);
         }
     }
 
-    private final Point[] points;
+    private final List<Point> points = new ArrayList<>();
 
     public Line(ByteBuf byteBuf) {
         super(byteBuf);
-        points = new Point[byteBuf.readUnsignedByte()];
-        for (int i = 0; i < points.length; i++)  {
-            points[i] = new Point(byteBuf);
+        int length = byteBuf.readUnsignedByte();
+        for (int i = 0; i < length; i++)  {
+            points.add(new Point(byteBuf));
         }
     }
 
-    public Point[] getPoints() {
+    public List<Point> getPoints() {
         return points;
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeByte((byte) points.length);
+        byteBuf.writeByte((byte) points.size());
         for (Point point : points) {
             point.serialize(byteBuf);
         }

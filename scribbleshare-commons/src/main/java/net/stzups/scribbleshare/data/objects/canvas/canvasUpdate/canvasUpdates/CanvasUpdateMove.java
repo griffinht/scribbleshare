@@ -55,7 +55,9 @@ public class CanvasUpdateMove extends CanvasUpdate {
 
         if (canvasObjectWrapper.getCanvasObject() instanceof Line) {
             Line line = (Line) canvasObjectWrapper.getCanvasObject();
-            line.getPoints()
+            for (CanvasMove canvasMove : canvasMoves) {
+                line.getPoints().add(new Line.Point(canvasMove.canvasObject.getX(), canvasMove.canvasObject.getY()));
+            }
         } else {
             canvasObjectWrapper.getCanvasObject().update(canvasMoves[canvasMoves.length - 1].canvasObject);
         }
