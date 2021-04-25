@@ -36,9 +36,6 @@ export default class CanvasUpdateMove extends CanvasUpdate {
                 if (this.canvasMoves.length > 0) {
                     canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[0].canvasObject, this.time / this.canvasMoves[0].dt);
                 }
-                if (this.canvasMoves.length === 1) {
-                    console.log(this.time, time);
-                }
                 if (this.canvasMoves[0].dt <= this.time) {
                     this.time -= this.canvasMoves[0].dt;
                     canvasObjectWrapper.canvasObject.original = this.canvasMoves[0].canvasObject;

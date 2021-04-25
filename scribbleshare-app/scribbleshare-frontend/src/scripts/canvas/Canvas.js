@@ -27,6 +27,7 @@ export class Canvas {
     constructor(reader) {
         this.isOpen = false;
         this.last = 0;
+        this.lastFlush = 0;
         this.canvasObjectWrappers = new Map();
         this.canvasUpdates = [];
         this.selected = {
@@ -133,6 +134,7 @@ export class Canvas {
     }
 
     flushActive() {
+        this.lastFlush = window.performance.now();
         if (this.selected.canvasObjectWrapper !== null) {
             if (this.selected.dirty) {
                 this.selected.dirty = false;
@@ -195,6 +197,13 @@ export class Canvas {
         }
     }
 }
+
+//todo fix
+setInterval(() => {
+    if (activeDocument !== null) {
+        activeDocument.canvas.flushActive();
+    }
+}, 100);
 
 function aabb(rect1, rect2, padding) {
     return rect1.x - padding < rect2.x + rect2.width &&
