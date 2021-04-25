@@ -186,6 +186,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
                             break;
                         }
                         room.getDocument().setName(clientMessageUpdateDocument.getName());
+                        room.queueMessageExcept(new ServerMessageUpdateDocument(room.getDocument()), client);
                         ScribbleshareRoom.getDatabase().updateDocument(room.getDocument());
                         break;//todo better update logic
                     }
