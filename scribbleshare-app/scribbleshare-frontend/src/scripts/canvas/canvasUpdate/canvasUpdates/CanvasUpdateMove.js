@@ -33,7 +33,9 @@ export default class CanvasUpdateMove extends CanvasUpdate {
             while (this.canvasMoves.length > 0) {
                 //console.log(time, this.time, canvasMoves[0].dt, canvasMoves[0].canvasObject.x, canvasMoves[0].canvasObject.y);
                 //console.log(canvasObjectWrapper.canvasObject.original, this.canvasMoves[0].canvasObject)
-                canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[0].canvasObject, this.time / this.canvasMoves[0].dt);
+                if (this.canvasMoves.length > 1) {
+                    canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[0].canvasObject, this.time / this.canvasMoves[0].dt);
+                }
                 if (this.canvasMoves[0].dt <= this.time) {
                     this.time -= this.canvasMoves[0].dt;
                     canvasObjectWrapper.canvasObject.original = this.canvasMoves[0].canvasObject;
