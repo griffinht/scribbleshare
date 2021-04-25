@@ -17,6 +17,7 @@ import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.util.LogFactory;
 
 import javax.net.ssl.KeyManagerFactory;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -33,31 +34,15 @@ public class Server {
      * Initializes the server and binds to the specified port
      */
     public ChannelFuture start() throws Exception {
-        SslContext sslContext;
         int port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
 
-        Boolean ssl = Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL);
+        SslContext sslContext;
 
-        if (!ssl) {
-            Scribbleshare.getLogger().warning("Starting server using insecure http:// protocol without SSL");
-            sslContext = null;//otherwise sslEngine is null and program continues with unencrypted sockets
+        if (Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL)) {
+            sslContext = SslContextBuilder.forServer(new File(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.SSL_ROOT_PATH)),
+                    new File(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.SSL_PATH))).build();
         } else {
-            String keystorePath = Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PATH);
-            String passphrase = Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.SSL_KEYSTORE_PASSPHRASE);
-            try (FileInputStream fileInputStream = new FileInputStream(keystorePath)) {
-                KeyStore keyStore = KeyStore.getInstance("PKCS12");
-                keyStore.load(fileInputStream, passphrase.toCharArray());
-
-                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, passphrase.toCharArray());
-
-                //SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-                sslContext = SslContextBuilder.forServer(keyManagerFactory)
-                        .sslProvider(SslProvider.JDK)
-                        .build();
-            } catch (IOException | GeneralSecurityException e) {
-                throw new Exception("Exception while getting SSL context", e);
-            }
+            sslContext = null;
         }
 
         bossGroup = new NioEventLoopGroup();
