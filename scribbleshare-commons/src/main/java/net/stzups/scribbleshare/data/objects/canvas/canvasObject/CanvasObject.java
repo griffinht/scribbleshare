@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.CanvasImage;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.CanvasMouse;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Line;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Shape;
 
 public class CanvasObject {
@@ -35,6 +36,9 @@ public class CanvasObject {
                 break;
             case MOUSE:
                 canvasObject = new CanvasMouse(byteBuf);
+                break;
+            case LINE:
+                canvasObject = new Line(byteBuf);
                 break;
             default:
                 canvasObject = null;

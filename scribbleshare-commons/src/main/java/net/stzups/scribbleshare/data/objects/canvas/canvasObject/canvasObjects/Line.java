@@ -1,8 +1,9 @@
-package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
+package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 
-public class LineCanvasObject extends CanvasObject {
+public class Line extends CanvasObject {
     private static class Point {
         private final short x;
         private final short y;
@@ -20,12 +21,16 @@ public class LineCanvasObject extends CanvasObject {
 
     private final Point[] points;
 
-    public LineCanvasObject(ByteBuf byteBuf) {
+    public Line(ByteBuf byteBuf) {
         super(byteBuf);
         points = new Point[byteBuf.readUnsignedByte()];
         for (int i = 0; i < points.length; i++)  {
             points[i] = new Point(byteBuf);
         }
+    }
+
+    public Point[] getPoints() {
+        return points;
     }
 
     @Override

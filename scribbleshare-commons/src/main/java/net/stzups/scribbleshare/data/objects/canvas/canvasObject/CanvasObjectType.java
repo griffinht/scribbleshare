@@ -9,6 +9,7 @@ public enum CanvasObjectType {
     SHAPE(0),
     IMAGE(1),
     MOUSE(2),
+    LINE(3),
     ;
 
     private static final Map<Integer, CanvasObjectType> objectTypeMap = new IntObjectHashMap<>();

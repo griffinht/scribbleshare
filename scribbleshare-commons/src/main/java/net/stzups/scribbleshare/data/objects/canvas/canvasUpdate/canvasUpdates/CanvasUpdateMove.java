@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.CanvasObjectWrapper;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Line;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
 
@@ -48,11 +49,16 @@ public class CanvasUpdateMove extends CanvasUpdate {
     public void update(Canvas canvas) {
         CanvasObjectWrapper canvasObjectWrapper = canvas.getCanvasObjects().get(id);
         if (canvasObjectWrapper == null || canvasMoves.length == 0) {
-            System.out.println("oopsie " + canvasObjectWrapper);
+            new RuntimeException("oopsie " + canvasObjectWrapper + ", "  + canvasMoves.length).printStackTrace();
             return;
         }
 
-        canvasObjectWrapper.getCanvasObject().update(canvasMoves[canvasMoves.length - 1].canvasObject);
+        if (canvasObjectWrapper.getCanvasObject() instanceof Line) {
+            Line line = (Line) canvasObjectWrapper.getCanvasObject();
+            line.getPoints()
+        } else {
+            canvasObjectWrapper.getCanvasObject().update(canvasMoves[canvasMoves.length - 1].canvasObject);
+        }
     }
 
     @Override
