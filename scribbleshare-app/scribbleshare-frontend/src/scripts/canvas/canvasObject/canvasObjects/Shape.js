@@ -25,9 +25,9 @@ export default class Shape extends EntityCanvasObject {
                 break;
             case ShapeType.TRIANGLE:
                 ctx.beginPath();
-                ctx.moveTo(this.width / 2 + 20, this.height / 2);
-                ctx.lineTo(this.width / 2, this.height / 2 - 50);
-                ctx.lineTo(this.width / 2 - 50, this.height / 2);
+                ctx.moveTo(this.width / 2 + 25, this.height / 2 + 25);
+                ctx.lineTo(this.width / 2, this.height / 2 - 25);
+                ctx.lineTo(this.width / 2 - 25, this.height / 2 + 25);
                 ctx.fill();
                 ctx.stroke();
         }
