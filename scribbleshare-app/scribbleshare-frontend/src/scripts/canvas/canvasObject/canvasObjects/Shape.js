@@ -12,6 +12,7 @@ export default class Shape extends EntityCanvasObject {
 
     draw() {
         ctx.fillStyle = 'rgb(' + this.red + ',' + this.green + ',' + this.blue + ')';
+        ctx.strokeStyle = ctx.fillStyle;
         switch (this.type) {
             case ShapeType.RECTANGLE:
                 ctx.fillRect(0, 0, this.width, this.height);
@@ -19,9 +20,11 @@ export default class Shape extends EntityCanvasObject {
             case ShapeType.ELLIPSE:
                 ctx.beginPath();
                 ctx.ellipse(this.width / 2, this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
                 break;
         }
+        ctx.strokeStyle = '#000';
     }
 
     serialize(writer) {
