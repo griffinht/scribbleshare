@@ -1,8 +1,19 @@
-const items = [];
-const sidebar = document.getElementById('side');
+export default class Sidebar {
+    constructor(element) {
+        this.items = [];
+        this.element = element;
+    }
 
-export default class SidebarItem {
-    constructor(display, open) {
+    addItem(display, open) {
+        let a = new SidebarItem(display, open, this);
+        this.items.push(a);
+        return a;
+    }
+}
+
+class SidebarItem {
+    constructor(display, open, a) {
+        this.a = a;
         this.open = open;
         this.button = document.createElement("button");
         let inner = document.createTextNode(display);
@@ -10,12 +21,11 @@ export default class SidebarItem {
         this.button.addEventListener('click', () => {
             this.setActive(true);
         });
-        sidebar.appendChild(this.button);
-        items.push(this);
+        this.a.element.appendChild(this.button);
     }
 
     setActive(open) {
-        items.forEach(item => {
+        this.a.items.forEach(item => {
             if (this === item) {
                 this.button.classList.add('active');
                 if (open) {
@@ -28,10 +38,10 @@ export default class SidebarItem {
     }
 
     remove() {
-        for (let i = 0; i < items.length; i++) {
-            if (items[i] === this) {
-                items.splice(i, 1);
-                sidebar.removeChild(this.button);
+        for (let i = 0; i < this.a.items.length; i++) {
+            if (this.a.items[i] === this) {
+                this.a.items.splice(i, 1);
+                this.a.element.removeChild(this.button);
                 break;
             }
         }

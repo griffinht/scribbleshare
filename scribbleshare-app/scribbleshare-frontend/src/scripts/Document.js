@@ -1,5 +1,4 @@
 import {Canvas} from "./canvas/Canvas.js";
-import SidebarItem from './SidebarItem.js';
 import Client from './Client.js'
 import socket from './protocol/WebSocketHandler.js'
 import * as User from "./User.js";
@@ -11,6 +10,7 @@ import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHand
 import invite from "./Invite.js";
 import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
+import Sidebar from "./Sidebar.js";
 
 const documents = new Map();
 export let activeDocument = null;
@@ -21,13 +21,14 @@ const updateBar = document.getElementById('sideBottom');
 updateBar.style.visibility = 'hidden';
 const renameInput = document.getElementById('renameInput');
 const deleteButton = document.getElementById('deleteButton');
+const sidebar = new Sidebar(document.getElementById('side'));
 
 class Document {
     constructor(name, id) {
         this.clients = new Map();
         this.name = name;
         this.id = id;
-        this.sidebarItem = new SidebarItem(this.name, () => {
+        this.sidebarItem = sidebar.addItem(this.name, () => {
             if (this.id != null) {
                 if (activeDocument != null) activeDocument.close();
 
