@@ -38,7 +38,7 @@ export default class LineCanvasObject extends CanvasObject {
         let lastPoint = this.points[0];
         let realPoints = [];
         this.points.forEach((point) => {
-            if (Math.sqrt(Math.pow(lastPoint.x - point.x, 2) + Math.pow(lastPoint.y - point.y, 2)) > 10) {
+            if (Math.sqrt(Math.pow(lastPoint.x - point.x, 2) + Math.pow(lastPoint.y - point.y, 2)) > 50) {
                 realPoints.push(point);
             }
         });
