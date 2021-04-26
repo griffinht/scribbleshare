@@ -189,27 +189,36 @@ export class Canvas {
 /*                this.localMouse.x = mouse.x;
                 this.localMouse.y = mouse.y;*/
                 //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
-                if ((event.buttons & 1) !== 1) {
-                    return;
-                }
+
+                console.log(mouse.drag, (event.buttons & 1))
                 if (mouse.drag) {
-                    if (this.selected.canvasObjectWrapper !== null) {
-                        if (canvasUpdateMove === null) {
-                            canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
+                    a = true;
+                    if ((event.buttons & 1) !== 1) {
+                        if (this.selected.canvasObjectWrapper !== null) {
+                            this.selected.canvasObjectWrapper.canvasObject.width += event.movementX;
+                            this.selected.canvasObjectWrapper.canvasObject.height += event.movementY;
+                            canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
                         }
-                        this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
-                        this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
-                        this.selected.dirty = true;
                     } else {
-                        if (line === null) {
-                            line = Line.create(event.offsetX, event.offsetY, color);
-                            this.insert(CanvasObjectType.LINE, line);
+
+                        if (this.selected.canvasObjectWrapper !== null) {
+                            if (canvasUpdateMove === null) {
+                                canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
+                            }
+                            this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
+                            this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
+                            this.selected.dirty = true;
                         } else {
-                            line.pushPoint(event.offsetX, event.offsetY);
-                            this.flushLine();
+                            if (line === null) {
+                                line = Line.create(event.offsetX, event.offsetY, color);
+                                this.insert(CanvasObjectType.LINE, line);
+                            } else {
+                                line.pushPoint(event.offsetX, event.offsetY);
+                                this.flushLine();
+                            }
                         }
                     }
-                } else if (canvasUpdateMove !== null) {
+                } else if (canvasUpdateMove !== null && ((event.buttons & 1) !== 1)) {
                     canvasUpdates.push(canvasUpdateMove);
                     canvasUpdateMove = null;
                 }
@@ -231,7 +240,6 @@ export class Canvas {
                 }
                 if (this.selected.canvasObjectWrapper === null) {
                     if ((event.buttons & 1) === 0) {
-                        console.log(shapee.a);
                         let s = Shape.create(event.offsetX, event.offsetY, 50, 50, shapee.a, color);
                         this.insert(CanvasObjectType.SHAPE, s);
                     }
@@ -239,6 +247,11 @@ export class Canvas {
                 break;
             }
             case 'contextmenu': {
+                if (a) {
+                    event.preventDefault();
+                    a = false;
+                    return;
+                }
                 if (this.selected.canvasObjectWrapper !== null) {
                     this.delete(this.selected.id);
                     event.preventDefault();

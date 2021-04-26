@@ -13,7 +13,7 @@ export default class Mouse {
             this.y = event.offsetY;
             this.dx += event.movementX;
             this.dy += event.movementY;
-            if (this.down && (event.buttons & 1) === 1) {
+            if (this.down && ((event.buttons & 1) === 1 || (event.buttons & 2) === 2)) {
                 this.drag = true;
             }
         });
@@ -31,7 +31,7 @@ export default class Mouse {
             this.drag = false;
         });
         element.addEventListener('mouseenter', (event) => {
-            if ((event.buttons & 1) === 1) {
+            if (((event.buttons & 1) === 1 || (event.buttons & 2) === 1)) {
                 this.down = true;
             }
         });
