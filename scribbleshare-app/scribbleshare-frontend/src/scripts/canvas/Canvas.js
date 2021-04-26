@@ -82,9 +82,9 @@ export class Canvas {
 
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText('fps:' + (1000 / dt), 50, 150);
+/*        ctx.fillText('fps:' + (1000 / dt), 50, 150);
         ctx.fillText('' + remoteTime, 50, 100);
-        ctx.fillText(mouse.dx + ', ' + mouse.dy, 50, 250);
+        ctx.fillText(mouse.dx + ', ' + mouse.dy, 50, 250);*/
         //console.log('draw1', this.canvasObjects);
         dt = convertTime(dt);
         for (let i = 0; i < this.canvasUpdates.length; i++) {
