@@ -15,12 +15,15 @@ export default class LineCanvasObject extends CanvasObject {
     }
 
     draw() {
+        ctx.fillStyle = 'rgb(' + this.red + ',' + this.green + ',' + this.blue + ')';
+        ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         this.points.forEach((point) => {
             ctx.lineTo(point.x, point.y);
         });
         ctx.stroke();
+        ctx.strokeStyle = '#000';
     }
 
     pushPoint(x, y) {
