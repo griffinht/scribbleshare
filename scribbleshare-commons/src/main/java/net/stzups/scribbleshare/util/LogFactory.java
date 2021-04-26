@@ -33,6 +33,9 @@ public class LogFactory {
      * Formats an existing logger with a name
      */
     public static void setLogger(Logger logger, String name) {
+        for (Handler handler : logger.getHandlers()) {
+            logger.removeHandler(handler);
+        }
         logger.setUseParentHandlers(false);
         Handler handler = new ConsoleHandler();
         logger.addHandler(handler);
