@@ -17,7 +17,9 @@ export default class Shape extends EntityCanvasObject {
                 ctx.fillRect(0, 0, this.width, this.height);
                 break;
             case ShapeType.ELLIPSE:
-                ctx.ellipse(0, 0, this.width, this.height, 0, 0, Math.PI * 2);
+                ctx.beginPath();
+                ctx.ellipse(this.width / 2, this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+                ctx.stroke();
                 break;
         }
     }
