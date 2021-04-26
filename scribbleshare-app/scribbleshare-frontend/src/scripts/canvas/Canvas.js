@@ -230,7 +230,6 @@ export class Canvas {
                     return;
                 }
                 if (this.selected.canvasObjectWrapper === null) {
-                    console.log(event.buttons & 1);
                     if ((event.buttons & 1) === 0) {
                         console.log(shapee.a);
                         let s = Shape.create(event.offsetX, event.offsetY, 50, 50, shapee.a, color);
