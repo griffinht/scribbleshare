@@ -13,7 +13,8 @@ class Invite {
             socket.send(new ClientMessageGetInvite());
         })
         socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
-            text.innerText = 'Join at localhost/?invite=' + serverMessageGetInvite.code;
+            let link = 'http://localhost/?invite=' + serverMessageGetInvite.code;
+            text.innerHTML = 'Join at <a href="' + link + '">' + link + "</a>";
             inviteModal.show();
         })
         this.setVisible(false);
