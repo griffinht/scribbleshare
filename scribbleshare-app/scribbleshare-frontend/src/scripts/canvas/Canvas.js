@@ -198,7 +198,7 @@ export class Canvas {
                         this.selected.dirty = true;
                     } else {
                         if (line === null) {
-                            line = Line.create(event.offsetX, event.offsetY);
+                            line = Line.create(event.offsetX, event.offsetY, color);
                             this.insert(CanvasObjectType.LINE, line);
                         } else {
                             line.pushPoint(event.offsetX, event.offsetY);

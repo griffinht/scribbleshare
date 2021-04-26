@@ -28,9 +28,15 @@ public class Line extends CanvasObject {
     }
 
     private final List<Point> points = new ArrayList<>();
+    private final byte red;
+    private final byte green;
+    private final byte blue;
 
     public Line(ByteBuf byteBuf) {
         super(byteBuf);
+        this.red = byteBuf.readByte();
+        this.green = byteBuf.readByte();
+        this.blue = byteBuf.readByte();
         int length = byteBuf.readUnsignedByte();
         for (int i = 0; i < length; i++)  {
             points.add(new Point(byteBuf));
@@ -44,6 +50,9 @@ public class Line extends CanvasObject {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
+        byteBuf.writeByte(red);
+        byteBuf.writeByte(green);
+        byteBuf.writeByte(blue);
         byteBuf.writeByte((byte) points.size());
         for (Point point : points) {
             point.serialize(byteBuf);

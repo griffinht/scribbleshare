@@ -4,6 +4,9 @@ import {ctx} from "../../Canvas.js";
 export default class LineCanvasObject extends CanvasObject {
     constructor(reader) {
         super(reader);
+        this.red = reader.readUint8();
+        this.green = reader.readUint8();
+        this.blue = reader.readUint8();
         this.points = [];
         let length = reader.readUint8();
         for (let i = 0; i < length; i++) {
@@ -26,7 +29,9 @@ export default class LineCanvasObject extends CanvasObject {
 
     serialize(writer) {
         super.serialize(writer);
-
+        writer.writeUint8(this.red);
+        writer.writeUint8(this.green);
+        writer.writeUint8(this.blue);
         let lastPoint = this.points[0];
         let realPoints = [];
         this.points.forEach((point) => {
@@ -41,11 +46,14 @@ export default class LineCanvasObject extends CanvasObject {
         });
     }
 
-    static create(x, y) {
+    static create(x, y, color) {
         let object = Object.create(this.prototype);
         object.points = [];
         object.x = x;
         object.y = y;
+        object.red = color.r;
+        object.blue = color.b;
+        object.green = color.g;
         return object;
     }
 }
