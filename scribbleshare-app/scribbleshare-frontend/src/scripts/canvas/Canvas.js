@@ -27,7 +27,8 @@ let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
 let mouseUpdateMove = null;
 let line = null;
-let a = false;
+let leftLock = false;
+let rightLock = false;
 
 export class Canvas {
     constructor(reader) {
@@ -190,17 +191,19 @@ export class Canvas {
                 this.localMouse.y = mouse.y;*/
                 //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
 
-                console.log(mouse.drag, (event.buttons & 1))
+                //console.log(mouse.drag, (event.buttons & 1))
                 if (mouse.drag) {
-                    a = true;
+
+
                     if ((event.buttons & 1) !== 1) {
+                        rightLock = true;
                         if (this.selected.canvasObjectWrapper !== null) {
                             this.selected.canvasObjectWrapper.canvasObject.width += event.movementX;
                             this.selected.canvasObjectWrapper.canvasObject.height += event.movementY;
                             canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
                         }
                     } else {
-
+                        //leftLock = true;
                         if (this.selected.canvasObjectWrapper !== null) {
                             if (canvasUpdateMove === null) {
                                 canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
@@ -227,16 +230,18 @@ export class Canvas {
             case 'mouseup': {
                 if (line !== null) {
                     line = null;
+                    leftLock = true;
                 } else {
-                    a = true;
+                    leftLock = false;
                 }
                 break;
             }
             case 'click': {
-                if (a) {
-                    a = false;
-                } else {
+                if (leftLock) {
+                    leftLock = true;
                     return;
+                } else {
+                    console.log('click');
                 }
                 if (this.selected.canvasObjectWrapper === null) {
                     if ((event.buttons & 1) === 0) {
@@ -247,9 +252,10 @@ export class Canvas {
                 break;
             }
             case 'contextmenu': {
-                if (a) {
+                console.log(rightLock);
+                if (rightLock) {
                     event.preventDefault();
-                    a = false;
+                    rightLock = false;
                     return;
                 }
                 if (this.selected.canvasObjectWrapper !== null) {
