@@ -11,6 +11,7 @@ import invite from "./Invite.js";
 import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
 import Sidebar from "./Sidebar.js";
+import color from "./ColorSelector.js";
 
 const documents = new Map();
 export let activeDocument = null;
