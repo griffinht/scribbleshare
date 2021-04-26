@@ -27,6 +27,7 @@ let canvasUpdates = [];//todo these could be instance variables but idk
 let canvasUpdateMove = null;
 let mouseUpdateMove = null;
 let line = null;
+let a = false;
 
 export class Canvas {
     constructor(reader) {
@@ -188,6 +189,9 @@ export class Canvas {
 /*                this.localMouse.x = mouse.x;
                 this.localMouse.y = mouse.y;*/
                 //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
+                if ((event.buttons & 1) !== 1) {
+                    return;
+                }
                 if (mouse.drag) {
                     if (this.selected.canvasObjectWrapper !== null) {
                         if (canvasUpdateMove === null) {
@@ -215,12 +219,22 @@ export class Canvas {
                 if (line !== null) {
                     line = null;
                 } else {
-                    if (this.selected.canvasObjectWrapper === null) {
-                        if ((event.buttons & 1) === 0) {
-                            console.log(shapee.a);
-                            let s = Shape.create(event.offsetX, event.offsetY, 50, 50, shapee.a, color);
-                            this.insert(CanvasObjectType.SHAPE, s);
-                        }
+                    a = true;
+                }
+                break;
+            }
+            case 'click': {
+                if (a) {
+                    a = false;
+                } else {
+                    return;
+                }
+                if (this.selected.canvasObjectWrapper === null) {
+                    console.log(event.buttons & 1);
+                    if ((event.buttons & 1) === 0) {
+                        console.log(shapee.a);
+                        let s = Shape.create(event.offsetX, event.offsetY, 50, 50, shapee.a, color);
+                        this.insert(CanvasObjectType.SHAPE, s);
                     }
                 }
                 break;
