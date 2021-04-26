@@ -12,6 +12,7 @@ import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessag
 import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
 import Sidebar from "./Sidebar.js";
 import color from "./ColorSelector.js";
+import shape from "./ShapeSelector.js";
 
 const documents = new Map();
 export let activeDocument = null;
