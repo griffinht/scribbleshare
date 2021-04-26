@@ -36,14 +36,23 @@ public class Shape extends EntityCanvasObject {
     }
 
     private final Type type;
+    private final byte red;
+    private final byte green;
+    private final byte blue;
 
     public Shape(ByteBuf byteBuf) {
         super(byteBuf);
         this.type = Type.valueOf(byteBuf.readUnsignedByte());
+        this.red = byteBuf.readByte();
+        this.green = byteBuf.readByte();
+        this.blue = byteBuf.readByte();
     }
 
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeByte((byte) type.id);
+        byteBuf.writeByte(red);
+        byteBuf.writeByte(green);
+        byteBuf.writeByte(blue);
     }
 }

@@ -13,6 +13,7 @@ import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.
 import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
 import Line from "./canvasObject/canvasObjects/Line.js";
 import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
+import color from "../ColorSelector.js";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -215,7 +216,7 @@ export class Canvas {
                 } else {
                     if (this.selected.canvasObjectWrapper === null) {
                         if ((event.buttons & 1) === 0) {
-                            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE);
+                            let shape = Shape.create(event.offsetX, event.offsetY, 50, 50, ShapeType.RECTANGLE, color);
                             this.insert(CanvasObjectType.SHAPE, shape);
                         }
                     }
