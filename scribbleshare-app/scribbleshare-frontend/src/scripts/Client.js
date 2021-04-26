@@ -8,11 +8,13 @@ export default class Client {
         this.icon.addEventListener('mouseenter', (event) => {
             let rect = this.icon.getBoundingClientRect();
             this.iconTooltip.style.visibility = 'visible';
+            this.iconTooltip.style.display = 'initial';
             this.iconTooltip.style.top = rect.top + 'px';
-            this.iconTooltip.style.left = rect.left + -50 + 'px';
+            this.iconTooltip.style.left = rect.left + -150 + 'px';
         })
         this.icon.addEventListener('mouseleave', (event) => {
             this.iconTooltip.style.visibility = 'hidden';
+            this.iconTooltip.style.display = 'none';
         })
         this.iconTooltip = document.createElement('div');
         if (user != null) {
@@ -22,6 +24,7 @@ export default class Client {
         this.iconTooltip.style.visibility = 'hidden';
         this.iconTooltip.style.zIndex = '1000';
         this.iconTooltip.style.color = 'black';
-        document.getElementsByTagName('body')[0].parentNode.appendChild(this.iconTooltip);
+        this.iconTooltip.style.display = 'none';
+        document.body.appendChild(this.iconTooltip);
     }
 }
