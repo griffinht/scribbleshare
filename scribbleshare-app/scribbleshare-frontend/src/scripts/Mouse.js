@@ -13,7 +13,7 @@ export default class Mouse {
             this.y = event.offsetY;
             this.dx += event.movementX;
             this.dy += event.movementY;
-            if (this.down) {
+            if (this.down && (event.buttons & 1) === 1) {
                 this.drag = true;
             }
         });
