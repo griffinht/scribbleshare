@@ -105,6 +105,7 @@ aside button:active {
 #colors {
     display: flex;
     flex-direction: row;
+    align-content: space-evenly;
 }
 
 input[type="radio"] {
