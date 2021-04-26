@@ -13,6 +13,6 @@ document.getElementById("shape2").addEventListener('click', (event) => {
 })
 document.getElementById("shape3").addEventListener('click', (event) => {
     out.src = "assets/triangle.png";
-    shape.a = ShapeType.ELLIPSE;
+    shape.a = ShapeType.TRIANGLE;
 })
 export default shape;

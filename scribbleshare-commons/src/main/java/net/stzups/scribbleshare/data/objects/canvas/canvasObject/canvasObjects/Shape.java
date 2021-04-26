@@ -11,6 +11,7 @@ public class Shape extends EntityCanvasObject {
     private enum Type {
         RECTANGLE(0),
         ELLIPSE(1),
+        TRIANGLE(2),
         ;
 
         private static final Map<Integer, Type> objectTypeMap = new IntObjectHashMap<>();

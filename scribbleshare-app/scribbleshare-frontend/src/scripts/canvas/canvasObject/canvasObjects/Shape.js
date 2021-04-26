@@ -23,6 +23,13 @@ export default class Shape extends EntityCanvasObject {
                 ctx.fill();
                 ctx.stroke();
                 break;
+            case ShapeType.TRIANGLE:
+                ctx.beginPath();
+                ctx.moveTo(this.width / 2 + 20, this.height / 2);
+                ctx.lineTo(this.width / 2, this.height / 2 - 50);
+                ctx.lineTo(this.width / 2 - 50, this.height / 2);
+                ctx.fill();
+                ctx.stroke();
         }
         ctx.strokeStyle = '#000';
     }
@@ -53,4 +60,5 @@ export default class Shape extends EntityCanvasObject {
 export const ShapeType = {
     RECTANGLE:0,
     ELLIPSE:1,
+    TRIANGLE:2,
 }
