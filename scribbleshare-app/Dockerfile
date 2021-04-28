@@ -15,6 +15,7 @@ build-typescript.sh
 # Runtime (Java 11)
 #
 FROM adoptopenjdk/openjdk11:alpine-jre
+RUN apk --no-cache add curl
 
 WORKDIR /usr/app
 

@@ -27,6 +27,13 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
         ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
 
+        if (request.uri().equals("/healthcheck")) {
+            System.out.println(ctx.channel().remoteAddress());
+            send(ctx, request, HttpResponseStatus.OK);
+            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
+            return;
+        }
+
         if (request.decoderResult().isFailure()) {
             send(ctx, request, HttpResponseStatus.BAD_REQUEST);
             ServerInitializer.getLogger(ctx).info("Bad request");
@@ -39,11 +46,6 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-/*        if (request.uri().equals("/healthcheck")) {
-            send(ctx, request, HttpResponseStatus.OK);
-            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
-            return;
-        }*/
 
         if (!request.uri().equals(ServerInitializer.WEBSOCKET_PATH)) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
