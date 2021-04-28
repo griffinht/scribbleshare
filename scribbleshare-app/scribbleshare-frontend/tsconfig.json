@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./build",
+    "outDir": "./build/scripts",
     "allowJs": true,
     "target": "ES6"
   },
