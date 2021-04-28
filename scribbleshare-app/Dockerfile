@@ -26,6 +26,6 @@ COPY --from=scribbleshare-frontend-build /usr/src/app/build ./html
 # Copy jar (should already be built with gradle shadowJar)
 COPY scribbleshare-backend/build/libs/scribbleshare-backend-all.jar scribbleshare-backend.jar
 
-HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD curl --fail http://localhost:80/ || exit 1
+HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD curl --fail http://localhost:80/healthcheck || exit 1
 
 ENTRYPOINT ["java", "-jar", "scribbleshare-backend.jar"]

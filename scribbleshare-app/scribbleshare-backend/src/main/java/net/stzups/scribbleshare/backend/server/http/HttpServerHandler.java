@@ -27,7 +27,6 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
@@ -43,15 +42,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -92,25 +96,28 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
+    private Set<SocketAddress> healthCheckRequests = new HashSet<>();
+
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
+
         if (!request.decoderResult().isSuccess()) {
-            sendError(ctx, request, HttpResponseStatus.BAD_REQUEST);
+            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
         // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
         // split query from path
         final String[] splitQuery = splitQuery(uri);
         if (splitQuery == null) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
         final String path = splitQuery[0];
@@ -118,21 +125,41 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         Map<String, String> queries = parseQuery(rawQuery);
         if (queries == null) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
         }
 
         String[] route = getRoute(path);
         if (route == null) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
         // check if this is a special request
 
         switch (route[0]) {
+            case "healthcheck": {
+                System.out.println(route.length);
+                if (route.length != 1) {
+                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                    return;
+                }
+
+                if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
+                    ServerInitializer.getLogger(ctx).warning("Healthcheck request from address which is not a loopback address");
+                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                    return;
+                }
+
+                if (healthCheckRequests.add(ctx.channel().remoteAddress())) {
+                    ServerInitializer.getLogger(ctx).info("Good healthcheck request");
+                }
+
+                send(ctx, request, HttpResponseStatus.OK);
+                return;
+            }
             case "api": {
                 if (route.length < 2) {
-                    sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
                     return;
                 }
 
@@ -144,7 +171,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         Long userId = authenticate(ctx, request);
                         if (userId == null) {
-                            sendError(ctx, request, HttpResponseStatus.UNAUTHORIZED);
+                            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
                             return;
                         }
 
@@ -170,7 +197,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
                                 //todo
-                                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                                send(ctx, request, HttpResponseStatus.NOT_FOUND);
                                 return;
                                 /*Resource resource = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
                                 if (resource == null) { //indicates an empty unsaved canvas, so serve that
@@ -188,7 +215,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 }
                                 send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(document.getId(), new Resource(request.content()))));
                             } else {
-                                sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
                         } else { // route.length == 4, get resource from document
                             // does the document have this resource?
@@ -216,20 +243,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 headers.add(HttpHeaderNames.CACHE_CONTROL, "private,max-age=" + MAX_AGE_NO_EXPIRE + ",immutable");//cache and never revalidate - permanent
                                 sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())));
                             } else {
-                                sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
                         }
                         return;
                     }
                 }
-                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                send(ctx, request, HttpResponseStatus.NOT_FOUND);
                 return;
             }
 
         }
 
         if (!HttpMethod.GET.equals(request.method())) {
-            sendError(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
             return;
         }
 
@@ -250,7 +277,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // get filesystem filePath from provided filePath
         final String filePath = getFilePath(path);
         if (filePath == null) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
 
@@ -259,7 +286,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             if (new File(HTTP_ROOT, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
                 sendRedirect(ctx, request, path + "/" + rawQuery);
             } else {
-                sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+                send(ctx, request, HttpResponseStatus.NOT_FOUND);
             }
             return;
         }
@@ -283,7 +310,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (ctx.channel().isActive()) {
-            sendError(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            send(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -363,7 +390,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         send(ctx, request, response);
     }
 
-    private static void sendError(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
+    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
 
         send(ctx, request, response);
@@ -398,14 +425,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             raf = new RandomAccessFile(file, "r");
         } catch (FileNotFoundException ignore) {
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
         long fileLength = raf.length();
         String mimeType = MimeTypes.getMimeType(file);
         if (mimeType == null) {
             ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
-            sendError(ctx, request, HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
         headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
@@ -436,7 +463,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static void logIn(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
         if (!logIn(request, headers)) {
             ServerInitializer.getLogger(ctx).warning("Bad authentication");
-            sendError(ctx, request, HttpResponseStatus.UNAUTHORIZED);
+            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             //todo rate limiting strategies
         } else {
             ServerInitializer.getLogger(ctx).info("Good authentication");
