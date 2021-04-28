@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm -rf build
+./build.sh
 
 npx babel src/scripts --out-file build/scripts/main.js
