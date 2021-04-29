@@ -1,65 +1,47 @@
-let color = {
-    r:0,
-    g:0,
-    b:0,
-}
+import Color from "./Color";
+
+const color: Color = Color.create(0, 0, 0);
 export default color;
-const output = document.getElementById("colorOut");
-function set(color) {
-    output.style.backgroundColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+const output: HTMLElement = document.getElementById("colorOut")!;
+function set(red: number, green: number, blue: number) {
+    color.set(red, green, blue);
+    output.style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
 }
-document.getElementById("color1").addEventListener('click', (event) => {
-    color.r = 255;
-    color.g = 0;
-    color.b = 0;
-    set(color);
+document.getElementById("color1")!.addEventListener('click', (event) => {
+    set(255, 0, 0);
 });
 
-document.getElementById("color2").addEventListener('click', (event) => {
-    color.r = 0;
-    color.g = 255;
-    color.b = 0;set(color);
+document.getElementById("color2")!.addEventListener('click', (event) => {
+    set(0, 255, 0);
 })
 
 
-document.getElementById("color3").addEventListener('click', (event) => {
-    color.r = 0;
-    color.g = 255;
-    color.b = 255;set(color);
+document.getElementById("color3")!.addEventListener('click', (event) => {
+    set(0, 255, 255);
 })
 
 
 
-document.getElementById("color4").addEventListener('click', (event) => {
-    color.r = 0;
-    color.g = 0;
-    color.b = 255;set(color);
+document.getElementById("color4")!.addEventListener('click', (event) => {
+    set(0, 0, 255);
 })
 
-document.getElementById("color5").addEventListener('click', (event) => {
-    color.r = 255;
-    color.g = 0;
-    color.b = 255;set(color);
+document.getElementById("color5")!.addEventListener('click', (event) => {
+    set(255, 0, 255);
 })
 
-document.getElementById("color6").addEventListener('click', (event) => {
-    color.r = 255;
-    color.g = 255;
-    color.b = 0;set(color);
+document.getElementById("color6")!.addEventListener('click', (event) => {
+    set(255, 255, 0);
 })
 
 
 
-document.getElementById("color7").addEventListener('click', (event) => {
-    color.r = 255;
-    color.g = 255;
-    color.b = 255;set(color);
+document.getElementById("color7")!.addEventListener('click', (event) => {
+    set(255, 255, 255);
 })
 
 
-document.getElementById("color8").addEventListener('click', (event) => {
-    color.r = 0;
-    color.g = 0;
-    color.b = 0;set(color);
+document.getElementById("color8")!.addEventListener('click', (event) => {
+    set(0, 0, 0);
 })
 
