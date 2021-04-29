@@ -25,7 +25,7 @@ export default class CanvasImage extends EntityCanvasObject {
         byteBuffer.writeBigInt64(this.id);
     }
 
-    static create(x: number, y: number, id: number, image: HTMLImageElement) {
+    static create(x: number, y: number, id: bigint, image: HTMLImageElement) {
         let object = Object.create(this.prototype);
         object.x = x;
         object.y = y;
