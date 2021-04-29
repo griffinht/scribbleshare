@@ -8,23 +8,24 @@ import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
 import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
 import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageMouseMove from "./messages/ServerMessageMouseMove.js";
+import BufferReader from "../BufferReader";
 
-const ServerMessageType = {
-    ADD_CLIENT:0,
-    REMOVE_CLIENT:1,
-    UPDATE_DOCUMENT:2,
-    ADD_USER:3,
-    DELETE_DOCUMENT:4,
-    GET_INVITE:5,
-    OPEN_DOCUMENT:6,
-    CANVAS_UPDATE:7,
-    HANDSHAKE:8,
-    MOUSE_MOVE:9,
-};
+enum ServerMessageType {
+    ADD_CLIENT,
+    REMOVE_CLIENT,
+    UPDATE_DOCUMENT,
+    ADD_USER,
+    DELETE_DOCUMENT,
+    GET_INVITE,
+    OPEN_DOCUMENT,
+    CANVAS_UPDATE,
+    HANDSHAKE,
+    MOUSE_MOVE,
+}
 export default ServerMessageType;
 
 
-export function getServerMessage(type, reader) {
+export function getServerMessage(type: ServerMessageType, reader: BufferReader) {
     let message;
     switch (type) {
         case ServerMessageType.ADD_CLIENT:

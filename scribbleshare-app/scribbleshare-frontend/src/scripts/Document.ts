@@ -26,6 +26,8 @@ const deleteButton = document.getElementById('deleteButton');
 const sidebar = new Sidebar(document.getElementById('side'));
 
 class Document {
+    clients:Map<number, Client>();
+
     constructor(name, id) {
         this.clients = new Map();
         this.name = name;

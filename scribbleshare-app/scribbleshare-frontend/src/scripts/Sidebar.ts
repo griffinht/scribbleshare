@@ -1,10 +1,14 @@
+'use strict'
 export default class Sidebar {
-    constructor(element) {
+    items: Array<SidebarItem>;
+    element: HTMLElement;
+
+    constructor(element: HTMLElement) {
         this.items = [];
         this.element = element;
     }
 
-    addItem(display, open) {
+    addItem(display: string, open: () => void) {
         let a = new SidebarItem(display, open, this);
         this.items.push(a);
         return a;
@@ -12,11 +16,15 @@ export default class Sidebar {
 }
 
 class SidebarItem {
-    constructor(display, open, a) {
+    a: Sidebar;
+    open: () => (void);
+    button:HTMLButtonElement
+
+    constructor(display: string, open: () => void, a: Sidebar) {
         this.a = a;
         this.open = open;
         this.button = document.createElement("button");
-        let inner = document.createTextNode(display);
+        let inner: Text = document.createTextNode(display);
         this.button.appendChild(inner);
         this.button.addEventListener('click', () => {
             this.setActive(true);
@@ -24,7 +32,7 @@ class SidebarItem {
         this.a.element.appendChild(this.button);
     }
 
-    setActive(open) {
+    setActive(open: boolean) {
         this.a.items.forEach(item => {
             if (this === item) {
                 this.button.classList.add('active');
@@ -38,7 +46,7 @@ class SidebarItem {
     }
 
     remove() {
-        for (let i = 0; i < this.a.items.length; i++) {
+        for (let i: number = 0; i < this.a.items.length; i++) {
             if (this.a.items[i] === this) {
                 this.a.items.splice(i, 1);
                 this.a.element.removeChild(this.button);

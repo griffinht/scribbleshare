@@ -1,5 +1,14 @@
 export default class Mouse {
-    constructor(element) {
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    width: number;
+    height: number;
+    down: boolean;
+    drag: boolean;
+
+    constructor(element: HTMLElement) {
         this.x = 0;
         this.y = 0;
         this.dx = 0;
@@ -17,16 +26,16 @@ export default class Mouse {
                 this.drag = true;
             }
         });
-        element.addEventListener('mousedown', (event) => {
+        element.addEventListener('mousedown', () => {
             this.down = true;
         });
 
-        element.addEventListener('mouseup', (event) => {
+        element.addEventListener('mouseup', () => {
             this.down = false;
             this.drag = false;
         });
 
-        element.addEventListener('mouseleave', (event) => {
+        element.addEventListener('mouseleave', () => {
             this.down = false;
             this.drag = false;
         });

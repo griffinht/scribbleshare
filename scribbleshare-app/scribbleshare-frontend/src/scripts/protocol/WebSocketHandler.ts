@@ -2,8 +2,7 @@ import BufferReader from './BufferReader.js'
 import BufferWriter from "./BufferWriter.js";
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import SocketEventType from "./SocketEventType.js";
-
-const webSocketUrl = 'ws://localhost:18080/scribblesocket';
+import Environment from "../Environment.js";
 
 class WebSocketHandler {
     constructor() {
@@ -18,8 +17,8 @@ class WebSocketHandler {
             this.serverMessageEvents[value] = [];
         });
 
-        console.log('Opening WebSocket connection to ' + webSocketUrl);
-        this.socket = new WebSocket(webSocketUrl);
+        console.log('Opening WebSocket connection to ' + Environment.WEBSOCKET_HOST);
+        this.socket = new WebSocket(Environment.WEBSOCKET_HOST);
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {

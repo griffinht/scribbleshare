@@ -1,5 +1,7 @@
 export default class Modal {
-    constructor(modal) {
+    modal: HTMLElement;
+
+    constructor(modal: HTMLElement) {
         this.modal = modal;
         this.hide();
     }
