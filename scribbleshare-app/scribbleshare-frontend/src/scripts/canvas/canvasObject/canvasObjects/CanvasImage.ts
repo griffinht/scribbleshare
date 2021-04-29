@@ -1,14 +1,19 @@
 import {ctx} from "../../Canvas.js";
 import {activeDocument} from "../../../Document.js";
-import {apiUrl} from "../../../main.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
+import Environment from "../../../Environment";
 
 export default class CanvasImage extends EntityCanvasObject {
+    id: bigint;
+    image: HTMLImageElement;
+
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
         this.id = byteBuffer.readBigInt64();
         this.image = document.createElement('img');
-        this.image.src = apiUrl + '/document/' + activeDocument.id + '/' + this.id;
+        // @ts-ignore todo
+        this.image.src = Environment.API_HOST + '/document/' + activeDocument.id + '/' + this.id;
     }
 
     draw() {
@@ -20,7 +25,7 @@ export default class CanvasImage extends EntityCanvasObject {
         byteBuffer.writeBigInt64(this.id);
     }
 
-    static create(x, y, id, image) {
+    static create(x: number, y: number, id: number, image: HTMLImageElement) {
         let object = Object.create(this.prototype);
         object.x = x;
         object.y = y;

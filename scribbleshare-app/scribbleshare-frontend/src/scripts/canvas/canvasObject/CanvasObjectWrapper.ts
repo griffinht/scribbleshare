@@ -1,12 +1,17 @@
 import {getCanvasObject} from "./getCanvasObject.js";
+import CanvasObject from "./CanvasObject";
+import ByteBuffer from "../../protocol/ByteBuffer";
 
 export default class CanvasObjectWrapper {
-    constructor(canvasObjectType, canvasObject) {
-        this.canvasObjectType = canvasObjectType;
+    canvasObjectType: CanvasObjectType;
+    canvasObject: CanvasObject;
+
+    constructor(type: CanvasObjectType, canvasObject: CanvasObject) {
+        this.canvasObjectType = type;
         this.canvasObject = canvasObject;
     }
 
-    serialize(byteBuffer: ByteBuffer) {
+    serialize(byteBuffer: ByteBuffer) {//todo implict returns??
         byteBuffer.writeUint8(this.canvasObjectType);
         this.canvasObject.serialize(byteBuffer);
     }

@@ -1,5 +1,6 @@
 import {ctx} from "../../Canvas.js";
 import CanvasObject from "../CanvasObject.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
 const pointerImage = document.createElement('img');
 pointerImage.src = '/assets/pointer.png';
 

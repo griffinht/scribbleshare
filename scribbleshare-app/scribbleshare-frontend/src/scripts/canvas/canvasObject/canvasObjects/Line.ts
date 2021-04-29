@@ -1,7 +1,13 @@
 import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
 
 export default class LineCanvasObject extends CanvasObject {
+    red: number;
+    green: number;
+    blue: number;
+    points: Array<Point>;
+
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
         this.red = byteBuffer.readUint8();

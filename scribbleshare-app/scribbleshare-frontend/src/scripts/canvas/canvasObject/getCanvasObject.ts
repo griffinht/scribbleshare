@@ -1,12 +1,12 @@
-import {CanvasObjectType} from "./CanvasObjectType.js";
 import Shape from "./canvasObjects/Shape.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
 import CanvasMouse from "./canvasObjects/CanvasMouse.js";
 import LineCanvasObject from "./canvasObjects/Line.js";
+import ByteBuffer from "../../protocol/ByteBuffer";
 
-export function getCanvasObject(canvasObjectType, byteBuffer) {
+export function getCanvasObject(type: CanvasObjectType, byteBuffer: ByteBuffer) {
     let object;
-    switch (canvasObjectType) {
+    switch (type) {
         case CanvasObjectType.SHAPE:
             object = new Shape(byteBuffer);
             break;
@@ -20,7 +20,7 @@ export function getCanvasObject(canvasObjectType, byteBuffer) {
             object = new LineCanvasObject(byteBuffer);
             break;
         default:
-            console.error('unknown canvasObjectType ' + canvasObjectType);
+            console.error('unknown canvasObjectType ' + type);
     }
     return object;
 }

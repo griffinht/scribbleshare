@@ -15,6 +15,9 @@ import Line from "./canvasObject/canvasObjects/Line.js";
 import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
 import color from "../ColorSelector.js";
 import shapee from "../ShapeSelector.js";
+import ByteBuffer from "../protocol/ByteBuffer";
+import CanvasObject from "./canvasObject/CanvasObject";
+import CanvasUpdate from "./canvasUpdate/CanvasUpdate";
 
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -31,6 +34,20 @@ let leftLock = false;
 let rightLock = false;
 
 export class Canvas {
+    isOpen: boolean;
+    last: number;
+    lastFlushSelected: number;
+    lastFlushMouse: number;
+    lastFlushLine: number;
+    canvasObjectWrappers: Map<number, CanvasObject>;
+    canvasUpdates: Array<CanvasUpdate>;
+    selected: {
+        id: number;
+        canvasObjectWrapper: CanvasObjectWrapper | null;
+        dirty: boolean;
+    }
+    localMouse: Mouse | null;
+
     constructor(byteBuffer: ByteBuffer) {
         this.isOpen = false;
         this.last = 0;

@@ -1,7 +1,12 @@
 import CanvasUpdate from "../CanvasUpdate.js";
-import {CanvasUpdateType} from "../CanvasUpdateType.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
+import {Canvas} from "../../Canvas";
 
 export default class CanvasUpdateDelete extends CanvasUpdate {
+    dt: number;
+    id: number;
+    time: number;
+
     constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.DELETE);
         this.dt = byteBuffer.readUint8();
@@ -9,12 +14,13 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         this.time = 0;
     }
 
-    draw(canvas, dt) {
+    draw(canvas: Canvas, dt: number): boolean {
         this.time += dt;
         if (this.dt <= this.time) {
             canvas.canvasObjectWrappers.delete(this.id);
             return true;
         }
+        return false;
     }
 
     serialize(byteBuffer: ByteBuffer) {
@@ -23,7 +29,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         byteBuffer.writeInt16(this.id);
     }
 
-    static create(time, id) {
+    static create(time: number, id: bigint) {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.DELETE;
         object.dt = time;

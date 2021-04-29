@@ -1,7 +1,11 @@
 import CanvasObject from "./CanvasObject.js";
-import {lerp} from "../Canvas.js";
+import ByteBuffer from "../../protocol/ByteBuffer";
 
 export default class EntityCanvasObject extends CanvasObject {
+    width: number;
+    height: number;
+    rotation: number;
+
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
         this.width = byteBuffer.readInt16();

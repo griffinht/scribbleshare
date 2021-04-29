@@ -1,6 +1,6 @@
-export const CanvasObjectType = {
-    SHAPE:0,
-    IMAGE:1,
-    MOUSE:2,
-    LINE:3,
+enum CanvasObjectType {
+    SHAPE,
+    IMAGE,
+    MOUSE,
+    LINE,
 }
