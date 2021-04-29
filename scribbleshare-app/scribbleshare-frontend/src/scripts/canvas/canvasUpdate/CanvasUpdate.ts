@@ -8,8 +8,8 @@ export default class CanvasUpdate {
         this.type = type;
     }
 
-    draw(canvas: Canvas, dt: number) {
-
+    draw(canvas: Canvas, dt: number): boolean {
+        return true;
     }
 
     serialize(byteBuffer: ByteBuffer) {

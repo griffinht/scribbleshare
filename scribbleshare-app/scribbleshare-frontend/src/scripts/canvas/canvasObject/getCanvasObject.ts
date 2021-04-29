@@ -20,7 +20,7 @@ export function getCanvasObject(type: CanvasObjectType, byteBuffer: ByteBuffer) 
             object = new LineCanvasObject(byteBuffer);
             break;
         default:
-            console.error('unknown canvasObjectType ' + type);
+            throw new Error('unknown canvasObjectType ' + type);
     }
     return object;
 }

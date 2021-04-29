@@ -29,7 +29,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         byteBuffer.writeInt16(this.id);
     }
 
-    static create(time: number, id: bigint) {
+    static create(time: number, id: number) {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.DELETE;
         object.dt = time;

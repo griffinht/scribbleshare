@@ -1,27 +1,38 @@
 import CanvasUpdate from "../CanvasUpdate.js";
-import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObject from "../../canvasObject/CanvasObject.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
+import {Canvas} from "../../Canvas";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
+    canvasMoves: CanvasMove[];
+    id: number;
+    set: boolean;
+    i: number;
+    time: number;
+
     constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.MOVE);
         this.canvasMoves = [];
         this.id = byteBuffer.readInt16();
         this.set = false;
         this.i = 0;
+        this.time = 0;
         let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
             this.canvasMoves.push(new CanvasMove(byteBuffer));
         }
     }
 
-    move(time, canvasObject) {
+    move(time: number, canvasObject: CanvasObject) {
         this.canvasMoves.push(CanvasMove.create(time, canvasObject));
         this.time = time;
     }
 
-    draw(canvas, time) {
+    draw(canvas: Canvas, time: number) {
         let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
+        if (canvasObjectWrapper === undefined) {
+            throw new Error('undefined for ' + this.id); //todo
+        }
         if (!this.set) {
             this.set = true;
             canvasObjectWrapper.canvasObject.original = CanvasObject.clone(canvasObjectWrapper.canvasObject);
@@ -68,7 +79,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         });
     }
 
-    static create(id, time) {
+    static create(id: number, time: number) {
         let object = Object.create(this.prototype);
         object.canvasUpdateType = CanvasUpdateType.MOVE;
         object.time = 0;
@@ -81,6 +92,9 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 }
 
 class CanvasMove {
+    dt: number;
+    canvasObject: CanvasObject;
+
     constructor(byteBuffer: ByteBuffer) {
         this.dt = byteBuffer.readUint8();
         this.canvasObject = new CanvasObject(byteBuffer);
@@ -91,7 +105,7 @@ class CanvasMove {
         this.canvasObject.serialize(byteBuffer);
     }
 
-    static create(dt, canvasObject) {
+    static create(dt: number, canvasObject: CanvasObject) {
         let canvasMove = Object.create(this.prototype);
         canvasMove.dt = dt;
         canvasMove.canvasObject = CanvasObject.clone(canvasObject);

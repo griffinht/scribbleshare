@@ -11,6 +11,10 @@ export default class Color {
         this.blue = byteBuffer.readUint8();
     }
 
+    getRgb() {
+        return 'rgb(' + this.red + ',' + this.green + ',' + this.blue + ')';
+    }
+
     update(color: Color) {
         this.red = color.red;
         this.green = color.green;
@@ -32,6 +36,12 @@ export default class Color {
     static create(red: number, green: number, blue: number) {
         let object: Color = Object.create(this.prototype);
         object.set(red, green, blue);
+        return object;
+    }
+
+    static from(color: Color) {
+        let object: Color = Object.create(this.prototype);
+        object.update(color);
         return object;
     }
 }

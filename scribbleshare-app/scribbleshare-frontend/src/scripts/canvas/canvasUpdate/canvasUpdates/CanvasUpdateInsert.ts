@@ -1,8 +1,14 @@
 import CanvasUpdate from "../CanvasUpdate.js";
-import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
+import ByteBuffer from "../../../protocol/ByteBuffer";
+import {Canvas} from "../../Canvas";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
+    dt: number;
+    id: number;
+    canvasObjectWrapper: CanvasObjectWrapper;
+    time: number;
+
     constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.INSERT);
         this.dt = byteBuffer.readUint8();
@@ -11,7 +17,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         this.time = 0;
     }
 
-    draw(canvas, dt) {
+    draw(canvas: Canvas, dt: number) {
         this.time += dt; //accumulated dt
         if (this.dt <= this.time) {
             canvas.canvasObjectWrappers.set(this.id, this.canvasObjectWrapper);
@@ -27,9 +33,9 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         this.canvasObjectWrapper.serialize(byteBuffer);
     }
 
-    static create(dt, id, canvasObjectWrapper) {
-        let object = Object.create(this.prototype);
-        object.canvasUpdateType = CanvasUpdateType.INSERT;
+    static create(dt: number, id: number, canvasObjectWrapper: CanvasObjectWrapper) {
+        let object: CanvasUpdateInsert = Object.create(this.prototype);
+        object.type = CanvasUpdateType.INSERT;
         object.dt = dt;
         object.id = id;
         object.canvasObjectWrapper = canvasObjectWrapper;

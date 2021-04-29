@@ -1,5 +1,4 @@
 import Shape, {ShapeType} from "./canvasObject/canvasObjects/Shape.js";
-import {CanvasObjectType} from "./canvasObject/CanvasObjectType.js";
 import {activeDocument, localClient, localClientId} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
@@ -10,26 +9,26 @@ import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
 import Mouse from "../Mouse.js";
 import CanvasUpdateDelete from "./canvasUpdate/canvasUpdates/CanvasUpdateDelete.js";
 import CanvasUpdateInsert from "./canvasUpdate/canvasUpdates/CanvasUpdateInsert.js";
-import CanvasMouse from "./canvasObject/canvasObjects/CanvasMouse.js";
 import Line from "./canvasObject/canvasObjects/Line.js";
 import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
 import color from "../ColorSelector.js";
 import shapee from "../ShapeSelector.js";
 import ByteBuffer from "../protocol/ByteBuffer";
-import CanvasObject from "./canvasObject/CanvasObject";
 import CanvasUpdate from "./canvasUpdate/CanvasUpdate";
+import CanvasObject from "./canvasObject/CanvasObject";
+import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessageCanvasUpdate";
 
-export const canvas = document.getElementById('canvas');
-export const ctx = canvas.getContext('2d');
+export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
+export const ctx = canvas.getContext('2d')!;
 
 const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
-let canvasUpdates = [];//todo these could be instance variables but idk
-let canvasUpdateMove = null;
-let mouseUpdateMove = null;
-let line = null;
+let canvasUpdates: Array<CanvasUpdate> = [];//todo these could be instance variables but idk
+let canvasUpdateMove: CanvasUpdateMove | null = null;
+let mouseUpdateMove: CanvasUpdateMove | null = null;
+let line: Line | null = null;
 let leftLock = false;
 let rightLock = false;
 
@@ -39,7 +38,7 @@ export class Canvas {
     lastFlushSelected: number;
     lastFlushMouse: number;
     lastFlushLine: number;
-    canvasObjectWrappers: Map<number, CanvasObject>;
+    canvasObjectWrappers: Map<number, CanvasObjectWrapper>;
     canvasUpdates: Array<CanvasUpdate>;
     selected: {
         id: number;
@@ -90,7 +89,7 @@ export class Canvas {
         update();
     }
 
-    draw(now) {
+    draw(now: number) {
         if (!this.isOpen) {
             console.log(this.isOpen);
             return;
@@ -139,7 +138,9 @@ export class Canvas {
                 }
             }
         });
-        if (this.selected.canvasObjectWrapper !== null && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+        if (this.selected.canvasObjectWrapper !== null
+            && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject
+            && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             this.selected.canvasObjectWrapper = null;
         }
 
@@ -147,19 +148,20 @@ export class Canvas {
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
-    insert(canvasObjectType, canvasObject) {
+    insert(type: CanvasObjectType, canvasObject: CanvasObject) {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
-        let canvasObjectWrapper = new CanvasObjectWrapper(canvasObjectType, canvasObject);
+        let canvasObjectWrapper = new CanvasObjectWrapper(type, canvasObject);
+        // @ts-ignore todo
         activeDocument.canvas.canvasObjectWrappers.set(id, canvasObjectWrapper);
         canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
     }
 
-    delete(id) {
+    delete(id: number) {
         this.canvasObjectWrappers.delete(id);
         canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
 
-    update(canvasUpdates) {
+    update(canvasUpdates: Array<CanvasUpdate>) {
         canvasUpdates.forEach((canvasUpdate) => {
             this.canvasUpdates.push(canvasUpdate);
         })
@@ -185,7 +187,7 @@ export class Canvas {
     }
 
     flushMouse() {
-        if (false && mouseUpdateMove !== null) {
+/*        if (false && mouseUpdateMove !== null) {
             if (((Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) && this.last - this.lastFlushMouse > 100)
                 || (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30)) {
                 mouseUpdateMove.move(getNow(), this.localMouse);
@@ -193,7 +195,7 @@ export class Canvas {
                 this.lastFlushMouse = window.performance.now();
                 mouse.reset();
             }
-        }
+        }*/
     }
 
     flushLine() {
@@ -201,7 +203,7 @@ export class Canvas {
         this.lastFlushLine = window.performance.now();
     }
 
-    onEvent(event) {
+    onEvent(event: MouseEvent) {
         switch (event.type) {
             case 'mousemove': {
 /*                this.localMouse.x = mouse.x;
@@ -214,7 +216,7 @@ export class Canvas {
 
                     if ((event.buttons & 1) !== 1) {
                         rightLock = true;
-                        if (this.selected.canvasObjectWrapper !== null) {
+                        if (this.selected.canvasObjectWrapper !== null && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
                             this.selected.canvasObjectWrapper.canvasObject.width += event.movementX;
                             this.selected.canvasObjectWrapper.canvasObject.height += event.movementY;
                             canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
@@ -285,7 +287,14 @@ export class Canvas {
     }
 }
 
-function aabb(rect1, rect2, padding) {
+interface Rectangle {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+function aabb(rect1: Rectangle, rect2: Rectangle, padding: number) {
     return rect1.x - padding < rect2.x + rect2.width &&
         rect1.x + rect1.width + padding > rect2.x &&
         rect1.y - padding < rect2.y + rect2.height &&
@@ -295,7 +304,7 @@ function aabb(rect1, rect2, padding) {
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let rect = canvas.parentNode.getBoundingClientRect();
+    let rect = canvas.parentNode.getBoundingClientRect();//todo
     canvas.width = rect.width;
     canvas.height = rect.height;
     ctx.putImageData(imageData, 0, 0);
@@ -306,7 +315,7 @@ resizeCanvas();
 
 
 
-function onEvent(event) {
+function onEvent(event: MouseEvent) {
     if (activeDocument !== null) {
         activeDocument.canvas.onEvent(event);
     }
@@ -324,7 +333,7 @@ export const UPDATE_INTERVAL = 1000;
 
 let lastUpdate = 0;
 
-function convertTime(time) {
+function convertTime(time: number) {
     return time / UPDATE_INTERVAL * 255;
 }
 
@@ -333,12 +342,13 @@ function getNow() {
 }
 
 let lastRemoteUpdate = 0;
-socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate) => {
+socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate: ServerMessageCanvasUpdate) => {
     //apply remote updates
     lastRemoteUpdate = window.performance.now();
+    // @ts-ignore todo
     activeDocument.canvas.update(serverMessageCanvasUpdate.canvasUpdates);
 });
-socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (a) => {
+socket.addMessageListener(ServerMessageType.MOUSE_MOVE, () => {
     lastRemoteUpdate = window.performance.now();
 })
 
@@ -373,6 +383,6 @@ setInterval(update, UPDATE_INTERVAL);
 
 
 
-export function lerp(v0, v1, t) {
+export function lerp(v0: number, v1: number, t: number) {
     return v0 * (1 - t) + v1 * t;
 }
