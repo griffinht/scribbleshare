@@ -1,8 +1,13 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
+import ByteBuffer from "../../ByteBuffer";
+import Document from "../../../Document";
 
 export default class ClientMessageUpdateDocument extends ClientMessage {
-    constructor(document) {
+    id: bigint;
+    name: string;
+
+    constructor(document: Document) {
         super(ClientMessageType.UPDATE_DOCUMENT);
         this.id = document.id;
         this.name = document.name;

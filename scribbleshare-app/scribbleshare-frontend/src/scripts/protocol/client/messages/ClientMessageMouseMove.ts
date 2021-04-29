@@ -1,8 +1,12 @@
 import ClientMessage from "../ClientMessage.js";
 import ClientMessageType from "../ClientMessageType.js";
+import MouseMove from "../../../MouseMove";
+import ByteBuffer from "../../ByteBuffer";
 
 export default class ClientMessageMouseMove extends ClientMessage {
-    constructor(mouseMoves) {
+    mouseMoves: Array<MouseMove>;
+
+    constructor(mouseMoves: Array<MouseMove>) {
         super(ClientMessageType.MOUSE_MOVE);
         this.mouseMoves = mouseMoves;
     }

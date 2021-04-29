@@ -15,7 +15,7 @@ export default class Sidebar {
     }
 }
 
-class SidebarItem {
+export class SidebarItem {
     a: Sidebar;
     open: () => (void);
     button:HTMLButtonElement

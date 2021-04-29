@@ -1,8 +1,11 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
+import ByteBuffer from "../../ByteBuffer";
 
 export default class ClientMessageHandshake extends ClientMessage {
-    constructor(invite) {
+    invite: string;
+
+    constructor(invite: string) {
         super(ClientMessageType.HANDSHAKE);
         this.invite = invite;
     }

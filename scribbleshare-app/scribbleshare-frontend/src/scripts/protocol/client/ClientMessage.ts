@@ -1,5 +1,10 @@
+import ClientMessageType from "./ClientMessageType";
+import ByteBuffer from "../ByteBuffer";
+
 export default class ClientMessage {
-    constructor(type) {
+    type:ClientMessageType;
+
+    constructor(type: ClientMessageType) {
         this.type = type;
     }
 

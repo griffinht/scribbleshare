@@ -10,23 +10,27 @@ import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHand
 import invite from "./Invite.js";
 import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
-import Sidebar from "./Sidebar.js";
+import Sidebar, {SidebarItem} from "./Sidebar.js";
 import color from "./ColorSelector.js";
 import shape from "./ShapeSelector.js";
 
 const documents = new Map();
-export let activeDocument = null;
+export let activeDocument: Document | null = null;
 export const clientsToolbar = document.getElementById("clientsToolbar");
 export let localClientId = 0;
 export let localClient = null;
-const updateBar = document.getElementById('sideBottom');
+const updateBar = document.getElementById('sideBottom')!;
 updateBar.style.visibility = 'hidden';
 const renameInput = document.getElementById('renameInput');
 const deleteButton = document.getElementById('deleteButton');
-const sidebar = new Sidebar(document.getElementById('side'));
+const sidebar = new Sidebar(document.getElementById('side')!);
 
-class Document {
-    clients:Map<number, Client>();
+export default class Document {
+    clients: Map<number, Client>;
+    name: string;
+    id: bigint;
+    sidebarItem: SidebarItem;
+    canvas: Canvas;
 
     constructor(name, id) {
         this.clients = new Map();
