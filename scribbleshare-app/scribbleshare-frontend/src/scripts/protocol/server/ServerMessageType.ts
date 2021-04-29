@@ -9,6 +9,7 @@ import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
 import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageMouseMove from "./messages/ServerMessageMouseMove.js";
 import ByteBuffer from "../ByteBuffer";
+import ServerMessage from "./ServerMessage";
 
 enum ServerMessageType {
     ADD_CLIENT,
@@ -24,7 +25,7 @@ enum ServerMessageType {
 }
 export default ServerMessageType;
 
-export function getServerMessage(type: ServerMessageType, byteBuffer: ByteBuffer) {
+export function getServerMessage(type: ServerMessageType, byteBuffer: ByteBuffer): ServerMessage {
     let message;
     switch (type) {
         case ServerMessageType.ADD_CLIENT:
@@ -58,8 +59,7 @@ export function getServerMessage(type: ServerMessageType, byteBuffer: ByteBuffer
             message = new ServerMessageMouseMove(byteBuffer);
             break;
         default:
-            console.error('unknown payload type ' + type + ', offset ' + byteBuffer.position + ', event ', event);
-            break;
+            throw new Error('unknown payload type ' + type + ', offset ' + byteBuffer.position);
     }
     return message;
 }

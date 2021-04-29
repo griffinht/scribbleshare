@@ -2,8 +2,11 @@ export default class ByteBuffer {
     position: number;
     view: DataView;
 
-    constructor(buffer: ArrayBufferLike) {
+    constructor(buffer?: ArrayBufferLike) {
         this.position = 0;
+        if (buffer === undefined) {
+            buffer = new ArrayBuffer(0);
+        }
         this.view = new DataView(buffer);
     }
 

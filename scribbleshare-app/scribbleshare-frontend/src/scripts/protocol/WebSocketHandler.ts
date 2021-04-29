@@ -1,20 +1,21 @@
-import BufferbyteBuffer from './BufferbyteBuffer.js'
-import BufferbyteBuffer from "./BufferbyteBuffer.js";
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
-import SocketEventType from "./SocketEventType.js";
 import Environment from "../Environment.js";
+import ServerMessage from "./server/ServerMessage";
+import ByteBuffer from "./ByteBuffer";
 
 class WebSocketHandler {
+    messageQueue: ServerMessage[] = [];
+    socketEventListeners: Map<SocketEventType, ((event: Event) => void)[]> = new Map();
+    serverMessageListeners: Map<ServerMessageType, ((serverMessage: ServerMessage) => void)[]> = new Map();
+    socket: WebSocket;
+
     constructor() {
-        this.messageQueue = [];
-        this.socketEvents = {};
         Object.keys(SocketEventType).forEach((key, value) => {
-            this.socketEvents[value] = [];
+            this.socketEventListeners.set(value, []);
         });
 
-        this.serverMessageEvents = {};
         Object.keys(ServerMessageType).forEach((key, value) => {
-            this.serverMessageEvents[value] = [];
+            this.serverMessageListeners.set(value, []);
         });
 
         console.log('Opening WebSocket connection to ' + Environment.WEBSOCKET_HOST);
@@ -23,12 +24,12 @@ class WebSocketHandler {
 
         this.socket.addEventListener('open', (event) => {
             console.log('WebSocket connection opened');
-            this.dispatchEvent(SocketEventType.OPEN);
+            this.dispatchEvent(SocketEventType.OPEN, event);
         });
 
         this.socket.addEventListener('close', (event) => {
             console.log('WebSocket connection closed');
-            this.dispatchEvent(SocketEventType.CLOSE);
+            this.dispatchEvent(SocketEventType.CLOSE, event);
         });
     
         this.socket.addEventListener('message', (event) => {
@@ -36,7 +37,7 @@ class WebSocketHandler {
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
-                let byteBuffer = new BufferbyteBuffer(event.data);
+                let byteBuffer = new ByteBuffer(event.data);
                 while (byteBuffer.hasNext()) {
                     this.dispatchMessageEvent(getServerMessage(byteBuffer.readUint8(), byteBuffer));
                 }
@@ -48,26 +49,26 @@ class WebSocketHandler {
         });
     }
 
-    addEventListener(socketEventType, onSocketEvent) {
-        this.socketEvents[socketEventType].push(onSocketEvent);
+    addEventListener(type: SocketEventType, onEvent: (event: Event) => void) {
+        this.socketEventListeners.get(type)!.push(onEvent);
     }
     
-    dispatchEvent(socketEventType, socketEvent) {
-        console.log('recv', socketEventType, socketEvent);
-        this.socketEvents[socketEventType].forEach(onSocketEvent => onSocketEvent(socketEvent));
+    dispatchEvent(type: SocketEventType, event: Event) {
+        console.log('recv', type, event);
+        this.socketEventListeners.get(type)!.forEach(onEvent => onEvent(event));
     }
 
-    addMessageListener(serverMessageType, onServerMessage) {
-        this.serverMessageEvents[serverMessageType].push(onServerMessage);
+    addMessageListener(type: ServerMessageType, onMessageEvent: (serverMessage: ServerMessage) => void) {
+        this.serverMessageListeners.get(type)!.push(onMessageEvent);
     }
 
-    dispatchMessageEvent(serverMessage) {
+    dispatchMessageEvent(serverMessage:  ServerMessage) {
         console.log('recv', serverMessage.type, serverMessage);
-        this.serverMessageEvents[serverMessage.type].forEach(onServerMessage => onServerMessage(serverMessage));
+        this.serverMessageListeners.get(serverMessage.type)!.forEach(onServerMessage => onServerMessage(serverMessage));
     }
 
-    queue(message) {
-        this.messageQueue.push(message);
+    queue(serverMessage: ServerMessage) {
+        this.messageQueue.push(serverMessage);
     }
 
     flush() {
@@ -75,19 +76,19 @@ class WebSocketHandler {
         this.messageQueue.length = 0;
     }
 
-    send(messages) {
-        if (!Array.isArray(messages)) messages = [messages];
-        if (messages.length === 0) return;
+    send(serverMessages: ServerMessage[] | ServerMessage) {
+        if (!Array.isArray(serverMessages)) serverMessages = [serverMessages];
+        if (serverMessages.length === 0) return;
 
         if (this.socket.readyState === WebSocket.OPEN) {
-            let byteBuffer = new BufferbyteBuffer();
-            messages.forEach((message) => {
-                message.serialize(byteBuffer);
-                console.log('send', message);
+            let byteBuffer = new ByteBuffer();
+            serverMessages.forEach((serverMessage) => {
+                serverMessage.serialize(byteBuffer);
+                console.log('send', serverMessage);
             });
             this.socket.send(byteBuffer.getBuffer());
         } else {
-            console.error('tried to send messages while websocket was closed', messages);
+            console.error('tried to send messages while websocket was closed', serverMessages);
         }
     }
 }
