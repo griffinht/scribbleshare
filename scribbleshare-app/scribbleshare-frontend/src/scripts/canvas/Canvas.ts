@@ -31,7 +31,7 @@ let leftLock = false;
 let rightLock = false;
 
 export class Canvas {
-    constructor(reader) {
+    constructor(byteBuffer: ByteBuffer) {
         this.isOpen = false;
         this.last = 0;
         this.lastFlushSelected = 0;
@@ -45,13 +45,13 @@ export class Canvas {
             dirty:false,
         };
         this.localMouse = null;
-        if (reader != null) {
-            let length = reader.readUint8();
+        if (byteBuffer != null) {
+            let length = byteBuffer.readUint8();
             for (let i = 0; i < length; i++) {
-                let type = reader.readUint8();
-                let lengthJ = reader.readUint16();
+                let type = byteBuffer.readUint8();
+                let lengthJ = byteBuffer.readUint16();
                 for (let j = 0; j < lengthJ; j++) {
-                    this.canvasObjectWrappers.set(reader.readInt16(), new CanvasObjectWrapper(type, getCanvasObject(type, reader)));
+                    this.canvasObjectWrappers.set(byteBuffer.readInt16(), new CanvasObjectWrapper(type, getCanvasObject(type, byteBuffer)));
                 }
             }
         }

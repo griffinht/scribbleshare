@@ -1,6 +1,6 @@
 import {activeDocument} from "./Document.js";
 import {apiUrl} from "./main.js";
-import BufferReader from "./protocol/BufferReader.js";
+import BufferbyteBuffer from "./protocol/BufferbyteBuffer.js";
 import {CanvasObjectType} from "./canvas/canvasObject/CanvasObjectType.js";
 import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
 import Modal from "./Modal.js";
@@ -36,11 +36,11 @@ document.body.addEventListener('drop', (event) => {
 
     fileUploadModal.modal.innerText = 'Uploading ' + file.name + '...';
 
-    let fileReader = new FileReader();
-    fileReader.addEventListener('load', (event) => {
+    let filebyteBuffer = new FilebyteBuffer();
+    filebyteBuffer.addEventListener('load', (event) => {
         // draw image file to canvas
         let image = document.createElement('img');
-        image.src = fileReader.result;
+        image.src = filebyteBuffer.result;
         image.addEventListener('load', (event) => {
             let canvas = document.createElement('canvas');
             // resize image if it is too large
@@ -76,7 +76,7 @@ document.body.addEventListener('drop', (event) => {
                     console.error(request.status + ' while fetching image id');
                     return;
                 }
-                let id = new BufferReader(new Uint8Array(request.response).buffer).readBigInt64();
+                let id = new BufferbyteBuffer(new Uint8Array(request.response).buffer).readBigInt64();
                 let object = CanvasImage.create(0, 0, id, image);
                 activeDocument.canvas.insert(CanvasObjectType.IMAGE, object);
             });
@@ -90,6 +90,6 @@ document.body.addEventListener('drop', (event) => {
         //todo verify client/server side that mime type is good
     });
 
-    //fileReader.readAsArrayBuffer(file);
-    fileReader.readAsDataURL(file);
+    //filebyteBuffer.readAsArrayBuffer(file);
+    filebyteBuffer.readAsDataURL(file);
 });

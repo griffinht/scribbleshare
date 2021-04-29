@@ -1,13 +1,18 @@
+import ByteBuffer from "../../protocol/ByteBuffer";
+import {Canvas} from "../Canvas";
+
 export default class CanvasUpdate {
-    constructor(canvasUpdateType) {
-        this.canvasUpdateType = canvasUpdateType;
+    type: CanvasUpdateType;
+
+    constructor(type: CanvasUpdateType) {
+        this.type = type;
     }
 
-    draw(canvas, dt) {
+    draw(canvas: Canvas, dt: number) {
 
     }
 
-    serialize(writer) {
-        writer.writeUint8(this.canvasUpdateType);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeUint8(this.type);
     }
 }

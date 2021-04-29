@@ -1,5 +1,9 @@
+import ServerMessageType from "./ServerMessageType";
+
 export default class ServerMessage {
-    constructor(type) {
+    type: ServerMessageType;
+
+    constructor(type: ServerMessageType) {
         this.type = type;
     }
 }

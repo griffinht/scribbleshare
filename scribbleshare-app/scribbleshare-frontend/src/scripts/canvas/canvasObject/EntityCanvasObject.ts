@@ -2,18 +2,18 @@ import CanvasObject from "./CanvasObject.js";
 import {lerp} from "../Canvas.js";
 
 export default class EntityCanvasObject extends CanvasObject {
-    constructor(reader) {
-        super(reader);
-        this.width = reader.readInt16();
-        this.height = reader.readInt16();
-        this.rotation = reader.readUint8();
+    constructor(byteBuffer: ByteBuffer) {
+        super(byteBuffer);
+        this.width = byteBuffer.readInt16();
+        this.height = byteBuffer.readInt16();
+        this.rotation = byteBuffer.readUint8();
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeInt16(this.width);
-        writer.writeInt16(this.height);
-        writer.writeUint8(this.rotation);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeInt16(this.width);
+        byteBuffer.writeInt16(this.height);
+        byteBuffer.writeUint8(this.rotation);
     }
 
 /*    lerp(target, t) {

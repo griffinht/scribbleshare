@@ -2,15 +2,15 @@ import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
 
 export default class LineCanvasObject extends CanvasObject {
-    constructor(reader) {
-        super(reader);
-        this.red = reader.readUint8();
-        this.green = reader.readUint8();
-        this.blue = reader.readUint8();
+    constructor(byteBuffer: ByteBuffer) {
+        super(byteBuffer);
+        this.red = byteBuffer.readUint8();
+        this.green = byteBuffer.readUint8();
+        this.blue = byteBuffer.readUint8();
         this.points = [];
-        let length = reader.readUint8();
+        let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
-            this.points[i] = new Point(reader);
+            this.points[i] = new Point(byteBuffer);
         }
     }
 
@@ -30,11 +30,11 @@ export default class LineCanvasObject extends CanvasObject {
         this.points.push(Point.create(x, y));
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.red);
-        writer.writeUint8(this.green);
-        writer.writeUint8(this.blue);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.red);
+        byteBuffer.writeUint8(this.green);
+        byteBuffer.writeUint8(this.blue);
         let lastPoint = this.points[0];
         let realPoints = [];
         this.points.forEach((point) => {
@@ -43,9 +43,9 @@ export default class LineCanvasObject extends CanvasObject {
             }
         });
 
-        writer.writeUint8(realPoints.length);
+        byteBuffer.writeUint8(realPoints.length);
         realPoints.forEach((realPoint) => {
-            realPoint.serialize(writer);
+            realPoint.serialize(byteBuffer);
         });
     }
 
@@ -62,14 +62,14 @@ export default class LineCanvasObject extends CanvasObject {
 }
 
 class Point {
-    constructor(reader) {
-        this.x = reader.readInt16();
-        this.y = reader.readInt16();
+    constructor(byteBuffer: ByteBuffer) {
+        this.x = byteBuffer.readInt16();
+        this.y = byteBuffer.readInt16();
     }
 
-    serialize(writer) {
-        writer.writeInt16(this.x);
-        writer.writeInt16(this.y);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeInt16(this.x);
+        byteBuffer.writeInt16(this.y);
     }
 
     static create(x, y) {

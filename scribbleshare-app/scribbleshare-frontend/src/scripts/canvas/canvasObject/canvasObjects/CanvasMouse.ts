@@ -4,8 +4,8 @@ const pointerImage = document.createElement('img');
 pointerImage.src = '/assets/pointer.png';
 
 export default class CanvasMouse extends CanvasObject {
-    constructor(reader) {
-        super(reader);
+    constructor(byteBuffer: ByteBuffer) {
+        super(byteBuffer);
     }
 
     draw() {
@@ -13,8 +13,8 @@ export default class CanvasMouse extends CanvasObject {
 
     }
 
-    serialize(writer) {
-        super.serialize(writer);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
     }
 
     static create() {

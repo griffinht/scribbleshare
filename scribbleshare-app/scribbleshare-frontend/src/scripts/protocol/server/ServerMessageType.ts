@@ -8,7 +8,7 @@ import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
 import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
 import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageMouseMove from "./messages/ServerMessageMouseMove.js";
-import BufferReader from "../BufferReader";
+import ByteBuffer from "../ByteBuffer";
 
 enum ServerMessageType {
     ADD_CLIENT,
@@ -24,42 +24,41 @@ enum ServerMessageType {
 }
 export default ServerMessageType;
 
-
-export function getServerMessage(type: ServerMessageType, reader: BufferReader) {
+export function getServerMessage(type: ServerMessageType, byteBuffer: ByteBuffer) {
     let message;
     switch (type) {
         case ServerMessageType.ADD_CLIENT:
-            message = new ServerMessageAddClient(reader);
+            message = new ServerMessageAddClient(byteBuffer);
             break;
         case ServerMessageType.REMOVE_CLIENT:
-            message = new ServerMessageRemoveClient(reader);
+            message = new ServerMessageRemoveClient(byteBuffer);
             break;
         case ServerMessageType.CANVAS_UPDATE:
-            message = new ServerMessageCanvasUpdate(reader);
+            message = new ServerMessageCanvasUpdate(byteBuffer);
             break;
         case ServerMessageType.UPDATE_DOCUMENT:
-            message = new ServerMessageUpdateDocument(reader);
+            message = new ServerMessageUpdateDocument(byteBuffer);
             break;
         case ServerMessageType.ADD_USER:
-            message = new ServerMessageAddUser(reader)
+            message = new ServerMessageAddUser(byteBuffer)
             break;
         case ServerMessageType.DELETE_DOCUMENT:
-            message = new ServerMessageDeleteDocument(reader);
+            message = new ServerMessageDeleteDocument(byteBuffer);
             break;
         case ServerMessageType.GET_INVITE:
-            message = new ServerMessageGetInvite(reader);
+            message = new ServerMessageGetInvite(byteBuffer);
             break;
         case ServerMessageType.OPEN_DOCUMENT:
-            message = new ServerMessageOpenDocument(reader);
+            message = new ServerMessageOpenDocument(byteBuffer);
             break;
         case ServerMessageType.HANDSHAKE:
-            message = new ServerMessageHandshake(reader);
+            message = new ServerMessageHandshake(byteBuffer);
             break;
         case ServerMessageType.MOUSE_MOVE:
-            message = new ServerMessageMouseMove(reader);
+            message = new ServerMessageMouseMove(byteBuffer);
             break;
         default:
-            console.error('unknown payload type ' + type + ', offset ' + reader.position + ', event ', event);
+            console.error('unknown payload type ' + type + ', offset ' + byteBuffer.position + ', event ', event);
             break;
     }
     return message;

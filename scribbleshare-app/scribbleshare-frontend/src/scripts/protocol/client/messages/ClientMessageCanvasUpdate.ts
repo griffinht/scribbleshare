@@ -7,11 +7,11 @@ export default class ClientMessageCanvasUpdate extends ClientMessage {
         this.canvasUpdates = canvasUpdates;
     }
     
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.canvasUpdates.length);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.canvasUpdates.length);
         this.canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.serialize(writer);
+            canvasUpdate.serialize(byteBuffer);
         })
     }
 }

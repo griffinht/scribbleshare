@@ -1,9 +1,12 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
+import ByteBuffer from "../../ByteBuffer";
 
 export default class ServerMessageGetInvite extends ServerMessage {
-    constructor(reader) {
+    code: string;
+
+    constructor(byteBuffer: ByteBuffer) {
         super(ServerMessageType.GET_INVITE);
-        this.code = reader.readString8();
+        this.code = byteBuffer.readString8();
     }
 }

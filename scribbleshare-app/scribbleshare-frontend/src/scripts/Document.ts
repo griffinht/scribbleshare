@@ -76,7 +76,7 @@ class Document {
                 console.error(request.status + ' while fetching document');
                 return;
             }
-            this.canvas = new Canvas(new BufferReader(new Uint8Array(request.response).buffer));
+            this.canvas = new Canvas(new BufferbyteBuffer(new Uint8Array(request.response).buffer));
             console.log('GET', this.canvas);
         });
         request.open('GET', apiUrl + '/document/' + this.id);

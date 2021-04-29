@@ -3,11 +3,11 @@ import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
-    constructor(reader) {
+    constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.INSERT);
-        this.dt = reader.readUint8();
-        this.id = reader.readInt16();
-        this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(reader);
+        this.dt = byteBuffer.readUint8();
+        this.id = byteBuffer.readInt16();
+        this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuffer);
         this.time = 0;
     }
 
@@ -20,11 +20,11 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         return false;
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.dt);
-        writer.writeInt16(this.id);
-        this.canvasObjectWrapper.serialize(writer);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.dt);
+        byteBuffer.writeInt16(this.id);
+        this.canvasObjectWrapper.serialize(byteBuffer);
     }
 
     static create(dt, id, canvasObjectWrapper) {

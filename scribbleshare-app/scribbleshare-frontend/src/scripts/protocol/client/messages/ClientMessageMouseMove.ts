@@ -7,11 +7,11 @@ export default class ClientMessageMouseMove extends ClientMessage {
         this.mouseMoves = mouseMoves;
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.mouseMoves.length);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.mouseMoves.length);
         for (let i = 0; i < this.mouseMoves.length; i++) {
-            this.mouseMoves[i].serialize(writer);
+            this.mouseMoves[i].serialize(byteBuffer);
         }
     }
 }

@@ -4,9 +4,9 @@ import {apiUrl} from "../../../main.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
 
 export default class CanvasImage extends EntityCanvasObject {
-    constructor(reader) {
-        super(reader);
-        this.id = reader.readBigInt64();
+    constructor(byteBuffer: ByteBuffer) {
+        super(byteBuffer);
+        this.id = byteBuffer.readBigInt64();
         this.image = document.createElement('img');
         this.image.src = apiUrl + '/document/' + activeDocument.id + '/' + this.id;
     }
@@ -15,9 +15,9 @@ export default class CanvasImage extends EntityCanvasObject {
         ctx.drawImage(this.image, 0, 0, this.width, this.height);
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeBigInt64(this.id);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeBigInt64(this.id);
     }
 
     static create(x, y, id, image) {

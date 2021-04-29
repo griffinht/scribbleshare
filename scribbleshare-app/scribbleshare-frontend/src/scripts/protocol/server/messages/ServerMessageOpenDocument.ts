@@ -1,11 +1,15 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import {Canvas} from "../../../canvas/Canvas.js";
+import ByteBuffer from "../../ByteBuffer";
 
 export default class ServerMessageOpenDocument extends ServerMessage {
-    constructor(reader) {
+    id: bigint;
+    canvas: Canvas;
+
+    constructor(byteBuffer: ByteBuffer) {
         super(ServerMessageType.OPEN_DOCUMENT);
-        this.id = reader.readBigInt64();
-        this.canvas = new Canvas(reader);
+        this.id = byteBuffer.readBigInt64();
+        this.canvas = new Canvas(byteBuffer);
     }
 }

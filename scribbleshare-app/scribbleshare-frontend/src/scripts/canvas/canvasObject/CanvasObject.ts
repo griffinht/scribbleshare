@@ -1,9 +1,9 @@
 import {ctx, lerp} from "../Canvas.js";
 
 export default class CanvasObject {
-    constructor(reader) {
-        this.x = reader.readInt16();
-        this.y = reader.readInt16();
+    constructor(byteBuffer: ByteBuffer) {
+        this.x = byteBuffer.readInt16();
+        this.y = byteBuffer.readInt16();
         this.original = null;
     }
 
@@ -16,9 +16,9 @@ export default class CanvasObject {
         ctx.fillRect(0, 0, 10, 10);
     }
 
-    serialize(writer) {
-        writer.writeInt16(this.x);
-        writer.writeInt16(this.y);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeInt16(this.x);
+        byteBuffer.writeInt16(this.y);
     }
 
     static clone(canvasObject) {

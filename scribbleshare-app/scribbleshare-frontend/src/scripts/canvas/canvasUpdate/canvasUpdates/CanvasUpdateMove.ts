@@ -3,15 +3,15 @@ import {CanvasUpdateType} from "../CanvasUpdateType.js";
 import CanvasObject from "../../canvasObject/CanvasObject.js";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
-    constructor(reader) {
+    constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.MOVE);
         this.canvasMoves = [];
-        this.id = reader.readInt16();
+        this.id = byteBuffer.readInt16();
         this.set = false;
         this.i = 0;
-        let length = reader.readUint8();
+        let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
-            this.canvasMoves.push(new CanvasMove(reader));
+            this.canvasMoves.push(new CanvasMove(byteBuffer));
         }
     }
 
@@ -59,12 +59,12 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         return this.canvasMoves[this.canvasMoves.length - 1].dt <= time;
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeInt16(this.id);
-        writer.writeUint8(this.canvasMoves.length);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeInt16(this.id);
+        byteBuffer.writeUint8(this.canvasMoves.length);
         this.canvasMoves.forEach((canvasMove) => {
-            canvasMove.serialize(writer);
+            canvasMove.serialize(byteBuffer);
         });
     }
 
@@ -81,14 +81,14 @@ export default class CanvasUpdateMove extends CanvasUpdate {
 }
 
 class CanvasMove {
-    constructor(reader) {
-        this.dt = reader.readUint8();
-        this.canvasObject = new CanvasObject(reader);
+    constructor(byteBuffer: ByteBuffer) {
+        this.dt = byteBuffer.readUint8();
+        this.canvasObject = new CanvasObject(byteBuffer);
     }
 
-    serialize(writer) {
-        writer.writeUint8(this.dt);
-        this.canvasObject.serialize(writer);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeUint8(this.dt);
+        this.canvasObject.serialize(byteBuffer);
     }
 
     static create(dt, canvasObject) {

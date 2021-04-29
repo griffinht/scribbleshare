@@ -1,5 +1,5 @@
-import BufferReader from './BufferReader.js'
-import BufferWriter from "./BufferWriter.js";
+import BufferbyteBuffer from './BufferbyteBuffer.js'
+import BufferbyteBuffer from "./BufferbyteBuffer.js";
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import SocketEventType from "./SocketEventType.js";
 import Environment from "../Environment.js";
@@ -36,9 +36,9 @@ class WebSocketHandler {
             if (typeof event.data === 'string') {
                 console.log(event.data);
             } else {
-                let reader = new BufferReader(event.data);
-                while (reader.hasNext()) {
-                    this.dispatchMessageEvent(getServerMessage(reader.readUint8(), reader));
+                let byteBuffer = new BufferbyteBuffer(event.data);
+                while (byteBuffer.hasNext()) {
+                    this.dispatchMessageEvent(getServerMessage(byteBuffer.readUint8(), byteBuffer));
                 }
             }
         });
@@ -80,12 +80,12 @@ class WebSocketHandler {
         if (messages.length === 0) return;
 
         if (this.socket.readyState === WebSocket.OPEN) {
-            let writer = new BufferWriter();
+            let byteBuffer = new BufferbyteBuffer();
             messages.forEach((message) => {
-                message.serialize(writer);
+                message.serialize(byteBuffer);
                 console.log('send', message);
             });
-            this.socket.send(writer.getBuffer());
+            this.socket.send(byteBuffer.getBuffer());
         } else {
             console.error('tried to send messages while websocket was closed', messages);
         }

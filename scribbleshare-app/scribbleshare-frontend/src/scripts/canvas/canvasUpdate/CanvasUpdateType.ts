@@ -1,5 +1,5 @@
-export const CanvasUpdateType = {
-    INSERT:0,
-    MOVE:1,
-    DELETE:2,
+enum CanvasUpdateType {
+    INSERT,
+    MOVE,
+    DELETE,
 }

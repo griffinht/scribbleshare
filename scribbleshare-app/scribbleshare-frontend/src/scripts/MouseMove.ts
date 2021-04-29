@@ -1,21 +1,20 @@
-import BufferReader from "./protocol/BufferReader";
-import BufferWriter from "./protocol/BufferWriter";
+import ByteBuffer from "./protocol/ByteBuffer";
 
 export default class MouseMove {
     dt: number;
     x: number;
     y: number;
 
-    constructor(reader: BufferReader) {
-        this.dt = reader.readUint8();
-        this.x = reader.readInt16();
-        this.y = reader.readInt16();
+    constructor(byteBuffer: ByteBuffer) {
+        this.dt = byteBuffer.readUint8();
+        this.x = byteBuffer.readInt16();
+        this.y = byteBuffer.readInt16();
     }
 
-    serialize(writer: BufferWriter) {
-        writer.writeUint8(this.dt);
-        writer.writeInt16(this.x);
-        writer.writeInt16(this.y);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeUint8(this.dt);
+        byteBuffer.writeInt16(this.x);
+        byteBuffer.writeInt16(this.y);
     }
 
     static create(dt: number, x: number, y: number) {

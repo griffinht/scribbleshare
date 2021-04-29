@@ -1,22 +1,23 @@
-import {CanvasUpdateType} from "./CanvasUpdateType.js";
 import CanvasUpdateInsert from "./canvasUpdates/CanvasUpdateInsert.js";
 import CanvasUpdateMove from "./canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateDelete from "./canvasUpdates/CanvasUpdateDelete.js";
+import ByteBuffer from "../../protocol/ByteBuffer";
+import CanvasUpdate from "./CanvasUpdate";
 
-export function getCanvasUpdate(canvasUpdateType, reader) {
-    let object;
-    switch (canvasUpdateType) {
+export function getCanvasUpdate(type: CanvasUpdateType, byteBuffer: ByteBuffer): CanvasUpdate {
+    let object: CanvasUpdate;
+    switch (type) {
         case CanvasUpdateType.INSERT:
-            object = new CanvasUpdateInsert(reader);
+            object = new CanvasUpdateInsert(byteBuffer);
             break;
         case CanvasUpdateType.MOVE:
-            object = new CanvasUpdateMove(reader);
+            object = new CanvasUpdateMove(byteBuffer);
             break;
         case CanvasUpdateType.DELETE:
-            object = new CanvasUpdateDelete(reader);
+            object = new CanvasUpdateDelete(byteBuffer);
             break;
         default:
-            console.error('unknown canvasUpdateType ' + canvasUpdateType);
+            throw new Error('unknown canvasUpdateType ' + type);
     }
     return object;
 }

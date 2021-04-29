@@ -7,8 +7,8 @@ export default class ClientMessageOpenDocument extends ClientMessage {
         this.id = document.id;
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeBigInt64(this.id);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeBigInt64(this.id);
     }
 }

@@ -8,9 +8,9 @@ export default class ClientMessageUpdateDocument extends ClientMessage {
         this.name = document.name;
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeBigInt64(this.id);
-        writer.writeString8(this.name);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeBigInt64(this.id);
+        byteBuffer.writeString8(this.name);
     }
 }

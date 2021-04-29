@@ -3,7 +3,7 @@ export default class ClientMessage {
         this.type = type;
     }
 
-    serialize(writer) {
-        writer.writeUint8(this.type);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeUint8(this.type);
     }
 }

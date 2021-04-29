@@ -2,12 +2,12 @@ import {ctx} from "../../Canvas.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
 
 export default class Shape extends EntityCanvasObject {
-    constructor(reader) {
-        super(reader);
-        this.type = reader.readUint8();
-        this.red = reader.readUint8();
-        this.green = reader.readUint8();
-        this.blue = reader.readUint8();
+    constructor(byteBuffer: ByteBuffer) {
+        super(byteBuffer);
+        this.type = byteBuffer.readUint8();
+        this.red = byteBuffer.readUint8();
+        this.green = byteBuffer.readUint8();
+        this.blue = byteBuffer.readUint8();
     }
 
     draw() {
@@ -34,12 +34,12 @@ export default class Shape extends EntityCanvasObject {
         ctx.strokeStyle = '#000';
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.type);
-        writer.writeUint8(this.red);
-        writer.writeUint8(this.green);
-        writer.writeUint8(this.blue);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.type);
+        byteBuffer.writeUint8(this.red);
+        byteBuffer.writeUint8(this.green);
+        byteBuffer.writeUint8(this.blue);
     }
 
     static create(x, y, width, height, type, color) {

@@ -1,6 +1,5 @@
 import socket from "./protocol/WebSocketHandler.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
-import ServerMessageAddUser from "./protocol/server/messages/ServerMessageAddUser";
 
 const users = new Map<bigint, User>();
 
@@ -17,7 +16,7 @@ class User {
     }
 }
 
-socket.addMessageListener(ServerMessageType.ADD_USER, (serverMessageAddUser: ServerMessageAddUser) => {
+socket.addMessageListener(ServerMessageType.ADD_USER, (serverMessageAddUser: ServerMessageType) => {
     let user = users.get(serverMessageAddUser.user.id);
     if (user == null) {
         user = new User(serverMessageAddUser.user.id);

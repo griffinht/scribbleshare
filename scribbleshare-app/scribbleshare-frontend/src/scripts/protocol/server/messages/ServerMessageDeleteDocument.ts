@@ -1,9 +1,12 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
+import ByteBuffer from "../../ByteBuffer";
 
 export default class ServerMessageDeleteDocument extends ServerMessage {
-    constructor(reader) {
+    id: bigint;
+
+    constructor(byteBuffer: ByteBuffer) {
         super(ServerMessageType.DELETE_DOCUMENT);
-        this.id = reader.readBigInt64();
+        this.id = byteBuffer.readBigInt64();
     }
 }

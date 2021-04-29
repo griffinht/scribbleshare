@@ -6,15 +6,15 @@ export default class CanvasObjectWrapper {
         this.canvasObject = canvasObject;
     }
 
-    serialize(writer) {
-        writer.writeUint8(this.canvasObjectType);
-        this.canvasObject.serialize(writer);
+    serialize(byteBuffer: ByteBuffer) {
+        byteBuffer.writeUint8(this.canvasObjectType);
+        this.canvasObject.serialize(byteBuffer);
     }
 
-    static deserialize(reader) {
+    static deserialize(byteBuffer: ByteBuffer) {
         let canvasObjectWrapper = Object.create(this.prototype);
-        canvasObjectWrapper.canvasObjectType = reader.readUint8();
-        canvasObjectWrapper.canvasObject = getCanvasObject(canvasObjectWrapper.canvasObjectType, reader);
+        canvasObjectWrapper.canvasObjectType = byteBuffer.readUint8();
+        canvasObjectWrapper.canvasObject = getCanvasObject(canvasObjectWrapper.canvasObjectType, byteBuffer);
         return canvasObjectWrapper;
     }
 }

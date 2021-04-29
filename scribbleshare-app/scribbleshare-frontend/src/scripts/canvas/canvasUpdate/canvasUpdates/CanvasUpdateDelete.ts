@@ -2,10 +2,10 @@ import CanvasUpdate from "../CanvasUpdate.js";
 import {CanvasUpdateType} from "../CanvasUpdateType.js";
 
 export default class CanvasUpdateDelete extends CanvasUpdate {
-    constructor(reader) {
+    constructor(byteBuffer: ByteBuffer) {
         super(CanvasUpdateType.DELETE);
-        this.dt = reader.readUint8();
-        this.id = reader.readInt16();
+        this.dt = byteBuffer.readUint8();
+        this.id = byteBuffer.readInt16();
         this.time = 0;
     }
 
@@ -17,10 +17,10 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         }
     }
 
-    serialize(writer) {
-        super.serialize(writer);
-        writer.writeUint8(this.dt);
-        writer.writeInt16(this.id);
+    serialize(byteBuffer: ByteBuffer) {
+        super.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.dt);
+        byteBuffer.writeInt16(this.id);
     }
 
     static create(time, id) {
