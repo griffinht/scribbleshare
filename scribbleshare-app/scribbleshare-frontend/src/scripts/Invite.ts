@@ -2,17 +2,20 @@ import socket from "./protocol/WebSocketHandler.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import Modal from "./Modal.js";
+import ServerMessageGetInvite from "./protocol/server/messages/ServerMessageGetInvite";
 
-const inviteButton = document.getElementById("inviteButton");
-const inviteModal = new Modal(document.getElementById('inviteModal'));
+const inviteButton = document.getElementById("inviteButton")!;
+const inviteModal = new Modal(document.getElementById('inviteModal')!);
 const text = inviteModal.modal.getElementsByTagName("p")[0];
 
 class Invite {
+    visible: boolean = true;
+
     constructor() {
         inviteButton.addEventListener('click', (event) => {
             socket.send(new ClientMessageGetInvite());
         })
-        socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite) => {
+        socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite: ServerMessageGetInvite) => {
             let link = 'http://localhost/?invite=' + serverMessageGetInvite.code;
             text.innerHTML = 'Join at <a href="' + link + '">' + link + "</a>";
             inviteModal.show();
@@ -31,7 +34,7 @@ class Invite {
         return invite;
     }
 
-    setVisible(visible) {
+    setVisible(visible: boolean) {
         if (visible) {
             inviteButton.style.visibility = 'visible';
         } else {
@@ -44,6 +47,6 @@ const invite = new Invite();
 export default invite;
 
 
-document.getElementById('inviteModalClose').addEventListener('click', (event) => {
+document.getElementById('inviteModalClose')!.addEventListener('click', (event) => {
     inviteModal.hide();
 })
