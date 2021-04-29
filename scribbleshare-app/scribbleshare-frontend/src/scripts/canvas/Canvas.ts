@@ -304,6 +304,7 @@ function aabb(rect1: Rectangle, rect2: Rectangle, padding: number) {
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // @ts-ignore
     let rect = canvas.parentNode.getBoundingClientRect();//todo
     canvas.width = rect.width;
     canvas.height = rect.height;
