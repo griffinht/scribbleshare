@@ -1,5 +1,16 @@
+import MouseMove from "./MouseMove";
+
 export default class Client {
-    constructor(id, user) {
+    id: number;
+    user: bigint;
+    icon: HTMLImageElement;
+    iconTooltip: HTMLElement;
+
+    mouseMoves: MouseMove[] = [];
+    time = 0;
+    first = true;
+
+    constructor(id: number, user: bigint) {
         this.id = id;
         this.user = user;
         //tooltip
@@ -18,7 +29,7 @@ export default class Client {
         })
         this.iconTooltip = document.createElement('div');
         if (user != null) {
-            this.iconTooltip.innerText = user.id;
+            this.iconTooltip.innerText = String(this.user);
         }
         this.iconTooltip.style.position = 'absolute';
         this.iconTooltip.style.visibility = 'hidden';

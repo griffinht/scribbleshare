@@ -47,7 +47,7 @@ export class Canvas {
     }
     localMouse: Mouse | null;
 
-    constructor(byteBuffer: ByteBuffer) {
+    constructor(byteBuffer?: ByteBuffer) {
         this.isOpen = false;
         this.last = 0;
         this.lastFlushSelected = 0;
