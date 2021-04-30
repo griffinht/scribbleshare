@@ -3,6 +3,7 @@ import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetI
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import Modal from "./Modal.js";
 import ServerMessageGetInvite from "./protocol/server/messages/ServerMessageGetInvite";
+import ServerMessage from "./protocol/server/ServerMessage";
 
 const inviteButton = document.getElementById("inviteButton")!;
 const inviteModal = new Modal(document.getElementById('inviteModal')!);
@@ -15,7 +16,8 @@ class Invite {
         inviteButton.addEventListener('click', (event) => {
             socket.send(new ClientMessageGetInvite());
         })
-        socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessageGetInvite: ServerMessageGetInvite) => {
+        socket.addMessageListener(ServerMessageType.GET_INVITE, (serverMessage: ServerMessage) => {
+            let serverMessageGetInvite = serverMessage as ServerMessageGetInvite;
             let link = 'http://localhost/?invite=' + serverMessageGetInvite.code;
             text.innerHTML = 'Join at <a href="' + link + '">' + link + "</a>";
             inviteModal.show();

@@ -5,14 +5,11 @@ import * as User from "./User.js";
 import ClientMessageOpenDocument from "./protocol/client/messages/ClientMessageOpenDocument.js";
 import ClientMessageCreateDocument from "./protocol/client/messages/ClientMessageCreateDocument.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
-import SocketEventType from "./protocol/SocketEventType.js";
 import ClientMessageHandshake from "./protocol/client/messages/ClientMessageHandshake.js";
 import invite from "./Invite.js";
 import ClientMessageUpdateDocument from "./protocol/client/messages/ClientMessageUpdateDocument.js";
 import ClientMessageDeleteDocument from "./protocol/client/messages/ClientMessageDeleteDocument.js";
 import Sidebar, {SidebarItem} from "./Sidebar.js";
-import color from "./ColorSelector.js";
-import shape from "./ShapeSelector.js";
 import ServerMessageUpdateDocument from "./protocol/server/messages/ServerMessageUpdateDocument";
 import ServerMessageAddClient from "./protocol/server/messages/ServerMessageAddClient";
 import ServerMessageRemoveClient from "./protocol/server/messages/ServerMessageRemoveClient";
@@ -20,6 +17,7 @@ import ServerMessageOpenDocument from "./protocol/server/messages/ServerMessageO
 import ServerMessageHandshake from "./protocol/server/messages/ServerMessageHandshake";
 import ServerMessageMouseMove from "./protocol/server/messages/ServerMessageMouseMove";
 import ServerMessageDeleteDocument from "./protocol/server/messages/ServerMessageDeleteDocument";
+import ServerMessage from "./protocol/server/ServerMessage";
 
 const documents = new Map();
 export let activeDocument: Document | null = null;
@@ -145,7 +143,8 @@ document.getElementById('add')!.addEventListener('click', () => {
     if (activeDocument != null) activeDocument.close();
     socket.send(new ClientMessageCreateDocument());
 });
-socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient: ServerMessageAddClient) => {
+socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessage: ServerMessage) => {
+    let serverMessageAddClient = serverMessage as ServerMessageAddClient;
     serverMessageAddClient.clientUserTuples.forEach((clientUserTuple) => {
         let user = User.getUser(clientUserTuple[1]);
         if (user === undefined) {
@@ -161,18 +160,21 @@ socket.addMessageListener(ServerMessageType.ADD_CLIENT, (serverMessageAddClient:
         console.log('Add client ', client);
     })
 });
-socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessageRemoveClient: ServerMessageRemoveClient) => {
+socket.addMessageListener(ServerMessageType.REMOVE_CLIENT, (serverMessage: ServerMessage) => {
+    let serverMessageRemoveClient = serverMessage as ServerMessageRemoveClient;
     console.log('Remove client ', serverMessageRemoveClient.id);
     // @ts-ignore todo
     activeDocument.removeClient(serverMessageRemoveClient.id)
 });
-socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessageOpenDocument: ServerMessageOpenDocument) => {
+socket.addMessageListener(ServerMessageType.OPEN_DOCUMENT, (serverMessage: ServerMessage) => {
+    let serverMessageOpenDocument = serverMessage as ServerMessageOpenDocument;
     let document = documents.get(serverMessageOpenDocument.id);
     document.canvas.close();
     document.canvas = serverMessageOpenDocument.canvas;
     document.open();
 })
-socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdateDocument: ServerMessageUpdateDocument) => {
+socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessage: ServerMessage) => {
+    let serverMessageUpdateDocument = serverMessage as ServerMessageUpdateDocument;
     let document = documents.get(serverMessageUpdateDocument.id);
     if (document === undefined) {
         new Document(serverMessageUpdateDocument.name + (serverMessageUpdateDocument.shared ? "(shared)" : ""), serverMessageUpdateDocument.id);
@@ -180,10 +182,12 @@ socket.addMessageListener(ServerMessageType.UPDATE_DOCUMENT, (serverMessageUpdat
         document.update(serverMessageUpdateDocument);
     }
 });
-socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessageHandshake: ServerMessageHandshake) => {
+socket.addMessageListener(ServerMessageType.HANDSHAKE, (serverMessage: ServerMessage) => {
+    let serverMessageHandshake = serverMessage as ServerMessageHandshake;
     localClientId = serverMessageHandshake.client;
 })
-socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove: ServerMessageMouseMove) => {
+socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessage: ServerMessage) => {
+    let serverMessageMouseMove = serverMessage as ServerMessageMouseMove;
     // @ts-ignore todo
     let client = activeDocument.clients.get(serverMessageMouseMove.client);
     if (client === undefined) {
@@ -196,8 +200,8 @@ socket.addMessageListener(ServerMessageType.MOUSE_MOVE, (serverMessageMouseMove:
 socket.addEventListener(SocketEventType.OPEN, () => {
     socket.send(new ClientMessageHandshake(invite.getInvite()));
 });
-socket.addMessageListener(ServerMessageType.DELETE_DOCUMENT, (serverMessageDeleteDocument: ServerMessageDeleteDocument
-) => {
+socket.addMessageListener(ServerMessageType.DELETE_DOCUMENT, (serverMessage: ServerMessage) => {
+    let serverMessageDeleteDocument = serverMessage as ServerMessageDeleteDocument;
     let document = documents.get(serverMessageDeleteDocument.id);
     if (document === undefined) {
         return;

@@ -17,6 +17,7 @@ import ByteBuffer from "../protocol/ByteBuffer";
 import CanvasUpdate from "./canvasUpdate/CanvasUpdate";
 import CanvasObject from "./canvasObject/CanvasObject";
 import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessageCanvasUpdate";
+import ServerMessage from "../protocol/server/ServerMessage";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
@@ -343,7 +344,8 @@ function getNow() {
 }
 
 let lastRemoteUpdate = 0;
-socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessageCanvasUpdate: ServerMessageCanvasUpdate) => {
+socket.addMessageListener(ServerMessageType.CANVAS_UPDATE, (serverMessage: ServerMessage) => {
+    let serverMessageCanvasUpdate = serverMessage as ServerMessageCanvasUpdate;
     //apply remote updates
     lastRemoteUpdate = window.performance.now();
     // @ts-ignore todo
