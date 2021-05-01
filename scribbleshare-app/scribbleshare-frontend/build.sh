@@ -15,7 +15,6 @@ rm -rf build/scripts
 # Rollup (minify)
 npm install --save-dev \
 @rollup/plugin-node-resolve \
-@rollup/plugin-replace \
 rollup-plugin-terser \
 @rollup/plugin-typescript typescript tslib
 
