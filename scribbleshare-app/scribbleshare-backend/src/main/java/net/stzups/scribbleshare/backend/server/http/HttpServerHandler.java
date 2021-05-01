@@ -80,8 +80,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     static {
         String path = Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.MIME_TYPES_FILE_PATH);
-        try {
-            MimeTypes.load(new FileInputStream(path));
+        try (FileInputStream fileInputStream = new FileInputStream(path)){
+            MimeTypes.load(fileInputStream);
         } catch (IOException e) {
             InputStream inputStream = HttpServerHandler.class.getResourceAsStream(path.startsWith("/") ? "" : "/" + path); //always use root of classpath
             if (inputStream != null) {
@@ -421,23 +421,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     /** make sure the file being sent is valid */
     private static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file) throws Exception {
-        RandomAccessFile raf;
-        try {
-            raf = new RandomAccessFile(file, "r");
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
+            long fileLength = randomAccessFile.length();
+            String mimeType = MimeTypes.getMimeType(file);
+            if (mimeType == null) {
+                ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
+                send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+            headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
+
+            sendChunkedResource(ctx, request, headers, new ChunkedFile(randomAccessFile, 0, fileLength, 8192), Timestamp.from(Instant.ofEpochMilli(file.lastModified())));
         } catch (FileNotFoundException ignore) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
         }
-        long fileLength = raf.length();
-        String mimeType = MimeTypes.getMimeType(file);
-        if (mimeType == null) {
-            ServerInitializer.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-        headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
-
-        sendChunkedResource(ctx, request, headers, new ChunkedFile(raf, 0, fileLength, 8192), Timestamp.from(Instant.ofEpochMilli(file.lastModified())));
     }
 
 
