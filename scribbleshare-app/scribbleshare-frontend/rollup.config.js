@@ -6,12 +6,11 @@ export default {
   input: 'src/scripts/main.ts',
   output: {
     file: 'build/scripts/main.js',
-    dir: 'build/scripts',
     format: 'iife',
   },
   plugins: [
     nodeResolve(),
-    typescript(),
     terser(),
+    typescript(),
   ]
 };
