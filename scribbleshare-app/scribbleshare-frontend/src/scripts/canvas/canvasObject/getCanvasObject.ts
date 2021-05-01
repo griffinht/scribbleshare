@@ -3,6 +3,7 @@ import CanvasImage from "./canvasObjects/CanvasImage.js";
 import CanvasMouse from "./canvasObjects/CanvasMouse.js";
 import LineCanvasObject from "./canvasObjects/Line.js";
 import ByteBuffer from "../../protocol/ByteBuffer";
+import CanvasObjectType from "./CanvasObjectType";
 
 export function getCanvasObject(type: CanvasObjectType, byteBuffer: ByteBuffer) {
     let object;

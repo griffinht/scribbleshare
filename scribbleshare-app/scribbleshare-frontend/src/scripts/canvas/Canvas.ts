@@ -18,6 +18,7 @@ import CanvasUpdate from "./canvasUpdate/CanvasUpdate";
 import CanvasObject from "./canvasObject/CanvasObject";
 import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessageCanvasUpdate";
 import ServerMessage from "../protocol/server/ServerMessage";
+import CanvasObjectType from "./canvasObject/CanvasObjectType";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;

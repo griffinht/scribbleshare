@@ -1,6 +1,7 @@
 import {getCanvasObject} from "./getCanvasObject.js";
 import CanvasObject from "./CanvasObject";
 import ByteBuffer from "../../protocol/ByteBuffer";
+import CanvasObjectType from "./CanvasObjectType";
 
 export default class CanvasObjectWrapper {
     canvasObjectType: CanvasObjectType;
