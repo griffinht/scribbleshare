@@ -11,11 +11,6 @@ services:
                 condition: service_healthy
 #            scribbleshare-keydb:
 #                condition: service_healthy
-#        healthcheck:
-#            test: [ "CMD", "curl -sf http://localhost:52853/healthcheck || exit 1" ]
-#            interval: 5s
-#            timeout: 5s
-#            retries: 5
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
@@ -35,11 +30,6 @@ services:
                 condition: service_healthy
 #            scribbleshare-keydb:
 #                condition: service_healthy
-#        healthcheck:
-#            test: [ "CMD", "curl -sf http://localhost:80/ || exit 1" ]
-#            interval: 5s
-#            timeout: 5s
-#            retries: 5
         environment:
             scribbleshare.ssl: "false"
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"

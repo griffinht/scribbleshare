@@ -1,0 +1,4 @@
+enum SocketEventType {
+    OPEN,
+    CLOSE,
+}

@@ -22,9 +22,14 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
     public static AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
+    private static AttributeKey<Boolean> A = AttributeKey.valueOf(HttpAuthenticator.class, "A");
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
+        if (ctx.channel().attr(A).get() != null) {
+            out.add(request.retain());
+            return;
+        }
         ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
 
         if (request.decoderResult().isFailure()) {
@@ -39,11 +44,11 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-/*        if (request.uri().equals("/healthcheck")) {
+        if (request.uri().equals("/healthcheck")) {
             send(ctx, request, HttpResponseStatus.OK);
             ServerInitializer.getLogger(ctx).info("Good healthcheck response");
             return;
-        }*/
+        }
 
         if (!request.uri().equals(ServerInitializer.WEBSOCKET_PATH)) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -58,8 +63,9 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
                 ServerInitializer.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());
                 //now that we have an good authenticated HTTP request, set up WebSocket pipeline
-                ctx.pipeline().remove(this);
+                //ctx.pipeline().remove(this);
                 //pass on this request
+                ctx.channel().attr(A).set(true);
                 out.add(request.retain());
             } else {
                 ServerInitializer.getLogger(ctx).warning("Bad authentication");
