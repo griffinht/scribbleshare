@@ -145,6 +145,9 @@ Canvas manipulation
 
 did a bunch of commits on master
 
+### v0.6
+Rework project architecture
+
 ### v0.6.0
 Typescript refactor
 - Rewrote all client side JavaScript to TypeScript
