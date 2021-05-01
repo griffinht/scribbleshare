@@ -143,4 +143,12 @@ CanvasImage upload, add api
 Canvas manipulation
 - Objects can be dragged/resized
 
-asdf
+did a bunch of commits on master
+
+### v0.6.0
+Typescript refactor
+- Rewrote all client side JavaScript to TypeScript
+
+### v0.6.1
+Fix build system
+- Rework rollup with typescript and environment variables
