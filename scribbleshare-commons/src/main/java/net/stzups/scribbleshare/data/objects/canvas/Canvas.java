@@ -56,7 +56,7 @@ public class Canvas {
     public void update(CanvasUpdates[] canvasUpdatesArray) {
         dirty = true;
         for (CanvasUpdates canvasUpdates : canvasUpdatesArray) {
-            canvasUpdate.update(this);
+            canvasUpdates.update(this);
         }
     }
 

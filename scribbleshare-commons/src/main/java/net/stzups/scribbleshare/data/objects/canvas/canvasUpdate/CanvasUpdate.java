@@ -7,21 +7,24 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.C
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateMove;
 
 public abstract class CanvasUpdate {
-    private final CanvasUpdateType canvasObjectType;
+    private final byte dt;
 
-    public CanvasUpdate(CanvasUpdateType canvasUpdateType) {
-        this.canvasObjectType = canvasUpdateType;
+    public CanvasUpdate(ByteBuf byteBuf) {
+        dt = byteBuf.readByte();
     }
 
-    public abstract void update(Canvas canvas);
+    protected abstract CanvasUpdateType getCanvasUpdateType();
+
+    public abstract void update(Canvas canvas, short id);
 
     public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeByte((byte) canvasObjectType.getId());
+        byteBuf.writeByte((byte) getCanvasUpdateType().getId());
+        byteBuf.writeByte(dt);
     }
 
-    static CanvasUpdate getCanvasUpdate(ByteBuf byteBuf) {
+    static CanvasUpdate getCanvasUpdate(CanvasUpdateType type, ByteBuf byteBuf) {
         CanvasUpdate canvasUpdate;
-        switch (CanvasUpdateType.valueOf(byteBuf.readUnsignedByte())) {
+        switch (type) {
             case INSERT:
                 canvasUpdate = new CanvasUpdateInsert(byteBuf);
                 break;

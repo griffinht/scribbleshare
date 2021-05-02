@@ -27,7 +27,7 @@ const SELECT_PADDING = 10;
 
 const mouse = new Mouse(canvas);
 
-let canvasUpdates: Array<CanvasUpdate> = [];//todo these could be instance variables but idk
+let canvasUpdatesArray: CanvasUpdate[] = [];//todo these could be instance variables but idk
 let canvasUpdateMove: CanvasUpdateMove | null = null;
 let mouseUpdateMove: CanvasUpdateMove | null = null;
 let line: Line | null = null;

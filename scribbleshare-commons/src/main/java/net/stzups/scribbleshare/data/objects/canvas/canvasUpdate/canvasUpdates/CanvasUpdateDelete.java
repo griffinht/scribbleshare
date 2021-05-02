@@ -7,27 +7,24 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
 
 public class CanvasUpdateDelete extends CanvasUpdate {
-    private final byte dt;
-    private final short id;
-
     public CanvasUpdateDelete(ByteBuf byteBuf) {
-        super(CanvasUpdateType.DELETE);
-        this.dt = byteBuf.readByte();
-        this.id = byteBuf.readShort();
+        super(byteBuf);
     }
 
     @Override
-    public void update(Canvas canvas) {
-        CanvasObjectWrapper canvasObjectWrapper = canvas.getCanvasObjects().remove(id);
-        if (canvasObjectWrapper == null) {
-            System.out.println("Tried to delete object that does not exist"); //todo
+    protected CanvasUpdateType getCanvasUpdateType() {
+        return CanvasUpdateType.DELETE;
+    }
+
+    @Override
+    public void update(Canvas canvas, short id) {
+        if (canvas.getCanvasObjects().remove(id) == null) {
+            throw new RuntimeException("CanvasObject does not exist");
         }
     }
 
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeByte(dt);
-        byteBuf.writeShort(id);
     }
 }
