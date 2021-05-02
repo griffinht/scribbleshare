@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
  */
 public abstract class ServerMessage implements Message {
 
-    /** overriding classes need to call this first */
+    /** overriding classes need to call this first or else */
     public void serialize(ByteBuf bytebuf) {
-        bytebuf.writeByte((byte) getMessageType().getId());
+        getMessageType().serialize(bytebuf);
     }
 
     protected abstract ServerMessageType getMessageType();

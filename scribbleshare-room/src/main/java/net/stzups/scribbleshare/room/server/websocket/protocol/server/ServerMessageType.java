@@ -1,5 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.server;
 
+import io.netty.buffer.ByteBuf;
+
 public enum ServerMessageType {
     ADD_CLIENT(0),
     REMOVE_CLIENT(1),
@@ -19,7 +21,7 @@ public enum ServerMessageType {
         this.id = id;
     }
 
-    public int getId() {
-        return id;
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeByte((byte) id);
     }
 }
