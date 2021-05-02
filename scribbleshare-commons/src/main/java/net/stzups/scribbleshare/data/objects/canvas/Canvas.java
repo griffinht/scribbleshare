@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
-import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +53,9 @@ public class Canvas {
         return dirty;
     }
 
-    public void update(CanvasUpdate[] canvasUpdates) {
+    public void update(CanvasUpdates[] canvasUpdatesArray) {
         dirty = true;
-        for (CanvasUpdate canvasUpdate : canvasUpdates) {
+        for (CanvasUpdates canvasUpdates : canvasUpdatesArray) {
             canvasUpdate.update(this);
         }
     }

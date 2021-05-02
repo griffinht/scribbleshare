@@ -7,6 +7,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
@@ -118,7 +119,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
             case READY: {
                 switch (message.getMessageType()) {
                     case CANVAS_UPDATE: {
-                        CanvasUpdate[] canvasUpdates = ((ClientMessageCanvasUpdate) message).getCanvasUpdates();
+                        CanvasUpdates[] canvasUpdatesArray = ((ClientMessageCanvasUpdate) message).getCanvasUpdatesArray();
                         room.getCanvas().update(canvasUpdates);
                         room.queueMessageExcept(new ServerMessageCanvasUpdate(canvasUpdates), client);
                         break;

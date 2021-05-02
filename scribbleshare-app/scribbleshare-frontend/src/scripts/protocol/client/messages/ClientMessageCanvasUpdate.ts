@@ -1,20 +1,20 @@
 import ClientMessage from "../ClientMessage.js";
 import ClientMessageType from "../ClientMessageType.js";
-import CanvasUpdate from "../../../canvas/canvasUpdate/CanvasUpdate";
 import ByteBuffer from "../../ByteBuffer";
+import CanvasUpdates from "../../../canvas/canvasUpdate/CanvasUpdates";
 
 export default class ClientMessageCanvasUpdate extends ClientMessage {
-    canvasUpdates: Array<CanvasUpdate>;
-    constructor(canvasUpdates: Array<CanvasUpdate>) {
+    canvasUpdatesArray: CanvasUpdates[];
+    constructor(canvasUpdatesArray: CanvasUpdates[]) {
         super(ClientMessageType.CANVAS_UPDATE);
-        this.canvasUpdates = canvasUpdates;
+        this.canvasUpdatesArray = canvasUpdatesArray;
     }
     
     serialize(byteBuffer: ByteBuffer) {
         super.serialize(byteBuffer);
-        byteBuffer.writeUint8(this.canvasUpdates.length);
-        this.canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.canvasUpdatesArray.length);
+        this.canvasUpdatesArray.forEach((canvasUpdates) => {
+            canvasUpdates.serialize(byteBuffer);
         })
     }
 }
