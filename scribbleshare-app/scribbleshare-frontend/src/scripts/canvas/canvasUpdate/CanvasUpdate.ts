@@ -1,5 +1,5 @@
-import ByteBuffer from "../../protocol/ByteBuffer";
-import {Canvas} from "../Canvas";
+import ByteBuffer from "../../protocol/ByteBuffer.js";
+import {Canvas} from "../Canvas.js";
 
 export default class CanvasUpdate {
     type: CanvasUpdateType;

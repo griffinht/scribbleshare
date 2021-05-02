@@ -1,7 +1,7 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
-import ByteBuffer from "../../ByteBuffer";
-import Document from "../../../Document";
+import ByteBuffer from "../../ByteBuffer.js";
+import Document from "../../../Document.js";
 
 export default class ClientMessageUpdateDocument extends ClientMessage {
     id: bigint;

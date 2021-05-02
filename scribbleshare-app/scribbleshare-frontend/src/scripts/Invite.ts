@@ -2,8 +2,8 @@ import socket from "./protocol/WebSocketHandler.js";
 import ClientMessageGetInvite from "./protocol/client/messages/ClientMessageGetInvite.js";
 import ServerMessageType from "./protocol/server/ServerMessageType.js";
 import Modal from "./Modal.js";
-import ServerMessageGetInvite from "./protocol/server/messages/ServerMessageGetInvite";
-import ServerMessage from "./protocol/server/ServerMessage";
+import ServerMessageGetInvite from "./protocol/server/messages/ServerMessageGetInvite.js";
+import ServerMessage from "./protocol/server/ServerMessage.js";
 
 const inviteButton = document.getElementById("inviteButton")!;
 const inviteModal = new Modal(document.getElementById('inviteModal')!);

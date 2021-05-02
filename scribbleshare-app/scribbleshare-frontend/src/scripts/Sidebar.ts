@@ -1,4 +1,3 @@
-'use strict'
 export default class Sidebar {
     items: Array<SidebarItem>;
     element: HTMLElement;

@@ -1,5 +1,5 @@
-import ClientMessageType from "./ClientMessageType";
-import ByteBuffer from "../ByteBuffer";
+import ClientMessageType from "./ClientMessageType.js";
+import ByteBuffer from "../ByteBuffer.js";
 
 export default class ClientMessage {
     type:ClientMessageType;

@@ -2,8 +2,8 @@ import Shape from "./canvasObjects/Shape.js";
 import CanvasImage from "./canvasObjects/CanvasImage.js";
 import CanvasMouse from "./canvasObjects/CanvasMouse.js";
 import LineCanvasObject from "./canvasObjects/Line.js";
-import ByteBuffer from "../../protocol/ByteBuffer";
-import CanvasObjectType from "./CanvasObjectType";
+import ByteBuffer from "../../protocol/ByteBuffer.js";
+import CanvasObjectType from "./CanvasObjectType.js";
 
 export function getCanvasObject(type: CanvasObjectType, byteBuffer: ByteBuffer) {
     let object;

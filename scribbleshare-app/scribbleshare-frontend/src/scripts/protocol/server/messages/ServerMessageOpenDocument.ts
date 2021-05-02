@@ -1,7 +1,7 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import {Canvas} from "../../../canvas/Canvas.js";
-import ByteBuffer from "../../ByteBuffer";
+import ByteBuffer from "../../ByteBuffer.js";
 
 export default class ServerMessageOpenDocument extends ServerMessage {
     id: bigint;

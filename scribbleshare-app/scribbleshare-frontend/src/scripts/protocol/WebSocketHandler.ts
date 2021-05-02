@@ -1,9 +1,9 @@
 import ServerMessageType, {getServerMessage} from "./server/ServerMessageType.js";
 import Environment from "../Environment.js";
-import ServerMessage from "./server/ServerMessage";
-import ByteBuffer from "./ByteBuffer";
-import ClientMessage from "./client/ClientMessage";
-import SocketEventType from "./SocketEventType";
+import ServerMessage from "./server/ServerMessage.js";
+import ByteBuffer from "./ByteBuffer.js";
+import ClientMessage from "./client/ClientMessage.js";
+import SocketEventType from "./SocketEventType.js";
 
 class WebSocketHandler {
     messageQueue: ClientMessage[] = [];

@@ -1,4 +1,4 @@
-import ByteBuffer from "./protocol/ByteBuffer";
+import ByteBuffer from "./protocol/ByteBuffer.js";
 
 export default class Color {
     red: number;

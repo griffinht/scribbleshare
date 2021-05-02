@@ -1,8 +1,8 @@
 import {ctx} from "../../Canvas.js";
 import {activeDocument} from "../../../Document.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
-import ByteBuffer from "../../../protocol/ByteBuffer";
-import Environment from "../../../Environment";
+import ByteBuffer from "../../../protocol/ByteBuffer.js";
+import Environment from "../../../Environment.js";
 
 export default class CanvasImage extends EntityCanvasObject {
     id: bigint;

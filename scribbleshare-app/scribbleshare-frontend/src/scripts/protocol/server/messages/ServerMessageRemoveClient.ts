@@ -1,6 +1,6 @@
-import ServerMessage from "../ServerMessage";
-import ServerMessageType from "../ServerMessageType";
-import ByteBuffer from "../../ByteBuffer";
+import ServerMessage from "../ServerMessage.js";
+import ServerMessageType from "../ServerMessageType.js";
+import ByteBuffer from "../../ByteBuffer.js";
 
 export default class ServerMessageRemoveClient extends ServerMessage {
     id: number;

@@ -1,4 +1,4 @@
-import MouseMove from "./MouseMove";
+import MouseMove from "./MouseMove.js";
 
 export default class Client {
     id: number;

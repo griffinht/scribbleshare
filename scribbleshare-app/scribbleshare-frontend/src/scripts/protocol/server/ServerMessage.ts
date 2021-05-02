@@ -1,4 +1,4 @@
-import ServerMessageType from "./ServerMessageType";
+import ServerMessageType from "./ServerMessageType.js";
 
 export default class ServerMessage {
     type: ServerMessageType;

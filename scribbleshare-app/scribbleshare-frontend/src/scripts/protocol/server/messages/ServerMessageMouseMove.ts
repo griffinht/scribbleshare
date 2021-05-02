@@ -1,7 +1,7 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import MouseMove from "../../../MouseMove.js";
-import ByteBuffer from "../../ByteBuffer";
+import ByteBuffer from "../../ByteBuffer.js";
 
 export default class ServerMessageMouseMove extends ServerMessage {
     client: number;

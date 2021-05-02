@@ -8,8 +8,8 @@ import ServerMessageOpenDocument from "./messages/ServerMessageOpenDocument.js";
 import ServerMessageCanvasUpdate from "./messages/ServerMessageCanvasUpdate.js";
 import ServerMessageHandshake from "./messages/ServerMessageHandshake.js";
 import ServerMessageMouseMove from "./messages/ServerMessageMouseMove.js";
-import ByteBuffer from "../ByteBuffer";
-import ServerMessage from "./ServerMessage";
+import ByteBuffer from "../ByteBuffer.js";
+import ServerMessage from "./ServerMessage.js";
 
 enum ServerMessageType {
     ADD_CLIENT,

@@ -1,5 +1,5 @@
 import {ctx, lerp} from "../Canvas.js";
-import ByteBuffer from "../../protocol/ByteBuffer";
+import ByteBuffer from "../../protocol/ByteBuffer.js";
 
 export default class CanvasObject {
     x: number;

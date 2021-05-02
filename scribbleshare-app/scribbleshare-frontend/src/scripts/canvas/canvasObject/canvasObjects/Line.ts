@@ -1,8 +1,8 @@
 import CanvasObject from "../CanvasObject.js";
 import {ctx} from "../../Canvas.js";
-import ByteBuffer from "../../../protocol/ByteBuffer";
-import Color from "../../../Color";
-import color from "../../../ColorSelector";
+import ByteBuffer from "../../../protocol/ByteBuffer.js";
+import Color from "../../../Color.js";
+import color from "../../../ColorSelector.js";
 
 export default class LineCanvasObject extends CanvasObject {
     color: Color;

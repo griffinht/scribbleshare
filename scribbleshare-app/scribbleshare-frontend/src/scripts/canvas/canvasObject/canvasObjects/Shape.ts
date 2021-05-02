@@ -1,8 +1,8 @@
 import {ctx} from "../../Canvas.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
-import ByteBuffer from "../../../protocol/ByteBuffer";
-import Color from "../../../Color";
-import CanvasObjectType from "../CanvasObjectType";
+import ByteBuffer from "../../../protocol/ByteBuffer.js";
+import Color from "../../../Color.js";
+import CanvasObjectType from "../CanvasObjectType.js";
 
 export default class Shape extends EntityCanvasObject {
     type: CanvasObjectType;

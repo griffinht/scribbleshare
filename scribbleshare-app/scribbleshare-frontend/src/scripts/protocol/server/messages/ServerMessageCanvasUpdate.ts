@@ -1,8 +1,8 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import {getCanvasUpdate} from "../../../canvas/canvasUpdate/getCanvasUpdate.js";
-import ByteBuffer from "../../ByteBuffer";
-import CanvasUpdate from "../../../canvas/canvasUpdate/CanvasUpdate";
+import ByteBuffer from "../../ByteBuffer.js";
+import CanvasUpdate from "../../../canvas/canvasUpdate/CanvasUpdate.js";
 
 export default class ServerMessageCanvasUpdate extends ServerMessage {
     canvasUpdates: Array<CanvasUpdate>;

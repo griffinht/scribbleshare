@@ -1,8 +1,8 @@
 import {activeDocument} from "./Document.js";
 import CanvasImage from "./canvas/canvasObject/canvasObjects/CanvasImage.js";
 import Modal from "./Modal.js";
-import Environment from "./Environment";
-import ByteBuffer from "./protocol/ByteBuffer";
+import Environment from "./Environment.js";
+import ByteBuffer from "./protocol/ByteBuffer.js";
 
 const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1280;

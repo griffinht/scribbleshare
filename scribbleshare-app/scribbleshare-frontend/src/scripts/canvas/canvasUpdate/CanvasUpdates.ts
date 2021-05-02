@@ -1,7 +1,7 @@
-import CanvasUpdate from "./CanvasUpdate";
-import CanvasObjectWrapper from "../canvasObject/CanvasObjectWrapper";
-import ByteBuffer from "../../protocol/ByteBuffer";
-import {getCanvasUpdate} from "./getCanvasUpdate";
+import CanvasUpdate from "./CanvasUpdate.js";
+import CanvasObjectWrapper from "../canvasObject/CanvasObjectWrapper.js";
+import ByteBuffer from "../../protocol/ByteBuffer.js";
+import {getCanvasUpdate} from "./getCanvasUpdate.js";
 
 export default class CanvasUpdates {
     canvasObjectWrapper: CanvasObjectWrapper;

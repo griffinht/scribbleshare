@@ -1,5 +1,5 @@
 import CanvasObject from "./CanvasObject.js";
-import ByteBuffer from "../../protocol/ByteBuffer";
+import ByteBuffer from "../../protocol/ByteBuffer.js";
 
 export default class EntityCanvasObject extends CanvasObject {
     width: number;

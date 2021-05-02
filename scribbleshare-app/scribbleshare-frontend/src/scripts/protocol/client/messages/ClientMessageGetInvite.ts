@@ -1,6 +1,6 @@
 import ClientMessageType from "../ClientMessageType.js";
 import ClientMessage from "../ClientMessage.js";
-import ByteBuffer from "../../ByteBuffer";
+import ByteBuffer from "../../ByteBuffer.js";
 
 export default class ClientMessageGetInvite extends ClientMessage {
     constructor() {

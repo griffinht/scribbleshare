@@ -1,7 +1,7 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
-import ByteBuffer from "../../../protocol/ByteBuffer";
-import {Canvas} from "../../Canvas";
+import ByteBuffer from "../../../protocol/ByteBuffer.js";
+import {Canvas} from "../../Canvas.js";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
     dt: number;
