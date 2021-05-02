@@ -1,13 +1,14 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.server;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.room.server.websocket.protocol.Message;
 
 import java.nio.charset.StandardCharsets;
 
 /**
  * Represents a packet sent by the server
  */
-public abstract class ServerMessage {
+public abstract class ServerMessage implements Message {
 
     /** overriding classes need to call this first */
     public void serialize(ByteBuf bytebuf) {

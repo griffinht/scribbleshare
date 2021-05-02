@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.CanvasObjectWrapper;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
@@ -21,10 +22,10 @@ public class CanvasUpdateMove extends CanvasUpdate {
     }
 
     @Override
-    public void update(Canvas canvas, short id) {
+    public void update(Canvas canvas, short id) throws CanvasUpdateException {
         CanvasObjectWrapper canvasObjectWrapper = canvas.getCanvasObjects().get(id);
         if (canvasObjectWrapper == null) {
-            throw new RuntimeException("CanvasObject does not exist");
+            throw new CanvasUpdateException("CanvasObject does not exist");
         }
 
         canvasObjectWrapper.getCanvasObject().update(canvasObject);

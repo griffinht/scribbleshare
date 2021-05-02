@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.scribbleshare.data.exceptions.DeserializationTypeException;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -28,10 +29,10 @@ public enum CanvasUpdateType {
         return id;
     }
 
-    public static CanvasUpdateType valueOf(int id) {
+    public static CanvasUpdateType deserialize(int id) throws DeserializationTypeException {
         CanvasUpdateType messageType = messageTypeMap.get(id);
         if (messageType == null) {
-            throw new IllegalArgumentException("Unknown CanvasUpdateType for given id " + id);
+            throw new DeserializationTypeException(CanvasUpdateType.class, id);
         }
         return messageType;
     }

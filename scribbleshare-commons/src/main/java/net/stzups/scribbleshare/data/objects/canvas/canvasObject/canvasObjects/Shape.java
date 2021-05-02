@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 
 import java.util.EnumSet;
@@ -27,10 +28,11 @@ public class Shape extends EntityCanvasObject {
             this.id = id;
         }
 
-        public static Type valueOf(int id) {
+        public static Type deserialize(ByteBuf byteBuf) throws DeserializationException {
+            int id = byteBuf.readUnsignedByte();
             Type objectType = objectTypeMap.get(id);
             if (objectType == null) {
-                throw new IllegalArgumentException("Unknown Shape type for given id " + id);
+                throw new DeserializationException("Unknown Shape type for given id " + id);
             }
             return objectType;
         }
@@ -41,9 +43,9 @@ public class Shape extends EntityCanvasObject {
     private final byte green;
     private final byte blue;
 
-    public Shape(ByteBuf byteBuf) {
+    public Shape(ByteBuf byteBuf) throws DeserializationException {
         super(byteBuf);
-        this.type = Type.valueOf(byteBuf.readUnsignedByte());
+        this.type = Type.deserialize(byteBuf);
         this.red = byteBuf.readByte();
         this.green = byteBuf.readByte();
         this.blue = byteBuf.readByte();

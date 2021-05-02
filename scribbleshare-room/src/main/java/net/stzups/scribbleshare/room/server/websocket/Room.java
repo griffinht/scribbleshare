@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.room.server.websocket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
@@ -39,7 +40,7 @@ class Room {
     private final Document document;
     private final Canvas canvas;
 
-    Room(Document document) {
+    Room(Document document) throws DeserializationException {
         this.document = document;
         ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId(), document.getId()).getData();
         this.canvas = new Canvas(canvas);
@@ -47,7 +48,7 @@ class Room {
         Scribbleshare.getLogger().info("Started " + this);
     }
 
-    static Room getRoom(Document document) {
+    static Room getRoom(Document document) throws DeserializationException {
         Room room = rooms.get(document);
         if (room == null) {
             return new Room(document);

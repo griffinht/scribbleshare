@@ -16,7 +16,7 @@ public class ClientMessageDeleteDocument extends ClientMessage {
         return ClientMessageType.DELETE_DOCUMENT;
     }
 
-    public long id() {
+    public long getId() {
         return id;
     }
 }

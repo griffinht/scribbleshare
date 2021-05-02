@@ -1,6 +1,8 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateDelete;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateInsert;
@@ -15,14 +17,14 @@ public abstract class CanvasUpdate {
 
     protected abstract CanvasUpdateType getCanvasUpdateType();
 
-    public abstract void update(Canvas canvas, short id);
+    public abstract void update(Canvas canvas, short id) throws CanvasUpdateException;
 
     public void serialize(ByteBuf byteBuf) {
         byteBuf.writeByte((byte) getCanvasUpdateType().getId());
         byteBuf.writeByte(dt);
     }
 
-    static CanvasUpdate getCanvasUpdate(CanvasUpdateType type, ByteBuf byteBuf) {
+    static CanvasUpdate deserialize(CanvasUpdateType type, ByteBuf byteBuf) throws DeserializationException {
         CanvasUpdate canvasUpdate;
         switch (type) {
             case INSERT:

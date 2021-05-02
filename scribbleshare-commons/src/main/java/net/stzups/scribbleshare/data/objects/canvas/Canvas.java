@@ -2,6 +2,8 @@ package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
@@ -32,11 +34,12 @@ public class Canvas {
     /**
      * Deserializes canvas from db
      */
-    public Canvas(ByteBuf byteBuf) {
+    public Canvas(ByteBuf byteBuf) throws DeserializationException {
         int length = byteBuf.readUnsignedByte();
         for (int i = 0; i < length; i++) {
-            CanvasObjectType canvasObjectType = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
+            CanvasObjectType canvasObjectType = CanvasObjectType.deserialize(byteBuf.readUnsignedByte());
             int l = byteBuf.readUnsignedShort();
+            if (l == 0) throw new DeserializationException("Length of CanvasObject[] for type " + canvasObjectType + " is 0");
             for (int j = 0; j < l; j++) {
                 canvasObjects.put(byteBuf.readShort(), new CanvasObjectWrapper(canvasObjectType, CanvasObject.getCanvasObject(canvasObjectType, byteBuf)));
             }
@@ -53,7 +56,7 @@ public class Canvas {
         return dirty;
     }
 
-    public void update(CanvasUpdates[] canvasUpdatesArray) {
+    public void update(CanvasUpdates[] canvasUpdatesArray) throws CanvasUpdateException {
         dirty = true;
         for (CanvasUpdates canvasUpdates : canvasUpdatesArray) {
             canvasUpdates.update(this);

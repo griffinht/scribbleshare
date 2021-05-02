@@ -1,8 +1,8 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
-import net.stzups.scribbleshare.data.objects.canvas.CanvasObjectWrapper;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
 
@@ -17,9 +17,9 @@ public class CanvasUpdateDelete extends CanvasUpdate {
     }
 
     @Override
-    public void update(Canvas canvas, short id) {
+    public void update(Canvas canvas, short id) throws CanvasUpdateException {
         if (canvas.getCanvasObjects().remove(id) == null) {
-            throw new RuntimeException("CanvasObject does not exist");
+            throw new CanvasUpdateException("CanvasObject does not exist");
         }
     }
 

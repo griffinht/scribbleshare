@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.room.server.websocket.protocol.Message;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
@@ -14,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Represents a packet sent by the client
  */
-public abstract class ClientMessage {
+public abstract class ClientMessage implements Message {
 
     public abstract ClientMessageType getMessageType();
 

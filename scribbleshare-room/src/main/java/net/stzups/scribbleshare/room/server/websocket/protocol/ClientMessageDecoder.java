@@ -17,7 +17,7 @@ import java.util.List;
  * Decodes a WebSocketFrame sent by the client to a ClientPacket
  */
 @ChannelHandler.Sharable
-public class MessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
+public class ClientMessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> list) {
         if (webSocketFrame instanceof TextWebSocketFrame) {

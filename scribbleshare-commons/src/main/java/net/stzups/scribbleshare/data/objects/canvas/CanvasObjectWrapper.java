@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 
@@ -13,8 +14,8 @@ public class CanvasObjectWrapper {
         this.canvasObject = canvasObject;
     }
 
-    public CanvasObjectWrapper(ByteBuf byteBuf) {
-        this.type = CanvasObjectType.valueOf(byteBuf.readUnsignedByte());
+    public CanvasObjectWrapper(ByteBuf byteBuf) throws DeserializationException {
+        this.type = CanvasObjectType.deserialize(byteBuf.readUnsignedByte());
         this.canvasObject = CanvasObject.getCanvasObject(type, byteBuf);
     }
 

@@ -14,7 +14,7 @@ import java.util.List;
  * Encodes a ServerPacket sent by the server to
  */
 @ChannelHandler.Sharable
-public class MessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
+public class ServerMessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
     @Override
     protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf b) {
         StringBuilder stringBuilder = new StringBuilder();//debug

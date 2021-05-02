@@ -1,22 +1,24 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 
 public class CanvasUpdates {
     private final short id;
     private final CanvasUpdate[][] canvasUpdates;
 
-    public CanvasUpdates(ByteBuf byteBuf) {
+    public CanvasUpdates(ByteBuf byteBuf) throws DeserializationException {
         id = byteBuf.readShort();
         canvasUpdates = new CanvasUpdate[byteBuf.readUnsignedByte()][];
         if (canvasUpdates.length == 0) throw new RuntimeException("Length can not be 0");
         for (int i = 0; i < canvasUpdates.length; i++) {
-            CanvasUpdateType type = CanvasUpdateType.valueOf(byteBuf.readUnsignedByte());
+            CanvasUpdateType type = CanvasUpdateType.deserialize(byteBuf.readUnsignedByte());
             CanvasUpdate[] canvasUpdates = new CanvasUpdate[byteBuf.readUnsignedByte()];
             if (canvasUpdates.length == 0) throw new RuntimeException("Length can not be 0");
             for (int k = 0; k < canvasUpdates.length; k++) {
-                canvasUpdates[k] = CanvasUpdate.getCanvasUpdate(type, byteBuf);
+                canvasUpdates[k] = CanvasUpdate.deserialize(type, byteBuf);
             }
             this.canvasUpdates[i] = canvasUpdates;
         }
@@ -26,13 +28,13 @@ public class CanvasUpdates {
         return id;
     }
 
-    public void update(Canvas canvas) {
+    public void update(Canvas canvas) throws CanvasUpdateException {
         for (CanvasUpdate[] canvasUpdates : canvasUpdates) {
             for (CanvasUpdate canvasUpdate : canvasUpdates) {
                 try {
                     canvasUpdate.update(canvas, id);
-                } catch (RuntimeException e) {
-                    throw new RuntimeException("Failed to apply " + canvasUpdate.getCanvasUpdateType() + " to CanvasObject with id " + id, e);
+                } catch (CanvasUpdateException e) {
+                    throw new CanvasUpdateException("Failed to apply " + canvasUpdate.getCanvasUpdateType() + " to CanvasObject with id " + id, e);
                 }
             }
         }

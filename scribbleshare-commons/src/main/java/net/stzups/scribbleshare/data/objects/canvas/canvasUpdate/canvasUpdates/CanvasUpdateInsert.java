@@ -1,6 +1,8 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.CanvasObjectWrapper;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
@@ -9,7 +11,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateTyp
 public class CanvasUpdateInsert extends CanvasUpdate {
     private final CanvasObjectWrapper canvasObjectWrapper;
 
-    public CanvasUpdateInsert(ByteBuf byteBuf) {
+    public CanvasUpdateInsert(ByteBuf byteBuf) throws DeserializationException {
         super(byteBuf);
         this.canvasObjectWrapper = new CanvasObjectWrapper(byteBuf);
     }
@@ -20,9 +22,9 @@ public class CanvasUpdateInsert extends CanvasUpdate {
     }
 
     @Override
-    public void update(Canvas canvas, short id) {
+    public void update(Canvas canvas, short id) throws CanvasUpdateException {
         if (canvas.getCanvasObjects().putIfAbsent(id, canvasObjectWrapper) != null) {
-            throw new RuntimeException("CanvasObject already exists");
+            throw new CanvasUpdateException("CanvasObject already exists");
         }
     }
 

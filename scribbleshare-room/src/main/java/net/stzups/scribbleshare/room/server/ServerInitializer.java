@@ -17,9 +17,9 @@ import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
-import net.stzups.scribbleshare.room.server.websocket.MessageHandler;
-import net.stzups.scribbleshare.room.server.websocket.protocol.MessageDecoder;
-import net.stzups.scribbleshare.room.server.websocket.protocol.MessageEncoder;
+import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
+import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
+import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
 import net.stzups.scribbleshare.util.LogFactory;
 
 import java.util.concurrent.Executors;
@@ -42,8 +42,8 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private SslContext sslContext;
     private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
-    private final MessageEncoder messageEncoder = new MessageEncoder();
-    private final MessageDecoder messageDecoder = new MessageDecoder();
+    private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
+    private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
@@ -71,9 +71,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH), null, true))
-                .addLast(messageEncoder)
-                .addLast(messageDecoder)
-                .addLast(new MessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+                .addLast(serverMessageEncoder)
+                .addLast(clientMessageDecoder)
+                .addLast(new ClientMessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
 
     }
 
