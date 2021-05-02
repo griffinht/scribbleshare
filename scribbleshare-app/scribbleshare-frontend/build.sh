@@ -1,11 +1,21 @@
 #!/bin/bash
-# Minifies frontend code and stores output in dist/
 
-# Copy everything to dist
-cp -r ./src dist
-# Except for javascript, which will be added minifed
-rm -rf dist/scripts
 
-# Install rollup with barebones node project and roll up JavaScript
-npm install @rollup/plugin-node-resolve @rollup/plugin-replace rollup-plugin-terser --save-dev
+# Clean up old build
+rm -rf build
+
+# Copy everything
+cp -r ./src build
+
+# Remove javascript, it will be added later by Rollup
+rm -rf build/scripts
+
+
+
+# Rollup (minify)
+npm install --save-dev \
+@rollup/plugin-node-resolve \
+rollup-plugin-terser \
+@rollup/plugin-typescript typescript tslib
+
 npx rollup -c;

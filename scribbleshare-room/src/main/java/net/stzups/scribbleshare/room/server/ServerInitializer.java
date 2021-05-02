@@ -16,7 +16,7 @@ import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
-import net.stzups.scribbleshare.room.ScribbleshareRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
 import net.stzups.scribbleshare.room.server.websocket.MessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.MessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.MessageEncoder;
@@ -32,7 +32,6 @@ import java.util.logging.Logger;
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
-    static final String WEBSOCKET_PATH = "/scribblesocket";
 
     private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
@@ -71,7 +70,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true))
+                .addLast(new WebSocketServerProtocolHandler(Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH), null, true))
                 .addLast(messageEncoder)
                 .addLast(messageDecoder)
                 .addLast(new MessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
