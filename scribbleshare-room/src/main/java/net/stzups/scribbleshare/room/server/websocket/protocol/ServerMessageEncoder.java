@@ -16,15 +16,14 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class ServerMessageEncoder extends MessageToByteEncoder<List<ServerMessage>> {
     @Override
-    protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf b) {
+    protected void encode(ChannelHandlerContext ctx, List<ServerMessage> serverMessages, ByteBuf out) {
         StringBuilder stringBuilder = new StringBuilder();//debug
         BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame();
-        ByteBuf byteBuf = binaryWebSocketFrame.content();
         for (ServerMessage serverMessage : serverMessages) {
             stringBuilder.append(serverMessage.getClass().getSimpleName()).append(", ");//debug
-            serverMessage.serialize(byteBuf);
+            serverMessage.serialize(binaryWebSocketFrame.content());
         }
         ServerInitializer.getLogger(ctx).info("send " + stringBuilder);//debug
-        ctx.writeAndFlush(binaryWebSocketFrame);
+        out.writeBytes(binaryWebSocketFrame.content());
     }
 }
