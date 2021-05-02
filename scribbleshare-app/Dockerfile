@@ -6,9 +6,10 @@ FROM node:15 AS scribbleshare-frontend-build
 WORKDIR /usr/src/app
 
 COPY scribbleshare-frontend .
+COPY scribbleshare-frontend/Environment.ts src/scripts/Environment.ts
 
-RUN chmod +x build-typescript.sh \
-build-typescript.sh
+RUN chmod +x build.sh \
+build.sh
 
 
 #

@@ -18,6 +18,7 @@ import ServerMessageHandshake from "./protocol/server/messages/ServerMessageHand
 import ServerMessageMouseMove from "./protocol/server/messages/ServerMessageMouseMove";
 import ServerMessageDeleteDocument from "./protocol/server/messages/ServerMessageDeleteDocument";
 import ServerMessage from "./protocol/server/ServerMessage";
+import SocketEventType from "./protocol/SocketEventType";
 
 const documents = new Map();
 export let activeDocument: Document | null = null;

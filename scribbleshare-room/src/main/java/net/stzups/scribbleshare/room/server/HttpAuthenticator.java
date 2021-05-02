@@ -14,8 +14,10 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AttributeKey;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
+import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
 
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        if (!request.uri().equals(ServerInitializer.WEBSOCKET_PATH)) {
+        if (!request.uri().equals(Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             ServerInitializer.getLogger(ctx).info("Bad uri");
             return;

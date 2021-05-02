@@ -3,6 +3,7 @@ import Environment from "../Environment.js";
 import ServerMessage from "./server/ServerMessage";
 import ByteBuffer from "./ByteBuffer";
 import ClientMessage from "./client/ClientMessage";
+import SocketEventType from "./SocketEventType";
 
 class WebSocketHandler {
     messageQueue: ClientMessage[] = [];

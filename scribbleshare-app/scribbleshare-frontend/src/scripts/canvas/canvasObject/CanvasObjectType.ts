@@ -4,3 +4,4 @@ enum CanvasObjectType {
     MOUSE,
     LINE,
 }
+export default CanvasObjectType;
