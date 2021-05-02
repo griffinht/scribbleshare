@@ -8,16 +8,13 @@ import java.nio.charset.StandardCharsets;
  * Represents a packet sent by the server
  */
 public abstract class ServerMessage {
-    private final ServerMessageType packetType;
-
-    protected ServerMessage(ServerMessageType packetType) {
-        this.packetType = packetType;
-    }
 
     /** overriding classes need to call this first */
     public void serialize(ByteBuf bytebuf) {
-        bytebuf.writeByte((byte) packetType.getId());
+        bytebuf.writeByte((byte) getMessageType().getId());
     }
+
+    protected abstract ServerMessageType getMessageType();
 
     /** poorly encodes strings as utf 8 preceded by a one byte unsigned length */
     protected static void writeString(String string, ByteBuf byteBuf) {

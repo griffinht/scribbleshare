@@ -9,8 +9,12 @@ public class ServerMessageCanvasUpdate extends ServerMessage {
     private final CanvasUpdate[] canvasUpdates;
 
     public ServerMessageCanvasUpdate(CanvasUpdate[] canvasUpdates) {
-        super(ServerMessageType.CANVAS_UPDATE);
         this.canvasUpdates = canvasUpdates;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.CANVAS_UPDATE;
     }
 
     @Override

@@ -8,8 +8,12 @@ public class ClientMessageOpenDocument extends ClientMessage {
     private final long id;
 
     public ClientMessageOpenDocument(ByteBuf byteBuf) {
-        super(ClientMessageType.OPEN_DOCUMENT);
         this.id = byteBuf.readLong();
+    }
+
+    @Override
+    public ClientMessageType getMessageType() {
+        return ClientMessageType.OPEN_DOCUMENT;
     }
 
     public long getId() {

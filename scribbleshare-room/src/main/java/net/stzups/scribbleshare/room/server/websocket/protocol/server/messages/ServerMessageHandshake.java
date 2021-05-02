@@ -9,8 +9,12 @@ public class ServerMessageHandshake extends ServerMessage {
     private final Client client;
 
     public ServerMessageHandshake(Client client) {
-        super(ServerMessageType.HANDSHAKE);
         this.client = client;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.HANDSHAKE;
     }
 
     public void serialize(ByteBuf byteBuf) {

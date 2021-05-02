@@ -8,8 +8,12 @@ public class ClientMessageHandshake extends ClientMessage {
     private final String code;
 
     public ClientMessageHandshake(ByteBuf byteBuf) {
-        super(ClientMessageType.HANDSHAKE);
         this.code = readString(byteBuf);
+    }
+
+    @Override
+    public ClientMessageType getMessageType() {
+        return ClientMessageType.HANDSHAKE;
     }
 
     public String getCode() {

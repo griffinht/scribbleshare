@@ -9,8 +9,12 @@ public class ServerMessageRemoveClient extends ServerMessage {
     private final Client client;
 
     public ServerMessageRemoveClient(Client client) {
-        super(ServerMessageType.REMOVE_CLIENT);
         this.client = client;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.REMOVE_CLIENT;
     }
 
     @Override

@@ -6,6 +6,11 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 
 public class ClientMessageGetInvite extends ClientMessage {
     public ClientMessageGetInvite(ByteBuf byteBuf) {
-        super(ClientMessageType.GET_INVITE);
+
+    }
+
+    @Override
+    public ClientMessageType getMessageType() {
+        return ClientMessageType.GET_INVITE;
     }
 }

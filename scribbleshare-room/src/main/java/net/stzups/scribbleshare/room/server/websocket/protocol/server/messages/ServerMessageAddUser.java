@@ -9,8 +9,12 @@ public class ServerMessageAddUser extends ServerMessage {
     private final User user;
 
     public ServerMessageAddUser(User user) {
-        super(ServerMessageType.ADD_USER);
         this.user = user;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.ADD_USER;
     }
 
     @Override

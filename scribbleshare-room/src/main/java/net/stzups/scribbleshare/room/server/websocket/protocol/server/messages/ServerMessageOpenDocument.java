@@ -11,9 +11,13 @@ public class ServerMessageOpenDocument extends ServerMessage {
     private final Canvas canvas;
 
     public ServerMessageOpenDocument(Document document, Canvas canvas) {
-        super(ServerMessageType.OPEN_DOCUMENT);
         this.document = document;
         this.canvas = canvas;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.OPEN_DOCUMENT;
     }
 
     @Override

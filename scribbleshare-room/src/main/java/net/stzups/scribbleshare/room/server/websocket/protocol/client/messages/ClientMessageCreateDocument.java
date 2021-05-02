@@ -6,6 +6,11 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 
 public class ClientMessageCreateDocument extends ClientMessage {
     public ClientMessageCreateDocument(ByteBuf byteBuf) {
-        super(ClientMessageType.CREATE_DOCUMENT);
+
+    }
+
+    @Override
+    public ClientMessageType getMessageType() {
+        return ClientMessageType.CREATE_DOCUMENT;
     }
 }

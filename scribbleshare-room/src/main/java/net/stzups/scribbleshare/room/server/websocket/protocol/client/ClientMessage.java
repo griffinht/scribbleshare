@@ -15,15 +15,8 @@ import java.nio.charset.StandardCharsets;
  * Represents a packet sent by the client
  */
 public abstract class ClientMessage {
-    private final ClientMessageType packetType;
 
-    protected ClientMessage(ClientMessageType packetType) {
-        this.packetType = packetType;
-    }
-
-    public ClientMessageType getMessageType() {
-        return packetType;
-    }
+    public abstract ClientMessageType getMessageType();
 
     protected String readString(ByteBuf byteBuf) {
         byte[] buffer = new byte[byteBuf.readUnsignedByte()];

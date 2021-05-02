@@ -8,8 +8,12 @@ public class ClientMessageDeleteDocument extends ClientMessage {
     private final long id;
 
     public ClientMessageDeleteDocument(ByteBuf byteBuf) {
-        super(ClientMessageType.DELETE_DOCUMENT);
         this.id = byteBuf.readLong();
+    }
+
+    @Override
+    public ClientMessageType getMessageType() {
+        return ClientMessageType.DELETE_DOCUMENT;
     }
 
     public long id() {

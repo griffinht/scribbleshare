@@ -16,8 +16,12 @@ public class ServerMessageAddClient extends ServerMessage {
     }
 
     public ServerMessageAddClient(Set<Client> clients) {
-        super(ServerMessageType.ADD_CLIENT);
         this.clients = clients;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.ADD_CLIENT;
     }
 
     @Override

@@ -9,8 +9,12 @@ public class ServerMessageDeleteDocument extends ServerMessage {
     private final long id;
 
     public ServerMessageDeleteDocument(Document document) {
-        super(ServerMessageType.DELETE_DOCUMENT);
         id = document.getId();
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.DELETE_DOCUMENT;
     }
 
     @Override

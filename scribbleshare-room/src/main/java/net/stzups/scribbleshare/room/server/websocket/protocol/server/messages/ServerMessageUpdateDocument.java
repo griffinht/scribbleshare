@@ -13,9 +13,13 @@ public class ServerMessageUpdateDocument extends ServerMessage {
         this(document, false);
     }
     public ServerMessageUpdateDocument(Document document, boolean shared) {
-        super(ServerMessageType.UPDATE_DOCUMENT);
         this.document = document;
         this.shared = shared;
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.UPDATE_DOCUMENT;
     }
 
     @Override

@@ -9,8 +9,12 @@ public class ServerMessageGetInvite extends ServerMessage {
     private final String code;
 
     public ServerMessageGetInvite(InviteCode inviteCode) {
-        super(ServerMessageType.GET_INVITE);
         code = inviteCode.getCode();
+    }
+
+    @Override
+    protected ServerMessageType getMessageType() {
+        return ServerMessageType.GET_INVITE;
     }
 
     @Override
