@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.scribbleshare.data.exceptions.DeserializationTypeException;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -33,10 +34,10 @@ public enum ClientMessageType {
         return id;
     }
 
-    public static ClientMessageType valueOf(int id) {
+    public static ClientMessageType deserialize(int id) throws DeserializationTypeException {
         ClientMessageType messageType = messageTypeMap.get(id);
         if (messageType == null) {
-            throw new IllegalArgumentException("Unknown ClientMessageType for given id " + id);
+            throw new DeserializationTypeException(ClientMessageType.class, id);
         }
         return messageType;
     }

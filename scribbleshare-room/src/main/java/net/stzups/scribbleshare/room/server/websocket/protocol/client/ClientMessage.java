@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.Message;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCreateDocument;
@@ -25,7 +26,7 @@ public abstract class ClientMessage implements Message {
         return new String(buffer, StandardCharsets.UTF_8);
     }
 
-    public static ClientMessage getClientMessage(ClientMessageType clientMessageType, ByteBuf byteBuf) {
+    public static ClientMessage getClientMessage(ClientMessageType clientMessageType, ByteBuf byteBuf) throws DeserializationException {
         ClientMessage message;
         switch (clientMessageType) {
             case OPEN_DOCUMENT:
