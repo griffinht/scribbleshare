@@ -10,7 +10,11 @@ export default {
   },
   plugins: [
     nodeResolve(),
-    terser(),
+    terser({
+      mangle: {
+        properties:true,
+      },
+    }),
     typescript(),
   ]
 };
