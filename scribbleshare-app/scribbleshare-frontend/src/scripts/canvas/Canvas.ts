@@ -155,12 +155,12 @@ export class Canvas {
         let canvasObjectWrapper = new CanvasObjectWrapper(type, canvasObject);
         // @ts-ignore todo
         activeDocument.canvas.canvasObjectWrappers.set(id, canvasObjectWrapper);
-        canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
+        //canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
     }
 
     delete(id: number) {
         this.canvasObjectWrappers.delete(id);
-        canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
+        //canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
 
     update(canvasUpdates: Array<CanvasUpdate>) {
@@ -221,7 +221,7 @@ export class Canvas {
                         if (this.selected.canvasObjectWrapper !== null && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
                             this.selected.canvasObjectWrapper.canvasObject.width += event.movementX;
                             this.selected.canvasObjectWrapper.canvasObject.height += event.movementY;
-                            canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
+                            //canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
                         }
                     } else {
                         //leftLock = true;
@@ -243,7 +243,7 @@ export class Canvas {
                         }
                     }
                 } else if (canvasUpdateMove !== null && ((event.buttons & 1) !== 1)) {
-                    canvasUpdates.push(canvasUpdateMove);
+                    //canvasUpdates.push(canvasUpdateMove);
                     canvasUpdateMove = null;
                 }
                 break;
@@ -362,7 +362,7 @@ function update() {
 
         //assemble local updates
         if (canvasUpdateMove !== null) {
-            canvasUpdates.push(canvasUpdateMove);
+            //canvasUpdates.push(canvasUpdateMove);
             canvasUpdateMove = null;
         }
 /*        if (mouseUpdateMove !== null) {
@@ -371,14 +371,14 @@ function update() {
         }*/
 
         //send local updates
-        if (canvasUpdates.length > 0) {
+        /*if (canvasUpdates.length > 0) {
             socket.queue(new ClientMessageCanvasUpdate(canvasUpdates));
-        }
+        }*/
         socket.flush();
         lastUpdate = window.performance.now();
 
         //clean up
-        canvasUpdates.length = 0;
+        //canvasUpdates.length = 0;
     } else {
         //happens if there is no document open
     }

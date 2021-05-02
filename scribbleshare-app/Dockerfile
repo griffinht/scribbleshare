@@ -8,6 +8,7 @@ WORKDIR /usr/src/app
 COPY scribbleshare-frontend .
 COPY scribbleshare-frontend/Environment.ts src/scripts/Environment.ts
 
+RUN npm install
 RUN chmod +x build.sh \
 build.sh
 

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Clean up old build
 rm -rf build
 
@@ -11,11 +10,5 @@ cp -r ./src build
 rm -rf build/scripts
 
 
-
-# Rollup (minify)
-npm install --save-dev \
-@rollup/plugin-node-resolve \
-rollup-plugin-terser \
-@rollup/plugin-typescript typescript tslib
 
 npx rollup -c;
