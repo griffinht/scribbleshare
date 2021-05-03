@@ -3,9 +3,10 @@ package net.stzups.scribbleshare.backend;
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
-import net.stzups.scribbleshare.backend.server.Server;
+import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.Database;
+import net.stzups.scribbleshare.server.Server;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
 import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
@@ -27,7 +28,7 @@ public class ScribbleshareBackend {
         database = new ScribbleshareDatabase();
 
         Server server = new Server();
-        ChannelFuture channelFuture = server.start();
+        ChannelFuture channelFuture = server.start(new ServerInitializer());
 
         Scribbleshare.getLogger().info("Started scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
 
@@ -37,7 +38,7 @@ public class ScribbleshareBackend {
 
         Scribbleshare.getLogger().info("Stopping scribbleshare-backend server");
 
-        server.stop();
+        server.stop();//todo
 
         Scribbleshare.getLogger().info("Stopped scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
     }

@@ -5,7 +5,8 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.Database;
-import net.stzups.scribbleshare.room.server.Server;
+import net.stzups.scribbleshare.room.server.ServerInitializer;
+import net.stzups.scribbleshare.server.Server;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
 import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
@@ -28,17 +29,17 @@ public class ScribbleshareRoom {
         database = new ScribbleshareDatabase();
 
         Server server = new Server();
-        ChannelFuture channelFuture = server.start();
+        ChannelFuture closeFuture = server.start(new ServerInitializer());
 
         Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
-        channelFuture.sync();
+        closeFuture.sync();
 
         start = System.currentTimeMillis();
 
         Scribbleshare.getLogger().info("Stopping scribbleshare-room server");
 
-        server.stop();
+        server.stop();//todo not necessary?
 
         Scribbleshare.getLogger().info("Stopped scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
     }

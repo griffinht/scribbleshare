@@ -1,15 +1,11 @@
 package net.stzups.scribbleshare.server;
 
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.scribbleshare.Scribbleshare;
@@ -18,6 +14,7 @@ import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
+@ChannelHandler.Sharable
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
@@ -26,15 +23,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     };
 
-    private final SslContext sslContext;
-
-    protected ServerInitializer(SslContext sslContext) {
-        this.sslContext = sslContext;
-    }
-
     @Override
     protected void initChannel(SocketChannel channel) {
-        Scribbleshare.setLogger(channel).info("Connection");
+        Scribbleshare.setLogger(channel).info("Connection opened");
 
         channel.pipeline().addLast(new ChannelDuplexHandler() {
                     @Override
@@ -43,11 +34,12 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                     }
                 })
                 .addLast(globalTrafficShapingHandler);
+
+        SslContext sslContext = Server.getSslContext(channel);
         if (sslContext != null) {
             channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
         }
     }
-
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) {

@@ -1,11 +1,11 @@
 package net.stzups.scribbleshare.room.server;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslContext;
 import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
@@ -16,15 +16,12 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEnco
  * WebSocket connections should be made to the specified WebSocket path
  * Connections not made to the WebSocket path go to ServerHandler
  */
+@ChannelHandler.Sharable
 public class ServerInitializer extends net.stzups.scribbleshare.server.ServerInitializer {
     private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
     private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
-
-    ServerInitializer(SslContext sslContext) {
-        super(sslContext);
-    }
 
     @Override
     protected void initChannel(SocketChannel channel) {
