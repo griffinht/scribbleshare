@@ -40,16 +40,6 @@ public enum State {
     },
     HANDSHAKE {
         @Override
-        public void channelInactive(ChannelHandlerContext ctx) {
-            final Attribute<Room> room = ClientMessageHandler.getRoom(ctx);
-            if (room.get() != null) {
-                room.get().removeClient(ClientMessageHandler.getClient(ctx).get());
-                return;
-            }
-            super.channelInactive(ctx);
-        }
-
-        @Override
         public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
             switch (clientMessage.getMessageType()) {
                 case HANDSHAKE: {
@@ -119,6 +109,16 @@ public enum State {
         }
     },
     READY {
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) {
+            final Attribute<Room> room = ClientMessageHandler.getRoom(ctx);
+            if (room.get() != null) {
+                room.get().removeClient(ClientMessageHandler.getClient(ctx).get());
+                return;
+            }
+            //super.channelInactive(ctx);
+        }
+
         @Override
         public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
             final Client client = ClientMessageHandler.getClient(ctx).get();
