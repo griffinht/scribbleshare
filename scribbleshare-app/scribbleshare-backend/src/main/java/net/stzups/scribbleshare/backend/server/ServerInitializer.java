@@ -1,6 +1,5 @@
 package net.stzups.scribbleshare.backend.server;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -13,15 +12,11 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
-import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
-import net.stzups.scribbleshare.backend.ScribbleshareBackend;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
-import net.stzups.scribbleshare.util.LogFactory;
 
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 /**
  * Creates pipeline to handle Websocket connections
@@ -29,8 +24,6 @@ import java.util.logging.Logger;
  * Connections not made to the WebSocket path go to ServerHandler
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
-    private static final AttributeKey<Logger> LOGGER = AttributeKey.valueOf(ServerInitializer.class, "LOGGER");
-
     private final GlobalTrafficShapingHandler globalTrafficShapingHandler = new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 0, 0, 1000) {
         @Override
         protected void doAccounting(TrafficCounter counter) {
@@ -47,14 +40,14 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel channel) {
-        setLogger(channel);
-        getLogger(channel).info("Connection");
+        Scribbleshare.setLogger(channel).info("Connection");
+
         ChannelPipeline pipeline = channel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
-                        getLogger(channel).warning("Uncaught exception");
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
+                        Scribbleshare.getLogger(ctx).warning("Uncaught exception");
                         throwable.printStackTrace();
                     }
                 })
@@ -68,16 +61,5 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(httpServerHandler);
-    }
-
-    public static void setLogger(SocketChannel channel) {
-        channel.attr(LOGGER).set(LogFactory.getLogger(channel.remoteAddress().toString()));
-    }
-
-    public static Logger getLogger(ChannelHandlerContext ctx) {
-        return getLogger(ctx.channel());
-    }
-    public static Logger getLogger(Channel channel) {
-        return channel.attr(LOGGER).get();
     }
 }
