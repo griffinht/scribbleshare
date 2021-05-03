@@ -9,6 +9,8 @@ import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 
+import java.util.logging.Level;
+
 @ChannelHandler.Sharable
 public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static final AttributeKey<State> STATE = AttributeKey.valueOf(ClientMessageHandler.class, "STATE");
@@ -45,7 +47,7 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ServerInitializer.getLogger(ctx).warning("Unhandled exception " + cause.getMessage());
+        ServerInitializer.getLogger(ctx).log(Level.SEVERE, "Unhandled exception ", cause);
     }
 
     @Override

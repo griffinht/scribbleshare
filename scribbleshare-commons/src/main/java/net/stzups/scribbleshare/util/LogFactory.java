@@ -1,5 +1,8 @@
 package net.stzups.scribbleshare.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
@@ -49,8 +52,17 @@ public class LogFactory {
                         + "[" + name + "] "
                         + level
                         + record.getMessage()
-                        + System.lineSeparator();
+                        + System.lineSeparator()
+                        + ((record.getThrown() == null) ? "" : getStackTrace(record.getThrown()));
             }
         });
+    }
+
+    private static String getStackTrace(Throwable throwable) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (PrintStream printStream = new PrintStream(byteArrayOutputStream, true, StandardCharsets.UTF_8)) {
+            throwable.printStackTrace(printStream);
+        }
+        return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
     }
 }
