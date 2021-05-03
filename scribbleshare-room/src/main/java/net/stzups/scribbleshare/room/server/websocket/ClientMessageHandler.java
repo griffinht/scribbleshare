@@ -47,7 +47,7 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ServerInitializer.getLogger(ctx).log(Level.SEVERE, "Unhandled exception ", cause);
+        ServerInitializer.getLogger(ctx).log(Level.WARNING, "Unhandled exception while in connection state " + getState(ctx).get(), cause);
     }
 
     @Override

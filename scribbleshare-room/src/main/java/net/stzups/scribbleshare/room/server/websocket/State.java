@@ -211,14 +211,14 @@ public enum State {
     };
 
     public void channelInactive(ChannelHandlerContext ctx) {
-        throw new UnsupportedOperationException("Unhandled channelInactive");
+        throw new UnsupportedOperationException("Unhandled channel close");
     }
 
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
-        throw new UnsupportedOperationException("Unhandled user event triggered " + event);
+        throw new UnsupportedOperationException("Unhandled netty userEventTriggered " + event);
     }
 
     public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
-        throw new ClientMessageException(clientMessage, "State: " + this);
+        throw new UnsupportedOperationException("Unhandled ClientMessage " + clientMessage.getClass().getSimpleName());
     }
 }
