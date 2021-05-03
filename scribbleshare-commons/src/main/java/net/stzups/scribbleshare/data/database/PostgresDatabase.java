@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.database;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -40,7 +41,7 @@ public class PostgresDatabase extends AbstractDatabase {
                 connection = DriverManager.getConnection(url, user, password);
             } catch (PSQLException e) {
                 if (e.getCause() instanceof ConnectException && (maxRetries < 0 || retries < maxRetries)) {
-                    System.out.println("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
+                    Scribbleshare.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
                 } else {
                     throw e;
                 }
