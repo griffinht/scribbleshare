@@ -27,7 +27,7 @@ public class PropertiesConfig implements ConfigProvider {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
                 properties.load(fileInputStream);
             }
-            Scribbleshare.getLogger().info("Loaded " + properties.size() + " config properties");
+            Scribbleshare.getLogger().info("Loaded " + properties.size() + " config properties from " + file.getName());
         }
     }
 
