@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import net.stzups.scribbleshare.room.server.ServerInitializer;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class ServerMessageEncoder extends MessageToMessageDecoder<List<ServerMes
             stringBuilder.append(serverMessage.getClass().getSimpleName()).append(", ");//debug
             serverMessage.serialize(binaryWebSocketFrame.content());
         }
-        ServerInitializer.getLogger(ctx).info("send " + stringBuilder);//debug
+        Scribbleshare.getLogger(ctx).info("send " + stringBuilder);//debug
         out.add(binaryWebSocketFrame);
     }
 }

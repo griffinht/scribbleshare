@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.room.server.websocket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.Attribute;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
 import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -12,7 +13,6 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
 import net.stzups.scribbleshare.room.server.HttpAuthenticator;
-import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
@@ -31,7 +31,7 @@ public enum State {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
             if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-                ServerInitializer.getLogger(ctx).info("WebSocket connection initialized");
+                Scribbleshare.getLogger(ctx).info("WebSocket connection initialized");
                 State.HANDSHAKE.setState(ctx);
                 return;
             }
@@ -52,7 +52,7 @@ public enum State {
                     if (user == null) {
                         throw new ClientMessageException(clientMessage, "User does not exist");
                     }
-                    ServerInitializer.getLogger(ctx).info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
+                    Scribbleshare.getLogger(ctx).info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
 
                     Client client = new Client(user, ctx.channel());
                     ClientMessageHandler.getClient(ctx).set(client);
@@ -152,7 +152,7 @@ public enum State {
                         }
                         room.get().addClient(client);
                     } else {
-                        ServerInitializer.getLogger(ctx).warning(client + " tried to open document not that does not exist");
+                        Scribbleshare.getLogger(ctx).warning(client + " tried to open document not that does not exist");
                     }
                     break;
                 }
@@ -173,7 +173,7 @@ public enum State {
                 case DELETE_DOCUMENT: {
                     ClientMessageDeleteDocument clientMessageDeleteDocument = (ClientMessageDeleteDocument) clientMessage;
                     if (clientMessageDeleteDocument.getId() == room.get().getDocument().getId()) {
-                        ServerInitializer.getLogger(ctx).info("Deleting live document " + room.get().getDocument());
+                        Scribbleshare.getLogger(ctx).info("Deleting live document " + room.get().getDocument());
                         room.get().sendMessage(new ServerMessageDeleteDocument(room.get().getDocument()));
                         room.get().end();
                         ScribbleshareRoom.getDatabase().deleteDocument(room.get().getDocument());
@@ -214,7 +214,7 @@ public enum State {
     };
 
     void setState(ChannelHandlerContext ctx) {
-        ServerInitializer.getLogger(ctx).info(this.toString());
+        Scribbleshare.getLogger(ctx).info(this.toString());
         ClientMessageHandler.getState(ctx).set(this);
     }
 

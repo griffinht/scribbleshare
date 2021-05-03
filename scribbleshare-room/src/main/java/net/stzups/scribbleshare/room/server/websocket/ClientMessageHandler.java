@@ -5,8 +5,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
-import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 
 import java.util.logging.Level;
@@ -46,7 +46,7 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ServerInitializer.getLogger(ctx).log(Level.WARNING, "Unhandled exception while in connection state " + getState(ctx).get(), cause);
+        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Unhandled exception while in connection state " + getState(ctx).get(), cause);
     }
 
     @Override

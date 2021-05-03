@@ -32,29 +32,29 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             out.add(request.retain());
             return;
         }
-        ServerInitializer.getLogger(ctx).info(request.method() + " " + request.uri());
+        Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
 
         if (request.decoderResult().isFailure()) {
             send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-            ServerInitializer.getLogger(ctx).info("Bad request");
+            Scribbleshare.getLogger(ctx).info("Bad request");
             return;
         }
 
         if (!request.method().equals(HttpMethod.GET)) {
             send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            ServerInitializer.getLogger(ctx).info("Bad method");
+            Scribbleshare.getLogger(ctx).info("Bad method");
             return;
         }
 
         if (request.uri().equals("/healthcheck")) {
             send(ctx, request, HttpResponseStatus.OK);
-            ServerInitializer.getLogger(ctx).info("Good healthcheck response");
+            Scribbleshare.getLogger(ctx).info("Good healthcheck response");
             return;
         }
 
-        if (!request.uri().equals(Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
+        if (!request.uri().equals(net.stzups.scribbleshare.Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            ServerInitializer.getLogger(ctx).info("Bad uri");
+            Scribbleshare.getLogger(ctx).info("Bad uri");
             return;
         }
 
@@ -62,7 +62,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         if (cookie != null) {
             HttpSession httpSession = ScribbleshareRoom.getDatabase().getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
-                ServerInitializer.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
+                Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());
                 //now that we have an good authenticated HTTP request, set up WebSocket pipeline
                 //ctx.pipeline().remove(this);
@@ -70,13 +70,13 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
                 ctx.channel().attr(A).set(true);
                 out.add(request.retain());
             } else {
-                ServerInitializer.getLogger(ctx).warning("Bad authentication");
+                Scribbleshare.getLogger(ctx).warning("Bad authentication");
                 //bad authentication attempt
                 //todo rate limit timeout server a proper response???
                 send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             }
         } else {
-            ServerInitializer.getLogger(ctx).info("No authentication");
+            Scribbleshare.getLogger(ctx).info("No authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
         }
     }
