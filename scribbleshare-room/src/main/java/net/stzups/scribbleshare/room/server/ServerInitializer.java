@@ -44,6 +44,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
+    private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
 
     ServerInitializer(SslContext sslContext) {
         this.sslContext = sslContext;
@@ -73,7 +74,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new WebSocketServerProtocolHandler(Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH), null, true))
                 .addLast(serverMessageEncoder)
                 .addLast(clientMessageDecoder)
-                .addLast(new ClientMessageHandler());//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
+                .addLast(clientMessageHandler);//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
 
     }
 
