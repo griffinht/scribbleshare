@@ -215,7 +215,7 @@ public enum State {
     }
 
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
-        throw new UnsupportedOperationException("Unhandled netty userEventTriggered " + event);
+
     }
 
     public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
