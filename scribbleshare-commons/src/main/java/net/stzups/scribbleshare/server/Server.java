@@ -21,14 +21,10 @@ import java.io.File;
 public class Server {
     private static final AttributeKey<SslContext> SSL_CONTEXT = AttributeKey.valueOf(Server.class, "SSL_CONTEXT");
 
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
-
     /**
      * Initializes the server and binds to the specified port
-     * @return close future
      */
-    public ChannelFuture start(ChannelHandler handler) throws Exception {
+    public void start(ChannelHandler handler) throws Exception {
         SslContext sslContext;
         if (Scribbleshare.getConfig().getBoolean(ScribbleshareConfigKeys.SSL)) {
             sslContext = SslContextBuilder.forServer(
@@ -39,38 +35,34 @@ public class Server {
             sslContext = null;
         }
 
-        int port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
+        final int port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
 
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
-                .childHandler(handler);
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogFactory.getLogger("netty").getName(), LogLevel.DEBUG))
+                    .childHandler(handler);
+            ChannelFuture bindFuture = serverBootstrap.bind(port).await();
+            if (!bindFuture.isSuccess()) {
+                bindFuture.channel().closeFuture().sync();
+                throw new Exception("Failed to bind to port " + port, bindFuture.cause());
+            }
 
-        Scribbleshare.getLogger().info("Binding to port " + port);
+            Scribbleshare.getLogger().info("Bound to port " + port);
 
-        ChannelFuture bindFuture = serverBootstrap.bind(port);
-        bindFuture.channel().attr(SSL_CONTEXT).set(sslContext);
+            bindFuture.channel().attr(SSL_CONTEXT).set(sslContext);
 
-        ChannelFuture closeFuture = bindFuture.sync().channel().closeFuture();
-        //closeFuture.addListener(future -> stop());
-
-        return closeFuture;
+            bindFuture.channel().closeFuture().sync();
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
     }
 
-    /**
-     * Shuts down the server gracefully, then blocks until the server is shut down
-     */
-    public void stop() throws InterruptedException {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
-
-        bossGroup.shutdownGracefully().sync();
-        workerGroup.shutdownGracefully().sync();
-    }
 
     public static SslContext getSslContext(Channel channel) {
         return channel.attr(SSL_CONTEXT).get();

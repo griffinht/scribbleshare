@@ -29,17 +29,18 @@ public class ScribbleshareRoom {
         database = new ScribbleshareDatabase();
 
         Server server = new Server();
-        ChannelFuture closeFuture = server.start(new ServerInitializer());
+        //ChannelFuture closeFuture =
+                server.start(new ServerInitializer());
 
         Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
-        closeFuture.sync();
+        //closeFuture.sync();
 
         start = System.currentTimeMillis();
 
         Scribbleshare.getLogger().info("Stopping scribbleshare-room server");
 
-        server.stop();//todo not necessary?
+        //server.stop();//todo not necessary?
 
         Scribbleshare.getLogger().info("Stopped scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
     }
