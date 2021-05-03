@@ -1,6 +1,5 @@
 package net.stzups.scribbleshare.room.server;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -23,6 +22,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEnco
 import net.stzups.scribbleshare.util.LogFactory;
 
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -52,15 +52,17 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel channel) {
-        setLogger(channel);
-        getLogger(channel).info("Initial connection");
+        Logger logger = LogFactory.getLogger(channel.remoteAddress().toString());
+        channel.attr(LOGGER).set(logger);
+
+        logger.info("Connection opened");
+
         ChannelPipeline pipeline = channel.pipeline();
         pipeline
                 .addLast(new ChannelDuplexHandler() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
-                        getLogger(channel).warning("Uncaught exception");
-                        throwable.printStackTrace();
+                        getLogger(ctx).log(Level.WARNING, "Uncaught exception", throwable);
                     }
                 })
                 .addLast(globalTrafficShapingHandler);
@@ -75,17 +77,15 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(serverMessageEncoder)
                 .addLast(clientMessageDecoder)
                 .addLast(clientMessageHandler);//todo give this a different executor? https://stackoverflow.com/questions/49133447/how-can-you-safely-perform-blocking-operations-in-a-netty-channel-handler
-
     }
 
-    public static void setLogger(SocketChannel channel) {
-        channel.attr(LOGGER).set(LogFactory.getLogger(channel.remoteAddress().toString()));
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) {
+        getLogger(ctx).info("Connection closed");
     }
 
     public static Logger getLogger(ChannelHandlerContext ctx) {
-        return getLogger(ctx.channel());
-    }
-    public static Logger getLogger(Channel channel) {
-        return channel.attr(LOGGER).get();
+        return ctx.channel().attr(LOGGER).get();
     }
 }

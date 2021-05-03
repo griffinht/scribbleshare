@@ -31,13 +31,12 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        ctx.channel().attr(STATE).set(State.INITIAL);
+        State.INITIAL.setState(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         ctx.channel().attr(STATE).get().channelInactive(ctx);
-
     }
 
     @Override

@@ -32,9 +32,12 @@ public enum State {
         public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
             if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
                 ServerInitializer.getLogger(ctx).info("WebSocket connection initialized");
-                ClientMessageHandler.getState(ctx).set(State.HANDSHAKE);
+                State.HANDSHAKE.setState(ctx);
                 return;
             }
+
+            if (event instanceof WebSocketServerProtocolHandler.ServerHandshakeStateEvent) return; //deprecated but still fired
+
             super.userEventTriggered(ctx, event);
         }
     },
@@ -100,7 +103,7 @@ public enum State {
                     });
                     client.flushMessages();
 
-                    ClientMessageHandler.getState(ctx).set(State.READY);
+                    State.READY.setState(ctx);
                     break;
                 }
                 default:
@@ -210,12 +213,17 @@ public enum State {
         }
     };
 
+    void setState(ChannelHandlerContext ctx) {
+        ServerInitializer.getLogger(ctx).info(this.toString());
+        ClientMessageHandler.getState(ctx).set(this);
+    }
+
     public void channelInactive(ChannelHandlerContext ctx) {
         throw new UnsupportedOperationException("Unhandled channel close");
     }
 
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
-
+        throw new UnsupportedOperationException("Unhandled Netty userEventTriggered " + event);
     }
 
     public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {

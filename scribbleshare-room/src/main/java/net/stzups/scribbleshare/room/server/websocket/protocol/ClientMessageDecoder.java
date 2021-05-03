@@ -21,7 +21,7 @@ import java.util.List;
 public class ClientMessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ServerInitializer.getLogger(ctx.channel()).warning("Decoding WebSocketFrame to ClientMessage caused " + cause.getMessage());
+        ServerInitializer.getLogger(ctx).warning("Decoding WebSocketFrame to ClientMessage caused " + cause.getMessage());
     }
 
     @Override
