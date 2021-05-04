@@ -1,7 +1,6 @@
 package net.stzups.scribbleshare.room;
 
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.data.database.Database;
@@ -34,13 +33,10 @@ public class ScribbleshareRoom {
 
             Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
-            closeFuture.channel().close().channel().closeFuture().sync();
+            closeFuture.sync();
         } finally {
-            Scribbleshare.getLogger().info("Stopping scribbleshare-room server");
-            start = System.currentTimeMillis();
             database.close();
         }
-        Scribbleshare.getLogger().info("Stopped scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
     }
 
     public static Database getDatabase() {

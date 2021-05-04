@@ -79,8 +79,8 @@ public class Server implements AutoCloseable {
 
     @Override
     public void close() {
-        workerGroup.shutdownGracefully();
-        bossGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully().syncUninterruptibly();
+        bossGroup.shutdownGracefully().syncUninterruptibly();
     }
 
 

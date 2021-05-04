@@ -11,8 +11,6 @@ import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
 import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
 
-import java.net.BindException;
-
 public class ScribbleshareBackend {
     private static Database database;
 
@@ -29,26 +27,15 @@ public class ScribbleshareBackend {
 
         database = new ScribbleshareDatabase();
 
-/*        Server server = new Server();
-        ChannelFuture channelFuture;
-        try {
-            channelFuture = server.start(new ServerInitializer());
-        } catch (BindException e) {
-            e.printStackTrace();
-            return;
+        try (Server server = new Server()) {
+            ChannelFuture closeFuture = server.start(new ServerInitializer());
+
+            Scribbleshare.getLogger().info("Started scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
+
+            closeFuture.sync();
+        } finally {
+            database.close();
         }
-
-        Scribbleshare.getLogger().info("Started scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
-
-        channelFuture.sync();
-
-        start = System.currentTimeMillis();
-
-        Scribbleshare.getLogger().info("Stopping scribbleshare-backend server");
-
-        //server.stop();//todo
-
-        Scribbleshare.getLogger().info("Stopped scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");*/
     }
 
     public static Database getDatabase() {
