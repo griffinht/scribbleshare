@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase extends AbstractDatabase {
+public class PostgresDatabase extends AbstractDatabase implements AutoCloseable {
     private static final Random random = new Random();
     private Connection connection;
 
@@ -47,6 +47,11 @@ public class PostgresDatabase extends AbstractDatabase {
                 }
             }
         }
+    }
+
+    @Override
+    public void close() throws SQLException {
+        connection.close();    
     }
 
     @Override

@@ -29,6 +29,12 @@ public class ScribbleshareDatabase implements Database {
         redis = new RedisDatabase(config.getString(ScribbleshareConfigKeys.REDIS_URL));
         logger.info("Connected to Redis database");*/
     }
+
+    @Override
+    public void close() throws Exception {
+        postgres.close();
+    }
+
     @Override
     public User createUser() {
         return postgres.createUser();

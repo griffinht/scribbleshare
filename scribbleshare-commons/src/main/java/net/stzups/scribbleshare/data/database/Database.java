@@ -7,7 +7,7 @@ import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
 
-public interface Database {
+public interface Database extends AutoCloseable {
     User createUser();
     User getUser(long id);
     void updateUser(User user);

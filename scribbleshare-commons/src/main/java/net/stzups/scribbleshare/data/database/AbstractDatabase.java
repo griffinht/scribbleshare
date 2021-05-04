@@ -7,7 +7,10 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
-public class AbstractDatabase implements Database {
+public abstract class AbstractDatabase implements Database {
+    @Override
+    public abstract void close() throws Exception;
+
     @Override
     public User createUser() {
         throw new UnsupportedOperationException();

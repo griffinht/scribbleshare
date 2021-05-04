@@ -19,6 +19,11 @@ public class RedisDatabase extends AbstractDatabase {
     }
 
     @Override
+    public void close() {
+        jedis.close();
+    }
+
+    @Override
     public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {
         throw new UnsupportedOperationException();
     }
