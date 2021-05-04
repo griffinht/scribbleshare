@@ -29,7 +29,7 @@ public class ScribbleshareBackend {
 
         database = new ScribbleshareDatabase();
 
-        Server server = new Server();
+/*        Server server = new Server();
         ChannelFuture channelFuture;
         try {
             channelFuture = server.start(new ServerInitializer());
@@ -48,7 +48,7 @@ public class ScribbleshareBackend {
 
         //server.stop();//todo
 
-        Scribbleshare.getLogger().info("Stopped scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
+        Scribbleshare.getLogger().info("Stopped scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");*/
     }
 
     public static Database getDatabase() {

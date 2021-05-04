@@ -1,10 +1,11 @@
 package net.stzups.scribbleshare.room;
 
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.ScribbleshareConfigKeys;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.Database;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
 import net.stzups.scribbleshare.server.Server;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
@@ -28,20 +29,17 @@ public class ScribbleshareRoom {
 
         database = new ScribbleshareDatabase();
 
-        Server server = new Server();
-        //ChannelFuture closeFuture =
-                server.start(new ServerInitializer());
+        try (Server server = new Server()) {
+            ChannelFuture closeFuture = server.start(new ServerInitializer());
 
-        Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
+            Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
-        //closeFuture.sync();
-
-        start = System.currentTimeMillis();
-
-        Scribbleshare.getLogger().info("Stopping scribbleshare-room server");
-
-        //server.stop();//todo not necessary?
-
+            closeFuture.channel().close().channel().closeFuture().sync();
+        } finally {
+            Scribbleshare.getLogger().info("Stopping scribbleshare-room server");
+            start = System.currentTimeMillis();
+            database.close();
+        }
         Scribbleshare.getLogger().info("Stopped scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
     }
 
