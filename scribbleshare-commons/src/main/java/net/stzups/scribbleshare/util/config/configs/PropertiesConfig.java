@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
 
 /**
  * Loads a file that should be formatted as a Java {@link Properties} file, and adds any values defined in that value.
@@ -19,13 +20,16 @@ public class PropertiesConfig implements ConfigProvider {
      * Loads .properties formatted file from given path, only if it exists.
      * @param path path to the .properties file
      */
-    public PropertiesConfig(String path) throws IOException {
+    public PropertiesConfig(String path) {
         properties = new Properties();
         File file = new File(path);
         if (file.exists()) {//load user defined config if created
             Scribbleshare.getLogger().info("Loading config properties from " + file.getName() + "...");
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
                 properties.load(fileInputStream);
+            } catch (IOException e) {
+                Scribbleshare.getLogger().log(Level.WARNING, "Failed to load " + file.getName(), e);
+                return;
             }
             Scribbleshare.getLogger().info("Loaded " + properties.size() + " config properties from " + file.getName());
         }
