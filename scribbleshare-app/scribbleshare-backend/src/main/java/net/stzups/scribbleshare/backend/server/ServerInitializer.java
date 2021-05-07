@@ -8,18 +8,13 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
 
-/**
- * Creates pipeline to handle Websocket connections
- * WebSocket connections should be made to the specified WebSocket path
- * Connections not made to the WebSocket path go to ServerHandler
- */
+import javax.net.ssl.SSLException;
+
 @ChannelHandler.Sharable
 public class ServerInitializer extends net.stzups.scribbleshare.server.ServerInitializer {
    private final HttpServerHandler httpServerHandler = new HttpServerHandler();
 
-    public ServerInitializer() {
-        super();
-    }
+    public ServerInitializer() throws SSLException {}
 
     @Override
     protected void initChannel(SocketChannel channel) {

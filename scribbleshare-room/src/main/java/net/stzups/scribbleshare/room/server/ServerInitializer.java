@@ -11,17 +11,16 @@ import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
 
-/**
- * Creates pipeline to handle Websocket connections
- * WebSocket connections should be made to the specified WebSocket path
- * Connections not made to the WebSocket path go to ServerHandler
- */
+import javax.net.ssl.SSLException;
+
 @ChannelHandler.Sharable
 public class ServerInitializer extends net.stzups.scribbleshare.server.ServerInitializer {
     private final HttpAuthenticator httpAuthenticator = new HttpAuthenticator();
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
     private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
+
+    public ServerInitializer() throws SSLException {}
 
     @Override
     protected void initChannel(SocketChannel channel) {
