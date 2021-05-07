@@ -44,8 +44,12 @@ public class HttpSession extends Session {
                 Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
                 for (Cookie cookie : cookies) {
                     if (cookie.name().equals(name)) {
-                        ByteBuf byteBuf = Base64.decode(Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8)));
-                        return new ClientCookie(byteBuf.readLong(), byteBuf.readLong());
+                        ByteBuf b = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
+                        ByteBuf byteBuf = Base64.decode(b);
+                        b.release();
+                        ClientCookie c = new ClientCookie(byteBuf.readLong(), byteBuf.readLong());
+                        byteBuf.release();
+                        return c;
                     }
                 }
             }
