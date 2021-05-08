@@ -26,7 +26,8 @@ public class ServerInitializer extends net.stzups.scribbleshare.server.ServerIni
     protected void initChannel(SocketChannel channel) {
         super.initChannel(channel);
 
-        channel.pipeline().addLast(new HttpServerCodec())
+        channel.pipeline()
+                .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
                 .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())

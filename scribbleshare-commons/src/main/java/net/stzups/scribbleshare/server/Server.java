@@ -18,7 +18,7 @@ public class Server implements AutoCloseable {
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
 
-    public Server() throws Exception {
+    public Server() {
         port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
 
         bossGroup = new NioEventLoopGroup();
