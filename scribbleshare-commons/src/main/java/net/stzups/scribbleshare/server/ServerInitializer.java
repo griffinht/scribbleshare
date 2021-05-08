@@ -10,7 +10,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigImplementation;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -22,11 +21,15 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         boolean getSSL();
         String getSSLRootPath();
         String getSSLPath();
+        boolean getDebugLogTraffic();
     }
 
+    private final Config config;
     private final SslContext sslContext;
 
     protected ServerInitializer(Config config) throws SSLException {
+        this.config = config;
+
         if (config.getSSL()) {
             sslContext = SslContextBuilder.forServer(
                     new File(config.getSSLRootPath()),
@@ -62,7 +65,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 }).addLast(new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000) {
                     @Override
                     protected void doAccounting(TrafficCounter counter) {
-                        if (Scribbleshare.getConfig().getBoolean(ScribbleshareConfigImplementation.DEBUG_LOG_TRAFFIC)) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
+                        if (config.getDebugLogTraffic()) System.out.print("\rread " + (double) counter.lastReadThroughput() / 1000 * 8 + "kb/s, write "  + (double) counter.lastWriteThroughput() / 1000 * 8 + "kb/s");
                     }
                 });
         if (sslContext != null) {

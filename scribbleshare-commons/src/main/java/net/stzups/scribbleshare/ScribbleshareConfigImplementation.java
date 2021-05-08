@@ -84,4 +84,9 @@ public class ScribbleshareConfigImplementation extends Config implements Scribbl
     public String getSSLPath() {
         return getString(SSL_PATH);
     }
+
+    @Override
+    public boolean getDebugLogTraffic() {
+        return getBoolean(DEBUG_LOG_TRAFFIC);
+    }
 }
