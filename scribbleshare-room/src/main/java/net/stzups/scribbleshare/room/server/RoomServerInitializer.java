@@ -12,6 +12,7 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
+import net.stzups.scribbleshare.server.HttpAuthenticator;
 import net.stzups.scribbleshare.server.ServerInitializer;
 
 import javax.net.ssl.SSLException;
@@ -27,17 +28,20 @@ public class RoomServerInitializer extends ServerInitializer {
         return ctx.channel().attr(DATABASE).get();
     }
 
+    private final Config config;
+    private final ScribbleshareDatabase database;
+
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
     private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
+    private final HttpAuthenticator httpAuthenticator;
 
-    private final Config config;
-    private final ScribbleshareDatabase database;
 
     public RoomServerInitializer(RoomServerInitializer.Config config, ScribbleshareDatabase database) throws SSLException {
         super(config);
         this.config = config;
         this.database = database;
+        httpAuthenticator = new HttpAuthenticator(database);
     }
 
     @Override
@@ -49,6 +53,7 @@ public class RoomServerInitializer extends ServerInitializer {
         channel.pipeline()
                 .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
+                .addLast(httpAuthenticator)
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(config.getWebsocketPath(), null, true))
                 .addLast(serverMessageEncoder)
