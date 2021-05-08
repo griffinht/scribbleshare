@@ -23,6 +23,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         String getSSLRootPath();
         String getSSLPath();
     }
+
     private final SslContext sslContext;
 
     protected ServerInitializer(Config config) throws SSLException {

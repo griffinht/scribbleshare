@@ -14,7 +14,9 @@ import javax.net.ssl.SSLException;
 public class ServerInitializer extends net.stzups.scribbleshare.server.ServerInitializer {
    private final HttpServerHandler httpServerHandler = new HttpServerHandler();
 
-    public ServerInitializer() throws SSLException {}
+    public ServerInitializer() throws SSLException {
+        super(null);
+    }
 
     @Override
     protected void initChannel(SocketChannel channel) {

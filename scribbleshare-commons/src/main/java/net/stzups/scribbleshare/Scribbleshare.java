@@ -32,14 +32,8 @@ public class Scribbleshare implements AutoCloseable {
     private final ScribbleshareConfig config;
     private final Server server;
 
-    protected Scribbleshare(String[] args) {
-        this(getScribbleshareConfig(args));
-    }
-
-    protected Scribbleshare(ScribbleshareConfig config) {
-        this.config = config;
-        this.server = new Server(config.getPort());
-        LogFactory.setLogger(LOGGER, config.getName());
+    protected Scribbleshare(String[] args, ScribbleshareConfigImplementation config) {
+        this(addConfigProviders(args, config), new Server(config.getPort()));
     }
 
     protected Scribbleshare(ScribbleshareConfig config, Server server) {
@@ -61,14 +55,11 @@ public class Scribbleshare implements AutoCloseable {
         server.close();
     }
 
-    private static ScribbleshareConfig getScribbleshareConfig(String[] args) {
-        ScribbleshareConfigImplementation scribbleshareConfig = new ScribbleshareConfigImplementation();
-
-        scribbleshareConfig
+    private static ScribbleshareConfig addConfigProviders(String[] args, ScribbleshareConfigImplementation config) {
+        config
                 .addConfigProvider(new ArgumentConfig(args))
-                .addConfigProvider(new EnvironmentVariableConfig(scribbleshareConfig.getEnvironmentVariablePrefix()))
-                .addConfigProvider(new PropertiesConfig(scribbleshareConfig.getProperties()));
-
-        return scribbleshareConfig;
+                .addConfigProvider(new EnvironmentVariableConfig(config.getEnvironmentVariablePrefix()))
+                .addConfigProvider(new PropertiesConfig(config.getProperties()));
+        return config;
     }
 }

@@ -4,9 +4,6 @@ import net.stzups.scribbleshare.util.config.Config;
 import net.stzups.scribbleshare.util.config.ConfigKey;
 import net.stzups.scribbleshare.util.config.OptionalConfigKey;
 import net.stzups.scribbleshare.util.config.RequiredConfigKey;
-import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
-import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
-import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
 
 public class ScribbleshareConfigImplementation extends Config implements ScribbleshareConfig {
     static final ConfigKey<String> NAME = new OptionalConfigKey<>("name", "Scribbleshare");
