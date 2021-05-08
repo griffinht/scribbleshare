@@ -60,6 +60,9 @@ import java.util.regex.Pattern;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    interface Config {
+
+    }
     private static final File HTTP_ROOT = new File(Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
     private static final int HTTP_CACHE_SECONDS = Scribbleshare.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
 
@@ -95,7 +98,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
+    private final Config config;
     private Set<SocketAddress> healthCheckRequests = new HashSet<>();
+
+    HttpServerHandler(Config config) {
+        this.config = config;
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {

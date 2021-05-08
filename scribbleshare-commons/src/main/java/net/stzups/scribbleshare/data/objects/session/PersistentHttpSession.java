@@ -23,16 +23,16 @@ public class PersistentHttpSession extends HttpSession {
         super(id, user, creation, hashedToken);
     }
 
-    public PersistentHttpSession(HttpSession httpSession, HttpHeaders headers) {
+    public PersistentHttpSession(HttpConfig config, HttpSession httpSession, HttpHeaders headers) {
         super(httpSession.getUser());
-        setCookie(headers);
+        setCookie(config, headers);
     }
 
-    private void setCookie(HttpHeaders headers) {
+    private void setCookie(HttpConfig config, HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain(Scribbleshare.getConfig().getDomain());
+        cookie.setDomain(config.getDomain());
         cookie.setPath(LOGIN_PATH);
-        if (Scribbleshare.getConfig().getSSL()) cookie.setSecure(true);
+        if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         cookie.setMaxAge(MAX_SESSION_AGE.get(ChronoUnit.SECONDS)); //persistent cookie

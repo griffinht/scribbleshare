@@ -65,9 +65,9 @@ public class HttpSession extends Session {
         super(id, user, creation, hashedToken);
     }
 
-    public HttpSession(User user, HttpHeaders headers) {
+    public HttpSession(HttpConfig config, User user, HttpHeaders headers) {
         super(user.getId());
-        setCookie(headers);
+        setCookie(config, headers);
     }
 
     public HttpSession(long id, ByteBuf byteBuf) {
@@ -81,11 +81,11 @@ public class HttpSession extends Session {
         return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
     }
 
-    private void setCookie(HttpHeaders headers) {
+    private void setCookie(HttpConfig config, HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain(Scribbleshare.getConfig().getDomain());
+        cookie.setDomain(config.getDomain());
         //not used cookie.setPath("");
-        if (Scribbleshare.getConfig().getSSL()) cookie.setSecure(true);
+        if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie, so no max age
