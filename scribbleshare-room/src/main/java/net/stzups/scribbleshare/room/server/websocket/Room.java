@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.room.server.websocket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -37,21 +38,23 @@ class Room {
 
     private final Set<Client> clients = new HashSet<>();
 
+    private final ScribbleshareDatabase database;
     private final Document document;
     private final Canvas canvas;
 
-    Room(Document document) throws DeserializationException {
+    Room(ScribbleshareDatabase database, Document document) throws DeserializationException {
+        this.database = database;
         this.document = document;
-        ByteBuf canvas = ScribbleshareRoom.getDatabase().getResource(document.getId(), document.getId()).getData();
+        ByteBuf canvas = database.getResource(document.getId(), document.getId()).getData();
         this.canvas = new Canvas(canvas);
         rooms.put(document, this);
         Scribbleshare.getLogger().info("Started " + this);
     }
 
-    static Room getRoom(Document document) throws DeserializationException {
+    static Room getRoom(ScribbleshareDatabase database, Document document) throws DeserializationException {
         Room room = rooms.get(document);
         if (room == null) {
-            return new Room(document);
+            return new Room(database, document);
         }
         return room;
     }
@@ -61,7 +64,7 @@ class Room {
         if (canvas.isDirty()) {
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
-            ScribbleshareRoom.getDatabase().updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
+            database.updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
         }
         //todo
         Scribbleshare.getLogger().info("Ended room " + this);

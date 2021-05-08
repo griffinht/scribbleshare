@@ -1,11 +1,14 @@
 package net.stzups.scribbleshare.room.server;
 
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.util.AttributeKey;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
@@ -19,20 +22,29 @@ public class RoomServerInitializer extends ServerInitializer {
         String getWebsocketPath();
     }
 
+    private static final AttributeKey<ScribbleshareDatabase> DATABASE = AttributeKey.valueOf(RoomServerInitializer.class, "DATABASE");
+    public static ScribbleshareDatabase getDatabase(ChannelHandlerContext ctx) {
+        return ctx.channel().attr(DATABASE).get();
+    }
+
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
     private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
 
     private final Config config;
+    private final ScribbleshareDatabase database;
 
-    public RoomServerInitializer(RoomServerInitializer.Config config) throws SSLException {
+    public RoomServerInitializer(RoomServerInitializer.Config config, ScribbleshareDatabase database) throws SSLException {
         super(config);
         this.config = config;
+        this.database = database;
     }
 
     @Override
     protected void initChannel(SocketChannel channel) {
         super.initChannel(channel);
+
+        channel.attr(DATABASE).set(database);
 
         channel.pipeline()
                 .addLast(new HttpServerCodec())
