@@ -7,8 +7,8 @@ import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
 import net.stzups.scribbleshare.room.server.RoomServerInitializer;
 
 public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
-    private final PostgresDatabase database;
     private final ScribbleshareRoomConfig config;
+    private final PostgresDatabase database;
 
     private ScribbleshareRoom(String[] args) throws Exception {
         this(args, new ScribbleshareRoomConfigImplementation());
@@ -16,8 +16,8 @@ public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
 
     private ScribbleshareRoom(String[] args, ScribbleshareRoomConfigImplementation config) throws Exception {
         super(args, config);
-        this.database = new PostgresDatabase(getConfig());
         this.config = config;
+        this.database = new PostgresDatabase(config);
     }
 
     public static void main(String[] args) throws Exception {
@@ -25,7 +25,7 @@ public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
         long start = System.currentTimeMillis();
         try (ScribbleshareRoom scribbleshareRoom = new ScribbleshareRoom(args)) {
 
-            ChannelFuture closeFuture = scribbleshareRoom.start(new RoomServerInitializer(scribbleshareRoom.getConfig()));
+            ChannelFuture closeFuture = scribbleshareRoom.start(new RoomServerInitializer(scribbleshareRoom.getConfig(), scribbleshareRoom.getDatabase()));
 
             Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
