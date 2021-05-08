@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.util.config;
 
 public class OptionalConfigKey<T> extends ConfigKey<T> {
-    private final T defaultValue;
+    private T defaultValue;
 
     public OptionalConfigKey(String key, T defaultValue) {
         super(key);
@@ -13,5 +13,10 @@ public class OptionalConfigKey<T> extends ConfigKey<T> {
             new Exception("Non fatal exception while parsing value for key \"" + getKey() + "\", default value will be used", e).printStackTrace();
         }
         return defaultValue;
+    }
+
+    @Override
+    public void setDefaultValue(T defaultValue) {
+        this.defaultValue = defaultValue;
     }
 }

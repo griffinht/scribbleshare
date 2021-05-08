@@ -1,9 +1,13 @@
-package net.stzups.scribbleshare.data.database;
+package net.stzups.scribbleshare.data.database.implementations;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.databases.MiscDatabase;
+import net.stzups.scribbleshare.data.database.databases.PersistentSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
+import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -27,21 +31,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase extends AbstractDatabase implements AutoCloseable {
+public class PostgresDatabase implements AutoCloseable, MiscDatabase, PersistentSessionDatabase, ResourceDatabase, SessionDatabase {
+    public interface Config {
+        String getUrl();
+        String getUser();
+        String getPassword();
+        int getMaxRetries();
+    }
     private static final Random random = new Random();
     private Connection connection;
 
     private final Map<Long, Document> documents = new HashMap<>();
 
-    public PostgresDatabase(String url, String user, String password, int maxRetries) throws Exception {
+    public PostgresDatabase(PostgresDatabase.Config config) throws Exception {
         Class.forName("org.postgresql.Driver");
         int retries = 0;
         while (connection == null) {
             try {
-                connection = DriverManager.getConnection(url, user, password);
+                connection = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
             } catch (PSQLException e) {
-                if (e.getCause() instanceof ConnectException && (maxRetries < 0 || retries < maxRetries)) {
-                    Scribbleshare.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + maxRetries + " retries)");
+                if (e.getCause() instanceof ConnectException && (config.getMaxRetries() < 0 || retries < config.getMaxRetries())) {
+                    Scribbleshare.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + config.getMaxRetries() + " retries)");
                 } else {
                     throw e;
                 }

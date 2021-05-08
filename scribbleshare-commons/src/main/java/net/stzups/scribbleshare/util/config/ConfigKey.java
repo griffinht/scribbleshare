@@ -1,17 +1,17 @@
 package net.stzups.scribbleshare.util.config;
 
-public class ConfigKey<T> {
+public abstract class ConfigKey<T> {
     private final String key;
 
-    ConfigKey(String key) {
+    protected ConfigKey(String key) {
         this.key = key;
     }
 
-    String getKey() {
+    final String getKey() {
         return key;
     }
 
-    T getDefaultValue(Exception e) {
-        throw new UnsupportedOperationException("Method should be overridden");
-    }
+    abstract T getDefaultValue(Exception e);
+
+    public abstract void setDefaultValue(T defaultValue);
 }

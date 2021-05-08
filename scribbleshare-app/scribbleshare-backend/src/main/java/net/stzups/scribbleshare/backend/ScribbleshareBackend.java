@@ -2,10 +2,9 @@ package net.stzups.scribbleshare.backend;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigKeys;
+import net.stzups.scribbleshare.ScribbleshareConfigImplementation;
 import net.stzups.scribbleshare.backend.server.ServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.database.Database;
 import net.stzups.scribbleshare.server.Server;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
@@ -15,15 +14,15 @@ public class ScribbleshareBackend {
     private static Database database;
 
     public static void main(String[] args) throws Exception {
-        Scribbleshare.setLogger("scribbleshare-backend");
+        //Scribbleshare.setLogger("scribbleshare-backend");
         Scribbleshare.getLogger().info("Starting scribbleshare-backend server...");
 
         long start = System.currentTimeMillis();
 
         Scribbleshare.getConfig()
                 .addConfigProvider(new ArgumentConfig(args))
-                .addConfigProvider(new EnvironmentVariableConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.ENVIRONMENT_VARIABLE_PREFIX)))
-                .addConfigProvider(new PropertiesConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.PROPERTIES)));
+                .addConfigProvider(new EnvironmentVariableConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigImplementation.ENVIRONMENT_VARIABLE_PREFIX)))
+                .addConfigProvider(new PropertiesConfig(Scribbleshare.getConfig().getProperties()(ScribbleshareConfigImplementation.PROPERTIES)));
 
         database = new ScribbleshareDatabase();
 
@@ -34,7 +33,7 @@ public class ScribbleshareBackend {
 
             closeFuture.sync();
         } finally {
-            database.close();
+            //database.close();
         }
     }
 

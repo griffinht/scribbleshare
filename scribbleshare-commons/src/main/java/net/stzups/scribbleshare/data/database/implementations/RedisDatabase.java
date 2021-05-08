@@ -1,17 +1,12 @@
-package net.stzups.scribbleshare.data.database;
+package net.stzups.scribbleshare.data.database.implementations;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.stzups.scribbleshare.data.objects.Document;
-import net.stzups.scribbleshare.data.objects.InviteCode;
-import net.stzups.scribbleshare.data.objects.Resource;
+import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
-import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import redis.clients.jedis.Jedis;
 
-public class RedisDatabase extends AbstractDatabase {
+public class RedisDatabase implements AutoCloseable, SessionDatabase {
     private final Jedis jedis;
 
     public RedisDatabase(String host) {
@@ -23,15 +18,6 @@ public class RedisDatabase extends AbstractDatabase {
         jedis.close();
     }
 
-    @Override
-    public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public HttpSession getHttpSession(long id) {

@@ -9,7 +9,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigKeys;
 import net.stzups.scribbleshare.util.LogFactory;
 
 public class Server implements AutoCloseable {
@@ -19,7 +18,7 @@ public class Server implements AutoCloseable {
     private final EventLoopGroup workerGroup;
 
     public Server() {
-        port = Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.PORT);
+        port = Scribbleshare.getConfig().getPort();
 
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();

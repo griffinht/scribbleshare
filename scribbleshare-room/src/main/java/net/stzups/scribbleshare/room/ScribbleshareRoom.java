@@ -2,44 +2,37 @@ package net.stzups.scribbleshare.room;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigKeys;
-import net.stzups.scribbleshare.data.database.Database;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.ServerInitializer;
-import net.stzups.scribbleshare.server.Server;
-import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
-import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
-import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
 
-public class ScribbleshareRoom {
-    private static Database database;
+public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
+    private final ScribbleshareDatabase database;
+
+    private ScribbleshareRoom(String[] args) throws Exception {
+        super(args);
+        database = new ScribbleshareDatabase();
+    }
 
     public static void main(String[] args) throws Exception {
-        Scribbleshare.setLogger("scribbleshare-room");
-
         Scribbleshare.getLogger().info("Starting scribbleshare-room server...");
-
         long start = System.currentTimeMillis();
+        try (ScribbleshareRoom scribbleshareRoom = new ScribbleshareRoom()) {
 
-        Scribbleshare.getConfig()
-                .addConfigProvider(new ArgumentConfig(args))
-                .addConfigProvider(new EnvironmentVariableConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.ENVIRONMENT_VARIABLE_PREFIX)))
-                .addConfigProvider(new PropertiesConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.PROPERTIES)));
-
-        database = new ScribbleshareDatabase();
-
-        try (Server server = new Server()) {
-            ChannelFuture closeFuture = server.start(new ServerInitializer());
+            ChannelFuture closeFuture = scribbleshareRoom.start(new ServerInitializer(Scribbleshare.getConfig()));
 
             Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 
             closeFuture.sync();
-        } finally {
-            database.close();
         }
     }
 
-    public static Database getDatabase() {
+    public ScribbleshareDatabase getDatabase() {
         return database;
+    }
+
+    @Override
+    public void close() throws Exception {
+        super.close();
+        database.close();
     }
 }

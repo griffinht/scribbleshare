@@ -1,27 +1,25 @@
 package net.stzups.scribbleshare.data.database;
 
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigKeys;
+import net.stzups.scribbleshare.data.database.databases.MiscDatabase;
+import net.stzups.scribbleshare.data.database.databases.PersistentSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
+import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
+import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.util.config.Config;
 
-import java.util.logging.Logger;
-
-public class ScribbleshareDatabase implements Database {
+public class ScribbleshareDatabase implements AutoCloseable, MiscDatabase, PersistentSessionDatabase, ResourceDatabase, SessionDatabase {
     private final PostgresDatabase postgres;
     //private final RedisDatabase redis;
 
     public ScribbleshareDatabase() throws Exception {
         Scribbleshare.getLogger().info("Connecting to Postgres database...");
-        postgres = new PostgresDatabase(Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_URL),
-                Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_USER),
-                Scribbleshare.getConfig().getString(ScribbleshareConfigKeys.POSTGRES_PASSWORD),
-                Scribbleshare.getConfig().getInteger(ScribbleshareConfigKeys.POSTGRES_RETRIES));
+        postgres = new PostgresDatabase(Scribbleshare.getConfig());
 
         Scribbleshare.getLogger().info("Connected to Postgres database");
 /*

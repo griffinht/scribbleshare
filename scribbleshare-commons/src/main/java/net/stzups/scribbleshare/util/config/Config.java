@@ -7,13 +7,13 @@ import java.util.List;
  * Used to store and retrieve key-value pairs by finding the first result from many different strategies.
  */
 public class Config {//todo probably needs a better name
-    private final List<ConfigProvider> configProviders = new ArrayList<>();
+    private final List<ConfigProvider> configProviders;
 
     /**
      * Constructs a new ConfigProvider from its builder
      */
-    public Config() {
-
+    protected Config() {
+        configProviders = new ArrayList<>();
     }
 
     public Config addConfigProvider(ConfigProvider configProvider) {
@@ -40,7 +40,7 @@ public class Config {//todo probably needs a better name
         return null;
     }
 
-    public String getString(ConfigKey<String> key) {
+    protected String getString(ConfigKey<String> key) {
         String value = find(key);
         if (value != null) {
             return value;
@@ -48,7 +48,7 @@ public class Config {//todo probably needs a better name
         return key.getDefaultValue(null);
     }
 
-    public Integer getInteger(ConfigKey<Integer> key) {
+    protected Integer getInteger(ConfigKey<Integer> key) {
         String value = find(key);
         if (value != null) {
             try {
@@ -60,7 +60,7 @@ public class Config {//todo probably needs a better name
         return key.getDefaultValue(null);
     }
 
-    public Boolean getBoolean(ConfigKey<Boolean> key) {
+    protected Boolean getBoolean(ConfigKey<Boolean> key) {
         String value = find(key);
         if (value != null) {
             if (value.equalsIgnoreCase("true")) {

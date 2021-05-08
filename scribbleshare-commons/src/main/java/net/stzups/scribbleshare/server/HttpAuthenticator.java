@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.room.server;
+package net.stzups.scribbleshare.server;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -15,9 +15,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.room.ScribbleshareRoom;
-import net.stzups.scribbleshare.room.ScribbleshareRoomConfigKeys;
 
 import java.util.List;
 
@@ -25,6 +24,12 @@ import java.util.List;
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
     public static AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
     private static AttributeKey<Boolean> A = AttributeKey.valueOf(HttpAuthenticator.class, "A");
+
+    private final SessionDatabase sessionDatabase;
+
+    public HttpAuthenticator(SessionDatabase sessionDatabase) {
+        this.sessionDatabase = sessionDatabase;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
@@ -51,16 +56,16 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             Scribbleshare.getLogger(ctx).info("Good healthcheck response");
             return;
         }
-
-        if (!request.uri().equals(net.stzups.scribbleshare.Scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
+//todo
+/*        if (!request.uri().equals(scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             Scribbleshare.getLogger(ctx).info("Bad uri");
             return;
-        }
+        }*/
 
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = ScribbleshareRoom.getDatabase().getHttpSession(cookie.getId());
+            HttpSession httpSession = sessionDatabase.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());
