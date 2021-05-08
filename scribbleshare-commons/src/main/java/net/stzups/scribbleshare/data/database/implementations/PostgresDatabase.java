@@ -4,10 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.databases.MiscDatabase;
-import net.stzups.scribbleshare.data.database.databases.PersistentSessionDatabase;
-import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
-import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -31,14 +28,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase implements AutoCloseable, MiscDatabase, PersistentSessionDatabase, ResourceDatabase, SessionDatabase {
+public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     public interface Config {
         String getUrl();
         String getUser();
         String getPassword();
         int getMaxRetries();
     }
-    private static final Random random = new Random();
+
+    private static final Random RANDOM = new Random();
     private Connection connection;
 
     private final Map<Long, Document> documents = new HashMap<>();
@@ -66,7 +64,7 @@ public class PostgresDatabase implements AutoCloseable, MiscDatabase, Persistent
 
     @Override
     public User createUser() {
-        User user = new User(random.nextLong(), new Long[0], new Long[0]);
+        User user = new User(RANDOM.nextLong(), new Long[0], new Long[0]);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
@@ -268,7 +266,7 @@ public class PostgresDatabase implements AutoCloseable, MiscDatabase, Persistent
 
     @Override
     public long addResource(long owner, Resource resource) {
-        long id = random.nextLong();
+        long id = RANDOM.nextLong();
         addResource(id, owner, resource);
         return id;
     }

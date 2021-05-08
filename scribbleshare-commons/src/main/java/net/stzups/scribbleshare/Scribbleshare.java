@@ -33,7 +33,13 @@ public class Scribbleshare implements AutoCloseable {
     private final Server server;
 
     protected Scribbleshare(String[] args) {
-        this(getScribbleshareConfig(args), new Server());
+        this(getScribbleshareConfig(args));
+    }
+
+    protected Scribbleshare(ScribbleshareConfig config) {
+        this.config = config;
+        this.server = new Server(config.getPort());
+        LogFactory.setLogger(LOGGER, config.getName());
     }
 
     protected Scribbleshare(ScribbleshareConfig config, Server server) {
