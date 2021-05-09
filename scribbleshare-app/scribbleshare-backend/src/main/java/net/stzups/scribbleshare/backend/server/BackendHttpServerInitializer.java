@@ -4,21 +4,18 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.AttributeKey;
-import net.stzups.scribbleshare.ScribbleshareConfig;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.server.ServerInitializer;
+import net.stzups.scribbleshare.server.HttpServerInitializer;
 
 import javax.net.ssl.SSLException;
 
 @ChannelHandler.Sharable
-public class BackendServerInitializer extends ServerInitializer {
-    private static final AttributeKey<ScribbleshareDatabase> DATABASE = AttributeKey.valueOf(BackendServerInitializer.class, "DATABASE");
+public class BackendHttpServerInitializer extends HttpServerInitializer {
+    private static final AttributeKey<ScribbleshareDatabase> DATABASE = AttributeKey.valueOf(BackendHttpServerInitializer.class, "DATABASE");
     public static ScribbleshareDatabase getDatabase(ChannelHandlerContext ctx) {
         return ctx.channel().attr(DATABASE).get();
     }
@@ -27,7 +24,7 @@ public class BackendServerInitializer extends ServerInitializer {
 
    private final ScribbleshareDatabase database;
 
-    public BackendServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
+    public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
         this.database = database;
         httpServerHandler = new HttpServerHandler(config);
@@ -39,8 +36,7 @@ public class BackendServerInitializer extends ServerInitializer {
 
         channel.attr(DATABASE).set(database);
 
-        channel.pipeline().addLast(new HttpServerCodec())
-                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)) //2gb todo decrease
+        channel.pipeline()
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(httpServerHandler);

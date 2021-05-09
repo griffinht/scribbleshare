@@ -5,6 +5,8 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
@@ -16,7 +18,7 @@ import java.io.File;
 import java.util.logging.Level;
 
 @ChannelHandler.Sharable
-public class ServerInitializer extends ChannelInitializer<SocketChannel> {
+public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     public interface Config {
         boolean getSSL();
         String getSSLRootPath();
@@ -27,7 +29,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private final Config config;
     private final SslContext sslContext;
 
-    protected ServerInitializer(Config config) throws SSLException {
+    private final HttpHandler httpHandler = new HttpHandler();
+
+    protected HttpServerInitializer(Config config) throws SSLException {
         this.config = config;
 
         if (config.getSSL()) {
@@ -49,6 +53,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable) {
                         Scribbleshare.getLogger(ctx).log(Level.WARNING, "Uncaught exception", throwable);
+                        //todo ctx.close();
                     }
 
                     @Override
@@ -71,5 +76,9 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         if (sslContext != null) {
             channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
         }
+        channel.pipeline()
+                .addLast(new HttpServerCodec())
+                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)) //2gb todo decrease
+                .addLast(httpHandler);
     }
 }

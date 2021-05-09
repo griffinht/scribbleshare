@@ -2,7 +2,7 @@ package net.stzups.scribbleshare.backend;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.BackendServerInitializer;
+import net.stzups.scribbleshare.backend.server.BackendHttpServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
 
@@ -25,7 +25,7 @@ public class ScribbleshareBackend extends Scribbleshare implements AutoCloseable
         long start = System.currentTimeMillis();
         try (ScribbleshareBackend scribbleshareBackend = new ScribbleshareBackend(args)) {
 
-            ChannelFuture closeFuture = scribbleshareBackend.start(new BackendServerInitializer(scribbleshareBackend.getConfig(), scribbleshareBackend.getDatabase()));
+            ChannelFuture closeFuture = scribbleshareBackend.start(new BackendHttpServerInitializer(scribbleshareBackend.getConfig(), scribbleshareBackend.getDatabase()));
 
             Scribbleshare.getLogger().info("Started scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
 

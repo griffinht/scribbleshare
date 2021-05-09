@@ -4,7 +4,7 @@ import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
-import net.stzups.scribbleshare.room.server.RoomServerInitializer;
+import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
 
 public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
     private final ScribbleshareRoomConfig config;
@@ -25,7 +25,7 @@ public class ScribbleshareRoom extends Scribbleshare implements AutoCloseable {
         long start = System.currentTimeMillis();
         try (ScribbleshareRoom scribbleshareRoom = new ScribbleshareRoom(args)) {
 
-            ChannelFuture closeFuture = scribbleshareRoom.start(new RoomServerInitializer(scribbleshareRoom.getConfig(), scribbleshareRoom.getDatabase()));
+            ChannelFuture closeFuture = scribbleshareRoom.start(new RoomHttpServerInitializer(scribbleshareRoom.getConfig(), scribbleshareRoom.getDatabase()));
 
             Scribbleshare.getLogger().info("Started scribbleshare-room server in " + (System.currentTimeMillis() - start) + "ms");
 

@@ -5,7 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.server.Server;
-import net.stzups.scribbleshare.server.ServerInitializer;
+import net.stzups.scribbleshare.server.HttpServerInitializer;
 import net.stzups.scribbleshare.util.LogFactory;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
@@ -46,8 +46,8 @@ public class Scribbleshare implements AutoCloseable {
         return config;
     }
 
-    public ChannelFuture start(ServerInitializer serverInitializer) throws Exception {
-        return server.start(serverInitializer);
+    public ChannelFuture start(HttpServerInitializer httpServerInitializer) throws Exception {
+        return server.start(httpServerInitializer);
     }
 
     @Override

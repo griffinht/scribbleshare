@@ -10,9 +10,8 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
-import net.stzups.scribbleshare.room.ScribbleshareRoom;
 import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
-import net.stzups.scribbleshare.room.server.RoomServerInitializer;
+import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageDeleteDocument;
@@ -25,7 +24,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
-import net.stzups.scribbleshare.server.HttpAuthenticator;
+import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 
 public enum State {
     INITIAL {
@@ -49,7 +48,7 @@ public enum State {
                 case HANDSHAKE: {
                     ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) clientMessage;
 
-                    User user = RoomServerInitializer.getDatabase(ctx).getUser(ctx.channel().attr(HttpAuthenticator.USER).get());
+                    User user = RoomHttpServerInitializer.getDatabase(ctx).getUser(HttpAuthenticator.getUser(ctx));
                     if (user == null) {
                         throw new ClientMessageException(clientMessage, "User does not exist");
                     }
@@ -59,20 +58,20 @@ public enum State {
                     ClientMessageHandler.getClient(ctx).set(client);
 
                     client.queueMessage(new ServerMessageHandshake(client));
-                    InviteCode inviteCode = RoomServerInitializer.getDatabase(ctx).getInviteCode(clientPacketHandshake.getCode());
+                    InviteCode inviteCode = RoomHttpServerInitializer.getDatabase(ctx).getInviteCode(clientPacketHandshake.getCode());
                     client.queueMessage(new ServerMessageAddUser(client.getUser()));
                     //figure out which document to open first
                     if (inviteCode != null) {
-                        Document document = RoomServerInitializer.getDatabase(ctx).getDocument(inviteCode.getDocument());
+                        Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(inviteCode.getDocument());
                         if (document != null) {
                             //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
                             if (document.getOwner() != client.getUser().getId()) {
                                 if (client.getUser().getSharedDocuments().add(document.getId())) {
-                                    RoomServerInitializer.getDatabase(ctx).updateUser(client.getUser());
+                                    RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
                                 }
                             }
                             try {
-                                ClientMessageHandler.getRoom(ctx).set(Room.getRoom(RoomServerInitializer.getDatabase(ctx), document));
+                                ClientMessageHandler.getRoom(ctx).set(Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document));
                             } catch (DeserializationException e) {
                                 throw new ClientMessageException(clientMessage, e);
                             }
@@ -81,24 +80,24 @@ public enum State {
                         }
                     } else {
                         if (client.getUser().getOwnedDocuments().size() == 0) {
-                            RoomServerInitializer.getDatabase(ctx).createDocument(client.getUser());
+                            RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
                         }
                     }
                     client.getUser().getOwnedDocuments().removeIf((id) -> {
-                        Document document = RoomServerInitializer.getDatabase(ctx).getDocument(id);
+                        Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
                         if (document == null) {
                             return true;
                         } else {
-                            client.queueMessage(new ServerMessageUpdateDocument(RoomServerInitializer.getDatabase(ctx).getDocument(id)));
+                            client.queueMessage(new ServerMessageUpdateDocument(RoomHttpServerInitializer.getDatabase(ctx).getDocument(id)));
                             return false;
                         }
                     });//todo this is bad
                     client.getUser().getSharedDocuments().removeIf((id) -> {
-                        Document document = RoomServerInitializer.getDatabase(ctx).getDocument(id);
+                        Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
                         if (document == null) {
                             return true;
                         } else {
-                            client.queueMessage(new ServerMessageUpdateDocument(RoomServerInitializer.getDatabase(ctx).getDocument(id)));
+                            client.queueMessage(new ServerMessageUpdateDocument(RoomHttpServerInitializer.getDatabase(ctx).getDocument(id)));
                             return false;
                         }
                     });
@@ -141,13 +140,13 @@ public enum State {
                 }
                 case OPEN_DOCUMENT: {
                     ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) clientMessage;
-                    Document document = RoomServerInitializer.getDatabase(ctx).getDocument(clientPacketOpenDocument.getId());
+                    Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(clientPacketOpenDocument.getId());
                     if (document != null) {
                         if (room.get() != null) {
                             room.get().removeClient(client);
                         }
                         try {
-                            room.set(Room.getRoom(RoomServerInitializer.getDatabase(ctx), document));
+                            room.set(Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document));
                         } catch (DeserializationException e) {
                             throw new ClientMessageException(clientMessage, e);
                         }
@@ -162,7 +161,7 @@ public enum State {
                         room.get().removeClient(client);
                     }
                     try {
-                        room.set(Room.getRoom(RoomServerInitializer.getDatabase(ctx), RoomServerInitializer.getDatabase(ctx).createDocument(client.getUser())));
+                        room.set(Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser())));
                         ClientMessageHandler.getRoom(ctx).set(room.get());
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -177,7 +176,7 @@ public enum State {
                         Scribbleshare.getLogger(ctx).info("Deleting live document " + room.get().getDocument());
                         room.get().sendMessage(new ServerMessageDeleteDocument(room.get().getDocument()));
                         room.get().end();
-                        RoomServerInitializer.getDatabase(ctx).deleteDocument(room.get().getDocument());
+                        RoomHttpServerInitializer.getDatabase(ctx).deleteDocument(room.get().getDocument());
                         break;
                     } else {
                         throw new ClientMessageException(clientMessage, "Tried to delete document which is not currently open");
@@ -201,11 +200,11 @@ public enum State {
                     }
                     room.get().getDocument().setName(clientMessageUpdateDocument.getName());
                     room.get().queueMessageExcept(new ServerMessageUpdateDocument(room.get().getDocument()), client);
-                    RoomServerInitializer.getDatabase(ctx).updateDocument(room.get().getDocument());
+                    RoomHttpServerInitializer.getDatabase(ctx).updateDocument(room.get().getDocument());
                     break;//todo better update logic
                 }
                 case GET_INVITE: {
-                    client.sendMessage(new ServerMessageGetInvite(RoomServerInitializer.getDatabase(ctx).getInviteCode(room.get().getDocument())));
+                    client.sendMessage(new ServerMessageGetInvite(RoomHttpServerInitializer.getDatabase(ctx).getInviteCode(room.get().getDocument())));
                     break;
                 }
                 default:
