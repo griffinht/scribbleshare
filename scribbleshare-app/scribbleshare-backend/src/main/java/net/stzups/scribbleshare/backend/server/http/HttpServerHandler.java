@@ -14,7 +14,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.BackendHttpServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -59,13 +58,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
     private final Config config;
+    private final ScribbleshareDatabase database;
 
     private final File httpRoot;
     private final int httpCacheSeconds;
     private final MimeTypes mimeTypes = new MimeTypes();
 
-    public HttpServerHandler(Config config) {
+    public HttpServerHandler(Config config, ScribbleshareDatabase database) {
         this.config = config;
+        this.database = database;
+        
         httpRoot = new File(config.getHttpRoot());
         httpCacheSeconds = config.getHttpCacheSeconds();
         String path = config.getMimeTypesFilePath();
@@ -91,11 +93,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
 
-        if (!request.decoderResult().isSuccess()) {
-            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-            return;
-        }
-
         // sanitize uri
         final String uri = getUri(request.uri());
         if (uri == null) {
@@ -115,6 +112,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         Map<String, String> queries = parseQuery(rawQuery);
         if (queries == null) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
+            return;
         }
 
         String[] route = getRoute(path);
@@ -144,7 +142,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             return;
                         }
 
-                        User user = BackendHttpServerInitializer.getDatabase(ctx).getUser(userId);
+                        User user = database.getUser(userId);
                         if (user == null) {
                             Scribbleshare.getLogger(ctx).warning("User with " + userId + " authenticated but does not exist");
                             break;
@@ -177,12 +175,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
                                 sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                Document document = BackendHttpServerInitializer.getDatabase(ctx).getDocument(documentId);
+                                Document document = database.getDocument(documentId);
                                 if (document == null) {
                                     Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                     break;
                                 }
-                                send(ctx, request, Unpooled.copyLong(BackendHttpServerInitializer.getDatabase(ctx).addResource(document.getId(), new Resource(request.content()))));
+                                send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
                             } else {
                                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -195,7 +193,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 break;
                             }
 
-                            Document document = BackendHttpServerInitializer.getDatabase(ctx).getDocument(documentId);
+                            Document document = database.getDocument(documentId);
                             if (document == null) {
                                 Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                 break;
@@ -203,7 +201,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                Resource resource = BackendHttpServerInitializer.getDatabase(ctx).getResource(resourceId, documentId);
+                                Resource resource = database.getResource(resourceId, documentId);
                                 if (resource == null) {
                                     break;
                                 }
@@ -267,10 +265,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
     }
 
-    private static Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
+    private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = BackendHttpServerInitializer.getDatabase(ctx).getHttpSession(cookie.getId());
+            HttpSession httpSession = database.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 return httpSession.getUser();
@@ -286,8 +284,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return null;
     }
 
-    private static void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) {
-        if (!logIn(BackendHttpServerInitializer.getDatabase(ctx), config, request, headers)) {
+    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) {
+        if (!logIn(config, request, headers)) {
             Scribbleshare.getLogger(ctx).warning("Bad authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             //todo rate limiting strategies
@@ -296,7 +294,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static boolean logIn(ScribbleshareDatabase database, HttpConfig config, HttpRequest request, HttpHeaders headers) {
+    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie == null) {
             User user;
