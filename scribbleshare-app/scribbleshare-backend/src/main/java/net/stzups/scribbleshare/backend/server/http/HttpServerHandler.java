@@ -532,8 +532,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
     }
 
-    //todo
-    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
 
     private static String[] getRoute(String path) {
         if (!path.startsWith("/")) return null;
