@@ -20,9 +20,9 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
         return ctx.channel().attr(DATABASE).get();
     }
 
-   private final HttpServerHandler httpServerHandler;
+    private final HttpServerHandler httpServerHandler;
 
-   private final ScribbleshareDatabase database;
+    private final ScribbleshareDatabase database;
 
     public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
