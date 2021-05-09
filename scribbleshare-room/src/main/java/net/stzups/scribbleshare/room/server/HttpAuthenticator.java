@@ -47,15 +47,15 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        if (!request.method().equals(HttpMethod.GET)) {
-            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            Scribbleshare.getLogger(ctx).warning("Bad method");
-            return;
-        }
-
         if (!request.uri().equals(config.getWebsocketPath())) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             Scribbleshare.getLogger(ctx).warning("Bad uri");
+            return;
+        }
+
+        if (!request.method().equals(HttpMethod.GET)) {
+            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            Scribbleshare.getLogger(ctx).warning("Bad method");
             return;
         }
 
