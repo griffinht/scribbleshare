@@ -41,7 +41,7 @@ import static net.stzups.scribbleshare.server.HttpUtils.sendRedirect;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    public interface Config {
+    public interface Config extends HttpConfig {
         String getHttpRoot();
         int getHttpCacheSeconds();
         String getMimeTypesFilePath();
@@ -60,13 +60,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
-    private final ScribbleshareConfig config;
+    private final Config config;
 
     private final File httpRoot;
     private final int httpCacheSeconds;
     private final MimeTypes mimeTypes = new MimeTypes();
 
-    public HttpServerHandler(ScribbleshareBackendConfig config) {
+    public HttpServerHandler(Config config) {
         this.config = config;
         httpRoot = new File(config.getHttpRoot());
         httpCacheSeconds = config.getHttpCacheSeconds();
