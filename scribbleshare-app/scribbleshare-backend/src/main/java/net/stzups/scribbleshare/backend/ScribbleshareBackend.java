@@ -2,42 +2,49 @@ package net.stzups.scribbleshare.backend;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfigImplementation;
-import net.stzups.scribbleshare.backend.server.ServerInitializer;
+import net.stzups.scribbleshare.backend.server.BackendServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.server.Server;
-import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
-import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;
-import net.stzups.scribbleshare.util.config.configs.PropertiesConfig;
+import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
 
-public class ScribbleshareBackend {
-    private static Database database;
+public class ScribbleshareBackend extends Scribbleshare implements AutoCloseable {
+    private final ScribbleshareBackendConfig config;
+    private final PostgresDatabase database;
+
+    private ScribbleshareBackend(String[] args) throws Exception {
+        this(args, new ScribbleshareBackendConfigImplementation());
+    }
+
+    private ScribbleshareBackend(String[] args, ScribbleshareBackendConfigImplementation config) throws Exception {
+        super(args, config);
+        this.config = config;
+        this.database = new PostgresDatabase(config);
+    }
 
     public static void main(String[] args) throws Exception {
-        //Scribbleshare.setLogger("scribbleshare-backend");
         Scribbleshare.getLogger().info("Starting scribbleshare-backend server...");
-
         long start = System.currentTimeMillis();
+        try (ScribbleshareBackend scribbleshareBackend = new ScribbleshareBackend(args)) {
 
-        Scribbleshare.getConfig()
-                .addConfigProvider(new ArgumentConfig(args))
-                .addConfigProvider(new EnvironmentVariableConfig(Scribbleshare.getConfig().getString(ScribbleshareConfigImplementation.ENVIRONMENT_VARIABLE_PREFIX)))
-                .addConfigProvider(new PropertiesConfig(Scribbleshare.getConfig().getProperties()(ScribbleshareConfigImplementation.PROPERTIES)));
-
-        database = new ScribbleshareDatabase();
-
-        try (Server server = new Server()) {
-            ChannelFuture closeFuture = server.start(new ServerInitializer());
+            ChannelFuture closeFuture = scribbleshareBackend.start(new BackendServerInitializer(scribbleshareBackend.getConfig(), scribbleshareBackend.getDatabase()));
 
             Scribbleshare.getLogger().info("Started scribbleshare-backend server in " + (System.currentTimeMillis() - start) + "ms");
 
             closeFuture.sync();
-        } finally {
-            //database.close();
         }
     }
 
-    public static Database getDatabase() {
+    public ScribbleshareDatabase getDatabase() {
         return database;
+    }
+
+    @Override
+    public ScribbleshareBackendConfig getConfig() {
+        return config;
+    }
+
+    @Override
+    public void close() throws Exception {
+        super.close();
+        database.close();
     }
 }

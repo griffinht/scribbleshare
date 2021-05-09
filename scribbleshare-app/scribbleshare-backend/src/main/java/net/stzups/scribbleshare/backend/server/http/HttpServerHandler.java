@@ -27,11 +27,14 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.ScribbleshareBackend;
-import net.stzups.scribbleshare.backend.ScribbleshareBackendConfigKeys;
+import net.stzups.scribbleshare.ScribbleshareConfig;
+import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
+import net.stzups.scribbleshare.backend.server.BackendServerInitializer;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.session.HttpConfig;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 
@@ -46,7 +49,6 @@ import java.net.SocketAddress;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -60,11 +62,11 @@ import java.util.regex.Pattern;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    interface Config {
-
+    public interface Config {
+        String getHttpRoot();
+        int getHttpCacheSeconds();
+        String getMimeTypesFilePath();
     }
-    private static final File HTTP_ROOT = new File(Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.HTML_ROOT));
-    private static final int HTTP_CACHE_SECONDS = Scribbleshare.getConfig().getInteger(ScribbleshareBackendConfigKeys.HTTP_CACHE_SECONDS);
 
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -80,29 +82,35 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
-    static {
-        String path = Scribbleshare.getConfig().getString(ScribbleshareBackendConfigKeys.MIME_TYPES_FILE_PATH);
-        try (FileInputStream fileInputStream = new FileInputStream(path)){
-            MimeTypes.load(fileInputStream);
+    private final ScribbleshareConfig config;
+
+    private final File httpRoot;
+    private final int httpCacheSeconds;
+    private final MimeTypes mimeTypes = new MimeTypes();
+
+    private Set<SocketAddress> healthCheckRequests = new HashSet<>();
+
+    public HttpServerHandler(ScribbleshareBackendConfig config) {
+        this.config = config;
+        httpRoot = new File(config.getHttpRoot());
+        httpCacheSeconds = config.getHttpCacheSeconds();
+        String path = config.getMimeTypesFilePath();
+        // check for mime types in working directory
+        try (FileInputStream fileInputStream = new FileInputStream(path)) {
+            mimeTypes.load(fileInputStream);
         } catch (IOException e) {
-            InputStream inputStream = HttpServerHandler.class.getResourceAsStream(path.startsWith("/") ? "" : "/" + path); //always use root of classpath
+            // check for mime types in root of classpath
+            InputStream inputStream = HttpServerHandler.class.getResourceAsStream(path.startsWith("/") ? "" : "/" + path);
             if (inputStream != null) {
                 try {
-                    MimeTypes.load(inputStream);
+                    mimeTypes.load(inputStream);
                 } catch (IOException e1) {
                     e.printStackTrace();
                 }
             } else {
-                e.printStackTrace(); // non critical, MimeTypes will just use the default value
+                e.printStackTrace(); // non critical, server will just serve 404 responses
             }
         }
-    }
-
-    private final Config config;
-    private Set<SocketAddress> healthCheckRequests = new HashSet<>();
-
-    HttpServerHandler(Config config) {
-        this.config = config;
     }
 
     @Override
@@ -182,7 +190,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             return;
                         }
 
-                        User user = ScribbleshareBackend.getDatabase().getUser(userId);
+                        User user = BackendServerInitializer.getDatabase(ctx).getUser(userId);
                         if (user == null) {
                             Scribbleshare.getLogger(ctx).warning("User with " + userId + " authenticated but does not exist");
                             break;
@@ -206,7 +214,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 //todo
                                 send(ctx, request, HttpResponseStatus.NOT_FOUND);
                                 return;
-                                /*Resource resource = ScribbleshareBackend.getDatabase().getResource(documentId, documentId);
+                                /*Resource resource = BackendServerInitializer.getDatabase(ctx).getResource(documentId, documentId);
                                 if (resource == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
                                     return;
@@ -215,12 +223,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
                                 sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
+                                Document document = BackendServerInitializer.getDatabase(ctx).getDocument(documentId);
                                 if (document == null) {
                                     Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                     break;
                                 }
-                                send(ctx, request, Unpooled.copyLong(ScribbleshareBackend.getDatabase().addResource(document.getId(), new Resource(request.content()))));
+                                send(ctx, request, Unpooled.copyLong(BackendServerInitializer.getDatabase(ctx).addResource(document.getId(), new Resource(request.content()))));
                             } else {
                                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -233,7 +241,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 break;
                             }
 
-                            Document document = ScribbleshareBackend.getDatabase().getDocument(documentId);
+                            Document document = BackendServerInitializer.getDatabase(ctx).getDocument(documentId);
                             if (document == null) {
                                 Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
                                 break;
@@ -241,7 +249,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                Resource resource = ScribbleshareBackend.getDatabase().getResource(resourceId, documentId);
+                                Resource resource = BackendServerInitializer.getDatabase(ctx).getResource(resourceId, documentId);
                                 if (resource == null) {
                                     break;
                                 }
@@ -288,9 +296,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        File file = new File(HTTP_ROOT, filePath);
+        File file = new File(httpRoot, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
-            if (new File(HTTP_ROOT, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
+            if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
                 sendRedirect(ctx, request, path + "/" + rawQuery);
             } else {
                 send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -299,10 +307,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
         HttpHeaders headers = new DefaultHttpHeaders();
         if (path.equals(PersistentHttpSession.LOGIN_PATH)) {
-            logIn(ctx, request, headers);
+            logIn(ctx, config, request, headers);
         }
-        headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + HTTP_CACHE_SECONDS);//cache but revalidate if stale todo set to private cache for resources behind authentication
-        sendFile(ctx, request, headers, file);
+        headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
+        sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
     }
 
     private static void send(ChannelHandlerContext ctx, FullHttpRequest request, ByteBuf responseContent) {
@@ -427,10 +435,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     /** make sure the file being sent is valid */
-    private static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file) throws Exception {
+    private static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws Exception {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             long fileLength = randomAccessFile.length();
-            String mimeType = MimeTypes.getMimeType(file);
             if (mimeType == null) {
                 Scribbleshare.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
                 send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -448,7 +455,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = ScribbleshareBackend.getDatabase().getHttpSession(cookie.getId());
+            HttpSession httpSession = BackendServerInitializer.getDatabase(ctx).getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 return httpSession.getUser();
@@ -464,8 +471,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return null;
     }
 
-    private static void logIn(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers) {
-        if (!logIn(request, headers)) {
+    private static void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) {
+        if (!logIn(BackendServerInitializer.getDatabase(ctx), config, request, headers)) {
             Scribbleshare.getLogger(ctx).warning("Bad authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
             //todo rate limiting strategies
@@ -474,43 +481,43 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static boolean logIn(HttpRequest request, HttpHeaders headers) {
+    private static boolean logIn(ScribbleshareDatabase database, HttpConfig config, HttpRequest request, HttpHeaders headers) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie == null) {
             User user;
             HttpSession.ClientCookie cookiePersistent = HttpSession.ClientCookie.getClientCookie(request, PersistentHttpSession.COOKIE_NAME);
             if (cookiePersistent != null) {
-                PersistentHttpSession persistentHttpSession = ScribbleshareBackend.getDatabase().getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                PersistentHttpSession persistentHttpSession = database.getAndRemovePersistentHttpSession(cookiePersistent.getId());
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
-                    user = ScribbleshareBackend.getDatabase().getUser(persistentHttpSession.getUser());
+                    user = database.getUser(persistentHttpSession.getUser());
                 } else {
                     //return false; todo
-                    user = ScribbleshareBackend.getDatabase().createUser();
+                    user = database.createUser();
                 }
             } else {
-                user = ScribbleshareBackend.getDatabase().createUser();
+                user = database.createUser();
             }
 
-            HttpSession httpSession = new HttpSession(user, headers);
-            ScribbleshareBackend.getDatabase().addHttpSession(httpSession);
+            HttpSession httpSession = new HttpSession(config, user, headers);
+            database.addHttpSession(httpSession);
 
             //this is single use and always refreshed
-            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, headers);
-            ScribbleshareBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(config, httpSession, headers);
+            database.addPersistentHttpSession(persistentHttpSession);
             return true;
         } else {
-            HttpSession httpSession = ScribbleshareBackend.getDatabase().getHttpSession(cookie.getId());
+            HttpSession httpSession = database.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 return true;
             } else {
                 //todo copied and bad
-                User user = ScribbleshareBackend.getDatabase().createUser();
-                httpSession = new HttpSession(user, headers);
-                ScribbleshareBackend.getDatabase().addHttpSession(httpSession);
+                User user = database.createUser();
+                httpSession = new HttpSession(config, user, headers);
+                database.addHttpSession(httpSession);
 
                 //this is single use and always refreshed
-                PersistentHttpSession persistentHttpSession = new PersistentHttpSession(httpSession, headers);
-                ScribbleshareBackend.getDatabase().addPersistentHttpSession(persistentHttpSession);
+                PersistentHttpSession persistentHttpSession = new PersistentHttpSession(config, httpSession, headers);
+                database.addPersistentHttpSession(persistentHttpSession);
                 return true;
             }
         }
@@ -525,6 +532,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
     }
 
+    //todo
     private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
 
     private static String[] getRoute(String path) {

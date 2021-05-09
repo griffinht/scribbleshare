@@ -16,9 +16,9 @@ import java.util.Map;
  * application/javascript js
  */
 public class MimeTypes {
-    private static final Map<String, String> extensionMimeTypeMap = new HashMap<>();
+    private final Map<String, String> extensionMimeTypeMap = new HashMap<>();
 
-    static void load(InputStream inputStream) throws IOException {
+    public void load(InputStream inputStream) throws IOException {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             for (String line; (line = bufferedReader.readLine()) != null;) {
@@ -39,7 +39,7 @@ public class MimeTypes {
      *
      * @return the MIME type for the given file, or a default type
      */
-    public static String getMimeType(File file) {
+    public String getMimeType(File file) {
         return getMimeType(file.getPath());
     }
 
@@ -49,7 +49,7 @@ public class MimeTypes {
      * @param extension can include or exclude the file separator ("html" or ".html" both work)
      * @return the MIME type for the given extension, or null
      */
-    public static String getMimeType(String extension) {
+    public String getMimeType(String extension) {
         int i = extension.lastIndexOf(".");
         if (i != -1) {
             extension = extension.substring(i + 1);
