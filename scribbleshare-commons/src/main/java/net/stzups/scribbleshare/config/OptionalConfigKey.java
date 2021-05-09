@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.util.config;
+package net.stzups.scribbleshare.config;
 
 /**
  * A {@link ConfigKey} that can use a default value if no other value is found

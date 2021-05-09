@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.util.config;
+package net.stzups.scribbleshare.config;
 
 /**
  * A {@link String} key that returns a value of type T

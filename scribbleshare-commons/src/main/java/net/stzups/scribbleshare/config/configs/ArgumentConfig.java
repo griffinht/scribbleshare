@@ -1,7 +1,7 @@
-package net.stzups.scribbleshare.util.config.configs;
+package net.stzups.scribbleshare.config.configs;
 
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.util.config.ConfigProvider;
+import net.stzups.scribbleshare.config.ConfigProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;

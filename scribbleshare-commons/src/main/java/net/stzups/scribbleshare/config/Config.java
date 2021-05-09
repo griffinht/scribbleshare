@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.util.config;
+package net.stzups.scribbleshare.config;
 
 import java.util.ArrayList;
 import java.util.List;

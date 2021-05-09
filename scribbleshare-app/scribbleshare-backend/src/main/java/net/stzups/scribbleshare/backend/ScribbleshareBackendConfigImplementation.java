@@ -1,8 +1,8 @@
 package net.stzups.scribbleshare.backend;
 
 import net.stzups.scribbleshare.ScribbleshareConfigImplementation;
-import net.stzups.scribbleshare.util.config.ConfigKey;
-import net.stzups.scribbleshare.util.config.OptionalConfigKey;
+import net.stzups.scribbleshare.config.ConfigKey;
+import net.stzups.scribbleshare.config.OptionalConfigKey;
 
 public class ScribbleshareBackendConfigImplementation extends ScribbleshareConfigImplementation implements ScribbleshareBackendConfig {
     private static final ConfigKey<String> HTML_ROOT = new OptionalConfigKey<>("html.root", "html");

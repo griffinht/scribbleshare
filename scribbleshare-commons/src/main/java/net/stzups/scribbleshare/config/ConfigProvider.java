@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.util.config;
+package net.stzups.scribbleshare.config;
 
 /**
  * Provides values for keys to a {@link Config}

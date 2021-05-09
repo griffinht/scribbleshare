@@ -1,6 +1,6 @@
-package net.stzups.scribbleshare.util.config.configs;
+package net.stzups.scribbleshare.config.configs;
 
-import net.stzups.scribbleshare.util.config.ConfigProvider;
+import net.stzups.scribbleshare.config.ConfigProvider;
 
 import java.util.Collections;
 import java.util.Map;
