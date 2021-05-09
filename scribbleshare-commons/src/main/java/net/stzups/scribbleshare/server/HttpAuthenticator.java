@@ -23,7 +23,6 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
     public static AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
-    private static AttributeKey<Boolean> A = AttributeKey.valueOf(HttpAuthenticator.class, "A");
 
     private final SessionDatabase sessionDatabase;
 
@@ -33,10 +32,11 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
-        if (ctx.channel().attr(A).get() != null) {
+        if (ctx.channel().attr(USER).get() != null) {
             out.add(request.retain());
             return;
         }
+
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
 
         if (request.decoderResult().isFailure()) {
@@ -72,7 +72,6 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
                 //now that we have an good authenticated HTTP request, set up WebSocket pipeline
                 //ctx.pipeline().remove(this);
                 //pass on this request
-                ctx.channel().attr(A).set(true);
                 out.add(request.retain());
             } else {
                 Scribbleshare.getLogger(ctx).warning("Bad authentication");
