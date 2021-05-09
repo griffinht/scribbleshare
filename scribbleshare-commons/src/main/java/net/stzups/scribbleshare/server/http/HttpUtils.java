@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.server;
+package net.stzups.scribbleshare.server.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

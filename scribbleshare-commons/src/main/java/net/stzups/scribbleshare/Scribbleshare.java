@@ -5,7 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.server.Server;
-import net.stzups.scribbleshare.server.HttpServerInitializer;
+import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 import net.stzups.scribbleshare.util.LogFactory;
 import net.stzups.scribbleshare.util.config.configs.ArgumentConfig;
 import net.stzups.scribbleshare.util.config.configs.EnvironmentVariableConfig;

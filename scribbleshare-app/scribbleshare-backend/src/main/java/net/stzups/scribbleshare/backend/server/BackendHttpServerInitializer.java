@@ -9,7 +9,7 @@ import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.server.HttpServerInitializer;
+import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 
 import javax.net.ssl.SSLException;
 

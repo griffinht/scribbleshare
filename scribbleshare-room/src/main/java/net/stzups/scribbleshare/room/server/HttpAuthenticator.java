@@ -14,7 +14,7 @@ import net.stzups.scribbleshare.data.objects.session.HttpSession;
 import java.util.List;
 import java.util.logging.Level;
 
-import static net.stzups.scribbleshare.server.HttpUtils.send;
+import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {

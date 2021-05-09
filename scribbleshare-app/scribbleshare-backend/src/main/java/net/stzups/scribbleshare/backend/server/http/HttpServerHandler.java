@@ -14,8 +14,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.ScribbleshareConfig;
-import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.BackendHttpServerInitializer;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -34,10 +32,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static net.stzups.scribbleshare.server.HttpUtils.send;
-import static net.stzups.scribbleshare.server.HttpUtils.sendChunkedResource;
-import static net.stzups.scribbleshare.server.HttpUtils.sendFile;
-import static net.stzups.scribbleshare.server.HttpUtils.sendRedirect;
+import static net.stzups.scribbleshare.server.http.HttpUtils.send;
+import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
+import static net.stzups.scribbleshare.server.http.HttpUtils.sendFile;
+import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {

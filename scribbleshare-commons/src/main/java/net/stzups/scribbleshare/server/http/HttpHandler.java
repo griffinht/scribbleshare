@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.server;
+package net.stzups.scribbleshare.server.http;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +10,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import static net.stzups.scribbleshare.server.HttpUtils.send;
+import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpHandler extends MessageToMessageDecoder<FullHttpRequest> {
