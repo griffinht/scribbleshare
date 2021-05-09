@@ -1,24 +1,19 @@
 package net.stzups.scribbleshare.server;
 
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 
 import java.util.List;
+
+import static net.stzups.scribbleshare.server.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
@@ -83,17 +78,5 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             Scribbleshare.getLogger(ctx).info("No authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
         }
-    }
-
-    private static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        if (request == null) { // assume no keep alive
-            ctx.writeAndFlush(response);
-            return;
-        }
-
-        ChannelFuture flushPromise = ctx.writeAndFlush(response);
-        flushPromise.addListener(ChannelFutureListener.CLOSE);
     }
 }
