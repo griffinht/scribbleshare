@@ -11,6 +11,7 @@ import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
+import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
@@ -24,7 +25,6 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageGetInvite;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
-import net.stzups.scribbleshare.room.server.HttpAuthenticator;
 
 public enum State {
     INITIAL {

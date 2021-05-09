@@ -2,7 +2,6 @@ package net.stzups.scribbleshare.room.server.websocket.protocol;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import net.stzups.scribbleshare.Scribbleshare;

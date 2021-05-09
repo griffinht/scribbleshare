@@ -1,7 +1,6 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.server.messages;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
