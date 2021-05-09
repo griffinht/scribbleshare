@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.data.exceptions;
+package net.stzups.scribbleshare.data.objects.exceptions;
 
 public class DeserializationTypeException extends DeserializationException {
     public DeserializationTypeException(Class<?> clazz, int id) {

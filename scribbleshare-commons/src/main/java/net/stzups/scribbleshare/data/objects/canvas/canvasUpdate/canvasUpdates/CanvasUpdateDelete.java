@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;

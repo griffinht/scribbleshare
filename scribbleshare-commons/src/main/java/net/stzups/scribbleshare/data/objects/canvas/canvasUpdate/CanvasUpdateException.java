@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.data.exceptions;
+package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 public class CanvasUpdateException extends Exception {
 

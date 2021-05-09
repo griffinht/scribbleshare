@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.Message;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageCreateDocument;

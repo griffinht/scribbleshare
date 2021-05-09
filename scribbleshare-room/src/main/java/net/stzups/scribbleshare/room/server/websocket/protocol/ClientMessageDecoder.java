@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessageType;
 

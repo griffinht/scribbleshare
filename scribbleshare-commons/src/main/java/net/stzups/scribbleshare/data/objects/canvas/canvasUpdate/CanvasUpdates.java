@@ -1,8 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
-import net.stzups.scribbleshare.data.exceptions.CanvasUpdateException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 
 public class CanvasUpdates {

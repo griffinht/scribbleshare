@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 

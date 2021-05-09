@@ -1,8 +1,8 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
-import net.stzups.scribbleshare.data.exceptions.DeserializationTypeException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
 
 import java.util.EnumSet;
 import java.util.Map;

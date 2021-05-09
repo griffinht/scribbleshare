@@ -1,7 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.protocol.client;
 
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.exceptions.DeserializationTypeException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
 
 import java.util.EnumSet;
 import java.util.Map;

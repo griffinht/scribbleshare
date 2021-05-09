@@ -2,7 +2,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 
 import java.util.EnumSet;

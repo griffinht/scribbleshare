@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
