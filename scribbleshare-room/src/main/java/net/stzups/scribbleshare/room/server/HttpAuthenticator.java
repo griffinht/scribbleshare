@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
@@ -17,14 +18,17 @@ import static net.stzups.scribbleshare.server.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
+
     private static final AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
     public static long getUser(ChannelHandlerContext ctx) {
         return ctx.channel().attr(USER).get();
     }
 
+    private final RoomHttpServerInitializer.Config config;
     private final SessionDatabase sessionDatabase;
 
-    public HttpAuthenticator(SessionDatabase sessionDatabase) {
+    public HttpAuthenticator(RoomHttpServerInitializer.Config config, SessionDatabase sessionDatabase) {
+        this.config = config;
         this.sessionDatabase = sessionDatabase;
     }
 
@@ -40,6 +44,18 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
         if (ctx.channel().attr(USER).get() != null) {
             out.add(request.retain());
+            return;
+        }
+
+        if (!request.method().equals(HttpMethod.GET)) {
+            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+            Scribbleshare.getLogger(ctx).warning("Bad method");
+            return;
+        }
+
+        if (!request.uri().equals(config.getWebsocketPath())) {
+            send(ctx, request, HttpResponseStatus.NOT_FOUND);
+            Scribbleshare.getLogger(ctx).warning("Bad uri");
             return;
         }
 

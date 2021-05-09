@@ -12,6 +12,4 @@ public abstract class ConfigKey<T> {
     }
 
     abstract T getDefaultValue(Exception e);
-
-    public abstract void setDefaultValue(T defaultValue);
 }

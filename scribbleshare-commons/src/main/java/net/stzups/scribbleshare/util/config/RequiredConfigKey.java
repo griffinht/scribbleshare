@@ -13,9 +13,4 @@ public class RequiredConfigKey<T> extends ConfigKey<T> {
             throw new IllegalArgumentException("Missing value for required config key \"" + getKey() + "\"");
         }
     }
-
-    @Override
-    public void setDefaultValue(T defaultValue) {
-        throw new UnsupportedOperationException("Can't set default value of a required key");
-    }
 }

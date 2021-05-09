@@ -6,7 +6,7 @@ import net.stzups.scribbleshare.util.config.OptionalConfigKey;
 import net.stzups.scribbleshare.util.config.RequiredConfigKey;
 
 public class ScribbleshareConfigImplementation extends Config implements ScribbleshareConfig {
-    static final ConfigKey<String> NAME = new OptionalConfigKey<>("name", "Scribbleshare");
+    private static final ConfigKey<String> NAME = new OptionalConfigKey<>("name", "Scribbleshare");
     private static final ConfigKey<Integer> PORT = new OptionalConfigKey<>("port", 80);
     private static final ConfigKey<String> SSL_PATH = new RequiredConfigKey<>("ssl.path");
     private static final ConfigKey<String> SSL_ROOT_PATH = new RequiredConfigKey<>("ssl.root.path");

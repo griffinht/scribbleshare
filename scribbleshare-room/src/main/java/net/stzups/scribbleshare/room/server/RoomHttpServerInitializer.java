@@ -34,11 +34,11 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
     private final HttpAuthenticator httpAuthenticator;
 
 
-    public RoomHttpServerInitializer(RoomHttpServerInitializer.Config config, ScribbleshareDatabase database) throws SSLException {
+    public RoomHttpServerInitializer(Config config, ScribbleshareDatabase database) throws SSLException {
         super(config);
         this.config = config;
         this.database = database;
-        httpAuthenticator = new HttpAuthenticator(database);
+        httpAuthenticator = new HttpAuthenticator(config, database);
     }
 
     @Override
