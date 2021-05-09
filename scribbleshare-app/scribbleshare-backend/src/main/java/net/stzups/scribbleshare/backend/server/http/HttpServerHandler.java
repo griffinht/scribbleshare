@@ -48,9 +48,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -70,7 +68,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         String getMimeTypesFilePath();
     }
 
-    private static final long MAX_AGE_NO_EXPIRE = Duration.ofDays(365).get(ChronoUnit.SECONDS);//one year
+    private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
 
