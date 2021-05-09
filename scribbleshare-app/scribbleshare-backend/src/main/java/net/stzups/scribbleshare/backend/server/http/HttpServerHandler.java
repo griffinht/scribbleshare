@@ -69,8 +69,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private final int httpCacheSeconds;
     private final MimeTypes mimeTypes = new MimeTypes();
 
-    private Set<SocketAddress> healthCheckRequests = new HashSet<>();
-
     public HttpServerHandler(ScribbleshareBackendConfig config) {
         this.config = config;
         httpRoot = new File(config.getHttpRoot());
