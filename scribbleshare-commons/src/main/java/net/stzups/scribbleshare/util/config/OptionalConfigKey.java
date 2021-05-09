@@ -1,5 +1,8 @@
 package net.stzups.scribbleshare.util.config;
 
+/**
+ * A {@link ConfigKey} that can use a default value if no other value is found
+ */
 public class OptionalConfigKey<T> extends ConfigKey<T> {
     private final T defaultValue;
 

@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Used to store and retrieve key-value pairs by finding the first result from many different strategies.
+ * Searches through provided {@link List<ConfigProvider>} to find a value for a key
  */
-public class Config {//todo probably needs a better name
+public class Config {
     private final List<ConfigProvider> configProviders;
 
-    /**
-     * Constructs a new ConfigProvider from its builder
-     */
     protected Config() {
         configProviders = new ArrayList<>();
     }

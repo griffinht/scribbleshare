@@ -1,5 +1,8 @@
 package net.stzups.scribbleshare.util.config;
 
+/**
+ * A {@link ConfigKey} that must have a value, otherwise an exception is thrown
+ */
 public class RequiredConfigKey<T> extends ConfigKey<T> {
     public RequiredConfigKey(String key) {
         super(key);
