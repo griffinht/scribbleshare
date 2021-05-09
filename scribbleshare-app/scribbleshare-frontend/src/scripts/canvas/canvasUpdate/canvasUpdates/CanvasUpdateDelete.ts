@@ -1,6 +1,7 @@
 import CanvasUpdate from "../CanvasUpdate.js";
 import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import {Canvas} from "../../Canvas.js";
+import CanvasUpdateType from "../CanvasUpdateType.js";
 
 export default class CanvasUpdateDelete extends CanvasUpdate {
     dt: number;

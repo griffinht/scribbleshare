@@ -3,3 +3,4 @@ enum CanvasUpdateType {
     MOVE,
     DELETE,
 }
+export default CanvasUpdateType;

@@ -3,6 +3,7 @@ import CanvasUpdateMove from "./canvasUpdates/CanvasUpdateMove.js";
 import CanvasUpdateDelete from "./canvasUpdates/CanvasUpdateDelete.js";
 import ByteBuffer from "../../protocol/ByteBuffer.js";
 import CanvasUpdate from "./CanvasUpdate.js";
+import CanvasUpdateType from "./CanvasUpdateType.js";
 
 export function getCanvasUpdate(type: CanvasUpdateType, byteBuffer: ByteBuffer): CanvasUpdate {
     let object: CanvasUpdate;
