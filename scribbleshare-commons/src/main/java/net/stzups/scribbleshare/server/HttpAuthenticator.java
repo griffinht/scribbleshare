@@ -11,7 +11,9 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
 import net.stzups.scribbleshare.data.objects.session.HttpSession;
 
+import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.logging.Level;
 
 import static net.stzups.scribbleshare.server.HttpUtils.send;
 
@@ -23,6 +25,14 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
     public HttpAuthenticator(SessionDatabase sessionDatabase) {
         this.sessionDatabase = sessionDatabase;
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Unhandled exception, serving HTTP 500", cause);
+        if (ctx.channel().isActive()) {
+            send(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
@@ -40,23 +50,17 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        if (!request.method().equals(HttpMethod.GET)) {
-            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            Scribbleshare.getLogger(ctx).info("Bad method");
-            return;
-        }
-
         if (request.uri().equals("/healthcheck")) {
+            if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
+                Scribbleshare.getLogger(ctx).warning("Healthcheck request from address which is not a loopback address");
+                send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+
             send(ctx, request, HttpResponseStatus.OK);
             Scribbleshare.getLogger(ctx).info("Good healthcheck response");
             return;
         }
-//todo
-/*        if (!request.uri().equals(scribbleshare.getConfig().getString(ScribbleshareRoomConfigKeys.WEBSOCKET_PATH))) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            Scribbleshare.getLogger(ctx).info("Bad uri");
-            return;
-        }*/
 
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
         if (cookie != null) {

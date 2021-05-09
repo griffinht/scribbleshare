@@ -134,26 +134,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // check if this is a special request
 
         switch (route[0]) {
-            case "healthcheck": {
-                System.out.println(route.length);
-                if (route.length != 1) {
-                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                    return;
-                }
-
-                if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
-                    Scribbleshare.getLogger(ctx).warning("Healthcheck request from address which is not a loopback address");
-                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                    return;
-                }
-
-                if (healthCheckRequests.add(ctx.channel().remoteAddress())) {
-                    Scribbleshare.getLogger(ctx).info("Good healthcheck request");
-                }
-
-                send(ctx, request, HttpResponseStatus.OK);
-                return;
-            }
             case "api": {
                 if (route.length < 2) {
                     send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -252,12 +232,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         }
 
+        // otherwise try to serve a regular HTTP file resource
+
         if (!HttpMethod.GET.equals(request.method())) {
             send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
             return;
         }
-
-        // otherwise try to serve a regular HTTP file resource
 
         // redirects
         if (path.endsWith(DEFAULT_FILE)) { // /index.html -> /
@@ -294,16 +274,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
         sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
     }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        if (ctx.channel().isActive()) {
-            send(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
 
     private static Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
         HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
