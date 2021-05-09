@@ -47,17 +47,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
 
 
-    private static final String DEFAULT_FILE = "index.html";
-    private static final String DEFAULT_FILE_EXTENSION = ".html";
+    private static final String DEFAULT_FILE = "index.html"; // / -> /index.html
+    private static final String DEFAULT_FILE_EXTENSION = ".html"; // /index -> index.html
 
+    // /index?key=value&otherKey=value
     private static final String QUERY_DELIMITER = "?";
     private static final String QUERY_SEPARATOR = "&";
     private static final String QUERY_PAIR_SEPARATOR = "=";
-
     private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
+
+    // abc-ABC_123.file
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
-    private final Config config;
+    private final HttpConfig config;
     private final ScribbleshareDatabase database;
 
     private final File httpRoot;
