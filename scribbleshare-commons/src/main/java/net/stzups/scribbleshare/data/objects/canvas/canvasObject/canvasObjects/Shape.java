@@ -2,8 +2,9 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
-import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class Shape extends EntityCanvasObject {
             int id = byteBuf.readUnsignedByte();
             Type objectType = objectTypeMap.get(id);
             if (objectType == null) {
-                throw new DeserializationException("Unknown Shape type for given id " + id);
+                throw new DeserializationTypeException(Shape.class, id);
             }
             return objectType;
         }

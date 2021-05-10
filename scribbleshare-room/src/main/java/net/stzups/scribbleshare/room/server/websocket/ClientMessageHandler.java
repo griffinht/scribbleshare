@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.room.exceptions.ClientMessageException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 
 import java.util.logging.Level;

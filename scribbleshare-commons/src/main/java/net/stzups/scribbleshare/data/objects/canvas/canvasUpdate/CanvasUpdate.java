@@ -1,11 +1,12 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateDelete;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateInsert;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateMove;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
 
 public abstract class CanvasUpdate {
     private final byte dt;
@@ -36,7 +37,7 @@ public abstract class CanvasUpdate {
                 canvasUpdate = new CanvasUpdateDelete(byteBuf);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown CanvasUpdate type");
+                throw new DeserializationTypeException(CanvasUpdateType.class, type.getId());
         }
         return canvasUpdate;
     }

@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.room.exceptions;
+package net.stzups.scribbleshare.room.server.websocket;
 
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 

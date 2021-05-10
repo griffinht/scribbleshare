@@ -1,11 +1,11 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.CanvasImage;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.CanvasMouse;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Line;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Shape;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 
 public class CanvasObject {
     private short x;
@@ -34,7 +34,7 @@ public class CanvasObject {
         byteBuf.writeShort(y);
     }
 
-    public static CanvasObject getCanvasObject(CanvasObjectType canvasObjectType, ByteBuf byteBuf) throws DeserializationException {
+    public static CanvasObject deserialize(CanvasObjectType canvasObjectType, ByteBuf byteBuf) throws DeserializationException {
         CanvasObject canvasObject;
         switch (canvasObjectType) {
             case SHAPE:

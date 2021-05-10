@@ -2,11 +2,12 @@ package net.stzups.scribbleshare.data.objects.canvas;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
-import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationLengthException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,9 +40,9 @@ public class Canvas {
         for (int i = 0; i < length; i++) {
             CanvasObjectType canvasObjectType = CanvasObjectType.deserialize(byteBuf.readUnsignedByte());
             int l = byteBuf.readUnsignedShort();
-            if (l == 0) throw new DeserializationException("Length of CanvasObject[] for type " + canvasObjectType + " is 0");
+            if (l == 0) throw new DeserializationLengthException(canvasObjectType, 0);
             for (int j = 0; j < l; j++) {
-                canvasObjects.put(byteBuf.readShort(), new CanvasObjectWrapper(canvasObjectType, CanvasObject.getCanvasObject(canvasObjectType, byteBuf)));
+                canvasObjects.put(byteBuf.readShort(), new CanvasObjectWrapper(canvasObjectType, CanvasObject.deserialize(canvasObjectType, byteBuf)));
             }
         }
     }
