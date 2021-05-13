@@ -11,11 +11,15 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     time: number;
 
     constructor(byteBuffer: ByteBuffer) {
-        super(CanvasUpdateType.INSERT);
+        super(byteBuffer);
         this.dt = byteBuffer.readUint8();
         this.id = byteBuffer.readInt16();
         this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuffer);
         this.time = 0;
+    }
+
+    getType(): CanvasUpdateType {
+        return CanvasUpdateType.INSERT;
     }
 
     draw(canvas: Canvas, dt: number) {
@@ -33,10 +37,8 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         byteBuffer.writeInt16(this.id);
         this.canvasObjectWrapper.serialize(byteBuffer);
     }
-
     static create(dt: number, id: number, canvasObjectWrapper: CanvasObjectWrapper) {
-        let object: CanvasUpdateInsert = Object.create(this.prototype);
-        object.type = CanvasUpdateType.INSERT;
+        let object: CanvasUpdateInsert = Object.create(this.prototype);//todo this on everything is
         object.dt = dt;
         object.id = id;
         object.canvasObjectWrapper = canvasObjectWrapper;

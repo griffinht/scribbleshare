@@ -10,9 +10,8 @@ export default class CanvasUpdateMove extends CanvasUpdate {
     set: boolean;
     i: number;
     time: number;
-
     constructor(byteBuffer: ByteBuffer) {
-        super(CanvasUpdateType.MOVE);
+        super(byteBuffer);
         this.canvasMoves = [];
         this.id = byteBuffer.readInt16();
         this.set = false;
@@ -22,6 +21,10 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         for (let i = 0; i < length; i++) {
             this.canvasMoves.push(new CanvasMove(byteBuffer));
         }
+    }
+
+    getType(): CanvasUpdateType {
+        return CanvasUpdateType.MOVE
     }
 
     move(time: number, canvasObject: CanvasObject) {
