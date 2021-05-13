@@ -31,12 +31,18 @@ class Selected {
         this.canvasObjectWrapper = canvasObjectWrapper;
     }
 
-    get(): CanvasObjectWrapper | null {
+    get(): CanvasObjectWrapper {
+        if (this.canvasObjectWrapper === null) throw new Error('tried to get when there is nothing to get');
         return this.canvasObjectWrapper;
     }
 
     has(): boolean {
-        return this.canvasObjectWrapper == null;
+        return this.canvasObjectWrapper !== null;
+    }
+
+    clear() {
+        this.id = 0;
+        this.canvasObjectWrapper = null;
     }
 }
 
@@ -112,12 +118,12 @@ export class Canvas {
                     ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
                     //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
                     canvasObjectWrapper.canvasObject.draw();
-                    /*if (selected !== null) {
+                    if (!selected.has()) {
                         if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-                            selected = new Selected
+                            selected.update(id, canvasObjectWrapper);
                         }
                     }
-                    if (this.selected.g.canvasObjectWrapper === null) {
+                    /*if (this.selected.g.canvasObjectWrapper === null) {
                         if (!mouse.drag) {
                             if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
                                 this.selected.id = id;
@@ -135,11 +141,12 @@ export class Canvas {
                 }
             }
         });
-       /* if (this.selected.canvasObjectWrapper !== null
-            && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject
-            && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-            this.selected.canvasObjectWrapper = null;
-        }*/
+        //clear selection if the mouse is gone
+        if (selected.has()
+            && selected.get().canvasObject instanceof EntityCanvasObject
+            && !aabb(selected.get().canvasObject as EntityCanvasObject, mouse, SELECT_PADDING)) {
+            selected.clear();
+        }
 
         this.last = now;
         window.requestAnimationFrame((now) => this.draw(now));
@@ -154,6 +161,9 @@ export class Canvas {
     }
 
     delete(id: number) {
+        if (selected.has() && selected.id === id) {
+            selected.clear();
+        }
         this.canvasObjectWrappers.delete(id);
         //canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
@@ -268,5 +278,11 @@ mouse.addEventListener('click', (event) => {
     if (activeDocument !== null) {
         let object = Shape.create(event.offsetX, event.offsetY, 50, 50, shape, color)
         activeDocument.canvas.insert(CanvasObjectType.SHAPE, object);
+    }
+});
+
+mouse.addEventListener('contextmenu', (event) => {
+    if (activeDocument !== null && selected.has()) {
+        activeDocument.canvas.delete(selected.id);
     }
 });
