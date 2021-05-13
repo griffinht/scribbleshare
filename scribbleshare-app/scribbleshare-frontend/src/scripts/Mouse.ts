@@ -12,35 +12,11 @@ export default class Mouse {
     eventListeners: Map<string, Array<(event: MouseEvent) => void>> = new Map();
 
     constructor(element: HTMLElement) {
-        element.addEventListener('mouseleave', () => {
-            this.down = false;
-            this.drag = false;
-        });
         element.addEventListener('mouseenter', (event) => {
-            if (event.buttons === 1) {
-                this.down = true;
-            }
+            this.mousedown(event);
         });
-
         element.addEventListener('mousedown', (event) => {
-            if (event.buttons !== 1) {
-                return;
-            }
-
-            this.down = true;
-        });
-        element.addEventListener('mouseup', (event) => {
-            if (!this.down) {
-                return;
-            }
-
-            this.down = false;
-            if (this.drag) {
-                this.drag = false;
-                this.dispatchEvent('dragstop', event);
-            } else {
-                this.dispatchEvent('click', event);
-            }
+            this.mousedown(event);
         });
         element.addEventListener('mousemove', (event) => {
             this.x = event.offsetX;//todo left click drag only
@@ -58,10 +34,38 @@ export default class Mouse {
                 this.dispatchEvent('dragstart', event);
             }
         });
+        element.addEventListener('mouseleave', (event) => {
+            this.mouseup(event);
+        });
+        element.addEventListener('mouseup', (event) => {
+            this.mouseup(event);
+        });
         element.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             this.dispatchEvent('contextmenu', event);
         });
+    }
+
+    mouseup(event: MouseEvent) {
+        if (!this.down) {
+            return;
+        }
+
+        this.down = false;
+        if (this.drag) {
+            this.drag = false;
+            this.dispatchEvent('dragstop', event);
+        } else {
+            this.dispatchEvent('click', event);
+        }
+    }
+
+    mousedown(event: MouseEvent) {
+        if (event.buttons !== 1) {
+            return;
+        }
+
+        this.down = true;
     }
 
     addEventListener(type: string, listener: (event: MouseEvent) => void) {//todo better typescript string key stuff idk

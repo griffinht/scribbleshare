@@ -10,9 +10,12 @@ import CanvasObject from "./canvasObject/CanvasObject.js";
 import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessageCanvasUpdate.js";
 import ServerMessage from "../protocol/server/ServerMessage.js";
 import CanvasObjectType from "./canvasObject/CanvasObjectType.js";
+import Mouse from "../Mouse.js";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
+
+const mouse = new Mouse(canvas);
 
 const SELECT_PADDING = 10;
 
