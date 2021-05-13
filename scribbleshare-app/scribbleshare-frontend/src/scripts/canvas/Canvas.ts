@@ -295,11 +295,9 @@ mouse.addEventListener('drag', (event) => {
         let canvasObject = selected.get().canvasObject;
         switch (tool) {
             case Tool.SELECT: {
-                if (true) {
-                    if (canvasObject instanceof EntityCanvasObject) {
-                        canvasObject.width += event.movementX;
-                        canvasObject.height += event.movementY;
-                    }
+                if (canvasObject instanceof EntityCanvasObject && !aabb(canvasObject, mouse, 0)) {
+                    canvasObject.width += event.movementX;
+                    canvasObject.height += event.movementY;
                 } else {
                     canvasObject.x += event.movementX;
                     canvasObject.y += event.movementY;
