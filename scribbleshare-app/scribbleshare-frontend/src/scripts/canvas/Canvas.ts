@@ -14,6 +14,7 @@ import Mouse from "../Mouse.js";
 import Shape from "./canvasObject/canvasObjects/Shape.js";
 import color from "../ColorSelector.js";
 import shape from "../ShapeSelector.js";
+import tool, {Tool} from "../ToolSelector.js";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
@@ -292,7 +293,19 @@ mouse.addEventListener('contextmenu', (event) => {
 mouse.addEventListener('drag', (event) => {
     if (activeDocument !== null && selected.has()) {
         let canvasObject = selected.get().canvasObject;
-        canvasObject.x += event.movementX;
-        canvasObject.y += event.movementY;
+        switch (tool) {
+            case Tool.SELECT: {
+                if (true) {
+                    if (canvasObject instanceof EntityCanvasObject) {
+                        canvasObject.width += event.movementX;
+                        canvasObject.height += event.movementY;
+                    }
+                } else {
+                    canvasObject.x += event.movementX;
+                    canvasObject.y += event.movementY;
+                }
+                break;
+            }
+        }
     }
-})
+});
