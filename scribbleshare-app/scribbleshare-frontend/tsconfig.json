@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "outDir": "./build/scripts",
-    "sourceMap": true,
-    "inlineSources": true,
+    //"sourceMap": true,
     "inlineSourceMap": true,
+    "inlineSources": true,
     "allowJs": false,
     "target": "ES6",
     "module": "ES6",
