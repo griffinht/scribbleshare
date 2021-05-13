@@ -1,15 +1,9 @@
-import Shape from "./canvasObject/canvasObjects/Shape.js";
 import {activeDocument, localClientId} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
 import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import {getCanvasObject} from "./canvasObject/getCanvasObject.js";
-import CanvasUpdateMove from "./canvasUpdate/canvasUpdates/CanvasUpdateMove.js";
-import Mouse from "../Mouse.js";
-import Line from "./canvasObject/canvasObjects/Line.js";
 import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
-import color from "../ColorSelector.js";
-import shapee from "../ShapeSelector.js";
 import ByteBuffer from "../protocol/ByteBuffer.js";
 import CanvasUpdate from "./canvasUpdate/CanvasUpdate.js";
 import CanvasObject from "./canvasObject/CanvasObject.js";
@@ -22,44 +16,37 @@ export const ctx = canvas.getContext('2d')!;
 
 const SELECT_PADDING = 10;
 
-const mouse = new Mouse(canvas);
+class Selected {
+    id: number = 0;
+    canvasObjectWrapper: CanvasObjectWrapper | null = null;
 
-let canvasUpdatesArray: CanvasUpdate[] = [];//todo these could be instance variables but idk
-let canvasUpdateMove: CanvasUpdateMove | null = null;
-let mouseUpdateMove: CanvasUpdateMove | null = null;
-let line: Line | null = null;
-let leftLock = false;
-let rightLock = false;
+    update(id: number, canvasObjectWrapper: CanvasObjectWrapper) {
+        this.id = id;
+        this.canvasObjectWrapper = canvasObjectWrapper;
+    }
+
+    get(): CanvasObjectWrapper | null {
+        return this.canvasObjectWrapper;
+    }
+
+    has(): boolean {
+        return this.canvasObjectWrapper == null;
+    }
+}
+
+let selected = new Selected();
 
 export class Canvas {
     isOpen: boolean;
     last: number;
-    lastFlushSelected: number;
-    lastFlushMouse: number;
-    lastFlushLine: number;
     canvasObjectWrappers: Map<number, CanvasObjectWrapper>;
     canvasUpdates: Array<CanvasUpdate>;
-    selected: {
-        id: number;
-        canvasObjectWrapper: CanvasObjectWrapper | null;
-        dirty: boolean;
-    }
-    localMouse: Mouse | null;
 
     constructor(byteBuffer?: ByteBuffer) {
         this.isOpen = false;
         this.last = 0;
-        this.lastFlushSelected = 0;
-        this.lastFlushMouse = 0;
-        this.lastFlushLine = 0;
         this.canvasObjectWrappers = new Map();
         this.canvasUpdates = [];
-        this.selected = {
-            id:0,
-            canvasObjectWrapper:null,
-            dirty:false,
-        };
-        this.localMouse = null;
         if (byteBuffer != null) {
             let length = byteBuffer.readUint8();
             for (let i = 0; i < length; i++) {
@@ -119,7 +106,12 @@ export class Canvas {
                     ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
                     //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
                     canvasObjectWrapper.canvasObject.draw();
-                    if (this.selected.canvasObjectWrapper === null) {
+                    /*if (selected !== null) {
+                        if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+                            selected = new Selected
+                        }
+                    }
+                    if (this.selected.g.canvasObjectWrapper === null) {
                         if (!mouse.drag) {
                             if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
                                 this.selected.id = id;
@@ -130,18 +122,18 @@ export class Canvas {
                         if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
                             ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
                         }
-                    }
+                    }*/
                     ctx.restore();
                 } else {
                     canvasObjectWrapper.canvasObject.draw();
                 }
             }
         });
-        if (this.selected.canvasObjectWrapper !== null
+       /* if (this.selected.canvasObjectWrapper !== null
             && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject
             && !aabb(this.selected.canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
             this.selected.canvasObjectWrapper = null;
-        }
+        }*/
 
         this.last = now;
         window.requestAnimationFrame((now) => this.draw(now));
@@ -167,122 +159,7 @@ export class Canvas {
     }
 
     flush() {
-        this.flushSelected();
-        this.flushMouse();
-        this.flushLine();
-    }
 
-    flushSelected() {
-        if (this.selected.canvasObjectWrapper !== null) {
-            if (this.selected.dirty) {
-                if (canvasUpdateMove !== null) {
-                    this.selected.dirty = false;
-                    canvasUpdateMove.move(getNow(), this.selected.canvasObjectWrapper.canvasObject);
-                    this.lastFlushSelected = window.performance.now();
-                }
-            }
-        }
-
-    }
-
-    flushMouse() {
-/*        if (false && mouseUpdateMove !== null) {
-            if (((Math.abs(mouse.dx) > 0 || Math.abs(mouse.dy) > 0) && this.last - this.lastFlushMouse > 100)
-                || (Math.sqrt(Math.pow(mouse.dx, 2) + Math.pow(mouse.dy, 2)) > 30)) {
-                mouseUpdateMove.move(getNow(), this.localMouse);
-                //console.log(this.last - this.lastFlushMouse)
-                this.lastFlushMouse = window.performance.now();
-                mouse.reset();
-            }
-        }*/
-    }
-
-    flushLine() {
-
-        this.lastFlushLine = window.performance.now();
-    }
-
-    onEvent(event: MouseEvent) {
-        switch (event.type) {
-            case 'mousemove': {
-/*                this.localMouse.x = mouse.x;
-                this.localMouse.y = mouse.y;*/
-                //mouseUpdateMove = CanvasUpdateMove.create(localClientId, getNow());
-
-                //console.log(mouse.drag, (event.buttons & 1))
-                if (mouse.drag) {
-
-
-                    if ((event.buttons & 1) !== 1) {
-                        rightLock = true;
-                        if (this.selected.canvasObjectWrapper !== null && this.selected.canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
-                            this.selected.canvasObjectWrapper.canvasObject.width += event.movementX;
-                            this.selected.canvasObjectWrapper.canvasObject.height += event.movementY;
-                            //canvasUpdates.push(CanvasUpdateInsert.create(getNow(), this.selected.id, this.selected.canvasObjectWrapper));
-                        }
-                    } else {
-                        //leftLock = true;
-                        if (this.selected.canvasObjectWrapper !== null) {
-                            if (canvasUpdateMove === null) {
-                                canvasUpdateMove = CanvasUpdateMove.create(this.selected.id, getNow());
-                            }
-                            this.selected.canvasObjectWrapper.canvasObject.x += event.movementX;
-                            this.selected.canvasObjectWrapper.canvasObject.y += event.movementY;
-                            this.selected.dirty = true;
-                        } else {
-                            if (line === null) {
-                                line = Line.create(event.offsetX, event.offsetY, color);
-                                this.insert(CanvasObjectType.LINE, line);
-                            } else {
-                                line.pushPoint(event.offsetX, event.offsetY);
-                                this.flushLine();
-                            }
-                        }
-                    }
-                } else if (canvasUpdateMove !== null && ((event.buttons & 1) !== 1)) {
-                    //canvasUpdates.push(canvasUpdateMove);
-                    canvasUpdateMove = null;
-                }
-                break;
-            }
-            case 'mouseup': {
-                if (line !== null) {
-                    line = null;
-                    leftLock = true;
-                } else {
-                    leftLock = false;
-                }
-                break;
-            }
-            case 'click': {
-                if (leftLock) {
-                    leftLock = true;
-                    return;
-                } else {
-                    console.log('click');
-                }
-                if (this.selected.canvasObjectWrapper === null) {
-                    if ((event.buttons & 1) === 0) {
-                        let s = Shape.create(event.offsetX, event.offsetY, 50, 50, shapee.a, color);
-                        this.insert(CanvasObjectType.SHAPE, s);
-                    }
-                }
-                break;
-            }
-            case 'contextmenu': {
-                console.log(rightLock);
-                if (rightLock) {
-                    event.preventDefault();
-                    rightLock = false;
-                    return;
-                }
-                if (this.selected.canvasObjectWrapper !== null) {
-                    this.delete(this.selected.id);
-                    event.preventDefault();
-                }
-                break;
-            }
-        }
     }
 }
 
@@ -291,6 +168,18 @@ interface Rectangle {
     y: number;
     width: number;
     height: number;
+}
+
+class Point implements Rectangle {
+    height: number = 0;
+    width: number = 0;
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
 function aabb(rect1: Rectangle, rect2: Rectangle, padding: number) {
@@ -315,16 +204,6 @@ resizeCanvas();
 
 
 
-function onEvent(event: MouseEvent) {
-    if (activeDocument !== null) {
-        activeDocument.canvas.onEvent(event);
-    }
-}
-
-canvas.addEventListener('mousemove', onEvent);
-canvas.addEventListener('mouseup', onEvent);
-canvas.addEventListener('click', onEvent);
-canvas.addEventListener('contextmenu', onEvent);
 
 
 
@@ -357,15 +236,6 @@ function update() {
     if (activeDocument !== null) {
         activeDocument.canvas.flush();
 
-        //assemble local updates
-        if (canvasUpdateMove !== null) {
-            //canvasUpdates.push(canvasUpdateMove);
-            canvasUpdateMove = null;
-        }
-/*        if (mouseUpdateMove !== null) {
-            canvasUpdates.push(mouseUpdateMove);
-            mouseUpdateMove = null;
-        }*/
 
         //send local updates
         /*if (canvasUpdates.length > 0) {
@@ -387,3 +257,4 @@ setInterval(update, UPDATE_INTERVAL);
 export function lerp(v0: number, v1: number, t: number) {
     return v0 * (1 - t) + v1 * t;
 }
+
