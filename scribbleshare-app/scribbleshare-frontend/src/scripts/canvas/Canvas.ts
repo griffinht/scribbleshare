@@ -131,10 +131,12 @@ export class Canvas {
                             }
                         }
                     } else {
-                        if (canvasObjectWrapper.canvasObject === this.selected.canvasObjectWrapper.canvasObject) {
-                            ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
-                        }
+
                     }*/
+                    if (selected.has()
+                        && id === selected.id) {
+                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
+                    }
                     ctx.restore();
                 } else {
                     canvasObjectWrapper.canvasObject.draw();
