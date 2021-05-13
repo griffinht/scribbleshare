@@ -11,6 +11,9 @@ import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessage
 import ServerMessage from "../protocol/server/ServerMessage.js";
 import CanvasObjectType from "./canvasObject/CanvasObjectType.js";
 import Mouse from "../Mouse.js";
+import Shape from "./canvasObject/canvasObjects/Shape.js";
+import color from "../ColorSelector.js";
+import shape from "../ShapeSelector.js";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
@@ -261,3 +264,9 @@ export function lerp(v0: number, v1: number, t: number) {
     return v0 * (1 - t) + v1 * t;
 }
 
+mouse.addEventListener('click', (event) => {
+    if (activeDocument !== null) {
+        let object = Shape.create(event.offsetX, event.offsetY, 50, 50, shape, color)
+        activeDocument.canvas.insert(CanvasObjectType.SHAPE, object);
+    }
+});
