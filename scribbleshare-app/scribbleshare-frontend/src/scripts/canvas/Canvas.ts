@@ -123,7 +123,7 @@ export class Canvas {
                             selected.update(id, canvasObjectWrapper);
                         }
                     }
-                    /*if (this.selected.g.canvasObjectWrapper === null) {
+/*                    if (this.selected.g.canvasObjectWrapper === null) {
                         if (!mouse.drag) {
                             if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
                                 this.selected.id = id;
@@ -288,3 +288,11 @@ mouse.addEventListener('contextmenu', (event) => {
         activeDocument.canvas.delete(selected.id);
     }
 });
+
+mouse.addEventListener('drag', (event) => {
+    if (activeDocument !== null && selected.has()) {
+        let canvasObject = selected.get().canvasObject;
+        canvasObject.x += event.movementX;
+        canvasObject.y += event.movementY;
+    }
+})

@@ -27,12 +27,11 @@ export default class Mouse {
                 return;
             }
 
-            if (this.drag) {
-                this.dispatchEvent('drag', event);
-            } else {
+            if (!this.drag) {
                 this.drag = true;
-                this.dispatchEvent('dragstart', event);
+                this.dispatchEvent('dragstart', event); //yes, this goes twice - make sure to ignore the position values on dragstart as they will be found on drag todo rewrite this comment to clear english
             }
+            this.dispatchEvent('drag', event);
         });
         element.addEventListener('mouseleave', (event) => {
             this.mouseup(event);
