@@ -279,7 +279,7 @@ export function lerp(v0: number, v1: number, t: number) {
 
 mouse.addEventListener('click', (event) => {
     if (activeDocument !== null) {
-        let object = Shape.create(event.offsetX, event.offsetY, 50, 50, shape, color)
+        let object = Shape.create(event.offsetX, event.offsetY, 50, 50, shape.shape, color)
         activeDocument.canvas.insert(CanvasObjectType.SHAPE, object);
     }
 });
