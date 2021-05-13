@@ -27,6 +27,10 @@ export default class Color {
         this.blue = blue;
     }
 
+    copy() {
+        return Color.from(this);
+    }
+
     serialize(byteBuffer: ByteBuffer) {
         byteBuffer.writeUint8(this.red);
         byteBuffer.writeUint8(this.green);
@@ -43,5 +47,9 @@ export default class Color {
         let object: Color = Object.create(this.prototype);
         object.update(color);
         return object;
+    }
+
+    static deserialize(byteBuffer: ByteBuffer) {
+        return Color.create(byteBuffer.readUint8(), byteBuffer.readUint8(), byteBuffer.readUint8());
     }
 }

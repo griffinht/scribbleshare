@@ -5,20 +5,16 @@ import Color from "../../../Color.js";
 
 export default class Shape extends EntityCanvasObject {
     type: ShapeType;
-    red: number;
-    green: number;
-    blue: number;
+    color: Color;
 
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
         this.type = byteBuffer.readUint8();
-        this.red = byteBuffer.readUint8();
-        this.green = byteBuffer.readUint8();
-        this.blue = byteBuffer.readUint8();
+        this.color = Color.deserialize(byteBuffer);
     }
 
     draw() {
-        ctx.fillStyle = 'rgb(' + this.red + ',' + this.green + ',' + this.blue + ')';
+        ctx.fillStyle = this.color.getRgb();
         ctx.strokeStyle = ctx.fillStyle;
         switch (this.type) {
             case ShapeType.RECTANGLE:
@@ -44,9 +40,7 @@ export default class Shape extends EntityCanvasObject {
     serialize(byteBuffer: ByteBuffer) {
         super.serialize(byteBuffer);
         byteBuffer.writeUint8(this.type);
-        byteBuffer.writeUint8(this.red);
-        byteBuffer.writeUint8(this.green);
-        byteBuffer.writeUint8(this.blue);
+        this.color.serialize(byteBuffer)
     }
 
     static create(x: number, y: number, width: number, height: number, type: ShapeType, color: Color) {
