@@ -3,8 +3,8 @@ import ClientMessage from "../ClientMessage.js";
 import ByteBuffer from "../../ByteBuffer.js";
 
 export default class ClientMessageGetInvite extends ClientMessage {
-    constructor() {
-        super(ClientMessageType.GET_INVITE);
+    getType(): ClientMessageType {
+        return ClientMessageType.GET_INVITE;
     }
 
     serialize(byteBuffer: ByteBuffer) {

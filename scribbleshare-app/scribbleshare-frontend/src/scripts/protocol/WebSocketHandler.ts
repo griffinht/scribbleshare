@@ -12,14 +12,6 @@ class WebSocketHandler {
     socket: WebSocket;
 
     constructor() {
-        Object.keys(SocketEventType).forEach((key, value) => {
-            this.socketEventListeners.set(value, []);
-        });
-
-        Object.keys(ServerMessageType).forEach((key, value) => {
-            this.serverMessageListeners.set(value, []);
-        });
-
         console.log('Opening WebSocket connection to ' + Environment.WEBSOCKET_HOST);
         this.socket = new WebSocket(Environment.WEBSOCKET_HOST);
         this.socket.binaryType = 'arraybuffer';
@@ -51,22 +43,38 @@ class WebSocketHandler {
         });
     }
 
-    addEventListener(type: SocketEventType, onEvent: (event: Event) => void) {
-        this.socketEventListeners.get(type)!.push(onEvent);
+    addEventListener(type: SocketEventType, listener: (event: Event) => void) {
+        let array = this.socketEventListeners.get(type);
+        if (array === undefined) {
+            array = [];
+            this.socketEventListeners.set(type, array);
+        }
+        array.push(listener)
     }
     
     dispatchEvent(type: SocketEventType, event: Event) {//todo improve
         console.log('recv', type, event);
-        this.socketEventListeners.get(type)!.forEach(onEvent => onEvent(event));
+        let array = this.socketEventListeners.get(type);
+        if (array !== undefined) {
+            array.forEach(onEvent => onEvent(event));
+        }
     }
 
-    addMessageListener(type: ServerMessageType, onMessageEvent: (serverMessage: ServerMessage) => void) {
-        this.serverMessageListeners.get(type)!.push(onMessageEvent);
+    addMessageListener(type: ServerMessageType, listener: (serverMessage: ServerMessage) => void) {
+        let array = this.serverMessageListeners.get(type);
+        if (array === undefined) {
+            array = [];
+            this.serverMessageListeners.set(type, array);
+        }
+        array.push(listener);
     }
 
-    dispatchMessageEvent(serverMessage:  ServerMessage) {
-        console.log('recv', serverMessage.type, serverMessage);
-        this.serverMessageListeners.get(serverMessage.type)!.forEach(onServerMessage => onServerMessage(serverMessage));
+    dispatchMessageEvent(serverMessage: ServerMessage) {
+        console.log('recv', serverMessage.getType(), serverMessage);
+        let array = this.serverMessageListeners.get(serverMessage.getType());
+        if (array !== undefined) {
+            array.forEach(onServerMessage => onServerMessage(serverMessage));
+        }
     }
 
     queue(clientMessage: ClientMessage) {

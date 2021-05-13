@@ -7,8 +7,12 @@ export default class ClientMessageDeleteDocument extends ClientMessage {
     id: bigint;
 
     constructor(document: Document) {
-        super(ClientMessageType.DELETE_DOCUMENT);
+        super();
         this.id = document.id;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.DELETE_DOCUMENT;
     }
 
     serialize(byteBuffer: ByteBuffer) {

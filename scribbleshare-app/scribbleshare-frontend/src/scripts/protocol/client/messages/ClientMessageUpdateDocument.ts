@@ -8,9 +8,13 @@ export default class ClientMessageUpdateDocument extends ClientMessage {
     name: string;
 
     constructor(document: Document) {
-        super(ClientMessageType.UPDATE_DOCUMENT);
+        super();
         this.id = document.id;
         this.name = document.name;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.UPDATE_DOCUMENT;
     }
 
     serialize(byteBuffer: ByteBuffer) {

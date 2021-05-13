@@ -6,8 +6,12 @@ export default class ClientMessageHandshake extends ClientMessage {
     invite: string;
 
     constructor(invite: string) {
-        super(ClientMessageType.HANDSHAKE);
+        super();
         this.invite = invite;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.HANDSHAKE;
     }
 
     serialize(byteBuffer: ByteBuffer) {

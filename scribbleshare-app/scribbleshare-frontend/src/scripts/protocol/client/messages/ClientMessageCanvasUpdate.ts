@@ -6,8 +6,12 @@ import CanvasUpdates from "../../../canvas/canvasUpdate/CanvasUpdates";
 export default class ClientMessageCanvasUpdate extends ClientMessage {
     canvasUpdatesArray: CanvasUpdates[];
     constructor(canvasUpdatesArray: CanvasUpdates[]) {
-        super(ClientMessageType.CANVAS_UPDATE);
+        super();
         this.canvasUpdatesArray = canvasUpdatesArray;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.CANVAS_UPDATE;
     }
     
     serialize(byteBuffer: ByteBuffer) {

@@ -6,7 +6,11 @@ export default class ServerMessageRemoveClient extends ServerMessage {
     id: number;
 
     constructor(byteBuffer: ByteBuffer) {
-        super(ServerMessageType.REMOVE_CLIENT);
+        super();
         this.id = byteBuffer.readInt16();
+    }
+
+    getType(): ServerMessageType {
+        return ServerMessageType.REMOVE_CLIENT;
     }
 }

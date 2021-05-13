@@ -8,7 +8,7 @@ export default class ServerMessageMouseMove extends ServerMessage {
     mouseMoves: Array<MouseMove>;
 
     constructor(byteBuffer: ByteBuffer) {
-        super(ServerMessageType.MOUSE_MOVE);
+        super();
         this.client = byteBuffer.readInt16();
         this.mouseMoves = [];
         let length = byteBuffer.readUint8();
@@ -17,4 +17,7 @@ export default class ServerMessageMouseMove extends ServerMessage {
         }
     }
 
+    getType(): ServerMessageType {
+        return ServerMessageType.MOUSE_MOVE;
+    }
 }

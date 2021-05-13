@@ -7,8 +7,12 @@ export default class ClientMessageMouseMove extends ClientMessage {
     mouseMoves: Array<MouseMove>;
 
     constructor(mouseMoves: Array<MouseMove>) {
-        super(ClientMessageType.MOUSE_MOVE);
+        super();
         this.mouseMoves = mouseMoves;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.MOUSE_MOVE;
     }
 
     serialize(byteBuffer: ByteBuffer) {

@@ -1,14 +1,10 @@
 import ClientMessageType from "./ClientMessageType.js";
 import ByteBuffer from "../ByteBuffer.js";
 
-export default class ClientMessage {
-    type:ClientMessageType;
-
-    constructor(type: ClientMessageType) {
-        this.type = type;
-    }
+export default abstract class ClientMessage {
+    abstract getType(): ClientMessageType;
 
     serialize(byteBuffer: ByteBuffer) {
-        byteBuffer.writeUint8(this.type);
+        byteBuffer.writeUint8(this.getType());
     }
 }

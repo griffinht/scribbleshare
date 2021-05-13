@@ -1,6 +1,7 @@
 import CanvasUpdate from "./CanvasUpdate.js";
 import CanvasObjectWrapper from "../canvasObject/CanvasObjectWrapper.js";
 import ByteBuffer from "../../protocol/ByteBuffer.js";
+import {getCanvasUpdate} from "./CanvasUpdateType.js";
 
 export default class CanvasUpdates {
     canvasObjectWrapper: CanvasObjectWrapper;
@@ -10,7 +11,7 @@ export default class CanvasUpdates {
         this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuf);
         let length = byteBuf.readUint8();
         for (let i = 0; i < length; i++) {
-            this.canvasUpdates[i] = CanvasUpdate.deserialize(byteBuf.readUint8(), byteBuf);
+            this.canvasUpdates[i] = getCanvasUpdate(byteBuf.readUint8(), byteBuf);
         }
     }
 

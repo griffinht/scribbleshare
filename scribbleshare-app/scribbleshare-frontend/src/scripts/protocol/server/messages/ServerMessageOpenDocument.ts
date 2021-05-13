@@ -8,8 +8,12 @@ export default class ServerMessageOpenDocument extends ServerMessage {
     canvas: Canvas;
 
     constructor(byteBuffer: ByteBuffer) {
-        super(ServerMessageType.OPEN_DOCUMENT);
+        super();
         this.id = byteBuffer.readBigInt64();
         this.canvas = new Canvas(byteBuffer);
+    }
+
+    getType(): ServerMessageType {
+        return ServerMessageType.OPEN_DOCUMENT;
     }
 }

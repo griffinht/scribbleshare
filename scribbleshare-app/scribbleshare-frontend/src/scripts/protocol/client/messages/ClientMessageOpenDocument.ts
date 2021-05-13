@@ -7,8 +7,12 @@ export default class ClientMessageOpenDocument extends ClientMessage {
     id: bigint;
 
     constructor(document: Document) {
-        super(ClientMessageType.OPEN_DOCUMENT);
+        super();
         this.id = document.id;
+    }
+
+    getType(): ClientMessageType {
+        return ClientMessageType.OPEN_DOCUMENT;
     }
 
     serialize(byteBuffer: ByteBuffer) {
