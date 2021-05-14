@@ -1,7 +1,6 @@
 package net.stzups.scribbleshare.data.objects.session;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,14 +43,19 @@ public class Session {
         this.id = id;
         this.user = byteBuf.readLong();
         this.creation = Timestamp.from(Instant.ofEpochMilli(byteBuf.readLong()));
-        hashedToken = new byte[32];
+        hashedToken = new byte[32];//todo
         byteBuf.readBytes(hashedToken);
     }
 
+    protected int getTokenLength() {
+        return 16;//todo
+    }
+
     /** should be called once after instance creation */
-    long generateToken() {
-        long token = secureRandom.nextLong();
-        hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
+    byte[] generateToken() {
+        byte[] token = new byte[getTokenLength()];
+        secureRandom.nextBytes(token);
+        hashedToken = messageDigest.digest(token);
         return token;
     }
 
@@ -71,9 +75,8 @@ public class Session {
         return hashedToken;
     }
 
-    public boolean validate(long token) {
-        byte[] hashedToken = messageDigest.digest(Unpooled.copyLong(token).array());
-        return Arrays.equals(hashedToken, this.hashedToken);
+    public boolean validate(byte[] token) {
+        return Arrays.equals(messageDigest.digest(token), this.hashedToken);
     }
 
     public void serialize(ByteBuf byteBuf) {

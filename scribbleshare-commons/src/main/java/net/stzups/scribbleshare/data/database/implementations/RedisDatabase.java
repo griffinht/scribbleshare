@@ -30,7 +30,7 @@ public class RedisDatabase implements AutoCloseable, SessionDatabase {
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-        ByteBuf byteBuf = Unpooled.buffer(56, 56);
+        ByteBuf byteBuf = Unpooled.buffer();
         httpSession.serialize(byteBuf);
         jedis.set(Unpooled.copyLong(httpSession.getId()).array(), byteBuf.array());
     }

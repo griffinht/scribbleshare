@@ -11,7 +11,6 @@ import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
-import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
@@ -21,18 +20,19 @@ import java.util.Set;
 public class HttpSession extends Session {
     public static class ClientCookie {
         private final long id;
-        private final long token;
+        private final byte[] token;
 
-        ClientCookie(long id, long token) {
-            this.id = id;
-            this.token = token;
+        ClientCookie(ByteBuf byteBuf) {
+            id = byteBuf.readLong();
+            token = new byte[16];//todo
+            byteBuf.readBytes(token);
         }
 
         public long getId() {
             return id;
         }
 
-        public long getToken() {
+        public byte[] getToken() {
             return token;
         }
 
@@ -45,7 +45,7 @@ public class HttpSession extends Session {
                         ByteBuf b = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
                         ByteBuf byteBuf = Base64.decode(b);
                         b.release();
-                        ClientCookie c = new ClientCookie(byteBuf.readLong(), byteBuf.readLong());
+                        ClientCookie c = new ClientCookie(byteBuf);
                         byteBuf.release();
                         return c;
                     }
@@ -77,7 +77,7 @@ public class HttpSession extends Session {
     protected DefaultCookie getCookie(String name) {
         ByteBuf byteBuf = Unpooled.buffer();
         byteBuf.writeLong(getId());
-        byteBuf.writeLong(super.generateToken());
+        byteBuf.writeBytes(super.generateToken());
         return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
     }
 

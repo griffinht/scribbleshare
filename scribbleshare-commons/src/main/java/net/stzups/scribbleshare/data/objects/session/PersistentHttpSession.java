@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
-import net.stzups.scribbleshare.Scribbleshare;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -41,7 +40,7 @@ public class PersistentHttpSession extends HttpSession {
     }
 
     @Override
-    public boolean validate(long token) {
+    public boolean validate(byte[] token) {
         if (Instant.now().isAfter(getCreation().toInstant().plus(MAX_SESSION_AGE))) {
             return false;
         }

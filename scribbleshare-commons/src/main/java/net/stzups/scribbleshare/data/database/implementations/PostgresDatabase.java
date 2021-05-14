@@ -8,10 +8,10 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
-import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+import net.stzups.scribbleshare.data.objects.session.HttpSession;
+import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import org.postgresql.util.PSQLException;
 
 import java.io.ByteArrayInputStream;
@@ -253,7 +253,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     @Override
     public void addHttpSession(HttpSession httpSession) {
-        ByteBuf byteBuf = Unpooled.buffer(56, 56);
+        ByteBuf byteBuf = Unpooled.buffer();
         httpSession.serialize(byteBuf);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO key_value(key, value) VALUES (?, ?)")) {
             preparedStatement.setLong(1, httpSession.getId());
