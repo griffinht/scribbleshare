@@ -17,5 +17,6 @@ export default abstract class CanvasUpdate {
 
     serialize(byteBuffer: ByteBuffer) {
         byteBuffer.writeUint8(this.getType());
+        byteBuffer.writeUint8(this.dt);
     }
 }

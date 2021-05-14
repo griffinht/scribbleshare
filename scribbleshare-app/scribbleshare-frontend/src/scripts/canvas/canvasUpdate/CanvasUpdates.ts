@@ -1,30 +1,38 @@
 import CanvasUpdate from "./CanvasUpdate.js";
-import CanvasObjectWrapper from "../canvasObject/CanvasObjectWrapper.js";
 import ByteBuffer from "../../protocol/ByteBuffer.js";
-import {getCanvasUpdate} from "./CanvasUpdateType.js";
+import CanvasUpdateType, {getCanvasUpdate} from "./CanvasUpdateType.js";
 
 export default class CanvasUpdates {
-    canvasObjectWrapper: CanvasObjectWrapper;
-    canvasUpdates: CanvasUpdate[] = [];
+    id: number;
+    canvasUpdates: CanvasUpdate[][] = [];
 
-    constructor(byteBuf: ByteBuffer) {
-        this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuf);
-        let length = byteBuf.readUint8();
+    constructor(byteBuffer: ByteBuffer) {
+        this.id = byteBuffer.readInt16();
+        let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
-            this.canvasUpdates[i] = getCanvasUpdate(byteBuf.readUint8(), byteBuf);
+            let type: CanvasUpdateType = byteBuffer.readUint8();//todo error checking?
+            let array = [];
+            let lengthK = byteBuffer.readUint8();
+            for (let k = 0; k < lengthK; k++) {
+                array.push(getCanvasUpdate(type, byteBuffer));
+            }
         }
     }
 
     serialize(byteBuffer: ByteBuffer) {
-        this.canvasObjectWrapper.serialize(byteBuffer);
-        this.canvasUpdates.forEach((canvasUpdate) => {
-            canvasUpdate.serialize(byteBuffer);
+        byteBuffer.writeInt16(this.id);
+        byteBuffer.writeUint8(this.canvasUpdates.length);
+        this.canvasUpdates.forEach((canvasUpdates) => {
+            byteBuffer.writeUint8(canvasUpdates[0].getType());
+            canvasUpdates.forEach((canvasUpdate) => {
+                canvasUpdate.serialize(byteBuffer);
+            });
         });
     }
 
-    static create(canvasObjectWrapper: CanvasObjectWrapper) {
+    static create(id: number) {
         let object: CanvasUpdates = Object.create(this.prototype);
-        object.canvasObjectWrapper = canvasObjectWrapper;
+        object.id = id;
         object.canvasUpdates = [];
         return object;
     }
