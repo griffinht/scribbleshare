@@ -6,29 +6,23 @@ import CanvasUpdateInsert from "./canvasUpdates/CanvasUpdateInsert.js";
 
 export default class CanvasUpdates {
     id: number;
-    canvasUpdates: CanvasUpdate[][] = [];
+    canvasUpdates: CanvasUpdate[] = [];
 
     constructor(byteBuffer: ByteBuffer) {
         this.id = byteBuffer.readInt16();
         let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
             let type: CanvasUpdateType = byteBuffer.readUint8();//todo error checking?
-            let array = [];
-            let lengthK = byteBuffer.readUint8();
-            for (let k = 0; k < lengthK; k++) {
-                array.push(getCanvasUpdate(type, byteBuffer));
-            }
+            this.canvasUpdates.push(getCanvasUpdate(type, byteBuffer));
         }
     }
 
     serialize(byteBuffer: ByteBuffer) {
         byteBuffer.writeInt16(this.id);
         byteBuffer.writeUint8(this.canvasUpdates.length);
-        this.canvasUpdates.forEach((canvasUpdates) => {
-            byteBuffer.writeUint8(canvasUpdates[0].getCanvasUpdateType());
-            canvasUpdates.forEach((canvasUpdate) => {
-                canvasUpdate.serialize(byteBuffer);
-            });
+        this.canvasUpdates.forEach((canvasUpdate) => {
+            byteBuffer.writeUint8(canvasUpdate.getCanvasUpdateType());
+            canvasUpdate.serialize(byteBuffer);
         });
     }
 
@@ -36,7 +30,7 @@ export default class CanvasUpdates {
         let object: CanvasUpdates = Object.create(this.prototype);
         object.id = id;
         object.canvasUpdates = [];
-        object.canvasUpdates.push([CanvasUpdateInsert.create(dt, canvasObject)]);
+        object.canvasUpdates.push(CanvasUpdateInsert.create(dt, canvasObject));
         return object;
     }
 }

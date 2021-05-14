@@ -20,7 +20,7 @@ public abstract class CanvasUpdate {
     public abstract void update(Canvas canvas, short id) throws CanvasUpdateException;
 
     public void serialize(ByteBuf byteBuf) {
-        byteBuf.writeByte((byte) getCanvasUpdateType().getId());
+        getCanvasUpdateType().serialize(byteBuf);
         byteBuf.writeByte(dt);
     }
 
@@ -37,7 +37,7 @@ public abstract class CanvasUpdate {
                 canvasUpdate = new CanvasUpdateDelete(byteBuf);
                 break;
             default:
-                throw new DeserializationTypeException(CanvasUpdateType.class, type.getId());
+                throw new DeserializationTypeException(CanvasUpdateType.class, type);
         }
         return canvasUpdate;
     }
