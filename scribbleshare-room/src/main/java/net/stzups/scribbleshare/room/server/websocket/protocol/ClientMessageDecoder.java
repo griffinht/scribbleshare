@@ -13,6 +13,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessageType;
 
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Decodes a WebSocketFrame sent by the client to a ClientPacket
@@ -21,7 +22,7 @@ import java.util.List;
 public class ClientMessageDecoder extends MessageToMessageDecoder<WebSocketFrame> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Scribbleshare.getLogger(ctx).warning("Decoding WebSocketFrame to ClientMessage caused " + cause.getMessage());
+        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while decoding WebSocketFrame to ClientMessage", cause);
     }
 
     @Override
