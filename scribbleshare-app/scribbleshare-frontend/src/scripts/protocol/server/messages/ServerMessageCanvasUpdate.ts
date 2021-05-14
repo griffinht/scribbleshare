@@ -1,18 +1,17 @@
 import ServerMessage from "../ServerMessage.js";
 import ServerMessageType from "../ServerMessageType.js";
 import ByteBuffer from "../../ByteBuffer.js";
-import CanvasUpdate from "../../../canvas/canvasUpdate/CanvasUpdate.js";
-import {getCanvasUpdate} from "../../../canvas/canvasUpdate/CanvasUpdateType.js";
+import CanvasUpdates from "../../../canvas/canvasUpdate/CanvasUpdates.js";
 
 export default class ServerMessageCanvasUpdate extends ServerMessage {
-    canvasUpdates: Array<CanvasUpdate>;
+    canvasUpdates: Array<CanvasUpdates>;
 
     constructor(byteBuffer: ByteBuffer) {
         super();
         this.canvasUpdates = [];
         let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
-            this.canvasUpdates.push(getCanvasUpdate(byteBuffer.readUint8(), byteBuffer));
+            this.canvasUpdates.push(new CanvasUpdates(byteBuffer));
         }
     }
 
