@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
@@ -50,6 +51,11 @@ public class Shape extends EntityCanvasObject {
         this.red = byteBuf.readByte();
         this.green = byteBuf.readByte();
         this.blue = byteBuf.readByte();
+    }
+
+    @Override
+    public CanvasObjectType getCanvasObjectType() {
+        return CanvasObjectType.SHAPE;
     }
 
     public void serialize(ByteBuf byteBuf) {

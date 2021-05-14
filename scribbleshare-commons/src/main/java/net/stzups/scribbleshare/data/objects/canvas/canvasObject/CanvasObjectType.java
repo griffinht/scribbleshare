@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
@@ -27,11 +28,12 @@ public enum CanvasObjectType {
         this.id = id;
     }
 
-    public int getId() {
-        return id;
+    public void serialize(ByteBuf byteBuf) {
+        byteBuf.writeByte((byte) id);
     }
 
-    public static CanvasObjectType deserialize(int id) throws DeserializationException {
+    public static CanvasObjectType deserialize(ByteBuf byteBuf) throws DeserializationException {
+        int id = byteBuf.readUnsignedByte();
         CanvasObjectType objectType = objectTypeMap.get(id);
         if (objectType == null) {
             throw new DeserializationTypeException(CanvasObjectType.class, id);

@@ -7,7 +7,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.L
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Shape;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 
-public class CanvasObject {
+public class CanvasObject {//todo make abstract?
     private short x;
     private short y;
 
@@ -16,12 +16,8 @@ public class CanvasObject {
         y = byteBuf.readShort();
     }
 
-    public short getX() {
-        return x;
-    }
-
-    public short getY() {
-        return y;
+    public CanvasObjectType getCanvasObjectType() {//this needs to be overridden
+        throw new UnsupportedOperationException("Tried to get type of base CanvasObject");
     }
 
     public void update(CanvasObject canvasObject) {
@@ -34,9 +30,9 @@ public class CanvasObject {
         byteBuf.writeShort(y);
     }
 
-    public static CanvasObject deserialize(CanvasObjectType canvasObjectType, ByteBuf byteBuf) throws DeserializationException {
+    public static CanvasObject deserialize(CanvasObjectType type, ByteBuf byteBuf) throws DeserializationException {
         CanvasObject canvasObject;
-        switch (canvasObjectType) {
+        switch (type) {
             case SHAPE:
                 canvasObject = new Shape(byteBuf);
                 break;

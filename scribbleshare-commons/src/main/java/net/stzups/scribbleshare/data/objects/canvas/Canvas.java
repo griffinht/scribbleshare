@@ -25,7 +25,7 @@ public class Canvas {
         return EMPTY_CANVAS;
     }
 
-    private final Map<Short, CanvasObjectWrapper> canvasObjects = new HashMap<>();
+    private final Map<Short, CanvasObject> canvasObjects = new HashMap<>();
     private boolean dirty = false;
 
     public Canvas() {
@@ -38,16 +38,16 @@ public class Canvas {
     public Canvas(ByteBuf byteBuf) throws DeserializationException {
         int length = byteBuf.readUnsignedByte();
         for (int i = 0; i < length; i++) {
-            CanvasObjectType canvasObjectType = CanvasObjectType.deserialize(byteBuf.readUnsignedByte());
+            CanvasObjectType type = CanvasObjectType.deserialize(byteBuf);
             int l = byteBuf.readUnsignedShort();
-            if (l == 0) throw new DeserializationLengthException(canvasObjectType, 0);
+            if (l == 0) throw new DeserializationLengthException(type, 0);
             for (int j = 0; j < l; j++) {
-                canvasObjects.put(byteBuf.readShort(), new CanvasObjectWrapper(canvasObjectType, CanvasObject.deserialize(canvasObjectType, byteBuf)));
+                canvasObjects.put(byteBuf.readShort(), CanvasObject.deserialize(type, byteBuf));
             }
         }
     }
 
-    public Map<Short, CanvasObjectWrapper> getCanvasObjects() {
+    public Map<Short, CanvasObject> getCanvasObjects() {
         return canvasObjects;
     }
 
@@ -67,14 +67,14 @@ public class Canvas {
     public void serialize(ByteBuf byteBuf) {
         Map<CanvasObjectType, Map<Short, CanvasObject>> canvasObjects = new HashMap<>();
 
-        for (Map.Entry<Short, CanvasObjectWrapper> entry : this.canvasObjects.entrySet()) {
-            Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getValue().getType(), (c -> new HashMap<>()));
-            map.put(entry.getKey(), entry.getValue().getCanvasObject());
+        for (Map.Entry<Short, CanvasObject> entry : this.canvasObjects.entrySet()) {
+            Map<Short, CanvasObject> map = canvasObjects.computeIfAbsent(entry.getValue().getCanvasObjectType(), (c -> new HashMap<>()));
+            map.put(entry.getKey(), entry.getValue());
         }
 
         byteBuf.writeByte((byte) canvasObjects.size());
         for (Map.Entry<CanvasObjectType, Map<Short, CanvasObject>> entry : canvasObjects.entrySet()) {
-            byteBuf.writeByte((byte) entry.getKey().getId());
+            entry.getKey().serialize(byteBuf);
             byteBuf.writeShort((short) entry.getValue().size());
             for (Map.Entry<Short, CanvasObject> entry1 : entry.getValue().entrySet()) {
                 byteBuf.writeShort(entry1.getKey());

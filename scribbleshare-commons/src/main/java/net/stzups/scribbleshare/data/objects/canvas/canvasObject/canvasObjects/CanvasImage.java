@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 
 public class CanvasImage extends EntityCanvasObject {
@@ -9,6 +10,11 @@ public class CanvasImage extends EntityCanvasObject {
     public CanvasImage(ByteBuf byteBuf) {
         super(byteBuf);
         this.id = byteBuf.readLong();
+    }
+
+    @Override
+    public CanvasObjectType getCanvasObjectType() {
+        return CanvasObjectType.IMAGE;
     }
 
     @Override

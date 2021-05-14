@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
+import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,9 @@ public class Line extends CanvasObject {
         }
     }
 
-    public List<Point> getPoints() {
-        return points;
+    @Override
+    public CanvasObjectType getCanvasObjectType() {
+        return CanvasObjectType.LINE;
     }
 
     @Override
