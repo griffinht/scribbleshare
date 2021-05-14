@@ -1,19 +1,20 @@
 import {activeDocument, localClientId} from "../Document.js";
 import socket from "../protocol/WebSocketHandler.js";
-import CanvasObjectWrapper from "./canvasObject/CanvasObjectWrapper.js";
 import ServerMessageType from "../protocol/server/ServerMessageType.js";
 import EntityCanvasObject from "./canvasObject/EntityCanvasObject.js";
 import ByteBuffer from "../protocol/ByteBuffer.js";
 import CanvasUpdate from "./canvasUpdate/CanvasUpdate.js";
-import CanvasObject from "./canvasObject/CanvasObject.js";
 import ServerMessageCanvasUpdate from "../protocol/server/messages/ServerMessageCanvasUpdate.js";
 import ServerMessage from "../protocol/server/ServerMessage.js";
-import CanvasObjectType, {getCanvasObject} from "./canvasObject/CanvasObjectType.js";
+import {getCanvasObject} from "./canvasObject/CanvasObjectType.js";
 import Mouse from "../Mouse.js";
 import Shape from "./canvasObject/canvasObjects/Shape.js";
 import color from "../ColorSelector.js";
 import shape from "../ShapeSelector.js";
 import tool, {Tool} from "../ToolSelector.js";
+import CanvasUpdates from "./canvasUpdate/CanvasUpdates.js";
+import ClientMessageCanvasUpdate from "../protocol/client/messages/ClientMessageCanvasUpdate.js";
+import CanvasObject from "./canvasObject/CanvasObject.js";
 
 export const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
@@ -22,27 +23,29 @@ const mouse = new Mouse(canvas);
 
 const SELECT_PADDING = 10;
 
+let canvasUpdatesMap: Map<number, CanvasUpdates> = new Map();
+
 class Selected {
     id: number = 0;
-    canvasObjectWrapper: CanvasObjectWrapper | null = null;
+    canvasObject: CanvasObject | null = null;
 
-    update(id: number, canvasObjectWrapper: CanvasObjectWrapper) {
+    update(id: number, canvasObject: CanvasObject) {
         this.id = id;
-        this.canvasObjectWrapper = canvasObjectWrapper;
+        this.canvasObject = canvasObject;
     }
 
-    get(): CanvasObjectWrapper {
-        if (this.canvasObjectWrapper === null) throw new Error('tried to get when there is nothing to get');
-        return this.canvasObjectWrapper;
+    get(): CanvasObject {
+        if (this.canvasObject === null) throw new Error('tried to get when there is nothing to get');
+        return this.canvasObject;
     }
 
     has(): boolean {
-        return this.canvasObjectWrapper !== null;
+        return this.canvasObject !== null;
     }
 
     clear() {
         this.id = 0;
-        this.canvasObjectWrapper = null;
+        this.canvasObject = null;
     }
 }
 
@@ -51,13 +54,13 @@ let selected = new Selected();
 export class Canvas {
     isOpen: boolean;
     last: number;
-    canvasObjectWrappers: Map<number, CanvasObjectWrapper>;
+    canvasObjects: Map<number, CanvasObject>;
     canvasUpdates: Array<CanvasUpdate>;
 
     constructor(byteBuffer?: ByteBuffer) {
         this.isOpen = false;
         this.last = 0;
-        this.canvasObjectWrappers = new Map();
+        this.canvasObjects = new Map();
         this.canvasUpdates = [];
         if (byteBuffer != null) {
             let length = byteBuffer.readUint8();
@@ -65,7 +68,7 @@ export class Canvas {
                 let type = byteBuffer.readUint8();
                 let lengthJ = byteBuffer.readUint16();
                 for (let j = 0; j < lengthJ; j++) {
-                    this.canvasObjectWrappers.set(byteBuffer.readInt16(), new CanvasObjectWrapper(type, getCanvasObject(type, byteBuffer)));
+                    this.canvasObjects.set(byteBuffer.readInt16(), getCanvasObject(type, byteBuffer));
                 }
             }
         }
@@ -111,23 +114,23 @@ export class Canvas {
             }
         }
 
-        this.canvasObjectWrappers.forEach((canvasObjectWrapper, id) => {
+        this.canvasObjects.forEach((canvasObject, id) => {
             if (id !== localClientId) {
-                if (canvasObjectWrapper.canvasObject instanceof EntityCanvasObject) {
+                if (canvasObject instanceof EntityCanvasObject) {
                     ctx.save();
-                    ctx.translate(canvasObjectWrapper.canvasObject.x, canvasObjectWrapper.canvasObject.y);
-                    //ctx.rotate((canvasObjectWrapper.canvasObject.rotation / 255) * (2 * Math.PI));
-                    canvasObjectWrapper.canvasObject.draw();
+                    ctx.translate(canvasObject.x, canvasObject.y);
+                    //ctx.rotate((canvasObject.canvasObject.rotation / 255) * (2 * Math.PI));
+                    canvasObject.draw();
                     if (!selected.has()) {
-                        if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
-                            selected.update(id, canvasObjectWrapper);
+                        if (aabb(canvasObject, mouse, SELECT_PADDING)) {
+                            selected.update(id, canvasObject);
                         }
                     }
-/*                    if (this.selected.g.canvasObjectWrapper === null) {
+/*                    if (this.selected.g.canvasObject === null) {
                         if (!mouse.drag) {
-                            if (aabb(canvasObjectWrapper.canvasObject, mouse, SELECT_PADDING)) {
+                            if (aabb(canvasObject.canvasObject, mouse, SELECT_PADDING)) {
                                 this.selected.id = id;
-                                this.selected.canvasObjectWrapper = canvasObjectWrapper;
+                                this.selected.canvasObject = canvasObject;
                             }
                         }
                     } else {
@@ -135,18 +138,18 @@ export class Canvas {
                     }*/
                     if (selected.has()
                         && id === selected.id) {
-                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObjectWrapper.canvasObject.width + SELECT_PADDING, canvasObjectWrapper.canvasObject.height + SELECT_PADDING);
+                        ctx.strokeRect(0 - SELECT_PADDING / 2, 0 - SELECT_PADDING / 2, canvasObject.width + SELECT_PADDING, canvasObject.height + SELECT_PADDING);
                     }
                     ctx.restore();
                 } else {
-                    canvasObjectWrapper.canvasObject.draw();
+                    canvasObject.draw();
                 }
             }
         });
         //clear selection if the mouse is gone
         if (selected.has()
-            && selected.get().canvasObject instanceof EntityCanvasObject
-            && !aabb(selected.get().canvasObject as EntityCanvasObject, mouse, SELECT_PADDING)) {
+            && selected.get() instanceof EntityCanvasObject
+            && !aabb(selected.get() as EntityCanvasObject, mouse, SELECT_PADDING)) {
             selected.clear();
         }
 
@@ -154,19 +157,19 @@ export class Canvas {
         window.requestAnimationFrame((now) => this.draw(now));
     }
 
-    insert(type: CanvasObjectType, canvasObject: CanvasObject) {
+    insert(canvasObject: CanvasObject): number {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
-        let canvasObjectWrapper = new CanvasObjectWrapper(type, canvasObject);
         // @ts-ignore todo
-        activeDocument.canvas.canvasObjectWrappers.set(id, canvasObjectWrapper);
+        activeDocument.canvas.canvasObjectWrappers.set(id, canvasObject);
         //canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
+        return id;
     }
 
     delete(id: number) {
         if (selected.has() && selected.id === id) {
             selected.clear();
         }
-        this.canvasObjectWrappers.delete(id);
+        this.canvasObjects.delete(id);
         //canvasUpdates.push(CanvasUpdateDelete.create(getNow(), id));
     }
 
@@ -259,6 +262,13 @@ function update() {
         /*if (canvasUpdates.length > 0) {
             socket.queue(new ClientMessageCanvasUpdate(canvasUpdates));
         }*/
+        if (canvasUpdatesMap.size > 0) {
+            let canvasUpdatesArray: Array<CanvasUpdates> = [];
+            canvasUpdatesMap.forEach((canvasUpdates, id) => {
+                canvasUpdatesArray.push(canvasUpdates);
+            });
+            socket.queue(new ClientMessageCanvasUpdate(canvasUpdatesArray));
+        }
         socket.flush();
         lastUpdate = window.performance.now();
 
@@ -278,8 +288,11 @@ export function lerp(v0: number, v1: number, t: number) {
 
 mouse.addEventListener('click', (event) => {
     if (activeDocument !== null) {
-        let object = Shape.create(event.offsetX, event.offsetY, 50, 50, shape.shape, color.copy())
-        activeDocument.canvas.insert(CanvasObjectType.SHAPE, object);
+        let canvasObject = Shape.create(event.offsetX, event.offsetY, 50, 50, shape.shape, color.copy())
+        let id = activeDocument.canvas.insert(canvasObject);
+        let canvasUpdates = CanvasUpdates.create(id);
+        //todo canvasUpdates.
+        //canvasUpdates.set(id, canvasUpdates);
     }
 });
 
@@ -291,7 +304,7 @@ mouse.addEventListener('contextmenu', (event) => {
 
 mouse.addEventListener('drag', (event) => {
     if (activeDocument !== null && selected.has()) {
-        let canvasObject = selected.get().canvasObject;
+        let canvasObject = selected.get();
         switch (tool) {
             case Tool.SELECT: {
                 if (canvasObject instanceof EntityCanvasObject && !aabb(canvasObject, mouse, 0)) {

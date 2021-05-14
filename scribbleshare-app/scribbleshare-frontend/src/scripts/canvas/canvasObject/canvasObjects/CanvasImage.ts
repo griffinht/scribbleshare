@@ -3,6 +3,7 @@ import {activeDocument} from "../../../Document.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
 import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import Environment from "../../../Environment.js";
+import CanvasObjectType from "../CanvasObjectType.js";
 
 export default class CanvasImage extends EntityCanvasObject {
     id: bigint;
@@ -14,6 +15,10 @@ export default class CanvasImage extends EntityCanvasObject {
         this.image = document.createElement('img');
         // @ts-ignore todo
         this.image.src = Environment.API_HOST + '/document/' + activeDocument.id + '/' + this.id;
+    }
+
+    getCanvasObjectType() {
+        return CanvasObjectType.IMAGE;
     }
 
     draw() {

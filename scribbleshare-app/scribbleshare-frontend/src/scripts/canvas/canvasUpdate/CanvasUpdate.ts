@@ -13,10 +13,10 @@ export default abstract class CanvasUpdate {
         return true;
     }
 
-    abstract getType(): CanvasUpdateType;
+    abstract getCanvasUpdateType(): CanvasUpdateType;
 
     serialize(byteBuffer: ByteBuffer) {
-        byteBuffer.writeUint8(this.getType());
+        byteBuffer.writeUint8(this.getCanvasUpdateType());
         byteBuffer.writeUint8(this.dt);
     }
 }

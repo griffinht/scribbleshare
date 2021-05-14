@@ -23,7 +23,7 @@ export default class CanvasUpdates {
         byteBuffer.writeInt16(this.id);
         byteBuffer.writeUint8(this.canvasUpdates.length);
         this.canvasUpdates.forEach((canvasUpdates) => {
-            byteBuffer.writeUint8(canvasUpdates[0].getType());
+            byteBuffer.writeUint8(canvasUpdates[0].getCanvasUpdateType());
             canvasUpdates.forEach((canvasUpdate) => {
                 canvasUpdate.serialize(byteBuffer);
             });

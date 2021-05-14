@@ -1,18 +1,19 @@
 import CanvasUpdate from "../CanvasUpdate.js";
-import CanvasObjectWrapper from "../../canvasObject/CanvasObjectWrapper.js";
 import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import {Canvas} from "../../Canvas.js";
 import CanvasUpdateType from "../CanvasUpdateType.js";
+import CanvasObject from "../../canvasObject/CanvasObject.js";
+import {getCanvasObject} from "../../canvasObject/CanvasObjectType.js";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
-    canvasObjectWrapper: CanvasObjectWrapper;
+    canvasObject: CanvasObject;
 
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
-        this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuffer);
+        this.canvasObject = getCanvasObject(byteBuffer.readUint8(), byteBuffer);
     }
 
-    getType(): CanvasUpdateType {
+    getCanvasUpdateType(): CanvasUpdateType {
         return CanvasUpdateType.INSERT;
     }
 
@@ -27,13 +28,14 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
 
     serialize(byteBuffer: ByteBuffer) {
         super.serialize(byteBuffer);
-        this.canvasObjectWrapper.serialize(byteBuffer);
+        byteBuffer.writeUint8(this.canvasObject.getCanvasObjectType());
+        this.canvasObject.serialize(byteBuffer);
     }
 
-    static create(dt: number, id: number, canvasObjectWrapper: CanvasObjectWrapper) {
+    static create(dt: number, id: number, canvasObject: CanvasObject) {
         let object: CanvasUpdateInsert = Object.create(this.prototype);//todo this on everything is
         object.dt = dt;
-        object.canvasObjectWrapper = canvasObjectWrapper;
+        object.canvasObject = canvasObject;
         return object;
     }
 }

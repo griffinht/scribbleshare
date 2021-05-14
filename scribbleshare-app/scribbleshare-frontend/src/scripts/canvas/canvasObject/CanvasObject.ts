@@ -12,6 +12,10 @@ export default class CanvasObject {
         this.original = null;
     }
 
+    getCanvasObjectType(): number {
+        throw new Error("cant get object type of plain base CanvasObject");
+    }
+
     lerp(target: CanvasObject, t: number) {
         // @ts-ignore todo
         this.x = lerp(this.original.x, target.x, t);

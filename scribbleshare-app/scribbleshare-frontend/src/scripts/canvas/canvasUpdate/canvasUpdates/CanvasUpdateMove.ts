@@ -12,7 +12,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         this.canvasObject = new CanvasObject(byteBuffer);
     }
 
-    getType(): CanvasUpdateType {
+    getCanvasUpdateType(): CanvasUpdateType {
         return CanvasUpdateType.MOVE
     }
 /*

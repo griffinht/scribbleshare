@@ -8,7 +8,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         super(byteBuffer);
     }
 
-    getType(): CanvasUpdateType {
+    getCanvasUpdateType(): CanvasUpdateType {
         return CanvasUpdateType.DELETE;
     }
 
@@ -25,7 +25,7 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
         super.serialize(byteBuffer);
     }
 
-    static create(time: number, id: number) {
+    static create(time: number) {
         let object: CanvasUpdateDelete = Object.create(this.prototype);
         object.dt = time;
         return object;

@@ -2,6 +2,7 @@ import {ctx} from "../../Canvas.js";
 import EntityCanvasObject from "../EntityCanvasObject.js";
 import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import Color from "../../../Color.js";
+import CanvasObjectType from "../CanvasObjectType.js";
 
 export default class Shape extends EntityCanvasObject {
     type: ShapeType;
@@ -11,6 +12,10 @@ export default class Shape extends EntityCanvasObject {
         super(byteBuffer);
         this.type = byteBuffer.readUint8();
         this.color = Color.deserialize(byteBuffer);
+    }
+
+    getCanvasObjectType() {
+        return CanvasObjectType.SHAPE;
     }
 
     draw() {
@@ -44,7 +49,7 @@ export default class Shape extends EntityCanvasObject {
     }
 
     static create(x: number, y: number, width: number, height: number, type: ShapeType, color: Color) {
-        let object = Object.create(this.prototype);
+        let object: Shape = Object.create(this.prototype);
         object.x = x;
         object.y = y;
         object.width = width;

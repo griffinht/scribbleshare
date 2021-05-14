@@ -3,6 +3,7 @@ import {ctx} from "../../Canvas.js";
 import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import Color from "../../../Color.js";
 import color from "../../../ColorSelector.js";
+import CanvasObjectType from "../CanvasObjectType.js";
 
 export default class LineCanvasObject extends CanvasObject {
     color: Color;
@@ -16,6 +17,10 @@ export default class LineCanvasObject extends CanvasObject {
         for (let i = 0; i < length; i++) {
             this.points[i] = new Point(byteBuffer);
         }
+    }
+
+    getCanvasObjectType() {
+        return CanvasObjectType.LINE;
     }
 
     draw() {
