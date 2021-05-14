@@ -12,8 +12,8 @@ export default class CanvasUpdates {
         this.id = byteBuffer.readInt16();
         let length = byteBuffer.readUint8();
         for (let i = 0; i < length; i++) {
-            let type: CanvasUpdateType = byteBuffer.readUint8();//todo error checking?
-            this.canvasUpdates.push(getCanvasUpdate(type, byteBuffer));
+            let canvasUpdateType: CanvasUpdateType = byteBuffer.readUint8();//todo error checking?
+            this.canvasUpdates.push(getCanvasUpdate(canvasUpdateType, byteBuffer));
         }
     }
 

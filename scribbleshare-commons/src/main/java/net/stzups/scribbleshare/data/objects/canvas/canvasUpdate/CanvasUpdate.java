@@ -20,7 +20,6 @@ public abstract class CanvasUpdate {
     public abstract void update(Canvas canvas, short id) throws CanvasUpdateException;
 
     public void serialize(ByteBuf byteBuf) {
-        getCanvasUpdateType().serialize(byteBuf);
         byteBuf.writeByte(dt);
     }
 

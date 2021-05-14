@@ -14,8 +14,7 @@ public class CanvasUpdates {
         canvasUpdates = new CanvasUpdate[byteBuf.readUnsignedByte()];
         if (canvasUpdates.length == 0) throw new DeserializationLengthException(canvasUpdates, 0);
         for (int i = 0; i < canvasUpdates .length; i++) {
-            CanvasUpdateType type = CanvasUpdateType.deserialize(byteBuf);
-            canvasUpdates[i] = CanvasUpdate.deserialize(type, byteBuf);
+            canvasUpdates[i] = CanvasUpdate.deserialize(CanvasUpdateType.deserialize(byteBuf), byteBuf);
         }
     }
 

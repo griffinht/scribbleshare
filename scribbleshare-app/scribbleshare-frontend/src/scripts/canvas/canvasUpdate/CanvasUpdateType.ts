@@ -11,9 +11,9 @@ enum CanvasUpdateType {
 }
 export default CanvasUpdateType;
 
-export function getCanvasUpdate(type: CanvasUpdateType, byteBuffer: ByteBuffer): CanvasUpdate {
+export function getCanvasUpdate(canvasUpdateType: CanvasUpdateType, byteBuffer: ByteBuffer): CanvasUpdate {
     let object: CanvasUpdate;
-    switch (type) {
+    switch (canvasUpdateType) {
         case CanvasUpdateType.INSERT:
             object = new CanvasUpdateInsert(byteBuffer);
             break;
@@ -24,7 +24,7 @@ export function getCanvasUpdate(type: CanvasUpdateType, byteBuffer: ByteBuffer):
             object = new CanvasUpdateDelete(byteBuffer);
             break;
         default:
-            throw new Error('unknown canvasUpdateType ' + type);
+            throw new Error('unknown canvasUpdateType ' + canvasUpdateType);
     }
     return object;
 }
