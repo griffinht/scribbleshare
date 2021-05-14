@@ -5,35 +5,24 @@ import {Canvas} from "../../Canvas.js";
 import CanvasUpdateType from "../CanvasUpdateType.js";
 
 export default class CanvasUpdateMove extends CanvasUpdate {
-    canvasMoves: CanvasMove[];
-    id: number;
-    set: boolean;
-    i: number;
-    time: number;
+    canvasObject: CanvasObject;
+
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
-        this.canvasMoves = [];
-        this.id = byteBuffer.readInt16();
-        this.set = false;
-        this.i = 0;
-        this.time = 0;
-        let length = byteBuffer.readUint8();
-        for (let i = 0; i < length; i++) {
-            this.canvasMoves.push(new CanvasMove(byteBuffer));
-        }
+        this.canvasObject = new CanvasObject(byteBuffer);
     }
 
     getType(): CanvasUpdateType {
         return CanvasUpdateType.MOVE
     }
-
+/*
     move(time: number, canvasObject: CanvasObject) {
         this.canvasMoves.push(CanvasMove.create(time, canvasObject));
         this.time = time;
-    }
+    }*/
 
     draw(canvas: Canvas, time: number) {
-        let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
+        /*let canvasObjectWrapper = canvas.canvasObjectWrappers.get(this.id);
         if (canvasObjectWrapper === undefined) {
             throw new Error('undefined for ' + this.id); //todo
         }
@@ -51,7 +40,7 @@ export default class CanvasUpdateMove extends CanvasUpdate {
         if (this.i > 0 && this.i < this.canvasMoves.length) {
             canvasObjectWrapper.canvasObject.lerp(this.canvasMoves[this.i].canvasObject, time / this.canvasMoves[this.i].dt);
         }
-/*        if (this.first <= this.time) {
+/!*        if (this.first <= this.time) {
 
         }
         if (this.first === 0) {
@@ -70,49 +59,20 @@ export default class CanvasUpdateMove extends CanvasUpdate {
                 }
             }
 
-        }*/
-        return this.canvasMoves[this.canvasMoves.length - 1].dt <= time;
+        }*!/*/
+        //return this.canvasMoves[this.canvasMoves.length - 1].dt <= time;
+        return false;
     }
 
     serialize(byteBuffer: ByteBuffer) {
         super.serialize(byteBuffer);
-        byteBuffer.writeInt16(this.id);
-        byteBuffer.writeUint8(this.canvasMoves.length);
-        this.canvasMoves.forEach((canvasMove) => {
-            canvasMove.serialize(byteBuffer);
-        });
-    }
-
-    static create(id: number, time: number) {
-        let object = Object.create(this.prototype);
-        object.canvasUpdateType = CanvasUpdateType.MOVE;
-        object.time = 0;
-        object.canvasMoves = [];
-        object.first = time;
-        object.time = time;
-        object.id = id;
-        return object;
-    }
-}
-
-class CanvasMove {
-    dt: number;
-    canvasObject: CanvasObject;
-
-    constructor(byteBuffer: ByteBuffer) {
-        this.dt = byteBuffer.readUint8();
-        this.canvasObject = new CanvasObject(byteBuffer);
-    }
-
-    serialize(byteBuffer: ByteBuffer) {
-        byteBuffer.writeUint8(this.dt);
         this.canvasObject.serialize(byteBuffer);
     }
 
     static create(dt: number, canvasObject: CanvasObject) {
-        let canvasMove = Object.create(this.prototype);
-        canvasMove.dt = dt;
-        canvasMove.canvasObject = CanvasObject.clone(canvasObject);
-        return canvasMove;
+        let object: CanvasUpdateMove = Object.create(this.prototype);
+        object.dt = dt;
+        object.canvasObject = canvasObject;
+        return object;
     }
 }

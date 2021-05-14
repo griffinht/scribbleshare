@@ -26,10 +26,8 @@ export default class CanvasUpdateDelete extends CanvasUpdate {
     }
 
     static create(time: number, id: number) {
-        let object = Object.create(this.prototype);
+        let object: CanvasUpdateDelete = Object.create(this.prototype);
         object.dt = time;
-        object.id = id;
-        object.time = 0;
         return object;
     }
 }

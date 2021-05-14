@@ -5,17 +5,11 @@ import {Canvas} from "../../Canvas.js";
 import CanvasUpdateType from "../CanvasUpdateType.js";
 
 export default class CanvasUpdateInsert extends CanvasUpdate {
-    dt: number;
-    id: number;
     canvasObjectWrapper: CanvasObjectWrapper;
-    time: number;
 
     constructor(byteBuffer: ByteBuffer) {
         super(byteBuffer);
-        this.dt = byteBuffer.readUint8();
-        this.id = byteBuffer.readInt16();
         this.canvasObjectWrapper = CanvasObjectWrapper.deserialize(byteBuffer);
-        this.time = 0;
     }
 
     getType(): CanvasUpdateType {
@@ -23,27 +17,23 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
     }
 
     draw(canvas: Canvas, dt: number) {
-        this.time += dt; //accumulated dt
+/*        this.time += dt; //accumulated dt
         if (this.dt <= this.time) {
             canvas.canvasObjectWrappers.set(this.id, this.canvasObjectWrapper);
             return true;
-        }
+        }*/
         return false;
     }
 
     serialize(byteBuffer: ByteBuffer) {
         super.serialize(byteBuffer);
-        byteBuffer.writeUint8(this.dt);
-        byteBuffer.writeInt16(this.id);
         this.canvasObjectWrapper.serialize(byteBuffer);
     }
 
     static create(dt: number, id: number, canvasObjectWrapper: CanvasObjectWrapper) {
         let object: CanvasUpdateInsert = Object.create(this.prototype);//todo this on everything is
         object.dt = dt;
-        object.id = id;
         object.canvasObjectWrapper = canvasObjectWrapper;
-        object.time = 0;
         return object;
     }
 }
