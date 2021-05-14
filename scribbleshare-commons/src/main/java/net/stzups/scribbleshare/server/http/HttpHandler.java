@@ -26,8 +26,8 @@ public class HttpHandler extends MessageToMessageDecoder<FullHttpRequest> {
 
         if (request.uri().equals("/healthcheck")) {
             if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
-                Scribbleshare.getLogger(ctx).warning("Healthcheck request from address which is not a loopback address");
                 send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                Scribbleshare.getLogger(ctx).warning("Healthcheck request from address which is not a loopback address");
             } else {
                 send(ctx, request, HttpResponseStatus.OK);
                 Scribbleshare.getLogger(ctx).info("Good healthcheck response");

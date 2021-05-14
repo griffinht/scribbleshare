@@ -218,7 +218,7 @@ public enum State {//todo use class instead of enums for state??
     }
 
     public void channelInactive(ChannelHandlerContext ctx) {
-        throw new UnsupportedOperationException("Unhandled channel close");
+        //todo throw new UnsupportedOperationException("Unhandled channel close");
     }
 
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
