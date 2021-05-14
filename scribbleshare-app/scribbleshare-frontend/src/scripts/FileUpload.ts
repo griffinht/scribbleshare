@@ -70,7 +70,7 @@ document.body.addEventListener('drop', (event) => {
             let request = new XMLHttpRequest();
             request.responseType = 'arraybuffer';
             // @ts-ignore todo
-            request.open('POST', Environment.API_HOST + '/document/' + activeDocument.id);
+            request.open('POST', Environment.getApiHost() + '/document/' + activeDocument.id);
 
             let dataIndex = output.indexOf('data:') + 5;
             request.setRequestHeader('content-type', output.substring(dataIndex, output.indexOf(';', dataIndex)));

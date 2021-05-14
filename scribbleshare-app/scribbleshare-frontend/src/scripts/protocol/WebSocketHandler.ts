@@ -12,8 +12,8 @@ class WebSocketHandler {
     socket: WebSocket;
 
     constructor() {
-        console.log('Opening WebSocket connection to ' + Environment.WEBSOCKET_HOST);
-        this.socket = new WebSocket(Environment.WEBSOCKET_HOST);
+        console.log('Opening WebSocket connection to ' + Environment.getWebsocketHost());
+        this.socket = new WebSocket(Environment.getWebsocketHost());
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.addEventListener('open', (event) => {
