@@ -159,8 +159,7 @@ export class Canvas {
 
     insert(canvasObject: CanvasObject): number {
         let id = (Math.random() - 0.5) * 32000;//todo i don't like this
-        // @ts-ignore todo
-        activeDocument.canvas.canvasObjectWrappers.set(id, canvasObject);
+        this.canvasObjects.set(id, canvasObject);
         //canvasUpdates.push(CanvasUpdateInsert.create(getNow(), id, canvasObjectWrapper));
         return id;
     }
@@ -273,7 +272,7 @@ function update() {
         lastUpdate = window.performance.now();
 
         //clean up
-        //canvasUpdates.length = 0;
+        canvasUpdatesMap.clear();
     } else {
         //happens if there is no document open
     }
@@ -289,10 +288,8 @@ export function lerp(v0: number, v1: number, t: number) {
 mouse.addEventListener('click', (event) => {
     if (activeDocument !== null) {
         let canvasObject = Shape.create(event.offsetX, event.offsetY, 50, 50, shape.shape, color.copy())
-        let id = activeDocument.canvas.insert(canvasObject);
-        let canvasUpdates = CanvasUpdates.create(id);
-        //todo canvasUpdates.
-        //canvasUpdates.set(id, canvasUpdates);
+        let canvasUpdates = CanvasUpdates.create(activeDocument.canvas.insert(canvasObject), getNow(), canvasObject);
+        canvasUpdatesMap.set(canvasUpdates.id, canvasUpdates);
     }
 });
 

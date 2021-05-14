@@ -1,6 +1,8 @@
 import CanvasUpdate from "./CanvasUpdate.js";
 import ByteBuffer from "../../protocol/ByteBuffer.js";
 import CanvasUpdateType, {getCanvasUpdate} from "./CanvasUpdateType.js";
+import CanvasObject from "../canvasObject/CanvasObject.js";
+import CanvasUpdateInsert from "./canvasUpdates/CanvasUpdateInsert.js";
 
 export default class CanvasUpdates {
     id: number;
@@ -30,10 +32,11 @@ export default class CanvasUpdates {
         });
     }
 
-    static create(id: number) {
+    static create(id: number, dt: number, canvasObject: CanvasObject) {
         let object: CanvasUpdates = Object.create(this.prototype);
         object.id = id;
         object.canvasUpdates = [];
+        object.canvasUpdates.push([CanvasUpdateInsert.create(dt, canvasObject)]);
         return object;
     }
 }

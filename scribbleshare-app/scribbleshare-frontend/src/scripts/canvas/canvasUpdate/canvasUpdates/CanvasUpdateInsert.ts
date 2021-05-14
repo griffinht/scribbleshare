@@ -32,7 +32,7 @@ export default class CanvasUpdateInsert extends CanvasUpdate {
         this.canvasObject.serialize(byteBuffer);
     }
 
-    static create(dt: number, id: number, canvasObject: CanvasObject) {
+    static create(dt: number, canvasObject: CanvasObject) {
         let object: CanvasUpdateInsert = Object.create(this.prototype);//todo this on everything is
         object.dt = dt;
         object.canvasObject = canvasObject;
