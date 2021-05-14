@@ -4,12 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddClient;
+import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 
@@ -84,10 +85,15 @@ class Room {
     void addClient(Client client) {
 
         //for the new client
-        client.sendMessage(new ServerMessageOpenDocument(document, canvas));//todo
-        //for the existing clients
-        queueMessage(new ServerMessageAddClient(client));
+        client.queueMessage(new ServerMessageOpenDocument(document, canvas));//todo
+        for (Client c : clients) {
+            client.queueMessage(new ServerMessageAddUser(c.getUser()));
+        }
         client.queueMessage(new ServerMessageAddClient(clients));//todo
+        //for the existing clients
+        queueMessage(new ServerMessageAddUser(client.getUser()));
+        queueMessage(new ServerMessageAddClient(client));
+
         clients.add(client);
         flushMessages();
         Scribbleshare.getLogger().info("Added " + client + " to " + this);

@@ -25,7 +25,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 
-public enum State {
+public enum State {//todo use class instead of enums for state??
     INITIAL {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
