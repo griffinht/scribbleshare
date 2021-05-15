@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.data.objects.session;
+package net.stzups.scribbleshare.data.objects.authentication.http;
 
 import io.netty.buffer.ByteBuf;
 

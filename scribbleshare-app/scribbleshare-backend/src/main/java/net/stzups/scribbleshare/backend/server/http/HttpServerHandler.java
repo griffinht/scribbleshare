@@ -18,9 +18,9 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.session.HttpConfig;
-import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
 
 import java.io.File;
 import java.io.FileInputStream;

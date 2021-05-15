@@ -9,9 +9,9 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
-import net.stzups.scribbleshare.data.objects.session.HttpSession;
-import net.stzups.scribbleshare.data.objects.session.PersistentHttpSession;
 import org.postgresql.util.PSQLException;
 
 import java.io.ByteArrayInputStream;

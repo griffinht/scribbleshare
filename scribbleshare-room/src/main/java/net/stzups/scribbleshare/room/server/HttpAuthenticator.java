@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
-import net.stzups.scribbleshare.data.objects.session.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
 
 import java.util.List;
 import java.util.logging.Level;

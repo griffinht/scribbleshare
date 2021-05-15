@@ -3,7 +3,7 @@ package net.stzups.scribbleshare.data.database.implementations;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
-import net.stzups.scribbleshare.data.objects.session.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
 import redis.clients.jedis.Jedis;
 
 public class RedisDatabase implements AutoCloseable, SessionDatabase {
