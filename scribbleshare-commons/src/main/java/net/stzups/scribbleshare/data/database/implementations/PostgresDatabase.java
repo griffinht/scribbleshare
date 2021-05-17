@@ -11,6 +11,7 @@ import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import org.postgresql.util.PSQLException;
 
@@ -29,6 +30,22 @@ import java.util.Map;
 import java.util.Random;
 
 public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
+    public Login getLogin(String username) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
+            preparedStatement.setString(1, username);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new Login(resultSet.getLong("id"), resultSet.getBytes("hashed_password"));
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public interface Config {
         String getUrl();
         String getUser();
@@ -64,7 +81,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     @Override
     public User createUser() {
-        User user = new User(RANDOM.nextLong(), new Long[0], new Long[0]);
+        User user = new User(RANDOM.nextLong(), new Long[0], new Long[0], "");
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
@@ -84,7 +101,8 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 if (resultSet.next()) {
                     return new User(id,
                             (Long[]) (resultSet.getArray("owned_documents").getArray()),
-                            (Long[]) (resultSet.getArray("shared_documents").getArray()));
+                            (Long[]) (resultSet.getArray("shared_documents").getArray()),
+                            resultSet.getString("username"));
                 } else {
                     return null;
                 }

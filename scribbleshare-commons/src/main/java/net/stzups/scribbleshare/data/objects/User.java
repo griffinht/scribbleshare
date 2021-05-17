@@ -8,11 +8,13 @@ public class User {
     private final long id;
     private final Set<Long> ownedDocuments;
     private final Set<Long> sharedDocuments;
+    private final String username;
 
-    public User(long id, Long[] ownedDocuments, Long[] sharedDocuments) {
+    public User(long id, Long[] ownedDocuments, Long[] sharedDocuments, String username) {
         this.id = id;
         this.ownedDocuments = new HashSet<>(Arrays.asList(ownedDocuments));
         this.sharedDocuments = new HashSet<>(Arrays.asList(sharedDocuments));
+        this.username = username;
     }
 
     public long getId() {
@@ -25,6 +27,10 @@ public class User {
 
     public Set<Long> getSharedDocuments() {
         return sharedDocuments;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     @Override

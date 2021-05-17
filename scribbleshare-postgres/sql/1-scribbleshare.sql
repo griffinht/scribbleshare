@@ -24,10 +24,19 @@ CREATE TABLE users(
     id bigint NOT NULL,
     owned_documents bigint[] NOT NULL,
     shared_documents bigint[] NOT NULL,
+    username varchar(256) NOT NULL,
     PRIMARY KEY (id)
 );
 GRANT SELECT, INSERT, UPDATE ON users TO scribbleshare_backend;
 GRANT SELECT, UPDATE ON users TO scribbleshare_room;
+
+CREATE TABLE logins(
+    username varchar(256) NOT NULL,
+    user_id bigint NOT NULL,
+    hashed_password bytea NOT NULL,
+    PRIMARY KEY (username)
+);
+GRANT SELECT, INSERT ON logins TO scribbleshare_backend;
 
 CREATE TABLE documents(
     id bigint NOT NULL,

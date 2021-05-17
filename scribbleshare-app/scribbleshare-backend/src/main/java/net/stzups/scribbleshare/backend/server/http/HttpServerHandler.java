@@ -22,6 +22,7 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +47,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         String getMimeTypesFilePath();
         String getDebugJsRoot();
     }
-
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
 
 
@@ -255,6 +255,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
+            // validate
+
             String username = form.get("username");
             String password = form.get("password");
 
@@ -278,11 +280,22 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
             System.out.println(username + ", " + password + ", " + remember);
-            if (true) {
-                sendRedirect(ctx, request, LOGIN_SUCCESS);
-            } else {
+
+            Login login = database.getLogin(username);
+            Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
+            if (id == null) {
+                //todo rate limit and generic error handling
+                if (login == null) {
+                    //bad username
+                } else {
+                    //bad password
+                }
+
                 sendRedirect(ctx, request, LOGIN_FAIL);
+                return;
             }
+
+           sendRedirect(ctx, request, LOGIN_SUCCESS);
             return;
         }
 
