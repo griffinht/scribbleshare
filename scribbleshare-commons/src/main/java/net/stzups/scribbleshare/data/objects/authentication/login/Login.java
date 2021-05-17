@@ -5,6 +5,16 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import java.util.Arrays;
 
 public class Login {
+    private static final byte[] DUMMY;
+    static {
+        DUMMY = BCrypt.withDefaults().hash(6, new byte[0]);
+    }
+    private static byte[] getDummy() {
+        byte[] dummy = new byte[DUMMY.length];
+        System.arraycopy(DUMMY, 0, dummy, 0, dummy.length);
+        return dummy;
+    }
+
     private final long id;
     private final byte[] hashedPassword;
 
@@ -20,7 +30,7 @@ public class Login {
     public static Long verify(Login login, byte[] plaintext) {
         byte[] hashedPassword;
         if (login == null) {
-            hashedPassword = new byte[0];
+            hashedPassword = getDummy();//todo is this helpful in a hypothetical timing attack?
         } else {
             hashedPassword = login.hashedPassword;
         }
