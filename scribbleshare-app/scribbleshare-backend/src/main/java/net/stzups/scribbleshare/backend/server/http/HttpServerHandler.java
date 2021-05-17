@@ -64,9 +64,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
 
-    private static final String LOGIN_PATH = "/login"; // which path the server will handle login requests
-    private static final String LOGIN_FAIL = "/login"; // redirect to bad login, should be the login page
+    private static final String LOGIN_PAGE = "/login"; // the login page, where login requests should come from
+    private static final String LOGIN_PATH = "/login"; // where login requests should go
     private static final String LOGIN_SUCCESS = "/"; // redirect to good login
+
+    private static final String REGISTER_PAGE = "/register"; // the register page, where register requests should come from
+    private static final String REGISTER_PATH = "/register"; // where register requests should go
+    private static final String REGISTER_SUCCESS = LOGIN_PAGE; // redirect for a good register, should be the login page
 
     private final HttpConfig config;
     private final ScribbleshareDatabase database;
@@ -248,7 +252,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
-            //todo check host/origin/referer
+            //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
 
             Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
             if (form == null) {
@@ -292,13 +296,56 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
                 }
 
-                sendRedirect(ctx, request, LOGIN_FAIL);
+                sendRedirect(ctx, request, LOGIN_PAGE);
                 return;
             }
 
             HttpHeaders httpHeaders = EmptyHttpHeaders.INSTANCE;
             database.addHttpSession(new HttpSession(config, database.getUser(login.getId()), httpHeaders));
             sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
+            return;
+        } else if (uri.equals(REGISTER_PATH) && request.method().equals(HttpMethod.POST)) {
+            String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+            if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
+
+            Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
+            if (form == null) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            // validate
+
+            String username = form.get("username");
+            String password = form.get("password");
+
+            if (username == null || password == null) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            //todo validate
+            if (false) {
+                //todo rate limit and generic error handling
+
+                sendRedirect(ctx, request, REGISTER_PAGE);
+                return;
+            }
+
+            User user = new User(username);
+            database.addUser(user);
+            Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
+            database.addLogin(login);
+
+
+            System.out.println(username + ", register " + password);
+
+            sendRedirect(ctx, request, REGISTER_SUCCESS);
             return;
         }
 
@@ -391,10 +438,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     user = database.getUser(persistentHttpSession.getUser());
                 } else {
                     //return false; todo
-                    user = database.createUser();
+                    user = new User();
+                    database.addUser(user);
                 }
             } else {
-                user = database.createUser();
+                user = new User();
+                database.addUser(user);
             }
 
             HttpSession httpSession = new HttpSession(config, user, headers);
@@ -410,7 +459,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return true;
             } else {
                 //todo copied and bad
-                User user = database.createUser();
+                User user = new User();
+                database.addUser(user);
                 httpSession = new HttpSession(config, user, headers);
                 database.addHttpSession(httpSession);
 

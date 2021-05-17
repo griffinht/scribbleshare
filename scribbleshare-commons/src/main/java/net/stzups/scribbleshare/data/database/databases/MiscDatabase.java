@@ -5,7 +5,7 @@ import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
 
 public interface MiscDatabase {
-    User createUser();
+    void addUser(User user);
     User getUser(long id);
     void updateUser(User user);
 

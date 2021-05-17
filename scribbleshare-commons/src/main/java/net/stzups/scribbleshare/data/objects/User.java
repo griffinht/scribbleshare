@@ -2,14 +2,23 @@ package net.stzups.scribbleshare.data.objects;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class User {
+    private static final Random RANDOM = new Random();
     private final long id;
     private final Set<Long> ownedDocuments;
     private final Set<Long> sharedDocuments;
     private final String username;
 
+    public User() {
+        this("");
+    }
+
+    public User(String username) {
+        this(RANDOM.nextLong(), new Long[0], new Long[0], username);
+    }
     public User(long id, Long[] ownedDocuments, Long[] sharedDocuments, String username) {
         this.id = id;
         this.ownedDocuments = new HashSet<>(Arrays.asList(ownedDocuments));

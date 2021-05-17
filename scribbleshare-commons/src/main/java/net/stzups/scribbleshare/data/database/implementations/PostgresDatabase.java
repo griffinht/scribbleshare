@@ -30,12 +30,13 @@ import java.util.Map;
 import java.util.Random;
 
 public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
+    @Override
     public Login getLogin(String username) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new Login(resultSet.getLong("id"), resultSet.getBytes("hashed_password"));
+                    return new Login(username, resultSet.getLong("id"), resultSet.getBytes("hashed_password"));
                 } else {
                     return null;
                 }
@@ -43,6 +44,18 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public void addLogin(Login login) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO logins(username, user_id, hashed_password) VALUES(?, ?, ?)")) {
+            preparedStatement.setString(1, login.getUsername());
+            preparedStatement.setLong(2, login.getId());
+            preparedStatement.setBinaryStream(3, new ByteArrayInputStream(login.getHashedPassword()));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();//todo error handling
         }
     }
 
@@ -80,17 +93,16 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public User createUser() {
-        User user = new User(RANDOM.nextLong(), new Long[0], new Long[0], "");
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents) VALUES (?, ?, ?)")) {
+    public void addUser(User user) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents, username) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
             preparedStatement.setArray(3, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
+            preparedStatement.setString(4, user.getUsername());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return user;
     }
 
     @Override
