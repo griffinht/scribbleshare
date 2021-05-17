@@ -7,4 +7,5 @@ public interface SessionDatabase {
 
     HttpSession getHttpSession(long id);
     void addHttpSession(HttpSession httpSession);
+    void removeHttpSession(long id);
 }

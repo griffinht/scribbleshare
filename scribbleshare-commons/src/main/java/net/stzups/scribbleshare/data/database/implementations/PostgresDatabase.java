@@ -295,6 +295,16 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
+    public void removeHttpSession(long id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM key_value WHERE key=?")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public long addResource(long owner, Resource resource) {
         long id = RANDOM.nextLong();
         addResource(id, owner, resource);

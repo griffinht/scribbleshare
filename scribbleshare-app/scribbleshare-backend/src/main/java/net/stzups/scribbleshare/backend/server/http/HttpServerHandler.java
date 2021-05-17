@@ -64,12 +64,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
     private static final String LOGIN_PAGE = "/login"; // the login page, where login requests should come from
-    private static final String LOGIN_PATH = "/login"; // where login requests should go
-    private static final String LOGIN_SUCCESS = "/"; // redirect to good login
+    private static final String LOGIN_PATH = PersistentHttpSession.LOGIN_PATH; // where login requests should go
+    private static final String LOGIN_SUCCESS = "/"; // redirect for a good login, should be the main page
 
     private static final String REGISTER_PAGE = "/register"; // the register page, where register requests should come from
     private static final String REGISTER_PATH = "/register"; // where register requests should go
     private static final String REGISTER_SUCCESS = LOGIN_PAGE; // redirect for a good register, should be the login page
+
+    private static final String LOGOUT_PAGE = "/logout"; // the logout page, where logout requests should come from
+    private static final String LOGOUT_PATH = "/logout"; // where logout requests should go
+    private static final String LOGOUT_SUCCESS = LOGIN_PAGE; // redirect for a good logout, should be the login page
 
     private final HttpConfig config;
     private final ScribbleshareDatabase database;
@@ -244,6 +248,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         //login
 
+        //todo validate for extra fields that should not happen
         if (uri.equals(LOGIN_PATH) && request.method().equals(HttpMethod.POST)) {
             Map<String, String> form = parseForm(request);
             if (form == null) {
@@ -320,6 +325,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
+            //todo check for existing username and user with username
+
             User user;
             HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
             if (cookie != null) {
@@ -340,6 +347,31 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             System.out.println(username + ", register " + password);
 
             sendRedirect(ctx, request, REGISTER_SUCCESS);
+            return;
+        } else if (uri.equals(LOGOUT_PAGE) && request.method().equals(HttpMethod.POST)) {
+            Map<String, String> form = parseForm(request);
+            if (form == null) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            User user;
+            HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+            if (cookie != null) {
+                database.removeHttpSession(cookie.getId());//todo timing attack????
+
+/*                HttpSession httpSession = database.getHttpSession(cookie.getId());
+                if (httpSession != null) {
+                    user = database.getUser(httpSession.getUser());
+                } else {//bad
+                    user = null;
+                }*/
+            } else {//no auth
+                user = null;
+            }
+
+
+            sendRedirect(ctx, request, LOGIN_SUCCESS);
             return;
         }
 
