@@ -245,15 +245,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         //login
 
         if (uri.equals(LOGIN_PATH) && request.method().equals(HttpMethod.POST)) {
-            String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-            if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
-                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                return;
-            }
-
-            //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
-
-            Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
+            Map<String, String> form = parseForm(request);
             if (form == null) {
                 send(ctx, request, HttpResponseStatus.BAD_REQUEST);
                 return;
@@ -304,15 +296,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
             return;
         } else if (uri.equals(REGISTER_PATH) && request.method().equals(HttpMethod.POST)) {
-            String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-            if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
-                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                return;
-            }
-
-            //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
-
-            Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
+            Map<String, String> form = parseForm(request);
             if (form == null) {
                 send(ctx, request, HttpResponseStatus.BAD_REQUEST);
                 return;
@@ -336,11 +320,22 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
-            User user = new User(username);
-            database.addUser(user);
+            User user;
+            HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+            if (cookie != null) {
+                HttpSession httpSession = database.getHttpSession(cookie.getId());
+                if (httpSession != null) {
+                    user = database.getUser(httpSession.getUser());
+                } else {
+                    user = new User(username);
+                    database.addUser(user);
+                }
+            } else {
+                user = new User(username);
+                database.addUser(user);
+            }
             Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
             database.addLogin(login);
-
 
             System.out.println(username + ", register " + password);
 
@@ -554,5 +549,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         return queries;
+    }
+
+    public static Map<String, String> parseForm(FullHttpRequest request) {
+        String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+        if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
+            return null;
+        }
+
+        //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
+
+        return parseQuery(request.content().toString(StandardCharsets.UTF_8));
     }
 }
