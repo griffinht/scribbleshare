@@ -36,7 +36,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new Login(username, resultSet.getLong("id"), resultSet.getBytes("hashed_password"));
+                    return new Login(username, resultSet.getLong("user_id"), resultSet.getBytes("hashed_password"));
                 } else {
                     return null;
                 }

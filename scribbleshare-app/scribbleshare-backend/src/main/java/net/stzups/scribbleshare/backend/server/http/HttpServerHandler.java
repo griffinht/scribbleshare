@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -300,7 +299,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
-            HttpHeaders httpHeaders = EmptyHttpHeaders.INSTANCE;
+            HttpHeaders httpHeaders = new DefaultHttpHeaders();
             database.addHttpSession(new HttpSession(config, database.getUser(login.getId()), httpHeaders));
             sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
             return;
