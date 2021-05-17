@@ -62,6 +62,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     // abc-ABC_123.file
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
 
+
+    private static final String LOGIN_PATH = "/login"; // which path the server will handle login requests
+    private static final String LOGIN_FAIL = "/login"; // redirect to bad login, should be the login page
+    private static final String LOGIN_SUCCESS = "/"; // redirect to good login
+
     private final HttpConfig config;
     private final ScribbleshareDatabase database;
 
@@ -135,53 +140,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // check if this is a special request
 
         switch (route[0]) {
-            case "login": {
-                if (route.length != 1 || !request.method().equals(HttpMethod.POST)) {
-                    break;
-                }
-
-                String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-                if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                //todo check host/origin/referer
-
-                Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
-                if (form == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                String username = form.get("username");
-                String password = form.get("password");
-
-                if (username == null || password == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                String rememberRaw = form.get("remember");
-                boolean remember;
-                if (rememberRaw != null) {
-                    if (rememberRaw.equals("on")) {
-                        remember = true;
-                    } else {
-                        send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                        return;
-                    }
-                } else {
-                    remember = false;
-                }
-
-
-                System.out.println(username + ", " + password + ", " + remember);
-                send(ctx, request, HttpResponseStatus.OK);
-                return;
-
-                //break;
-            }
             case "api": {
                 if (route.length < 2) {
                     send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -278,6 +236,54 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
+        }
+
+        //login
+
+        if (uri.equals(LOGIN_PATH) && request.method().equals(HttpMethod.POST)) {
+            String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+            if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            //todo check host/origin/referer
+
+            Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
+            if (form == null) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            String username = form.get("username");
+            String password = form.get("password");
+
+            if (username == null || password == null) {
+                send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+
+            String rememberRaw = form.get("remember");
+            boolean remember;
+            if (rememberRaw != null) {
+                if (rememberRaw.equals("on")) {
+                    remember = true;
+                } else {
+                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                    return;
+                }
+            } else {
+                remember = false;
+            }
+
+
+            System.out.println(username + ", " + password + ", " + remember);
+            if (true) {
+                sendRedirect(ctx, request, LOGIN_SUCCESS);
+            } else {
+                sendRedirect(ctx, request, LOGIN_FAIL);
+            }
+            return;
         }
 
         // otherwise try to serve a regular HTTP file resource
