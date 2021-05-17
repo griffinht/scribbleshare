@@ -42,11 +42,11 @@ public class HttpSession extends Session {
                 Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
                 for (Cookie cookie : cookies) {
                     if (cookie.name().equals(name)) {
-                        ByteBuf b = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
-                        ByteBuf byteBuf = Base64.decode(b);
-                        b.release();
-                        ClientCookie c = new ClientCookie(byteBuf);
-                        byteBuf.release();
+                        ByteBuf tokenBase64 = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
+                        ByteBuf token = Base64.decode(tokenBase64);
+                        tokenBase64.release();
+                        ClientCookie c = new ClientCookie(token);
+                        token.release();
                         return c;
                     }
                 }
@@ -75,10 +75,14 @@ public class HttpSession extends Session {
     }
 
     protected DefaultCookie getCookie(String name) {
-        ByteBuf byteBuf = Unpooled.buffer();
-        byteBuf.writeLong(getId());
-        byteBuf.writeBytes(super.generateToken());
-        return new DefaultCookie(name, Base64.encode(byteBuf).toString(StandardCharsets.UTF_8));
+        ByteBuf token = Unpooled.buffer();
+        token.writeLong(getId());
+        token.writeBytes(super.generateToken());
+        ByteBuf tokenBase64 = Base64.encode(token);
+        DefaultCookie cookie = new DefaultCookie(name, tokenBase64.toString(StandardCharsets.UTF_8));
+        tokenBase64.release();
+        token.release();
+        return cookie;
     }
 
     private void setCookie(HttpConfig config, HttpHeaders headers) {
