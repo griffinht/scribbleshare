@@ -42,6 +42,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         String getHttpRoot();
         int getHttpCacheSeconds();
         String getMimeTypesFilePath();
+        String getDebugJsRoot();
     }
 
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
@@ -62,6 +63,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private final HttpConfig config;
     private final ScribbleshareDatabase database;
 
+    private final File jsRoot;
     private final File httpRoot;
     private final int httpCacheSeconds;
     private final MimeTypes mimeTypes = new MimeTypes();
@@ -69,8 +71,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public HttpServerHandler(Config config, ScribbleshareDatabase database) {
         this.config = config;
         this.database = database;
-        
+
         httpRoot = new File(config.getHttpRoot());
+        if (config.getDebugJsRoot().equals("")) {
+            jsRoot = httpRoot;
+        } else {
+            jsRoot = new File(config.getDebugJsRoot());
+        }
         httpCacheSeconds = config.getHttpCacheSeconds();
         String path = config.getMimeTypesFilePath();
         // check for mime types in working directory
@@ -250,7 +257,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        File file = new File(httpRoot, filePath);
+        File root;
+        if (filePath.endsWith(".js")) {
+            root = jsRoot;
+        } else {
+            root = httpRoot;
+        }
+        File file = new File(root, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
             if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
                 sendRedirect(ctx, request, path + "/" + rawQuery);
