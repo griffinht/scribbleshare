@@ -8,6 +8,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -133,6 +135,53 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // check if this is a special request
 
         switch (route[0]) {
+            case "login": {
+                if (route.length != 1 || !request.method().equals(HttpMethod.POST)) {
+                    break;
+                }
+
+                String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+                if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
+                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                    return;
+                }
+
+                //todo check host/origin/referer
+
+                Map<String, String> form = parseQuery(request.content().toString(StandardCharsets.UTF_8));
+                if (form == null) {
+                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                    return;
+                }
+
+                String username = form.get("username");
+                String password = form.get("password");
+
+                if (username == null || password == null) {
+                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                    return;
+                }
+
+                String rememberRaw = form.get("remember");
+                boolean remember;
+                if (rememberRaw != null) {
+                    if (rememberRaw.equals("on")) {
+                        remember = true;
+                    } else {
+                        send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                        return;
+                    }
+                } else {
+                    remember = false;
+                }
+
+
+                System.out.println(username + ", " + password + ", " + remember);
+                send(ctx, request, HttpResponseStatus.OK);
+                return;
+
+                //break;
+            }
             case "api": {
                 if (route.length < 2) {
                     send(ctx, request, HttpResponseStatus.NOT_FOUND);
@@ -397,7 +446,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * Returns String array with length of 2, with the first element as the path and the second element as the raw query
      * Example:
-     * /index.html?key=value&otherKey=otherValue -> [ /index.html, ?key=value&otherKey=otherValue ]
+     * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
      */
     public static String[] splitQuery(String uri) {
         int index = uri.lastIndexOf(QUERY_DELIMITER);
@@ -410,20 +459,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         } else if (uri.indexOf(QUERY_DELIMITER) != index) { // make sure there is only one ? in the uri
             return null;
         } else {
-            return new String[] {uri.substring(0, index), uri.substring(index)};
+            return new String[] {uri.substring(0, index), uri.substring(index + 1)};
         }
     }
 
     /**
-     * Parses ?key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
+     * Parses key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
      */
     public static Map<String, String> parseQuery(String query) {
         if (query.isEmpty()) return Collections.emptyMap(); // no query to parse
-        if (!query.startsWith("?")) return null; // malformed, should start with ?
 
         Map<String, String> queries = new HashMap<>();
-        String[] keyValuePairs = query.substring(1) // query starts with ?
-                .split(QUERY_SEPARATOR);
+        String[] keyValuePairs = query.split(QUERY_SEPARATOR);
         for (String keyValuePair : keyValuePairs) {
             String[] split = keyValuePair.split(QUERY_PAIR_SEPARATOR, 3); // a limit of 2 (expected) would not detect malformed queries such as ?key==, so we need to go one more
             if (split.length == 1) { // key with no value, such as ?key
