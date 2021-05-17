@@ -57,11 +57,11 @@ public class HttpSession extends Session {
 
     public static final String COOKIE_NAME = "session";
 
-    public HttpSession(long user) {
+    protected HttpSession(long user) {
         super(user);
     }
 
-    public HttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
+    protected HttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
         super(id, user, creation, hashedToken);
     }
 

@@ -7,6 +7,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
@@ -113,11 +114,16 @@ public class HttpUtils {
         }
     }
 
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, String newUri) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
+        response.headers().set(headers);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
         send(ctx, request, response);
+    }
+
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
+        sendRedirect(ctx, request, EmptyHttpHeaders.INSTANCE, newUri);
     }
 
     public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
