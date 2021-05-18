@@ -375,16 +375,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     }
 
                     database.expireHttpSession(httpUserSession);
-                    //todo clear cookie
+                    httpUserSession.clearCookie(config, headers);
                 }
                 HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
                 if (persistentCookie != null) {
                     PersistentHttpUserSession persistentHttpUserSession = database.getAndExpirePersistentHttpSession(persistentCookie);
-                    //todo clear cookie
+                    persistentHttpUserSession.clearCookie(config, headers);
                 }
 
 
-                sendRedirect(ctx, request, LOGIN_SUCCESS);
+                sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
                 return;
             }
         }

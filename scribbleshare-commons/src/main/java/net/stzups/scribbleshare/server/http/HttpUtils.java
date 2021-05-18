@@ -18,6 +18,8 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import net.stzups.scribbleshare.Scribbleshare;
@@ -170,5 +172,9 @@ public class HttpUtils {
         } catch (FileNotFoundException ignore) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
         }
+    }
+
+    public static void setCookie(HttpHeaders headers, Cookie cookie) {
+        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 }

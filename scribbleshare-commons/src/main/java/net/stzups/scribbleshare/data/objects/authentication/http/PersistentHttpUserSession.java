@@ -1,12 +1,10 @@
 package net.stzups.scribbleshare.data.objects.authentication.http;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.cookie.CookieHeaderNames;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import net.stzups.scribbleshare.server.http.HttpUtils;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -22,23 +20,19 @@ public class PersistentHttpUserSession extends HttpUserSession {
 
     public PersistentHttpUserSession(HttpConfig config, HttpUserSession httpSession, HttpHeaders headers) {
         super(httpSession.getUser());
-        setCookie(config, headers);
+        HttpUtils.setCookie(headers, getCookie(config));
     }
 
     public PersistentHttpUserSession(long id, Timestamp creation, Timestamp expiration, long userId, ByteBuf byteBuf) {
         super(id, creation, expiration, userId, byteBuf);
     }
 
-    private void setCookie(HttpConfig config, HttpHeaders headers) {
-        DefaultCookie cookie = getCookie(COOKIE_NAME);
-        cookie.setDomain(config.getDomain());
-        cookie.setPath("/");
-        if (config.getSSL()) cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
+    @Override
+    protected Cookie getCookie(HttpConfig config) {
+        Cookie cookie = super.getCookie(config);
         cookie.setMaxAge(MAX_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
-        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+        return cookie;
     }
 
     public static HttpSessionCookie getCookie(HttpRequest request) {

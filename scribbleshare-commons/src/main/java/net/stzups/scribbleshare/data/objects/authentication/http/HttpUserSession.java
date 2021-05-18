@@ -3,13 +3,13 @@ package net.stzups.scribbleshare.data.objects.authentication.http;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.server.http.HttpUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -27,7 +27,7 @@ public class HttpUserSession extends UserSession {
 
     public HttpUserSession(HttpConfig config, User user, HttpHeaders headers) {
         super(user.getId());
-        setCookie(config, headers);
+        HttpUtils.setCookie(headers, getCookie(config));
     }
 
     public HttpUserSession(long id, Timestamp creation, Timestamp expiration, long userId, ByteBuf byteBuf) {
@@ -45,15 +45,21 @@ public class HttpUserSession extends UserSession {
         return cookie;
     }
 
-    private void setCookie(HttpConfig config, HttpHeaders headers) {
+    protected Cookie getCookie(HttpConfig config) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
         cookie.setDomain(config.getDomain());
-        //not used cookie.setPath("");
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie, so no max age
-        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+
+        return cookie;
+    }
+
+    public void clearCookie(HttpConfig config, HttpHeaders headers) {
+        Cookie cookie = getCookie(config);
+        cookie.setMaxAge(0);//todo
+        HttpUtils.setCookie(headers, cookie);
     }
 
     public static HttpSessionCookie getCookie(HttpRequest request) {
@@ -62,9 +68,5 @@ public class HttpUserSession extends UserSession {
 
     public boolean validate(HttpSessionCookie cookie) {
         return validate(cookie.getToken()) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
-    }
-
-    public static void clearCookie(HttpConfig config, HttpHeaders headers) {
-
     }
 }
