@@ -9,6 +9,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
@@ -269,24 +270,16 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void expirePersistentHttpSession(PersistentHttpUserSession persistentHttpUserSession) throws SQLException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE persistent_user_sessions SET expired=? WHERE id=?")) {
-            preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
-            preparedStatement.setLong(2, persistentHttpUserSession.getId());
-            preparedStatement.execute();
-        }
-    }
-
-    @Override
-    public HttpUserSession getHttpSession(long id) {
+    public HttpUserSession getHttpSession(HttpSessionCookie cookie) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
-            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (!resultSet.next()) {
                     return null; // does not exist
                 }
 
-                return new HttpUserSession(id,
+                return new HttpUserSession(
+                        resultSet.getLong("id"),
                         resultSet.getTimestamp("created"),
                         resultSet.getTimestamp("expired"),
                         resultSet.getLong("user_id"),
@@ -316,7 +309,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void updateHttpSession(HttpUserSession httpUserSession) throws SQLException {
+    public void expireHttpSession(HttpUserSession httpUserSession) throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE user_sessions SET expired=? WHERE id=?")) {
             preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
             preparedStatement.setLong(2, httpUserSession.getUser());
@@ -377,14 +370,18 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public PersistentHttpUserSession getAndExpirePersistentHttpSession(long id) {//todo combine
+    public PersistentHttpUserSession getAndExpirePersistentHttpSession(HttpSessionCookie cookie) {//todo combine
         PersistentHttpUserSession persistentHttpSession;
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
-            preparedStatement.setLong(1, id);
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?; UPDATE persistent_user_sessions SET expired=? WHERE id=?")) {
+            preparedStatement.setLong(1, cookie.getId());
+
+            preparedStatement.setTimestamp(2, Timestamp.from(Instant.now()));
+            preparedStatement.setLong(3, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    persistentHttpSession = new PersistentHttpUserSession(id,
+                    persistentHttpSession = new PersistentHttpUserSession(
+                            resultSet.getLong("id"),
                             resultSet.getTimestamp("created"),
                             resultSet.getTimestamp("expired"),
                             resultSet.getLong("user_id"),
@@ -399,12 +396,6 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             return null;
         }
 
-        try {
-            expirePersistentHttpSession(persistentHttpSession);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
         return persistentHttpSession;
     }
 }

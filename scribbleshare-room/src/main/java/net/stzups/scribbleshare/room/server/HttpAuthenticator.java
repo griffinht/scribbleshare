@@ -62,7 +62,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
         HttpSessionCookie cookie = HttpUserSession.getCookie(request);
         if (cookie != null) {
-            HttpUserSession httpSession = sessionDatabase.getHttpSession(cookie.getId());
+            HttpUserSession httpSession = sessionDatabase.getHttpSession(cookie);
             if (httpSession != null && httpSession.validate(cookie)) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());
