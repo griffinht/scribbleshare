@@ -364,7 +364,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 //todo clear cookie
             }
             HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
-            if (cookie != null) {
+            if (persistentCookie != null) {
                 database.expireHttpSession(persistentCookie.getId());
                 //todo clear cookie
             }
@@ -416,9 +416,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
         HttpHeaders headers = new DefaultHttpHeaders();
-        if (path.equals(PersistentHttpUserSession.LOGIN_PATH)) {
+ /*       if (path.equals(PersistentHttpUserSession.LOGIN_PATH)) {
             logIn(ctx, config, request, headers);
-        }
+        }*/
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
         sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
     }

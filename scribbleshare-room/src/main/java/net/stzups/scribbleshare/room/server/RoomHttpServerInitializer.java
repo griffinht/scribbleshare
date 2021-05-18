@@ -49,6 +49,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
 
         channel.pipeline()
                 .addLast(httpAuthenticator)
+                .addLast(httpExceptionHandler())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(config.getWebsocketPath(), null, true))
                 .addLast(serverMessageEncoder)

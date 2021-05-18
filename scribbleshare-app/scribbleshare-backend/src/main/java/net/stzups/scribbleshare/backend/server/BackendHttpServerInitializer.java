@@ -27,6 +27,7 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
         channel.pipeline()
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
-                .addLast(httpServerHandler);
+                .addLast(httpServerHandler)
+                .addLast(httpExceptionHandler());
     }
 }
