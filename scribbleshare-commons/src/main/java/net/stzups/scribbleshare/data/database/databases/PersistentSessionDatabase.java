@@ -7,12 +7,17 @@ import java.sql.SQLException;
 
 public interface PersistentSessionDatabase {
     /**
-     * Get existing {@link PersistentHttpUserSession} and expire it, or null if it does exist
+     * Get existing {@link PersistentHttpUserSession}, or null if it does exist
      */
-    PersistentHttpUserSession getAndExpirePersistentHttpSession(HttpSessionCookie cookie);
+    PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie);
 
     /**
      * Add new {@link PersistentHttpUserSession}
      */
-    void addPersistentHttpSession(PersistentHttpUserSession persistentHttpSession) throws SQLException;
+    void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws SQLException;
+
+    /**
+     * Expire existing {@link PersistentHttpUserSession}
+     */
+    void expirePersistentHttpUserSession(PersistentHttpUserSession persistentHttpUserSession) throws SQLException;
 }

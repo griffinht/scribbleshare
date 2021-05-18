@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -305,7 +306,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
                 database.addHttpSession(userSession);
                 if (remember) {
-                    database.addPersistentHttpSession(new PersistentHttpUserSession(config, userSession, httpHeaders));
+                    database.addPersistentHttpUserSession(new PersistentHttpUserSession(config, userSession, httpHeaders));
                 }
                 sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                 return;
@@ -365,24 +366,37 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
 
                 HttpHeaders headers = new DefaultHttpHeaders();
-                //todo authenticate so only authenticated users can log out
                 HttpSessionCookie cookie = HttpUserSession.getCookie(request);
                 if (cookie != null) {
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
-                    if (httpUserSession == null) {
-                        //todo bad
-                        return;
+                    if (httpUserSession != null) {
+                        if (httpUserSession.validate(cookie)) {
+                            database.expireHttpSession(httpUserSession);
+                            httpUserSession.clearCookie(config, headers);
+                        } else {
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
+                        }
+                    } else {
+                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent session");
                     }
-
-                    database.expireHttpSession(httpUserSession);
-                    httpUserSession.clearCookie(config, headers);
                 }
+
                 HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
                 if (persistentCookie != null) {
-                    PersistentHttpUserSession persistentHttpUserSession = database.getAndExpirePersistentHttpSession(persistentCookie);
-                    persistentHttpUserSession.clearCookie(config, headers);
+                    PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
+                    if (persistentHttpUserSession != null) {
+                        if (persistentHttpUserSession.validate(persistentCookie)) {
+                            database.expirePersistentHttpUserSession(persistentHttpUserSession);
+                            persistentHttpUserSession.clearCookie(config, headers);
+                        } else {
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
+                            //todo error
+                        }
+                    } else {
+                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
+                        //todo error
+                    }
                 }
-
 
                 sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
                 return;
@@ -458,7 +472,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return null;
     }
 
-    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) {
+    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) throws SQLException {
         if (!logIn(config, request, headers)) {
             Scribbleshare.getLogger(ctx).warning("Bad authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
@@ -468,13 +482,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) {
+    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws SQLException {
         HttpSessionCookie cookie = HttpUserSession.getCookie(request);
         if (cookie == null) {
             User user;
             HttpSessionCookie cookiePersistent = PersistentHttpUserSession.getCookie(request);
             if (cookiePersistent != null) {
-                PersistentHttpUserSession persistentHttpSession = database.getAndExpirePersistentHttpSession(cookiePersistent);
+                PersistentHttpUserSession persistentHttpSession = database.getPersistentHttpUserSession(cookiePersistent);
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent)) {
                     user = database.getUser(persistentHttpSession.getUser());
                 } else {
@@ -492,7 +506,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             //this is single use and always refreshed
             PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
-            database.addPersistentHttpSession(persistentHttpSession);
+            database.addPersistentHttpUserSession(persistentHttpSession);
             return true;
         } else {
             HttpUserSession httpSession = database.getHttpSession(cookie);
@@ -507,7 +521,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 //this is single use and always refreshed
                 PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
-                database.addPersistentHttpSession(persistentHttpSession);
+                database.addPersistentHttpUserSession(persistentHttpSession);
                 return true;
             }
         }
