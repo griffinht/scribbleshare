@@ -6,14 +6,14 @@ import net.stzups.scribbleshare.data.objects.User;
 import java.util.Arrays;
 
 public class Login {
+    private static final int COST = 6; // todo
+
+    private static final BCrypt.Hasher HASHER = BCrypt.withDefaults();
+    private static final BCrypt.Verifyer VERIFIER = BCrypt.verifyer();
+
     private static final byte[] DUMMY;
     static {
-        DUMMY = BCrypt.withDefaults().hash(6, new byte[0]);
-    }
-    private static byte[] getDummy() {
-        byte[] dummy = new byte[DUMMY.length];
-        System.arraycopy(DUMMY, 0, dummy, 0, dummy.length);
-        return dummy;
+        DUMMY = HASHER.hash(COST, new byte[0]); // todo new byte[0] - use a different dummy plaintext?
     }
 
     private final String username;
@@ -23,7 +23,7 @@ public class Login {
     public Login(User user, byte[] password) {
         this.id = user.getId();
         this.username = user.getUsername();
-        this.hashedPassword = BCrypt.withDefaults().hash(6, password);
+        this.hashedPassword = HASHER.hash(COST, password);
         Arrays.fill(password, (byte) 0);
     }
 
@@ -48,15 +48,17 @@ public class Login {
     public static Long verify(Login login, byte[] plaintext) {
         byte[] hashedPassword;
         if (login == null) {
-            hashedPassword = getDummy();//todo is this helpful in a hypothetical timing attack?
+            hashedPassword = DUMMY; // still verify hash even when we know it will fail to protect against timing attack
         } else {
             hashedPassword = login.hashedPassword;
         }
 
-        boolean verified = BCrypt.verifyer().verify(plaintext, hashedPassword).verified;
+        boolean verified = VERIFIER.verify(plaintext, hashedPassword).verified;
 
-        Arrays.fill(hashedPassword, (byte) 0);
         Arrays.fill(plaintext, (byte) 0);
+        if (hashedPassword != DUMMY) { // don't clear dummy, it will be reused
+            Arrays.fill(hashedPassword, (byte) 0);
+        }
 
         if (verified) {
             assert login != null;
