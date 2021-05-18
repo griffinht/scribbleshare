@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 
@@ -26,11 +26,11 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     private final RoomHttpServerInitializer.Config config;
-    private final SessionDatabase sessionDatabase;
+    private final HttpSessionDatabase httpSessionDatabase;
 
-    public HttpAuthenticator(RoomHttpServerInitializer.Config config, SessionDatabase sessionDatabase) {
+    public HttpAuthenticator(RoomHttpServerInitializer.Config config, HttpSessionDatabase httpSessionDatabase) {
         this.config = config;
-        this.sessionDatabase = sessionDatabase;
+        this.httpSessionDatabase = httpSessionDatabase;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
         HttpSessionCookie cookie = HttpUserSession.getCookie(request);
         if (cookie != null) {
-            HttpUserSession httpSession = sessionDatabase.getHttpSession(cookie);
+            HttpUserSession httpSession = httpSessionDatabase.getHttpSession(cookie);
             if (httpSession != null && httpSession.validate(cookie)) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());

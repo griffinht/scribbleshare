@@ -5,7 +5,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpU
 
 import java.sql.SQLException;
 
-public interface PersistentSessionDatabase {
+public interface PersistentHttpSessionDatabase {
     /**
      * Get existing {@link PersistentHttpUserSession}, or null if it does exist
      */

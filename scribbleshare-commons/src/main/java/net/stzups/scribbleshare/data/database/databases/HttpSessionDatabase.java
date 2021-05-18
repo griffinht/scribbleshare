@@ -5,7 +5,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession
 
 import java.sql.SQLException;
 
-public interface SessionDatabase {
+public interface HttpSessionDatabase {
     /**
      * Get existing {@link HttpUserSession}, or null if it does not exist
      */
