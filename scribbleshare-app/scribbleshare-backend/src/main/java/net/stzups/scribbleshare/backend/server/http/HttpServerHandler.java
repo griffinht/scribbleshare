@@ -356,19 +356,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
-            User user;
+            HttpHeaders headers = new DefaultHttpHeaders();
+            //todo authenticate so only authenticated users can log out
             HttpSessionCookie cookie = HttpUserSession.getCookie(request);
             if (cookie != null) {
-                database.removeHttpSession(cookie.getId());//todo timing attack????
-
-/*                HttpSession httpSession = database.getHttpSession(cookie.getId());
-                if (httpSession != null) {
-                    user = database.getUser(httpSession.getUser());
-                } else {//bad
-                    user = null;
-                }*/
-            } else {//no auth
-                user = null;
+                database.expireHttpSession(cookie.getId());
+                //todo clear cookie
+            }
+            HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
+            if (cookie != null) {
+                database.expireHttpSession(persistentCookie.getId());
+                //todo clear cookie
             }
 
 
@@ -460,7 +458,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             User user;
             HttpSessionCookie cookiePersistent = PersistentHttpUserSession.getCookie(request);
             if (cookiePersistent != null) {
-                PersistentHttpUserSession persistentHttpSession = database.getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                PersistentHttpUserSession persistentHttpSession = database.getAndExpirePersistentHttpSession(cookiePersistent.getId());
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent)) {
                     user = database.getUser(persistentHttpSession.getUser());
                 } else {

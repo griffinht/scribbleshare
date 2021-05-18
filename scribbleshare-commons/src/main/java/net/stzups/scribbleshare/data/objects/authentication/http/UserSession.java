@@ -65,6 +65,10 @@ public class UserSession {
         return created;
     }
 
+    public Timestamp getExpired() {
+        return expired;
+    }
+
     public byte[] getHashedToken() {
         return hashedToken;
     }

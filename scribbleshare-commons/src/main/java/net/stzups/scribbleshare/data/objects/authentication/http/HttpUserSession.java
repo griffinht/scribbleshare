@@ -63,4 +63,8 @@ public class HttpUserSession extends UserSession {
     public boolean validate(HttpSessionCookie cookie) {
         return validate(cookie.getToken()) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
     }
+
+    public static void clearCookie(HttpConfig config, HttpHeaders headers) {
+
+    }
 }
