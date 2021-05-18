@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import net.stzups.scribbleshare.server.http.HttpUtils;
 
 import java.sql.Timestamp;
@@ -27,9 +28,9 @@ public class PersistentHttpUserSession extends HttpUserSession {
         super(id, creation, expiration, userId, byteBuf);
     }
 
-    @Override
-    protected Cookie getCookie(HttpConfig config) {
-        Cookie cookie = super.getCookie(config);
+    private Cookie getCookie(HttpConfig config) {
+        DefaultCookie cookie = getCookie(config, COOKIE_NAME);
+
         cookie.setMaxAge(MAX_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
         return cookie;

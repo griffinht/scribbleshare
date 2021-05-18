@@ -34,7 +34,7 @@ public class HttpUserSession extends UserSession {
         super(id, creation, expiration, userId, byteBuf);
     }
 
-    protected DefaultCookie getCookie(String name) {
+    protected DefaultCookie getCookie(HttpConfig config, String name) {
         ByteBuf token = Unpooled.buffer();
         token.writeLong(getId());
         token.writeBytes(super.generateToken());
@@ -42,18 +42,19 @@ public class HttpUserSession extends UserSession {
         DefaultCookie cookie = new DefaultCookie(name, tokenBase64.toString(StandardCharsets.UTF_8));
         tokenBase64.release();
         token.release();
-        return cookie;
-    }
 
-    protected Cookie getCookie(HttpConfig config) {
-        DefaultCookie cookie = getCookie(COOKIE_NAME);
         cookie.setDomain(config.getDomain());
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
-        //session cookie, so no max age
 
         return cookie;
+    }
+
+    private Cookie getCookie(HttpConfig config) {
+        //session cookie, so no max age
+
+        return getCookie(config, COOKIE_NAME);
     }
 
     public void clearCookie(HttpConfig config, HttpHeaders headers) {

@@ -306,7 +306,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
                 database.addHttpSession(userSession);
                 if (remember) {
-                    database.addPersistentHttpUserSession(new PersistentHttpUserSession(config, userSession, httpHeaders));
+                    PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+                    database.addPersistentHttpUserSession(persistentHttpUserSession);
                 }
                 sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                 return;
