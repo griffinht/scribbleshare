@@ -272,7 +272,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 if (resultSet.next()) {
                     return new HttpUserSession(id,
                             resultSet.getTimestamp("created"),
-                            resultSet.getTimestamp("expires"),
+                            resultSet.getTimestamp("expired"),
                             resultSet.getLong("user_id"),
                             Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
@@ -370,7 +370,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 if (resultSet.next()) {
                     persistentHttpSession = new PersistentHttpUserSession(id,
                             resultSet.getTimestamp("created"),
-                            resultSet.getTimestamp("expires"),
+                            resultSet.getTimestamp("expired"),
                             resultSet.getLong("user_id"),
                             Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {

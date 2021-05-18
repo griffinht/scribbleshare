@@ -9,16 +9,17 @@ import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class PersistentHttpUserSession extends HttpUserSession {
-    private static final Duration AGE = Duration.ofDays(90);
+    private static final Duration MAX_AGE = Duration.ofDays(90);
     public static final String COOKIE_NAME = "persistent_session";
     public static final String LOGIN_PATH = "/login";
 
 
     public PersistentHttpUserSession(HttpConfig config, HttpUserSession httpSession, HttpHeaders headers) {
-        super(httpSession.getUser(), AGE);
+        super(httpSession.getUser());
         setCookie(config, headers);
     }
 
@@ -33,8 +34,13 @@ public class PersistentHttpUserSession extends HttpUserSession {
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
-        cookie.setMaxAge(AGE.get(ChronoUnit.SECONDS)); //persistent cookie
+        cookie.setMaxAge(MAX_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+    }
+
+    @Override
+    public boolean validate(byte[] token) {
+        return super.validate(token) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
     }
 }

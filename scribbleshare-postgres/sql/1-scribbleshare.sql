@@ -24,31 +24,23 @@ GRANT SELECT, UPDATE ON users TO scribbleshare_room;
 CREATE TABLE persistent_user_sessions(
       id bigint NOT NULL,
       created timestamp NOT NULL,
-      expires timestamp NOT NULL,
+      expired timestamp NOT NULL,
       user_id bigint NOT NULL,
       data bytea NOT NULL,
       PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT ON persistent_user_sessions TO scribbleshare_backend;
+GRANT SELECT, UPDATE, INSERT ON persistent_user_sessions TO scribbleshare_backend;
 
 CREATE TABLE user_sessions(
      id bigint NOT NULL,
      created timestamp NOT NULL,
-     expires timestamp NOT NULL,
+     expired timestamp NOT NULL,
      user_id bigint NOT NULL,
      data bytea NOT NULL,
      PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT ON user_sessions TO scribbleshare_backend;
-GRANT SELECT ON user_sessions TO scribbleshare_room;
-
-CREATE TABLE expired_sessions(
-     id bigint NOT NULL,
-     data bytea NOT NULL,
-     PRIMARY KEY (id)
-);
-GRANT SELECT, INSERT ON expired_sessions TO scribbleshare_backend;
-GRANT SELECT, INSERT ON expired_sessions TO scribbleshare_room;
+GRANT SELECT, UPDATE, INSERT ON user_sessions TO scribbleshare_backend;
+GRANT SELECT, UPDATE ON user_sessions TO scribbleshare_room;
 
 CREATE TABLE logins(
     username varchar(256) NOT NULL,

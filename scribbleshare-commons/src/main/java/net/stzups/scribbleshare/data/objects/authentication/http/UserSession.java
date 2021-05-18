@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
 public class UserSession {
@@ -27,21 +26,21 @@ public class UserSession {
 
     private final long id;
     private final Timestamp created;
-    private final Timestamp expires;
+    private final Timestamp expired;
     private final long userId;
     private final byte[] hashedToken = new byte[HASHED_TOKEN_LENGTH];
 
-    protected UserSession(long userId, TemporalAmount age) {
+    protected UserSession(long userId) {
         id = secureRandom.nextLong();
         created = new Timestamp(Instant.now().toEpochMilli());
-        expires = new Timestamp(created.toInstant().plus(age).toEpochMilli());
+        expired = created;
         this.userId = userId;
     }
 
-    public UserSession(long id, Timestamp created, Timestamp expires, long userId, ByteBuf byteBuf) {
+    public UserSession(long id, Timestamp created, Timestamp expired, long userId, ByteBuf byteBuf) {
         this.id = id;
         this.created = created;
-        this.expires = expires;
+        this.expired = expired;
         this.userId = userId;
         byteBuf.readBytes(hashedToken);
     }
@@ -71,8 +70,7 @@ public class UserSession {
     }
 
     public boolean validate(byte[] token) {
-        return Arrays.equals(messageDigest.digest(token), this.hashedToken)
-                && Instant.now().isBefore(expires.toInstant());
+        return Arrays.equals(messageDigest.digest(token), this.hashedToken) && created.equals(expired);
     }
 
     public void serialize(ByteBuf byteBuf) {
@@ -81,7 +79,7 @@ public class UserSession {
 
     @Override
     public String toString() {
-        return "Session{id=" + id + ",userId" + userId + ",created=" + created + ",expires=" + expires + "}";
+        return "Session{id=" + id + ",userId" + userId + ",created=" + created + ",expires=" + expired + "}";
     }
 
     @Override

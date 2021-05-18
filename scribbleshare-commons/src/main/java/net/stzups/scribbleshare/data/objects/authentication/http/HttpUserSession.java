@@ -16,7 +16,7 @@ import net.stzups.scribbleshare.data.objects.User;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
+import java.time.Instant;
 import java.util.Set;
 
 public class HttpUserSession extends UserSession {
@@ -58,14 +58,14 @@ public class HttpUserSession extends UserSession {
     }
 
     public static final String COOKIE_NAME = "session";
-    private static final Duration AGE = Duration.ofDays(1);
+    private static final Duration MAX_AGE = Duration.ofDays(1);
 
-    protected HttpUserSession(long user, TemporalAmount age) {
-        super(user, age);
+    protected HttpUserSession(long user) {
+        super(user);
     }
 
     public HttpUserSession(HttpConfig config, User user, HttpHeaders headers) {
-        super(user.getId(), AGE);
+        super(user.getId());
         setCookie(config, headers);
     }
 
@@ -93,5 +93,10 @@ public class HttpUserSession extends UserSession {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
         //session cookie, so no max age
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+    }
+
+    @Override
+    public boolean validate(byte[] token) {
+        return super.validate(token) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
     }
 }
