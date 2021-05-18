@@ -373,10 +373,10 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     public PersistentHttpUserSession getAndExpirePersistentHttpSession(HttpSessionCookie cookie) {//todo combine
         PersistentHttpUserSession persistentHttpSession;
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?; UPDATE persistent_user_sessions SET expired=? WHERE id=?")) {
-            preparedStatement.setLong(1, cookie.getId());
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE persistent_user_sessions SET expired=? WHERE id=?; SELECT * FROM persistent_user_sessions WHERE id=?")) {
+            preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
+            preparedStatement.setLong(2, cookie.getId());
 
-            preparedStatement.setTimestamp(2, Timestamp.from(Instant.now()));
             preparedStatement.setLong(3, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
