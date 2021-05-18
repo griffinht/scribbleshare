@@ -15,16 +15,18 @@ import net.stzups.scribbleshare.data.objects.User;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Set;
 
-public class HttpSession extends Session {
+public class HttpUserSession extends UserSession {
     public static class ClientCookie {
         private final long id;
         private final byte[] token;
 
         ClientCookie(ByteBuf byteBuf) {
             id = byteBuf.readLong();
-            token = new byte[16];//todo
+            token = new byte[UserSession.TOKEN_LENGTH];
             byteBuf.readBytes(token);
         }
 
@@ -56,22 +58,19 @@ public class HttpSession extends Session {
     }
 
     public static final String COOKIE_NAME = "session";
+    private static final Duration AGE = Duration.ofDays(1);
 
-    protected HttpSession(long user) {
-        super(user);
+    protected HttpUserSession(long user, TemporalAmount age) {
+        super(user, age);
     }
 
-    protected HttpSession(long id, long user, Timestamp creation, byte[] hashedToken) {
-        super(id, user, creation, hashedToken);
-    }
-
-    public HttpSession(HttpConfig config, User user, HttpHeaders headers) {
-        super(user.getId());
+    public HttpUserSession(HttpConfig config, User user, HttpHeaders headers) {
+        super(user.getId(), AGE);
         setCookie(config, headers);
     }
 
-    public HttpSession(long id, ByteBuf byteBuf) {
-        super(id, byteBuf);
+    public HttpUserSession(long id, Timestamp creation, Timestamp expiration, long userId, ByteBuf byteBuf) {
+        super(id, creation, expiration, userId, byteBuf);
     }
 
     protected DefaultCookie getCookie(String name) {

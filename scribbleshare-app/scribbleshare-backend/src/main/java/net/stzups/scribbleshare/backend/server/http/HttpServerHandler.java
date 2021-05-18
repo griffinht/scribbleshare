@@ -20,8 +20,8 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 
 import java.io.File;
@@ -64,7 +64,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
     private static final String LOGIN_PAGE = "/login"; // the login page, where login requests should come from
-    private static final String LOGIN_PATH = PersistentHttpSession.LOGIN_PATH; // where login requests should go
+    private static final String LOGIN_PATH = PersistentHttpUserSession.LOGIN_PATH; // where login requests should go
     private static final String LOGIN_SUCCESS = "/"; // redirect for a good login, should be the main page
 
     private static final String REGISTER_PAGE = "/register"; // the register page, where register requests should come from
@@ -297,7 +297,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
             HttpHeaders httpHeaders = new DefaultHttpHeaders();
-            database.addHttpSession(new HttpSession(config, database.getUser(login.getId()), httpHeaders));
+            database.addHttpSession(new HttpUserSession(config, database.getUser(login.getId()), httpHeaders));
             sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
             return;
         } else if (uri.equals(REGISTER_PATH) && request.method().equals(HttpMethod.POST)) {
@@ -328,9 +328,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             //todo check for existing username and user with username
 
             User user;
-            HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+            HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
             if (cookie != null) {
-                HttpSession httpSession = database.getHttpSession(cookie.getId());
+                HttpUserSession httpSession = database.getHttpSession(cookie.getId());
                 if (httpSession != null) {
                     user = database.getUser(httpSession.getUser());
                 } else {
@@ -356,7 +356,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
             User user;
-            HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+            HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
             if (cookie != null) {
                 database.removeHttpSession(cookie.getId());//todo timing attack????
 
@@ -417,7 +417,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
         HttpHeaders headers = new DefaultHttpHeaders();
-        if (path.equals(PersistentHttpSession.LOGIN_PATH)) {
+        if (path.equals(PersistentHttpUserSession.LOGIN_PATH)) {
             logIn(ctx, config, request, headers);
         }
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
@@ -425,9 +425,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
-        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = database.getHttpSession(cookie.getId());
+            HttpUserSession httpSession = database.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 return httpSession.getUser();
@@ -454,12 +454,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) {
-        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie == null) {
             User user;
-            HttpSession.ClientCookie cookiePersistent = HttpSession.ClientCookie.getClientCookie(request, PersistentHttpSession.COOKIE_NAME);
+            HttpUserSession.ClientCookie cookiePersistent = HttpUserSession.ClientCookie.getClientCookie(request, PersistentHttpUserSession.COOKIE_NAME);
             if (cookiePersistent != null) {
-                PersistentHttpSession persistentHttpSession = database.getAndRemovePersistentHttpSession(cookiePersistent.getId());
+                PersistentHttpUserSession persistentHttpSession = database.getAndRemovePersistentHttpSession(cookiePersistent.getId());
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
                     user = database.getUser(persistentHttpSession.getUser());
                 } else {
@@ -472,26 +472,26 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 database.addUser(user);
             }
 
-            HttpSession httpSession = new HttpSession(config, user, headers);
+            HttpUserSession httpSession = new HttpUserSession(config, user, headers);
             database.addHttpSession(httpSession);
 
             //this is single use and always refreshed
-            PersistentHttpSession persistentHttpSession = new PersistentHttpSession(config, httpSession, headers);
+            PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
             database.addPersistentHttpSession(persistentHttpSession);
             return true;
         } else {
-            HttpSession httpSession = database.getHttpSession(cookie.getId());
+            HttpUserSession httpSession = database.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 return true;
             } else {
                 //todo copied and bad
                 User user = new User();
                 database.addUser(user);
-                httpSession = new HttpSession(config, user, headers);
+                httpSession = new HttpUserSession(config, user, headers);
                 database.addHttpSession(httpSession);
 
                 //this is single use and always refreshed
-                PersistentHttpSession persistentHttpSession = new PersistentHttpSession(config, httpSession, headers);
+                PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
                 database.addPersistentHttpSession(persistentHttpSession);
                 return true;
             }

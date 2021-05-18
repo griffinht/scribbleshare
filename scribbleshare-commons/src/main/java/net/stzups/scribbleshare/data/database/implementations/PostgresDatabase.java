@@ -9,8 +9,8 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import org.postgresql.util.PSQLException;
@@ -252,11 +252,11 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addPersistentHttpSession(PersistentHttpSession persistentHttpSession) {
+    public void addPersistentHttpSession(PersistentHttpUserSession persistentHttpSession) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, \"user\", creation_time, hashed_token) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setLong(1, persistentHttpSession.getId());
             preparedStatement.setLong(2, persistentHttpSession.getUser());
-            preparedStatement.setTimestamp(3, persistentHttpSession.getCreation());
+            preparedStatement.setTimestamp(3, persistentHttpSession.getCreated());
             preparedStatement.setBinaryStream(4, new ByteArrayInputStream(persistentHttpSession.getHashedToken()));
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -265,12 +265,16 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public HttpSession getHttpSession(long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT value FROM key_value WHERE key=?")) {
+    public HttpUserSession getHttpSession(long id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM key_value WHERE key=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return new HttpSession(id, Unpooled.wrappedBuffer(resultSet.getBinaryStream("value").readAllBytes()));
+                    return new HttpUserSession(id,
+                            resultSet.getTimestamp("created"),
+                            resultSet.getTimestamp("expires"),
+                            resultSet.getLong("user_id"),
+                            Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
                     return null;
                 }
@@ -282,7 +286,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addHttpSession(HttpSession httpSession) {
+    public void addHttpSession(HttpUserSession httpSession) {
         ByteBuf byteBuf = Unpooled.buffer();
         httpSession.serialize(byteBuf);
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO key_value(key, value) VALUES (?, ?)")) {
@@ -357,14 +361,18 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
      * Remove a user session for a token and return the removed user session
      */
     @Override
-    public PersistentHttpSession getAndRemovePersistentHttpSession(long id) {//todo combine
-        PersistentHttpSession persistentHttpSession;
+    public PersistentHttpUserSession getAndRemovePersistentHttpSession(long id) {//todo combine
+        PersistentHttpUserSession persistentHttpSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    persistentHttpSession = new PersistentHttpSession(id, resultSet.getLong("user"), resultSet.getTimestamp("creation_time"), resultSet.getBinaryStream("hashed_token").readAllBytes());
+                    persistentHttpSession = new PersistentHttpUserSession(id,
+                            resultSet.getTimestamp("created"),
+                            resultSet.getTimestamp("expires"),
+                            resultSet.getLong("user_id"),
+                            Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
                     System.out.println("PersistentUserSession with id " + id + " does not exist");
                     return null;

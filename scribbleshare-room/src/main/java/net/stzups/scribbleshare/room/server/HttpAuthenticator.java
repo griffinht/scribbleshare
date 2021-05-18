@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.SessionDatabase;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -59,9 +59,9 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        HttpSession.ClientCookie cookie = HttpSession.ClientCookie.getClientCookie(request, HttpSession.COOKIE_NAME);
+        HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie != null) {
-            HttpSession httpSession = sessionDatabase.getHttpSession(cookie.getId());
+            HttpUserSession httpSession = sessionDatabase.getHttpSession(cookie.getId());
             if (httpSession != null && httpSession.validate(cookie.getToken())) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());

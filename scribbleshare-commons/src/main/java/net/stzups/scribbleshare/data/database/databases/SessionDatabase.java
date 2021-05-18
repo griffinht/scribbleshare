@@ -1,11 +1,11 @@
 package net.stzups.scribbleshare.data.database.databases;
 
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 
 public interface SessionDatabase {
 
 
-    HttpSession getHttpSession(long id);
-    void addHttpSession(HttpSession httpSession);
+    HttpUserSession getHttpSession(long id);
+    void addHttpSession(HttpUserSession httpSession);
     void removeHttpSession(long id);
 }
