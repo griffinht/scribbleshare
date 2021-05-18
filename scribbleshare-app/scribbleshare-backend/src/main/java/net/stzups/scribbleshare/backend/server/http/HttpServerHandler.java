@@ -298,7 +298,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
             HttpHeaders httpHeaders = new DefaultHttpHeaders();
-            database.addHttpSession(new HttpUserSession(config, database.getUser(login.getId()), httpHeaders));
+            HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
+            database.addHttpSession(userSession);
+            if (remember) {
+                database.addPersistentHttpSession(new PersistentHttpUserSession(config, userSession, httpHeaders));
+            }
             sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
             return;
         } else if (uri.equals(REGISTER_PATH) && request.method().equals(HttpMethod.POST)) {

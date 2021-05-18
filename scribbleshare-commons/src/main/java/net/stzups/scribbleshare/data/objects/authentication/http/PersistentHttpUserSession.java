@@ -32,7 +32,7 @@ public class PersistentHttpUserSession extends HttpUserSession {
     private void setCookie(HttpConfig config, HttpHeaders headers) {
         DefaultCookie cookie = getCookie(COOKIE_NAME);
         cookie.setDomain(config.getDomain());
-        cookie.setPath(LOGIN_PATH);
+        cookie.setPath("/");
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
