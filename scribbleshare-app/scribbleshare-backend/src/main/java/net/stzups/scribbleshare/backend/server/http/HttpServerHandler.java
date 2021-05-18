@@ -364,12 +364,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             //todo authenticate so only authenticated users can log out
             HttpSessionCookie cookie = HttpUserSession.getCookie(request);
             if (cookie != null) {
-                database.expireHttpSession(cookie.getId());
+                database.updateHttpSession(cookie.getId());
                 //todo clear cookie
             }
             HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
             if (persistentCookie != null) {
-                database.expireHttpSession(persistentCookie.getId());
+                database.updateHttpSession(persistentCookie.getId());
                 //todo clear cookie
             }
 

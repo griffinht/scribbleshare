@@ -252,7 +252,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addPersistentHttpSession(PersistentHttpUserSession persistentHttpSession) {
+    public void addPersistentHttpSession(PersistentHttpUserSession persistentHttpSession) throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, created, expired, user_id, data) VALUES (?, ?, ?, ?, ?)")) {
             preparedStatement.setLong(1, persistentHttpSession.getId());
             preparedStatement.setTimestamp(2, persistentHttpSession.getCreated());
@@ -265,19 +265,15 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             byteBuf.release();
 
             preparedStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();//todo error handling
         }
     }
 
     @Override
-    public void expirePersistentHttpSession(long id) {
+    public void expirePersistentHttpSession(PersistentHttpUserSession persistentHttpUserSession) throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE persistent_user_sessions SET expired=? WHERE id=?")) {
             preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
-            preparedStatement.setLong(2, id);
+            preparedStatement.setLong(2, persistentHttpUserSession.getId());
             preparedStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -286,15 +282,15 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new HttpUserSession(id,
-                            resultSet.getTimestamp("created"),
-                            resultSet.getTimestamp("expired"),
-                            resultSet.getLong("user_id"),
-                            Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
-                } else {
-                    return null;
+                if (!resultSet.next()) {
+                    return null; // does not exist
                 }
+
+                return new HttpUserSession(id,
+                        resultSet.getTimestamp("created"),
+                        resultSet.getTimestamp("expired"),
+                        resultSet.getLong("user_id"),
+                        Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
@@ -303,32 +299,28 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addHttpSession(HttpUserSession httpSession) {
+    public void addHttpSession(HttpUserSession httpUserSession) throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_sessions(id, created, expired, user_id, data) VALUES (?, ?, ?, ?, ?)")) {
-            preparedStatement.setLong(1, httpSession.getId());
-            preparedStatement.setTimestamp(2, httpSession.getCreated());
-            preparedStatement.setTimestamp(3, httpSession.getExpired());
-            preparedStatement.setLong(4, httpSession.getUser());
+            preparedStatement.setLong(1, httpUserSession.getId());
+            preparedStatement.setTimestamp(2, httpUserSession.getCreated());
+            preparedStatement.setTimestamp(3, httpUserSession.getExpired());
+            preparedStatement.setLong(4, httpUserSession.getUser());
 
             ByteBuf byteBuf = Unpooled.buffer();
-            httpSession.serialize(byteBuf);
+            httpUserSession.serialize(byteBuf);
             preparedStatement.setBinaryStream(5, new ByteBufInputStream(byteBuf));
             byteBuf.release();
 
             preparedStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
     @Override
-    public void expireHttpSession(long id) {
+    public void updateHttpSession(HttpUserSession httpUserSession) throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE user_sessions SET expired=? WHERE id=?")) {
             preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
-            preparedStatement.setLong(2, id);
+            preparedStatement.setLong(2, httpUserSession.getUser());
             preparedStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -398,7 +390,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                             resultSet.getLong("user_id"),
                             Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
                 } else {
-                    System.out.println("PersistentUserSession with id " + id + " does not exist");
+                    //todo
                     return null;
                 }
             }
@@ -407,7 +399,12 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             return null;
         }
 
-        expirePersistentHttpSession(id);//todo combine with above to single transaction
+        try {
+            expirePersistentHttpSession(persistentHttpSession);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
         return persistentHttpSession;
     }
 }
