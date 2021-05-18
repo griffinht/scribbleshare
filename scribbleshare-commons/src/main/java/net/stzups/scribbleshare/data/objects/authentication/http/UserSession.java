@@ -69,7 +69,7 @@ public class UserSession {
         return hashedToken;
     }
 
-    public boolean validate(byte[] token) {
+    protected boolean validate(byte[] token) {
         return Arrays.equals(messageDigest.digest(token), this.hashedToken) && created.equals(expired);
     }
 

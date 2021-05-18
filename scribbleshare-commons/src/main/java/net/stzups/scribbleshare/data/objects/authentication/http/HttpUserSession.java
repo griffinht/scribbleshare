@@ -6,10 +6,8 @@ import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import net.stzups.scribbleshare.data.objects.User;
 
@@ -17,48 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Set;
 
 public class HttpUserSession extends UserSession {
-    public static class ClientCookie {
-        private final long id;
-        private final byte[] token;
-
-        ClientCookie(ByteBuf byteBuf) {
-            id = byteBuf.readLong();
-            token = new byte[UserSession.TOKEN_LENGTH];
-            byteBuf.readBytes(token);
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public byte[] getToken() {
-            return token;
-        }
-
-        public static ClientCookie getClientCookie(HttpRequest request, String name) {
-            String cookiesHeader = request.headers().get(HttpHeaderNames.COOKIE);
-            if (cookiesHeader != null) {
-                Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);
-                for (Cookie cookie : cookies) {
-                    if (cookie.name().equals(name)) {
-                        ByteBuf tokenBase64 = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
-                        ByteBuf token = Base64.decode(tokenBase64);
-                        tokenBase64.release();
-                        ClientCookie c = new ClientCookie(token);
-                        token.release();
-                        return c;
-                    }
-                }
-            }
-            return null;
-        }
-    }
+    private static final Duration MAX_AGE = Duration.ofDays(1);
 
     public static final String COOKIE_NAME = "session";
-    private static final Duration MAX_AGE = Duration.ofDays(1);
 
     protected HttpUserSession(long user) {
         super(user);
@@ -95,8 +56,11 @@ public class HttpUserSession extends UserSession {
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
 
-    @Override
-    public boolean validate(byte[] token) {
-        return super.validate(token) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
+    public static HttpSessionCookie getCookie(HttpRequest request) {
+        return HttpSessionCookie.getHttpSessionCookie(request, COOKIE_NAME);
+    }
+
+    public boolean validate(HttpSessionCookie cookie) {
+        return validate(cookie.getToken()) && Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE));
     }
 }

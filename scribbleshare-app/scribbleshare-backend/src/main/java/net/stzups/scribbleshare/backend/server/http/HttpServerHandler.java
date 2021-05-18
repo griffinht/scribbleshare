@@ -20,6 +20,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
@@ -328,7 +329,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             //todo check for existing username and user with username
 
             User user;
-            HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
+            HttpSessionCookie cookie = HttpUserSession.getCookie(request);
             if (cookie != null) {
                 HttpUserSession httpSession = database.getHttpSession(cookie.getId());
                 if (httpSession != null) {
@@ -356,7 +357,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
             User user;
-            HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
+            HttpSessionCookie cookie = HttpUserSession.getCookie(request);
             if (cookie != null) {
                 database.removeHttpSession(cookie.getId());//todo timing attack????
 
@@ -425,10 +426,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
-        HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
+        HttpSessionCookie cookie = HttpUserSession.getCookie(request);
         if (cookie != null) {
             HttpUserSession httpSession = database.getHttpSession(cookie.getId());
-            if (httpSession != null && httpSession.validate(cookie.getToken())) {
+            if (httpSession != null && httpSession.validate(cookie)) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 return httpSession.getUser();
             } else {
@@ -454,13 +455,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) {
-        HttpUserSession.ClientCookie cookie = HttpUserSession.ClientCookie.getClientCookie(request, HttpUserSession.COOKIE_NAME);
+        HttpSessionCookie cookie = HttpUserSession.getCookie(request);
         if (cookie == null) {
             User user;
-            HttpUserSession.ClientCookie cookiePersistent = HttpUserSession.ClientCookie.getClientCookie(request, PersistentHttpUserSession.COOKIE_NAME);
+            HttpSessionCookie cookiePersistent = PersistentHttpUserSession.getCookie(request);
             if (cookiePersistent != null) {
                 PersistentHttpUserSession persistentHttpSession = database.getAndRemovePersistentHttpSession(cookiePersistent.getId());
-                if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent.getToken())) {
+                if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent)) {
                     user = database.getUser(persistentHttpSession.getUser());
                 } else {
                     //return false; todo
@@ -481,7 +482,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return true;
         } else {
             HttpUserSession httpSession = database.getHttpSession(cookie.getId());
-            if (httpSession != null && httpSession.validate(cookie.getToken())) {
+            if (httpSession != null && httpSession.validate(cookie)) {
                 return true;
             } else {
                 //todo copied and bad
