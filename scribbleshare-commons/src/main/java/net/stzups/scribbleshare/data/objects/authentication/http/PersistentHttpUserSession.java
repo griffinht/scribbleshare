@@ -2,8 +2,6 @@ package net.stzups.scribbleshare.data.objects.authentication.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import net.stzups.scribbleshare.server.http.HttpUtils;
 
@@ -28,16 +26,18 @@ public class PersistentHttpUserSession extends HttpUserSession {
         super(id, creation, expiration, userId, byteBuf);
     }
 
-    private Cookie getCookie(HttpConfig config) {
-        DefaultCookie cookie = getCookie(config, COOKIE_NAME);
+    @Override
+    protected String getCookieName() {
+        return COOKIE_NAME;
+    }
+
+    @Override
+    public DefaultCookie getCookie(HttpConfig config) {
+        DefaultCookie cookie = super.getCookie(config);
 
         cookie.setMaxAge(MAX_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
 
         return cookie;
-    }
-
-    public static HttpSessionCookie getCookie(HttpRequest request) {
-        return HttpSessionCookie.getHttpSessionCookie(request, COOKIE_NAME);
     }
 
     @Override
