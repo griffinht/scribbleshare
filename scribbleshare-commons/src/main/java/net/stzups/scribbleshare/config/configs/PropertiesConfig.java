@@ -24,7 +24,6 @@ public class PropertiesConfig implements ConfigProvider {
         properties = new Properties();
         File file = new File(path);
         if (file.exists()) {//load user defined config if created
-            Scribbleshare.getLogger().info("Loading config properties from " + file.getName() + "...");
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
                 properties.load(fileInputStream);
             } catch (IOException e) {
