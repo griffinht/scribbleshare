@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.util;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
@@ -17,6 +18,8 @@ import java.util.logging.Logger;
  * Helper class used to format log messages
  */
 public class LogFactory {
+    private static final DateFormat FORMAT = new SimpleDateFormat("[yyyy-MM-dd] [HH:mm:ss] ");
+
     /**
      * Creates or finds a Java logger and sets formatting to the following:
      * [yyyy-MM-dd] [hh:mm:ss] [name] [level (if not INFO)] message
@@ -43,12 +46,10 @@ public class LogFactory {
         Handler handler = new ConsoleHandler();
         logger.addHandler(handler);
         handler.setFormatter(new Formatter() {
-            private final SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd] [HH:mm:ss] ");
-
             @Override
             public String format(LogRecord record) {
                 String level = (record.getLevel() == Level.INFO) ? "" : "[" + record.getLevel() + "] "; // include Logger Level if it is not Level.INFO
-                return  dateFormat.format(Date.from(Instant.now()))
+                return  FORMAT.format(Date.from(Instant.now()))
                         + "[" + name + "] "
                         + level
                         + record.getMessage()
