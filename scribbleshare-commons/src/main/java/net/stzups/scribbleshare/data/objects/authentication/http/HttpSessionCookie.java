@@ -29,7 +29,7 @@ public class HttpSessionCookie {
         return token;
     }
 
-    static HttpSessionCookie getHttpSessionCookie(HttpRequest request, String name) {
+    public static HttpSessionCookie getHttpSessionCookie(HttpRequest request, String name) {
         String cookiesHeader = request.headers().get(HttpHeaderNames.COOKIE);
         if (cookiesHeader != null) {
             Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookiesHeader);

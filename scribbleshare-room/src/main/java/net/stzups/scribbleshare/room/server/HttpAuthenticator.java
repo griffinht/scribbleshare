@@ -60,7 +60,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        HttpSessionCookie cookie = HttpUserSession.getCookie(request);
+        HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie != null) {
             HttpUserSession httpSession = httpSessionDatabase.getHttpSession(cookie);
             if (httpSession != null && httpSession.validate(cookie)) {

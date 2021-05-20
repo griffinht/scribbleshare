@@ -339,7 +339,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 //todo check for existing username and user with username
 
                 User user;
-                HttpSessionCookie cookie = HttpUserSession.getCookie(request);
+                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
                 if (cookie != null) {
                     HttpUserSession httpSession = database.getHttpSession(cookie);
                     if (httpSession != null) {
@@ -367,7 +367,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
 
                 HttpHeaders headers = new DefaultHttpHeaders();
-                HttpSessionCookie cookie = HttpUserSession.getCookie(request);
+                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
                 if (cookie != null) {
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
                     if (httpUserSession != null) {
@@ -382,7 +382,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     }
                 }
 
-                HttpSessionCookie persistentCookie = PersistentHttpUserSession.getCookie(request);
+                HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
                 if (persistentCookie != null) {
                     PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
                     if (persistentHttpUserSession != null) {
@@ -455,7 +455,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
-        HttpSessionCookie cookie = HttpUserSession.getCookie(request);
+        HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie != null) {
             HttpUserSession httpSession = database.getHttpSession(cookie);
             if (httpSession != null && httpSession.validate(cookie)) {
@@ -484,10 +484,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws SQLException {
-        HttpSessionCookie cookie = HttpUserSession.getCookie(request);
+        HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie == null) {
             User user;
-            HttpSessionCookie cookiePersistent = PersistentHttpUserSession.getCookie(request);
+            HttpSessionCookie cookiePersistent = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
             if (cookiePersistent != null) {
                 PersistentHttpUserSession persistentHttpSession = database.getPersistentHttpUserSession(cookiePersistent);
                 if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent)) {

@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -59,10 +58,6 @@ public class HttpUserSession extends UserSession {
         Cookie cookie = getCookie(config);
         cookie.setMaxAge(0);
         HttpUtils.setCookie(headers, cookie);
-    }
-
-    public static HttpSessionCookie getCookie(HttpRequest request) {
-        return HttpSessionCookie.getHttpSessionCookie(request, COOKIE_NAME);
     }
 
     public boolean validate(HttpSessionCookie cookie) {
