@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class Room {
+public class Room {
     private static final int SEND_PERIOD = 1000;
 
     private static final  Map<Document, Room> rooms = new HashMap<>();
@@ -51,7 +51,7 @@ class Room {
         Scribbleshare.getLogger().info("Started " + this);
     }
 
-    static Room getRoom(ScribbleshareDatabase database, Document document) throws DeserializationException {
+    public static Room getRoom(ScribbleshareDatabase database, Document document) throws DeserializationException {
         Room room = rooms.get(document);
         if (room == null) {
             return new Room(database, document);
@@ -59,7 +59,7 @@ class Room {
         return room;
     }
 
-    void end() {
+    public void end() {
         rooms.remove(document);
         if (canvas.isDirty()) {
             ByteBuf byteBuf = Unpooled.buffer();
@@ -70,7 +70,7 @@ class Room {
         Scribbleshare.getLogger().info("Ended room " + this);
     }
 
-    Document getDocument() {
+    public Document getDocument() {
         return document;
     }
 
@@ -82,7 +82,7 @@ class Room {
      * Creates a new client using its channel.
      * todo
      */
-    void addClient(Client client) {
+    public void addClient(Client client) {
 
         //for the new client
         client.queueMessage(new ServerMessageOpenDocument(document, canvas));//todo
@@ -104,7 +104,7 @@ class Room {
      *
      * @param client client to remove
      */
-    void removeClient(Client client) {
+    public void removeClient(Client client) {
         clients.remove(client);
         sendMessage(new ServerMessageRemoveClient(client));
         Scribbleshare.getLogger().info("Removed " + client + " to " + this);
@@ -119,7 +119,7 @@ class Room {
      * @param serverMessage message to send
      * @param except client to exclude
      */
-    void sendPacketExcept(ServerMessage serverMessage, Client except) {
+    public void sendPacketExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
                 client.sendMessage(serverMessage);
@@ -132,13 +132,13 @@ class Room {
      *
      * @param serverMessage the message to send
      */
-    void sendMessage(ServerMessage serverMessage) {
+    public void sendMessage(ServerMessage serverMessage) {
         for (Client client : clients) {
             client.sendMessage(serverMessage);
         }
     }
 
-    void queueMessageExcept(ServerMessage serverMessage, Client except) {
+    public void queueMessageExcept(ServerMessage serverMessage, Client except) {
         for (Client client : clients) {
             if (except != client) {
                 client.queueMessage(serverMessage);
@@ -146,13 +146,13 @@ class Room {
         }
     }
 
-    void queueMessage(ServerMessage serverMessage) {
+    public void queueMessage(ServerMessage serverMessage) {
         for (Client client : clients) {
             client.queueMessage(serverMessage);
         }
     }
 
-    void flushMessages() {
+    public void flushMessages() {
         for (Client client : clients) {
             client.flushMessages();
         }

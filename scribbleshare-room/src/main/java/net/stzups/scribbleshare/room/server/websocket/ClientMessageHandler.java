@@ -6,31 +6,31 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
+import net.stzups.scribbleshare.room.server.websocket.state.State;
+import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
+import net.stzups.scribbleshare.server.http.HttpAuthenticator;
 
 import java.util.logging.Level;
 
 @ChannelHandler.Sharable
 public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMessage> {
     private static final AttributeKey<State> STATE = AttributeKey.valueOf(ClientMessageHandler.class, "STATE");
-    private static final AttributeKey<Client> CLIENT = AttributeKey.valueOf(ClientMessageHandler.class, "CLIENT");
-    private static final AttributeKey<Room> ROOM = AttributeKey.valueOf(ClientMessageHandler.class, "ROOM");
 
     public static Attribute<State> getState(ChannelHandlerContext ctx) {
         return ctx.channel().attr(STATE);
     }
 
-    public static Attribute<Client> getClient(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(CLIENT);
-    }
+    private final ScribbleshareDatabase database;
 
-    public static Attribute<Room> getRoom(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(ROOM);
+    public ClientMessageHandler(ScribbleshareDatabase database) {
+        this.database = database;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        State.INITIAL.setState(ctx);
+        State.setState(ctx, new InitialState(database.getUser(HttpAuthenticator.getUser(ctx))));
     }
 
     @Override

@@ -1,10 +1,9 @@
-package net.stzups.scribbleshare.room.server;
+package net.stzups.scribbleshare.server.http;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
@@ -13,50 +12,39 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCook
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
-
     private static final AttributeKey<Long> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
-    public static long getUser(ChannelHandlerContext ctx) {
+    public static Long getUser(ChannelHandlerContext ctx) {
         return ctx.channel().attr(USER).get();
     }
 
-    private final RoomHttpServerInitializer.Config config;
     private final HttpSessionDatabase httpSessionDatabase;
+    private final String uri;
 
-    public HttpAuthenticator(RoomHttpServerInitializer.Config config, HttpSessionDatabase httpSessionDatabase) {
-        this.config = config;
+    public HttpAuthenticator(HttpSessionDatabase httpSessionDatabase) {
+        this(httpSessionDatabase, null);
+    }
+
+    public HttpAuthenticator(HttpSessionDatabase httpSessionDatabase, String uri) {
         this.httpSessionDatabase = httpSessionDatabase;
+        this.uri = uri;
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Unhandled exception, serving HTTP 500", cause);
-        if (ctx.channel().isActive()) {
-            send(ctx, null, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Override
-    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
-        if (ctx.channel().attr(USER).get() != null) {
-            out.add(request.retain());
-            return;
-        }
-
-        if (!request.uri().equals(config.getWebsocketPath())) {
+    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) throws Exception {
+        if (uri != null && !request.uri().equals(uri)) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             Scribbleshare.getLogger(ctx).warning("Bad uri");
             return;
         }
 
-        if (!request.method().equals(HttpMethod.GET)) {
-            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            Scribbleshare.getLogger(ctx).warning("Bad method");
+        Long user = ctx.channel().attr(USER).get();
+        if (user != null) {
+            out.add(request.retain());
             return;
         }
 

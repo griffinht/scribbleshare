@@ -19,7 +19,7 @@ public class Client {
 
     private List<ServerMessage> messages = new ArrayList<>();
 
-    Client(User user, Channel channel) {
+    public Client(User user, Channel channel) {
         this.user = user;
         this.channel = channel;
         regenerateId();
@@ -42,22 +42,22 @@ public class Client {
         }
     }
 
-    void queueMessage(ServerMessage serverMessage) {
+    public void queueMessage(ServerMessage serverMessage) {
         messages.add(serverMessage);
     }
 
-    void sendMessage(ServerMessage serverMessage) {
+    public void sendMessage(ServerMessage serverMessage) {
         channel.writeAndFlush(Collections.singletonList(serverMessage));
     }
 
-    void flushMessages() {
+    public void flushMessages() {
         if (messages.size() > 0) {
             channel.writeAndFlush(messages);
             messages = new ArrayList<>();//clear() won't work here as the above line does not block and writes later
         }
     }
 
-    void disconnect() {
+    public void disconnect() {
         try {
             channel.close().sync();
         } catch (InterruptedException e) {
