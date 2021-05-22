@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="scribbleshare-backend" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="net.stzups.scribbleshare.backend.ScribbleshareBackend" />
+    <module name="scribbleshare.scribbleshare-backend.main" />
+    <option name="VM_PARAMETERS" value="-Dio.netty.leakDetectionLevel=paranoid" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scribbleshare-app" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
