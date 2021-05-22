@@ -84,6 +84,16 @@ public class Canvas {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Canvas)) {
+            return false;
+        }
+
+        Canvas canvas = (Canvas) object;
+        return canvas.canvasObjects.equals(canvasObjects);
+    }
+
+    @Override
     public String toString() {
         return "Canvas{canvasObjects=" + canvasObjects.size() + "}";
     }

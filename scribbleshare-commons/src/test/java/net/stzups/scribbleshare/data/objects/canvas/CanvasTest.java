@@ -18,10 +18,10 @@ public class CanvasTest {
         c = new Canvas(byteBuf);
         byteBuf.release();
 
-        assertEquals(canvas.getCanvasObjects(), c.getCanvasObjects());
+        assertEquals(canvas, c);
     }
 
-    private static final int MULTIPLE_AMOUNT = 20;
+    private static final int MULTIPLE_AMOUNT = 5;
 
     @Test
     public void serializeEmptyMultiple() throws DeserializationException {
@@ -41,9 +41,6 @@ public class CanvasTest {
             c[i] = new Canvas(byteBuf);
         }
 
-        assertEquals(canvases.length, c.length);
-        for (int i = 0; i < c.length; i++) {
-            assertEquals(canvases[i].getCanvasObjects(), c[i].getCanvasObjects());
-        }
+        assertArrayEquals(canvases, c);
     }
 }
