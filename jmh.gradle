@@ -1,0 +1,17 @@
+sourceSets {
+    jmh {
+        compileClasspath += sourceSets.test.runtimeClasspath
+        runtimeClasspath += sourceSets.test.runtimeClasspath
+    }
+}
+
+dependencies {
+    jmhCompile project
+    jmhCompile 'org.openjdk.jmh:jmh-core:1.18'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.18'
+}
+
+task jmh(type: JavaExec, description: 'Executing JMH benchmarks') {
+    classpath = sourceSets.jmh.runtimeClasspath
+    main = 'org.openjdk.jmh.Main'
+}

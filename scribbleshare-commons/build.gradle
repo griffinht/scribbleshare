@@ -2,16 +2,8 @@ plugins {
     id 'java-library'
 }
 
-repositories {
-    mavenCentral()
-}
-
-sourceSets {
-    jmh {
-        compileClasspath += sourceSets.test.runtimeClasspath
-        runtimeClasspath += sourceSets.test.runtimeClasspath
-    }
-}
+apply from: rootProject.file('test.gradle')
+apply from: rootProject.file('jmh.gradle')
 
 dependencies {
     api 'io.netty:netty-all:4.1.55.Final'
@@ -19,20 +11,4 @@ dependencies {
     implementation 'redis.clients:jedis:3.5.2'
     implementation 'at.favre.lib:bcrypt:0.9.0'
     api 'com.github.stzups:config:master-SNAPSHOT'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-    jmhCompile project
-    jmhCompile 'org.openjdk.jmh:jmh-core:1.18'
-    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.18'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-task jmh(type: JavaExec, description: 'Executing JMH benchmarks') {
-    classpath = sourceSets.jmh.runtimeClasspath
-    main = 'org.openjdk.jmh.Main'
 }
