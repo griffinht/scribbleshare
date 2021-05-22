@@ -17,11 +17,6 @@ public class Line extends CanvasObject {
             this.y = byteBuf.readShort();
         }
 
-        public Point(short x, short y) {
-            this.x = x;
-            this.y = y;
-        }
-
         private void serialize(ByteBuf byteBuf) {
             byteBuf.writeShort(x);
             byteBuf.writeShort(y);
