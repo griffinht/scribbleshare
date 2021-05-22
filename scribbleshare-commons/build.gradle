@@ -2,8 +2,8 @@ plugins {
     id 'java-library'
 }
 
-apply from: rootProject.file('test.gradle')
-apply from: rootProject.file('jmh.gradle')
+apply from: rootProject.file('gradle/test.gradle')
+apply from: rootProject.file('gradle/jmh.gradle')
 
 dependencies {
     api 'io.netty:netty-all:4.1.55.Final'
