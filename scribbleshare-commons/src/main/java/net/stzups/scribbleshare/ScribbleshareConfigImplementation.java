@@ -1,9 +1,9 @@
 package net.stzups.scribbleshare;
 
-import net.stzups.scribbleshare.config.Config;
-import net.stzups.scribbleshare.config.ConfigKey;
-import net.stzups.scribbleshare.config.OptionalConfigKey;
-import net.stzups.scribbleshare.config.RequiredConfigKey;
+import net.stzups.config.Config;
+import net.stzups.config.ConfigKey;
+import net.stzups.config.OptionalConfigKey;
+import net.stzups.config.RequiredConfigKey;
 
 public class ScribbleshareConfigImplementation extends Config implements ScribbleshareConfig {
     private static final ConfigKey<String> NAME = new OptionalConfigKey<>("name", "Scribbleshare");
