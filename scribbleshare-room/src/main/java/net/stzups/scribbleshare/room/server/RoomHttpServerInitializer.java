@@ -31,7 +31,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
 
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
-    private final ClientMessageHandler clientMessageHandler = new ClientMessageHandler();
+    private final ClientMessageHandler clientMessageHandler;
     private final HttpAuthenticator httpAuthenticator;
 
 
@@ -39,6 +39,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         super(config);
         this.config = config;
         this.database = database;
+        clientMessageHandler = new ClientMessageHandler(database);
         httpAuthenticator = new HttpAuthenticator(database);
     }
 

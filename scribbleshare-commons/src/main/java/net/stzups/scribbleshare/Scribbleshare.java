@@ -7,9 +7,9 @@ import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.server.Server;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 import net.stzups.scribbleshare.util.LogFactory;
-import net.stzups.scribbleshare.config.configs.ArgumentConfig;
-import net.stzups.scribbleshare.config.configs.EnvironmentVariableConfig;
-import net.stzups.scribbleshare.config.configs.PropertiesConfig;
+import net.stzups.config.configs.ArgumentConfig;
+import net.stzups.config.configs.EnvironmentVariableConfig;
+import net.stzups.config.configs.PropertiesConfig;
 
 import java.util.logging.Logger;
 
