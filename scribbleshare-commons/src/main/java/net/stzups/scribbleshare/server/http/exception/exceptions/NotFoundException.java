@@ -1,7 +1,7 @@
-package net.stzups.scribbleshare.backend.server.http.exception.exceptions;
+package net.stzups.scribbleshare.server.http.exception.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import net.stzups.scribbleshare.backend.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
 
 public class NotFoundException extends HttpException {
     public NotFoundException(String message) {

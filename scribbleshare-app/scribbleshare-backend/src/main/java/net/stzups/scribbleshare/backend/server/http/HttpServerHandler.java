@@ -14,10 +14,12 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.http.exception.HttpException;
-import net.stzups.scribbleshare.backend.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.backend.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.backend.server.http.exception.exceptions.UnauthorizedException;
+import net.stzups.scribbleshare.server.http.Form;
+import net.stzups.scribbleshare.server.http.HttpUtils;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -32,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -60,11 +61,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String DEFAULT_FILE = "index.html"; // / -> /index.html
     private static final String DEFAULT_FILE_EXTENSION = ".html"; // /index -> index.html
 
-    // /index?key=value&otherKey=value
-    private static final String QUERY_DELIMITER = "?";
-    private static final String QUERY_SEPARATOR = "&";
-    private static final String QUERY_PAIR_SEPARATOR = "=";
-    private static final String QUERY_REGEX = QUERY_DELIMITER + QUERY_SEPARATOR + QUERY_PAIR_SEPARATOR;
 
     // abc-ABC_123.file
     private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
@@ -146,10 +142,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         String[] route;
         try {
             uri = getUri(request.uri());
-            splitQuery = splitQuery(uri);
+            splitQuery = HttpUtils.splitQuery(uri);
             path = splitQuery[0];
             rawQuery = splitQuery[1];
-            queries = parseQuery(rawQuery);
+            queries = HttpUtils.parseQuery(rawQuery);
             route = getRoute(path);
         } catch (BadRequestException e) {
             throw new NotFoundException("Exception while parsing URI", e);
@@ -491,7 +487,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
 
-    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + QUERY_REGEX + FILE_NAME_REGEX + "]+$");
+    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + HttpUtils.QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
     /** Sanitizes uri */
     public static String getUri(String uri) throws BadRequestException {
@@ -536,46 +532,5 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-    /**
-     * Returns String array with length of 2, with the first element as the path and the second element as the raw query
-     * Example:
-     * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
-     */
-    public static String[] splitQuery(String uri) throws BadRequestException {
-        int index = uri.lastIndexOf(QUERY_DELIMITER);
-        if (index <= 0) { // check for a query
-            if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) {
-                throw new BadRequestException("Empty query contains illegal characters");
-            } else {
-                return new String[] {uri, ""};
-            }
-        } else if (uri.indexOf(QUERY_DELIMITER) != index) {
-            throw new BadRequestException("Encountered multiple " + QUERY_DELIMITER + " in uri, there should only be one");
-        } else {
-            return new String[] {uri.substring(0, index), uri.substring(index + 1)};
-        }
-    }
 
-    /**
-     * Parses key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
-     */
-    public static Map<String, String> parseQuery(String query) throws BadRequestException {
-        if (query.isEmpty())
-            return Collections.emptyMap(); // no query to parse
-
-        Map<String, String> queries = new HashMap<>();
-        String[] keyValuePairs = query.split(QUERY_SEPARATOR);
-        for (String keyValuePair : keyValuePairs) {
-            String[] split = keyValuePair.split(QUERY_PAIR_SEPARATOR, 3); // a limit of 2 (expected) would not detect malformed queries such as ?key==, so we need to go one more
-            if (split.length == 1) { // key with no value, such as ?key
-                queries.put(split[0], "");
-            } else if (split.length != 2) {
-                throw new BadRequestException("Each key should have one value of query " + query);
-            } else {
-                queries.put(split[0], split[1]);
-            }
-        }
-
-        return queries;
-    }
 }

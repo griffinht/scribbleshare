@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.backend.server.http.exception;
+package net.stzups.scribbleshare.server.http.exception;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 

@@ -1,9 +1,9 @@
-package net.stzups.scribbleshare.backend.server.http;
+package net.stzups.scribbleshare.server.http;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import net.stzups.scribbleshare.backend.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class Form {
 
         //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
 
-        this.form = HttpServerHandler.parseQuery(request.content().toString(StandardCharsets.UTF_8));
+        this.form = HttpUtils.parseQuery(request.content().toString(StandardCharsets.UTF_8));
     }
 
     public String getText(String field) throws BadRequestException {
