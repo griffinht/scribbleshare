@@ -15,7 +15,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.Form;
-import net.stzups.scribbleshare.server.http.HttpUtils;
+import net.stzups.scribbleshare.server.http.Query;
+import net.stzups.scribbleshare.server.http.Route;
+import net.stzups.scribbleshare.server.http.Uri;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
@@ -36,11 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
@@ -62,8 +60,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final String DEFAULT_FILE_EXTENSION = ".html"; // /index -> index.html
 
 
-    // abc-ABC_123.file
-    private static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
+
 
 
 
@@ -134,19 +131,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        final String uri;
-        final String[] splitQuery;
-        final String path;
-        final String rawQuery;
-        Map<String, String> queries;
-        String[] route;
+        final Query query;
+        final Route route;
         try {
-            uri = getUri(request.uri());
-            splitQuery = HttpUtils.splitQuery(uri);
-            path = splitQuery[0];
-            rawQuery = splitQuery[1];
-            queries = HttpUtils.parseQuery(rawQuery);
-            route = getRoute(path);
+            query = new Query(request.uri());
+            route = getRoute(query);
         } catch (BadRequestException e) {
             throw new NotFoundException("Exception while parsing URI", e);
         }
@@ -244,7 +233,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         if (request.method().equals(HttpMethod.POST)) {
             //todo validate for extra fields that should not happen
-            if (uri.equals(LOGIN_PATH)) {
+            if (query.path().equals(LOGIN_PATH)) {
                 Form form = new Form(request);
 
                 String username = form.getText("username");
@@ -277,7 +266,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
                 sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                 return;
-            } else if (uri.equals(REGISTER_PATH)) {
+            } else if (query.path().equals(REGISTER_PATH)) {
                 Form form = new Form(request);
 
                 // validate
@@ -318,7 +307,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 sendRedirect(ctx, request, REGISTER_SUCCESS);
                 return;
-            } else if (uri.equals(LOGOUT_PAGE)) {
+            } else if (query.path().equals(LOGOUT_PAGE)) {
                 Form form = new Form(request);//todo necessary?
 
                 HttpHeaders headers = new DefaultHttpHeaders();
@@ -368,37 +357,39 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         // redirects
-        if (path.endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE.length()) + rawQuery);
+        if (query.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - DEFAULT_FILE.length()) + query.rawQuery());
             return;
-        } else if ((path + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, request, path.substring(0, path.length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + rawQuery);
+        } else if ((query.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + query.rawQuery());
             return;
-        } else if (path.endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, request, path.substring(0, path.length() - DEFAULT_FILE_EXTENSION.length()) + rawQuery);
+        } else if (query.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - DEFAULT_FILE_EXTENSION.length()) + query.rawQuery());
             return;
         }
 
         // get filesystem filePath from provided filePath
         final String filePath;
         try {
-            filePath = getFilePath(path);
+            filePath = getFilePath(query.path());
         } catch (BadRequestException e) {
             throw new NotFoundException("Exception while getting file path for http request", e);
         }
 
+        //todo this is mostly for debug
         File root;
         if (filePath.endsWith(".js")) {
             root = jsRoot;
         } else {
             root = httpRoot;
         }
+
         File file = new File(root, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
             if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
-                sendRedirect(ctx, request, path + "/" + rawQuery);
+                sendRedirect(ctx, request, query.path() + "/" + query.rawQuery());
             } else {
-                send(ctx, request, HttpResponseStatus.NOT_FOUND);
+                throw new NotFoundException("File at path " + filePath + " not found");
             }
             return;
         }
@@ -487,29 +478,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
 
-    private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + HttpUtils.QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
-    /** Sanitizes uri */
-    public static String getUri(String uri) throws BadRequestException {
-        if (!ALLOWED_CHARACTERS.matcher(uri).matches())
-            throw new BadRequestException("URI contains illegal characters");
-
-        return uri;
-    }
-
-    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
-
-    private static String[] getRoute(String path) throws BadRequestException {
-        if (!path.startsWith("/"))
-            throw new BadRequestException("Route must start with a /");
-
-        String[] route = path.substring(1).split("/");
-        if (route.length == 0) {
-            return new String[] {""};
-        } else {
-            return route;
-        }
-    }
 
     /** Converts uri to filesystem path */
     private static String getFilePath(String path) throws BadRequestException {
