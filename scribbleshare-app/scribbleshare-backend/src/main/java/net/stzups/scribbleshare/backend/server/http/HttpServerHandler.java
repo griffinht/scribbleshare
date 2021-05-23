@@ -17,6 +17,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.server.http.exception.HttpException;
 import net.stzups.scribbleshare.backend.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.backend.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.backend.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -158,38 +159,30 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         switch (route[0]) {
             case "api": {
-                if (route.length < 2) {
-                    send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                    return;
-                }
+                if (route.length < 2)
+                    throw new NotFoundException("No route for api");
 
                 switch (route[1]) {
                     case "document": {
-                        if (route.length != 3 && route.length != 4) {
-                            break;
-                        }
+                        if (route.length != 3 && route.length != 4)
+                            throw new NotFoundException("Incorrect route length");
 
                         Long userId = authenticate(ctx, request);
-                        if (userId == null) {
-                            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
-                            return;
-                        }
 
                         User user = database.getUser(userId);
-                        if (user == null) {
-                            Scribbleshare.getLogger(ctx).warning("User with " + userId + " authenticated but does not exist");
-                            break;
-                        }
+                        if (user == null) //todo
+                            throw new UnauthorizedException("User with " + userId + " authenticated but does not exist");
 
                         long documentId;
                         try {
                             documentId = Long.parseLong(route[2]);
                         } catch (NumberFormatException e) {
-                            break;
+                            throw new BadRequestException("Exception while parsing " + route[2], e);
                         }
 
                         if (!user.getOwnedDocuments().contains(documentId) && !user.getSharedDocuments().contains(documentId)) {
-                            break; //user cant do this to documents they don't have access to todo public documents
+                            throw new NotFoundException("User tried to open document they don't have access to");
+                            //todo public documents
                         }
 
                         // user has access to the document
@@ -197,8 +190,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         if (route.length == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
                                 //todo
-                                send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                                return;
+                                throw new NotFoundException("todo not implemented yet");
                                 /*Resource resource = BackendServerInitializer.getDatabase(ctx).getResource(documentId, documentId);
                                 if (resource == null) { //indicates an empty unsaved canvas, so serve that
                                     send(ctx, request, Canvas.getEmptyCanvas());
@@ -209,10 +201,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
                                 Document document = database.getDocument(documentId);
-                                if (document == null) {
-                                    Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
-                                    break;
-                                }
+                                if (document == null)
+                                    throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
+
                                 send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
                             } else {
                                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
@@ -223,20 +214,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             try {
                                 resourceId = Long.parseLong(route[3]);
                             } catch (NumberFormatException e) {
-                                break;
+                                throw new BadRequestException("Exception while parsing " + route[3], e);
                             }
 
                             Document document = database.getDocument(documentId);
-                            if (document == null) {
-                                Scribbleshare.getLogger(ctx).warning("Document with id " + documentId + " for user " + user + " somehow does not exist");
-                                break;
-                            }
+                            if (document == null)
+                                throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
                                 Resource resource = database.getResource(resourceId, documentId);
                                 if (resource == null) {
-                                    break;
+                                    throw new NotFoundException("Resource does not exist");
                                 }
 
                                 HttpHeaders headers = new DefaultHttpHeaders();
@@ -248,9 +237,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         }
                         return;
                     }
+                    default:
+                        throw new NotFoundException("Bad route");
                 }
-                send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                return;
             }
 
         }
@@ -426,7 +415,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
     }
 
-    private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
+    private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) throws UnauthorizedException {
         HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie != null) {
             HttpUserSession httpSession = database.getHttpSession(cookie);
@@ -442,7 +431,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             Scribbleshare.getLogger(ctx).info("No authentication");
         }
 
-        return null;
+        throw new UnauthorizedException("Bad authentication");
     }
 
     private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) throws SQLException {

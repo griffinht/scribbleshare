@@ -8,7 +8,7 @@ public class NotFoundException extends HttpException {
         super(message);
     }
 
-    public NotFoundException(String message, HttpException cause) {
+    public NotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
