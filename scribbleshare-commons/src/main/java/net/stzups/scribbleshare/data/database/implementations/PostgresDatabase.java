@@ -56,7 +56,12 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setBinaryStream(3, new ByteArrayInputStream(login.getHashedPassword()));
             preparedStatement.execute();
         } catch (SQLException e) {
-            return false;
+            if (e.getSQLState().equals("23505")) { // PostgreSQL error code unique_violation
+                return false;
+            } else {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         return true;
