@@ -21,5 +21,6 @@ public interface ScribbleshareDatabase extends PersistentHttpSessionDatabase, Re
     InviteCode getInviteCode(String code);
     InviteCode getInviteCode(Document document);
     Login getLogin(String username);
-    void addLogin(Login login);
+    /** false if the username already existed */
+    boolean addLogin(Login login);
 }

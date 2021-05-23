@@ -336,8 +336,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     return;
                 }
 
-                //todo check for existing username and user with username
-
                 User user;
                 HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
                 if (cookie != null) {
@@ -353,9 +351,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     database.addUser(user);
                 }
                 Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
-                database.addLogin(login);
+                if (!database.addLogin(login)) {
+                    Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
+                    sendRedirect(ctx, request, REGISTER_PAGE);
+                    return;
+                }
 
-                System.out.println(username + ", register " + password);
+                Scribbleshare.getLogger(ctx).info("Registered with username " + username);
 
                 sendRedirect(ctx, request, REGISTER_SUCCESS);
                 return;
