@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -127,8 +128,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             channelRead(ctx, request);
         } catch (HttpException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, e.responseStatus());
         } catch (Exception e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }

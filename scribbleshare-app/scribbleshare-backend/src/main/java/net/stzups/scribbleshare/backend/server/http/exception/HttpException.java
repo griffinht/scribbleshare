@@ -8,7 +8,7 @@ public abstract class HttpException extends Exception {
     }
 
     protected HttpException(String message, HttpException cause) {
-        super(cause);
+        super(message, cause);
     }
 
     public abstract HttpResponseStatus responseStatus();
