@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.backend.server.http;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import net.stzups.scribbleshare.backend.server.http.exception.exceptions.BadRequestException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;

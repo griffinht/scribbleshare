@@ -14,6 +14,9 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.backend.server.http.exception.HttpException;
+import net.stzups.scribbleshare.backend.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.backend.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -119,9 +122,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
+        try {
+            channelRead(ctx, request);
+        } catch (HttpException e) {
+            send(ctx, request, e.responseStatus());
+        } catch (Exception e) {
+            send(ctx, request, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
+    private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         final String uri;
         final String[] splitQuery;
         final String path;
@@ -136,9 +148,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             queries = parseQuery(rawQuery);
             route = getRoute(path);
         } catch (BadRequestException e) {
-            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling http request", e);
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
+            throw new NotFoundException("Exception while parsing URI", e);
         }
 
         // check if this is a special request
@@ -244,126 +254,121 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         //login
 
-        try {
-            if (request.method().equals(HttpMethod.POST)) {
-                //todo validate for extra fields that should not happen
-                if (uri.equals(LOGIN_PATH)) {
-                    Form form = new Form(request);
+        if (request.method().equals(HttpMethod.POST)) {
+            //todo validate for extra fields that should not happen
+            if (uri.equals(LOGIN_PATH)) {
+                Form form = new Form(request);
 
-                    String username = form.getText("username");
-                    String password = form.getText("password");
-                    boolean remember = form.getCheckbox("remember");
+                String username = form.getText("username");
+                String password = form.getText("password");
+                boolean remember = form.getCheckbox("remember");
 
 
-                    System.out.println(username + ", " + password + ", " + remember);
+                System.out.println(username + ", " + password + ", " + remember);
 
-                    Login login = database.getLogin(username);
-                    Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
-                    if (id == null) {
-                        //todo rate limit and generic error handling
-                        if (login == null) {
-                            Scribbleshare.getLogger(ctx).info("Bad username " + username);
-                        } else {
-                            Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
-                        }
-
-                        sendRedirect(ctx, request, LOGIN_PAGE);
-                        return;
+                Login login = database.getLogin(username);
+                Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
+                if (id == null) {
+                    //todo rate limit and generic error handling
+                    if (login == null) {
+                        Scribbleshare.getLogger(ctx).info("Bad username " + username);
+                    } else {
+                        Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
                     }
 
-                    HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                    HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
-                    database.addHttpSession(userSession);
-                    if (remember) {
-                        PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
-                        database.addPersistentHttpUserSession(persistentHttpUserSession);
-                    }
-                    sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
+                    sendRedirect(ctx, request, LOGIN_PAGE);
                     return;
-                } else if (uri.equals(REGISTER_PATH)) {
-                    Form form = new Form(request);
+                }
 
-                    // validate
+                HttpHeaders httpHeaders = new DefaultHttpHeaders();
+                HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
+                database.addHttpSession(userSession);
+                if (remember) {
+                    PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+                    database.addPersistentHttpUserSession(persistentHttpUserSession);
+                }
+                sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
+                return;
+            } else if (uri.equals(REGISTER_PATH)) {
+                Form form = new Form(request);
 
-                    String username = form.getText("username");
-                    String password = form.getText("password");
+                // validate
 
-                    //todo validate
-                    if (false) {
-                        //todo rate limit and generic error handling
+                String username = form.getText("username");
+                String password = form.getText("password");
 
-                        sendRedirect(ctx, request, REGISTER_PAGE);
-                        return;
-                    }
+                //todo validate
+                if (false) {
+                    //todo rate limit and generic error handling
 
-                    User user;
-                    HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-                    if (cookie != null) {
-                        HttpUserSession httpSession = database.getHttpSession(cookie);
-                        if (httpSession != null) {
-                            user = database.getUser(httpSession.getUser());
-                        } else {
-                            user = new User(username);
-                            database.addUser(user);
-                        }
+                    sendRedirect(ctx, request, REGISTER_PAGE);
+                    return;
+                }
+
+                User user;
+                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
+                if (cookie != null) {
+                    HttpUserSession httpSession = database.getHttpSession(cookie);
+                    if (httpSession != null) {
+                        user = database.getUser(httpSession.getUser());
                     } else {
                         user = new User(username);
                         database.addUser(user);
                     }
-                    Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
-                    if (!database.addLogin(login)) {
-                        Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
-                        sendRedirect(ctx, request, REGISTER_PAGE);
-                        return;
-                    }
-
-                    Scribbleshare.getLogger(ctx).info("Registered with username " + username);
-
-                    sendRedirect(ctx, request, REGISTER_SUCCESS);
-                    return;
-                } else if (uri.equals(LOGOUT_PAGE)) {
-                    Form form = new Form(request);//todo necessary?
-
-                    HttpHeaders headers = new DefaultHttpHeaders();
-                    HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-                    if (cookie != null) {
-                        HttpUserSession httpUserSession = database.getHttpSession(cookie);
-                        if (httpUserSession != null) {
-                            if (httpUserSession.validate(cookie)) {
-                                database.expireHttpSession(httpUserSession);
-                                httpUserSession.clearCookie(config, headers);
-                            } else {
-                                Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
-                            }
-                        } else {
-                            Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent session");
-                        }
-                    }
-
-                    HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
-                    if (persistentCookie != null) {
-                        PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
-                        if (persistentHttpUserSession != null) {
-                            if (persistentHttpUserSession.validate(persistentCookie)) {
-                                database.expirePersistentHttpUserSession(persistentHttpUserSession);
-                                persistentHttpUserSession.clearCookie(config, headers);
-                            } else {
-                                Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
-                                //todo error
-                            }
-                        } else {
-                            Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
-                            //todo error
-                        }
-                    }
-
-                    sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
+                } else {
+                    user = new User(username);
+                    database.addUser(user);
+                }
+                Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
+                if (!database.addLogin(login)) {
+                    Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
+                    sendRedirect(ctx, request, REGISTER_PAGE);
                     return;
                 }
+
+                Scribbleshare.getLogger(ctx).info("Registered with username " + username);
+
+                sendRedirect(ctx, request, REGISTER_SUCCESS);
+                return;
+            } else if (uri.equals(LOGOUT_PAGE)) {
+                Form form = new Form(request);//todo necessary?
+
+                HttpHeaders headers = new DefaultHttpHeaders();
+                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
+                if (cookie != null) {
+                    HttpUserSession httpUserSession = database.getHttpSession(cookie);
+                    if (httpUserSession != null) {
+                        if (httpUserSession.validate(cookie)) {
+                            database.expireHttpSession(httpUserSession);
+                            httpUserSession.clearCookie(config, headers);
+                        } else {
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
+                        }
+                    } else {
+                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent session");
+                    }
+                }
+
+                HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
+                if (persistentCookie != null) {
+                    PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
+                    if (persistentHttpUserSession != null) {
+                        if (persistentHttpUserSession.validate(persistentCookie)) {
+                            database.expirePersistentHttpUserSession(persistentHttpUserSession);
+                            persistentHttpUserSession.clearCookie(config, headers);
+                        } else {
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
+                            //todo error
+                        }
+                    } else {
+                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
+                        //todo error
+                    }
+                }
+
+                sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
+                return;
             }
-        } catch (BadRequestException e) {
-            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-            return;
         }
 
 
@@ -391,9 +396,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             filePath = getFilePath(path);
         } catch (BadRequestException e) {
-            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while getting file path for http request", e);
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
+            throw new NotFoundException("Exception while getting file path for http request", e);
         }
 
         File root;
