@@ -299,7 +299,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 sendRedirect(ctx, request, REGISTER_SUCCESS);
                 return;
-            } else if (route.path().equals(LOGOUT_PAGE)) {
+            } else if (route.path().equals(LOGOUT_PATH)) {
                 Form form = new Form(request);//todo necessary?
 
                 HttpHeaders headers = new DefaultHttpHeaders();
