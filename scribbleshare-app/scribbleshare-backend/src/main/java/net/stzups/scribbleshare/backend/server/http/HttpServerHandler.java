@@ -15,7 +15,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.Form;
-import net.stzups.scribbleshare.server.http.Query;
 import net.stzups.scribbleshare.server.http.Route;
 import net.stzups.scribbleshare.server.http.Uri;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
@@ -39,6 +38,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
@@ -131,27 +131,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        final Query query;
         final Route route;
         try {
-            query = new Query(request.uri());
-            route = getRoute(query);
+            route = new Route(request.uri());
         } catch (BadRequestException e) {
             throw new NotFoundException("Exception while parsing URI", e);
         }
 
         // check if this is a special request
 
-        switch (route[0]) {
+        switch (route.get(0)) {
             case "api": {
-                if (route.length < 2)
-                    throw new NotFoundException("No route for api");
-
-                switch (route[1]) {
+                switch (route.get(1)) {
                     case "document": {
-                        if (route.length != 3 && route.length != 4)
-                            throw new NotFoundException("Incorrect route length");
-
                         Long userId = authenticate(ctx, request);
 
                         User user = database.getUser(userId);
@@ -160,9 +152,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         long documentId;
                         try {
-                            documentId = Long.parseLong(route[2]);
+                            documentId = Long.parseLong(route.get(2));
                         } catch (NumberFormatException e) {
-                            throw new BadRequestException("Exception while parsing " + route[2], e);
+                            throw new BadRequestException("Exception while parsing " + route.get(2), e);
                         }
 
                         if (!user.getOwnedDocuments().contains(documentId) && !user.getSharedDocuments().contains(documentId)) {
@@ -172,7 +164,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                         // user has access to the document
 
-                        if (route.length == 3) { // get document or submit new resource to document
+                        if (route.length() == 3) { // get document or submit new resource to document
                             if (request.method().equals(HttpMethod.GET)) {
                                 //todo
                                 throw new NotFoundException("todo not implemented yet");
@@ -197,9 +189,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             // does the document have this resource?
                             long resourceId;
                             try {
-                                resourceId = Long.parseLong(route[3]);
+                                resourceId = Long.parseLong(route.get(3));
                             } catch (NumberFormatException e) {
-                                throw new BadRequestException("Exception while parsing " + route[3], e);
+                                throw new BadRequestException("Exception while parsing " + route.get(3), e);
                             }
 
                             Document document = database.getDocument(documentId);
@@ -233,7 +225,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         if (request.method().equals(HttpMethod.POST)) {
             //todo validate for extra fields that should not happen
-            if (query.path().equals(LOGIN_PATH)) {
+            if (route.path().equals(LOGIN_PATH)) {
                 Form form = new Form(request);
 
                 String username = form.getText("username");
@@ -266,7 +258,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
                 sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                 return;
-            } else if (query.path().equals(REGISTER_PATH)) {
+            } else if (route.path().equals(REGISTER_PATH)) {
                 Form form = new Form(request);
 
                 // validate
@@ -307,7 +299,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 sendRedirect(ctx, request, REGISTER_SUCCESS);
                 return;
-            } else if (query.path().equals(LOGOUT_PAGE)) {
+            } else if (route.path().equals(LOGOUT_PAGE)) {
                 Form form = new Form(request);//todo necessary?
 
                 HttpHeaders headers = new DefaultHttpHeaders();
@@ -357,21 +349,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         // redirects
-        if (query.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - DEFAULT_FILE.length()) + query.rawQuery());
+        if (route.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
+            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
             return;
-        } else if ((query.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + query.rawQuery());
+        } else if ((route.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
+            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
             return;
-        } else if (query.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, request, query.path().substring(0, query.path().length() - DEFAULT_FILE_EXTENSION.length()) + query.rawQuery());
+        } else if (route.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
+            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
             return;
         }
 
         // get filesystem filePath from provided filePath
         final String filePath;
         try {
-            filePath = getFilePath(query.path());
+            filePath = getFilePath(route.path());
         } catch (BadRequestException e) {
             throw new NotFoundException("Exception while getting file path for http request", e);
         }
@@ -387,7 +379,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         File file = new File(root, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
             if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
-                sendRedirect(ctx, request, query.path() + "/" + query.rawQuery());
+                sendRedirect(ctx, request, route.path() + "/" + route.rawQuery());
             } else {
                 throw new NotFoundException("File at path " + filePath + " not found");
             }
@@ -478,7 +470,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
 
-
+    private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\\\" + File.separator + "." + Uri.FILE_NAME_REGEX + "]+$");
 
     /** Converts uri to filesystem path */
     private static String getFilePath(String path) throws BadRequestException {

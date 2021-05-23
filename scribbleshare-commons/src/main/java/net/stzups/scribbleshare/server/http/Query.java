@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Query {
+public class Query extends Uri {
 
     // /index?key=value&otherKey=value
     private static final String QUERY_DELIMITER = "?";
@@ -20,13 +20,14 @@ public class Query {
     private final Map<String, String> queries;
 
     public Query(String uri) throws BadRequestException {
+        super(uri);
         String[] splitQuery = splitQuery(uri);
         path = splitQuery[0];
         rawQuery = splitQuery[1];
         queries = parseQuery(rawQuery);
     }
 
-    public String getQuery(String key) throws BadRequestException {
+    public String get(String key) throws BadRequestException {
         String query = queries.get(key);
         if (query == null)
             throw new BadRequestException("Missing query for key " + key);
