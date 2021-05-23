@@ -48,7 +48,7 @@ public class Query extends Uri {
      * Example:
      * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
      */
-    public static String[] splitQuery(String uri) throws BadRequestException {
+    private String[] splitQuery(String uri) throws BadRequestException {
         int index = uri.lastIndexOf(QUERY_DELIMITER);
         if (index <= 0) { // check for a query
             if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) {

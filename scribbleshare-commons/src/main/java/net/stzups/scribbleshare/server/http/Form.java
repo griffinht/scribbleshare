@@ -22,7 +22,7 @@ public class Form {
 
         //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
 
-        this.form = HttpUtils.parseQuery(request.content().toString(StandardCharsets.UTF_8));
+        this.form = Query.parseQuery(request.content().toString(StandardCharsets.UTF_8));
     }
 
     public String getText(String field) throws BadRequestException {
