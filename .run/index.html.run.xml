@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="index.html" type="JavascriptDebugType" uri="http://localhost:3456">
-    <method v="2">
-      <option name="TypeScript.Before.Run" enabled="true" FAIL_ON_ERROR="false" CONFIG_PATH="C:\Users\Griffin\git\scribbleshare\scribbleshare-app\scribbleshare-frontend\tsconfig.json" />
-    </method>
-  </configuration>
-</component>
