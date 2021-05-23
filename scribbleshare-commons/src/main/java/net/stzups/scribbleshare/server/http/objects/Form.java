@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.server.http;
+package net.stzups.scribbleshare.server.http.objects;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;

@@ -1,10 +1,6 @@
-package net.stzups.scribbleshare.server.http;
+package net.stzups.scribbleshare.server.http.objects;
 
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-
-import java.io.File;
-import java.util.regex.Pattern;
 
 public class Route extends Query {
 

@@ -10,8 +10,8 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
-import net.stzups.scribbleshare.server.http.HttpAuthenticator;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
+import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 
 import javax.net.ssl.SSLException;
 

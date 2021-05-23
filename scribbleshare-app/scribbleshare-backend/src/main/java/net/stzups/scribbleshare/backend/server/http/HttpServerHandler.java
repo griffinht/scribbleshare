@@ -14,13 +14,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.server.http.Form;
-import net.stzups.scribbleshare.server.http.Route;
-import net.stzups.scribbleshare.server.http.Uri;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -30,6 +23,13 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCook
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
+import net.stzups.scribbleshare.server.http.objects.Form;
+import net.stzups.scribbleshare.server.http.objects.Route;
+import net.stzups.scribbleshare.server.http.objects.Uri;
 
 import java.io.File;
 import java.io.FileInputStream;

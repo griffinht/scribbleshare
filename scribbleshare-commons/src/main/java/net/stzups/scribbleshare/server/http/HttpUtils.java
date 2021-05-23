@@ -23,7 +23,6 @@ import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,11 +31,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 public class HttpUtils {

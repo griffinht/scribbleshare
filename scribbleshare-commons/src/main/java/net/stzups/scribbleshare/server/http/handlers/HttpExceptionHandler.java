@@ -1,10 +1,11 @@
-package net.stzups.scribbleshare.server.http;
+package net.stzups.scribbleshare.server.http.handlers;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.server.http.HttpUtils;
 
 import java.util.logging.Level;
 

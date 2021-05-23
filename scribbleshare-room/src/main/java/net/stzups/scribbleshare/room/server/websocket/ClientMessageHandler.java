@@ -10,7 +10,7 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
-import net.stzups.scribbleshare.server.http.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 
 import java.util.logging.Level;
 

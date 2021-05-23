@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.server.http;
+package net.stzups.scribbleshare.server.http.handlers;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;

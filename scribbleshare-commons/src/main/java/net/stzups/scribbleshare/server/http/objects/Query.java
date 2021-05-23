@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.server.http;
+package net.stzups.scribbleshare.server.http.objects;
 
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 
