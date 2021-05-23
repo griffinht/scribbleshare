@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
@@ -118,7 +119,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
 
         final String uri;
@@ -135,6 +136,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             queries = parseQuery(rawQuery);
             route = getRoute(path);
         } catch (BadRequestException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling http request", e);
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -385,8 +387,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         // get filesystem filePath from provided filePath
-        final String filePath = getFilePath(path);
-        if (filePath == null) {
+        final String filePath;
+        try {
+            filePath = getFilePath(path);
+        } catch (BadRequestException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while getting file path for http request", e);
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
