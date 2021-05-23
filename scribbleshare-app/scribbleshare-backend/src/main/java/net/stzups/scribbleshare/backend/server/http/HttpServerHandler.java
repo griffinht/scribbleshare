@@ -8,7 +8,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -243,158 +242,128 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         //login
 
-        if (request.method().equals(HttpMethod.POST)) {
-            //todo validate for extra fields that should not happen
-            if (uri.equals(LOGIN_PATH)) {
-                Map<String, String> form = parseForm(request);
-                if (form == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
+        try {
+            if (request.method().equals(HttpMethod.POST)) {
+                //todo validate for extra fields that should not happen
+                if (uri.equals(LOGIN_PATH)) {
+                    Form form = new Form(request);
 
-                // validate
+                    String username = form.getText("username");
+                    String password = form.getText("password");
+                    boolean remember = form.getCheckbox("remember");
 
-                String username = form.get("username");
-                String password = form.get("password");
 
-                if (username == null || password == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
+                    System.out.println(username + ", " + password + ", " + remember);
 
-                String rememberRaw = form.get("remember");
-                boolean remember;
-                if (rememberRaw != null) {
-                    if (rememberRaw.equals("on")) {
-                        remember = true;
-                    } else {
-                        send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+                    Login login = database.getLogin(username);
+                    Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
+                    if (id == null) {
+                        //todo rate limit and generic error handling
+                        if (login == null) {
+                            Scribbleshare.getLogger(ctx).info("Bad username " + username);
+                        } else {
+                            Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
+                        }
+
+                        sendRedirect(ctx, request, LOGIN_PAGE);
                         return;
                     }
-                } else {
-                    remember = false;
-                }
 
+                    HttpHeaders httpHeaders = new DefaultHttpHeaders();
+                    HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
+                    database.addHttpSession(userSession);
+                    if (remember) {
+                        PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+                        database.addPersistentHttpUserSession(persistentHttpUserSession);
+                    }
+                    sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
+                    return;
+                } else if (uri.equals(REGISTER_PATH)) {
+                    Form form = new Form(request);
 
-                System.out.println(username + ", " + password + ", " + remember);
+                    // validate
 
-                Login login = database.getLogin(username);
-                Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
-                if (id == null) {
-                    //todo rate limit and generic error handling
-                    if (login == null) {
-                        Scribbleshare.getLogger(ctx).info("Bad username " + username);
-                    } else {
-                        Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
+                    String username = form.getText("username");
+                    String password = form.getText("password");
+
+                    //todo validate
+                    if (false) {
+                        //todo rate limit and generic error handling
+
+                        sendRedirect(ctx, request, REGISTER_PAGE);
+                        return;
                     }
 
-                    sendRedirect(ctx, request, LOGIN_PAGE);
-                    return;
-                }
-
-                HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
-                database.addHttpSession(userSession);
-                if (remember) {
-                    PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
-                    database.addPersistentHttpUserSession(persistentHttpUserSession);
-                }
-                sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
-                return;
-            } else if (uri.equals(REGISTER_PATH)) {
-                Map<String, String> form = parseForm(request);
-                if (form == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                // validate
-
-                String username = form.get("username");
-                String password = form.get("password");
-
-                if (username == null || password == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                //todo validate
-                if (false) {
-                    //todo rate limit and generic error handling
-
-                    sendRedirect(ctx, request, REGISTER_PAGE);
-                    return;
-                }
-
-                User user;
-                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-                if (cookie != null) {
-                    HttpUserSession httpSession = database.getHttpSession(cookie);
-                    if (httpSession != null) {
-                        user = database.getUser(httpSession.getUser());
+                    User user;
+                    HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
+                    if (cookie != null) {
+                        HttpUserSession httpSession = database.getHttpSession(cookie);
+                        if (httpSession != null) {
+                            user = database.getUser(httpSession.getUser());
+                        } else {
+                            user = new User(username);
+                            database.addUser(user);
+                        }
                     } else {
                         user = new User(username);
                         database.addUser(user);
                     }
-                } else {
-                    user = new User(username);
-                    database.addUser(user);
-                }
-                Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
-                if (!database.addLogin(login)) {
-                    Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
-                    sendRedirect(ctx, request, REGISTER_PAGE);
-                    return;
-                }
-
-                Scribbleshare.getLogger(ctx).info("Registered with username " + username);
-
-                sendRedirect(ctx, request, REGISTER_SUCCESS);
-                return;
-            } else if (uri.equals(LOGOUT_PAGE)) {
-                Map<String, String> form = parseForm(request);
-                if (form == null) {
-                    send(ctx, request, HttpResponseStatus.BAD_REQUEST);
-                    return;
-                }
-
-                HttpHeaders headers = new DefaultHttpHeaders();
-                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-                if (cookie != null) {
-                    HttpUserSession httpUserSession = database.getHttpSession(cookie);
-                    if (httpUserSession != null) {
-                        if (httpUserSession.validate(cookie)) {
-                            database.expireHttpSession(httpUserSession);
-                            httpUserSession.clearCookie(config, headers);
-                        } else {
-                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
-                        }
-                    } else {
-                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent session");
+                    Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
+                    if (!database.addLogin(login)) {
+                        Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
+                        sendRedirect(ctx, request, REGISTER_PAGE);
+                        return;
                     }
-                }
 
-                HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
-                if (persistentCookie != null) {
-                    PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
-                    if (persistentHttpUserSession != null) {
-                        if (persistentHttpUserSession.validate(persistentCookie)) {
-                            database.expirePersistentHttpUserSession(persistentHttpUserSession);
-                            persistentHttpUserSession.clearCookie(config, headers);
+                    Scribbleshare.getLogger(ctx).info("Registered with username " + username);
+
+                    sendRedirect(ctx, request, REGISTER_SUCCESS);
+                    return;
+                } else if (uri.equals(LOGOUT_PAGE)) {
+                    Form form = new Form(request);//todo necessary?
+
+                    HttpHeaders headers = new DefaultHttpHeaders();
+                    HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
+                    if (cookie != null) {
+                        HttpUserSession httpUserSession = database.getHttpSession(cookie);
+                        if (httpUserSession != null) {
+                            if (httpUserSession.validate(cookie)) {
+                                database.expireHttpSession(httpUserSession);
+                                httpUserSession.clearCookie(config, headers);
+                            } else {
+                                Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
+                            }
                         } else {
-                            Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent session");
+                        }
+                    }
+
+                    HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
+                    if (persistentCookie != null) {
+                        PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
+                        if (persistentHttpUserSession != null) {
+                            if (persistentHttpUserSession.validate(persistentCookie)) {
+                                database.expirePersistentHttpUserSession(persistentHttpUserSession);
+                                persistentHttpUserSession.clearCookie(config, headers);
+                            } else {
+                                Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
+                                //todo error
+                            }
+                        } else {
+                            Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
                             //todo error
                         }
-                    } else {
-                        Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
-                        //todo error
                     }
-                }
 
-                sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
-                return;
+                    sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
+                    return;
+                }
             }
+        } catch (BadRequestException e) {
+            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
+            return;
         }
+
 
         // otherwise try to serve a regular HTTP file resource
 

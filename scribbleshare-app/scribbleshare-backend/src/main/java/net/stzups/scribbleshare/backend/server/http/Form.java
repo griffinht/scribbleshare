@@ -23,4 +23,24 @@ public class Form {
 
         this.form = HttpServerHandler.parseQuery(request.content().toString(StandardCharsets.UTF_8));
     }
+
+    public String getText(String field) throws BadRequestException {
+        String value = form.get(field);
+        if (value == null) {
+            throw new BadRequestException("Missing value for " + field);
+        }
+
+        return value;
+    }
+
+    public boolean getCheckbox(String field) throws BadRequestException {
+        String value = form.get(field);
+        if (value == null) { //http forms don't include false
+            return false;
+        } else if (value.equals("on")) {
+            return true;
+        } else {
+            throw new BadRequestException("Malformed value for " + field);
+        }
+    }
 }
