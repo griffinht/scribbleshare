@@ -279,7 +279,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 if (cookie != null) {
                     HttpUserSession httpSession = database.getHttpSession(cookie);
                     if (httpSession != null) {
-                        user = database.getUser(httpSession.getUser());
+                        User u = database.getUser(httpSession.getUser());
+                        if (u.isRegistered()) {
+                            Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
+                            user = new User(username);
+                            database.addUser(user);
+                        } else {
+                            Scribbleshare.getLogger(ctx).info("Temporary user is registering");
+                            user = u;
+                        }
                     } else {
                         user = new User(username);
                         database.addUser(user);
@@ -288,6 +296,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     user = new User(username);
                     database.addUser(user);
                 }
+
+                assert !user.isRegistered();
+
                 Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
                 if (!database.addLogin(login)) {
                     Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);

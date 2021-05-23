@@ -38,6 +38,10 @@ public class User {
         return sharedDocuments;
     }
 
+    public boolean isRegistered() {
+        return !username.equals("");
+    }
+
     public String getUsername() {
         return username;
     }
