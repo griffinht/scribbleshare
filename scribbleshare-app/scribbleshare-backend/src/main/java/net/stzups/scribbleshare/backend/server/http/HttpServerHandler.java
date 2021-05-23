@@ -119,33 +119,23 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
 
-        // sanitize uri
-        final String uri = getUri(request.uri());
-        if (uri == null) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        // split query from path
-        final String[] splitQuery = splitQuery(uri);
-        if (splitQuery == null) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-        final String path = splitQuery[0];
-        final String rawQuery = splitQuery[1];
-
-        Map<String, String> queries = parseQuery(rawQuery);
-        if (queries == null) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        String[] route = getRoute(path);
-        if (route == null) {
+        final String uri;
+        final String[] splitQuery;
+        final String path;
+        final String rawQuery;
+        Map<String, String> queries;
+        String[] route;
+        try {
+            uri = getUri(request.uri());
+            splitQuery = splitQuery(uri);
+            path = splitQuery[0];
+            rawQuery = splitQuery[1];
+            queries = parseQuery(rawQuery);
+            route = getRoute(path);
+        } catch (BadRequestException e) {
             send(ctx, request, HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -535,14 +525,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
     /** Sanitizes uri */
-    public static String getUri(String uri) {
-        return (ALLOWED_CHARACTERS.matcher(uri).matches()) ? uri : null;
+    public static String getUri(String uri) throws BadRequestException {
+        if (!ALLOWED_CHARACTERS.matcher(uri).matches())
+            throw new BadRequestException("URI contains illegal characters");
+
+        return uri;
     }
 
     private static final Pattern ALLOWED_PATH = Pattern.compile("^[\\\\" + File.separator + "." + FILE_NAME_REGEX + "]+$");
 
-    private static String[] getRoute(String path) {
-        if (!path.startsWith("/")) return null;
+    private static String[] getRoute(String path) throws BadRequestException {
+        if (!path.startsWith("/"))
+            throw new BadRequestException("Route must start with a /");
+
         String[] route = path.substring(1).split("/");
         if (route.length == 0) {
             return new String[] {""};
@@ -552,7 +547,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     /** Converts uri to filesystem path */
-    private static String getFilePath(String path) {
+    private static String getFilePath(String path) throws BadRequestException {
         path = path.replace("/", File.separator);
 
         if (path.contains(File.separator + '.') // /.
@@ -560,9 +555,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 || path.contains(File.separator + File.separator) // //
                 || path.charAt(0) == '.' // .
                 || path.charAt(path.length() - 1) == '.' // /page.
-                || !ALLOWED_PATH.matcher(path).matches()) {
-            return null;
-        }
+                || !ALLOWED_PATH.matcher(path).matches())
+            throw new BadRequestException("File path contains illegal characters");
 
         if (path.endsWith(File.separator)) { // / -> index.html
             path = path + DEFAULT_FILE;
@@ -578,16 +572,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
      * Example:
      * /index.html?key=value&otherKey=otherValue -> [ /index.html, key=value&otherKey=otherValue ]
      */
-    public static String[] splitQuery(String uri) {
+    public static String[] splitQuery(String uri) throws BadRequestException {
         int index = uri.lastIndexOf(QUERY_DELIMITER);
         if (index <= 0) { // check for a query
-            if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) { // there is no query, so there should also be no other reserved keywords
-                return null;
+            if (uri.contains(QUERY_SEPARATOR) || uri.contains(QUERY_PAIR_SEPARATOR)) {
+                throw new BadRequestException("Empty query contains illegal characters");
             } else {
                 return new String[] {uri, ""};
             }
-        } else if (uri.indexOf(QUERY_DELIMITER) != index) { // make sure there is only one ? in the uri
-            return null;
+        } else if (uri.indexOf(QUERY_DELIMITER) != index) {
+            throw new BadRequestException("Encountered multiple " + QUERY_DELIMITER + " in uri, there should only be one");
         } else {
             return new String[] {uri.substring(0, index), uri.substring(index + 1)};
         }
@@ -596,8 +590,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * Parses key=value&otherKey=otherValue&keyWithEmptyValue to a Map of key-value pairs
      */
-    public static Map<String, String> parseQuery(String query) {
-        if (query.isEmpty()) return Collections.emptyMap(); // no query to parse
+    public static Map<String, String> parseQuery(String query) throws BadRequestException {
+        if (query.isEmpty())
+            return Collections.emptyMap(); // no query to parse
 
         Map<String, String> queries = new HashMap<>();
         String[] keyValuePairs = query.split(QUERY_SEPARATOR);
@@ -605,24 +600,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             String[] split = keyValuePair.split(QUERY_PAIR_SEPARATOR, 3); // a limit of 2 (expected) would not detect malformed queries such as ?key==, so we need to go one more
             if (split.length == 1) { // key with no value, such as ?key
                 queries.put(split[0], "");
-            } else if (split.length != 2) { // malformed, each key should have one value
-                return null;
+            } else if (split.length != 2) {
+                throw new BadRequestException("Each key should have one value of query " + query);
             } else {
                 queries.put(split[0], split[1]);
             }
         }
 
         return queries;
-    }
-
-    public static Map<String, String> parseForm(FullHttpRequest request) {
-        String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-        if (contentType == null || !contentType.contentEquals(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED)) {
-            return null;
-        }
-
-        //todo check host/origin/referer to make sure they originate from LOGIN_PAGE
-
-        return parseQuery(request.content().toString(StandardCharsets.UTF_8));
     }
 }
