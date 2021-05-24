@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
@@ -288,18 +287,30 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         if (u.isRegistered()) {
                             Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
                             user = new User(username);
-                            database.addUser(user);
+                            try {
+                                database.addUser(user);
+                            } catch (FailedException e) {
+                                throw new InternalServerException("todo", e);
+                            }
                         } else {
                             Scribbleshare.getLogger(ctx).info("Temporary user is registering");
                             user = u;
                         }
                     } else {
                         user = new User(username);
-                        database.addUser(user);
+                        try {
+                            database.addUser(user);
+                        } catch (FailedException e) {
+                            throw new InternalServerException("todo", e);
+                        }
                     }
                 } else {
                     user = new User(username);
-                    database.addUser(user);
+                    try {
+                        database.addUser(user);
+                    } catch (FailedException e) {
+                        throw new InternalServerException("todo", e);
+                    }
                 }
 
                 assert !user.isRegistered();
@@ -431,70 +442,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
         } catch (IOException e) {
             throw new InternalServerException("Exception while sending file", e);
-        }
-    }
-
-    private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) throws UnauthorizedException {
-        HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-        if (cookie != null) {
-            HttpUserSession httpSession = database.getHttpSession(cookie);
-            if (httpSession != null && httpSession.validate(cookie)) {
-                Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
-                return httpSession.getUser();
-            } else {
-                Scribbleshare.getLogger(ctx).warning("Bad authentication");
-                //bad authentication attempt
-                //todo rate limit timeout server a proper response???
-            }
-        } else {
-            Scribbleshare.getLogger(ctx).info("No authentication");
-        }
-
-        throw new UnauthorizedException("Bad authentication");
-    }
-
-    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws FailedException {
-        HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-        if (cookie == null) {
-            User user;
-            HttpSessionCookie cookiePersistent = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
-            if (cookiePersistent != null) {
-                PersistentHttpUserSession persistentHttpSession = database.getPersistentHttpUserSession(cookiePersistent);
-                if (persistentHttpSession != null && persistentHttpSession.validate(cookiePersistent)) {
-                    user = database.getUser(persistentHttpSession.getUser());
-                } else {
-                    //return false; todo
-                    user = new User();
-                    database.addUser(user);
-                }
-            } else {
-                user = new User();
-                database.addUser(user);
-            }
-
-            HttpUserSession httpSession = new HttpUserSession(config, user, headers);
-            database.addHttpSession(httpSession);
-
-            //this is single use and always refreshed
-            PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
-            database.addPersistentHttpUserSession(persistentHttpSession);
-            return true;
-        } else {
-            HttpUserSession httpSession = database.getHttpSession(cookie);
-            if (httpSession != null && httpSession.validate(cookie)) {
-                return true;
-            } else {
-                //todo copied and bad
-                User user = new User();
-                database.addUser(user);
-                httpSession = new HttpUserSession(config, user, headers);
-                database.addHttpSession(httpSession);
-
-                //this is single use and always refreshed
-                PersistentHttpUserSession persistentHttpSession = new PersistentHttpUserSession(config, httpSession, headers);
-                database.addPersistentHttpUserSession(persistentHttpSession);
-                return true;
-            }
         }
     }
 

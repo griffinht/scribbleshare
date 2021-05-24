@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
@@ -45,7 +46,12 @@ public class HandshakeState extends State {
                         //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
                         if (document.getOwner() != client.getUser().getId()) {
                             if (client.getUser().getSharedDocuments().add(document.getId())) {
-                                RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
+                                try {
+                                    RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
+                                } catch (FailedException e) {
+                                    e.printStackTrace();
+                                    //todo
+                                }
                             }
                         }
                         try {

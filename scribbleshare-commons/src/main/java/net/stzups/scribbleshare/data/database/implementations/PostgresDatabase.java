@@ -101,7 +101,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addUser(User user) {
+    public void addUser(User user) throws FailedException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(id, owned_documents, shared_documents, username) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
@@ -109,7 +109,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setString(4, user.getUsername());
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new FailedException(e);
         }
     }
 
@@ -134,14 +134,14 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(User user) throws FailedException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET owned_documents=?, shared_documents=? WHERE id=?")){
             preparedStatement.setArray(1, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
             preparedStatement.setLong(3, user.getId());
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new FailedException(e);
         }
     }
 
