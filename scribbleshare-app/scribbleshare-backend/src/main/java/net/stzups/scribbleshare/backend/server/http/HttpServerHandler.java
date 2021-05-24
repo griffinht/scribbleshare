@@ -419,8 +419,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         HttpHeaders headers = new DefaultHttpHeaders();
-/*        if (path.equals(AUTHENTICATE_PAGE)) {
-            logIn(ctx, config, request, headers);
+        /*if (route.equals(AUTHENTICATE_PAGE)) {
+            try {
+                logIn(config, request, headers);
+            } catch (FailedException e) {
+                throw new InternalServerException("Exception while logging user in", e);
+            }
         }*/
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
         try {
@@ -447,16 +451,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         throw new UnauthorizedException("Bad authentication");
-    }
-
-    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) throws FailedException {
-        if (!logIn(config, request, headers)) {
-            Scribbleshare.getLogger(ctx).warning("Bad authentication");
-            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
-            //todo rate limiting strategies
-        } else {
-            Scribbleshare.getLogger(ctx).info("Good authentication");
-        }
     }
 
     private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws FailedException {
