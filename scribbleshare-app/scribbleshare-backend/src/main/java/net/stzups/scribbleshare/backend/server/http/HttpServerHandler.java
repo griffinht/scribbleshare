@@ -234,8 +234,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 System.out.println(username + ", " + password + ", " + remember);
 
                 Login login = database.getLogin(username);
-                Long id = Login.verify(login, password.getBytes(StandardCharsets.UTF_8));
-                if (id == null) {
+                if (Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
                     //todo rate limit and generic error handling
                     if (login == null) {
                         Scribbleshare.getLogger(ctx).info("Bad username " + username);

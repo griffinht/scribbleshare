@@ -45,7 +45,7 @@ public class Login {
         return hashedPassword;
     }
 
-    public static Long verify(Login login, byte[] plaintext) {
+    public static boolean verify(Login login, byte[] plaintext) {
         byte[] hashedPassword;
         if (login == null) {
             hashedPassword = DUMMY; // still verify hash even when we know it will fail to protect against timing attack
@@ -60,11 +60,6 @@ public class Login {
             Arrays.fill(hashedPassword, (byte) 0);
         }
 
-        if (verified) {
-            assert login != null;
-            return login.id;
-        } else {
-            return null;
-        }
+        return verified;
     }
 }
