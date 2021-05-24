@@ -4,14 +4,17 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
@@ -35,16 +38,23 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
+        try {
+            handle(ctx, request);
+        } catch (HttpException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
+            send(ctx, request, e.responseStatus());
+        }
+        out.add(request.retain());
+    }
+
+    private void handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         if (uri != null && !request.uri().equals(uri)) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
-            Scribbleshare.getLogger(ctx).warning("Bad uri");
-            return;
+            throw new NotFoundException("Bad uri");
         }
 
         Long user = ctx.channel().attr(USER).get();
         if (user != null) {
-            out.add(request.retain());
             return;
         }
 
@@ -54,16 +64,13 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             if (httpSession != null && httpSession.validate(cookie)) {
                 Scribbleshare.getLogger(ctx).info("Authenticated with id " + httpSession.getUser());
                 ctx.channel().attr(USER).set(httpSession.getUser());
-                out.add(request.retain());
             } else {
-                Scribbleshare.getLogger(ctx).warning("Bad authentication");
                 //bad authentication attempt
                 //todo rate limit timeout server a proper response???
-                send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
+                throw new UnauthorizedException("Bad authentication");
             }
         } else {
-            Scribbleshare.getLogger(ctx).info("No authentication");
-            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
+            throw new UnauthorizedException("No authentication");
         }
     }
 }

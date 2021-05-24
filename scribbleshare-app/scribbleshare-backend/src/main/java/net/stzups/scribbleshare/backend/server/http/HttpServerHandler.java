@@ -121,14 +121,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
         Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
         try {
-            channelRead(ctx, request);
+            handle(ctx, request);
         } catch (HttpException e) {
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, e.responseStatus());
         }
     }
 
-    private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    private void handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         final Route route;
         try {
             route = new Route(request.uri());
