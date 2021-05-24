@@ -1,9 +1,8 @@
 package net.stzups.scribbleshare.data.database.databases;
 
+import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
-
-import java.sql.SQLException;
 
 public interface HttpSessionDatabase {
     /**
@@ -14,10 +13,10 @@ public interface HttpSessionDatabase {
     /**
      * Add new {@link HttpUserSession}
      */
-    void addHttpSession(HttpUserSession httpUserSession) throws SQLException;
+    void addHttpSession(HttpUserSession httpUserSession) throws FailedException;
 
     /**
      * Expire existing {@link HttpUserSession}
      */
-    void expireHttpSession(HttpUserSession httpUserSession) throws SQLException;
+    void expireHttpSession(HttpUserSession httpUserSession) throws FailedException;
 }

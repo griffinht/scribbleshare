@@ -15,6 +15,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
@@ -25,6 +26,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpU
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.server.http.objects.Form;
@@ -36,7 +38,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -124,13 +125,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         } catch (HttpException e) {
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, e.responseStatus());
-        } catch (Exception e) {
-            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
-            send(ctx, request, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+    private void channelRead(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         final Route route;
         try {
             route = new Route(request.uri());
@@ -251,10 +249,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
                 HttpHeaders httpHeaders = new DefaultHttpHeaders();
                 HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
-                database.addHttpSession(userSession);
+                try {
+                    database.addHttpSession(userSession);
+                } catch (FailedException e) {
+                    throw new InternalServerException("Exception while adding http session to database", e);
+                }
                 if (remember) {
                     PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
-                    database.addPersistentHttpUserSession(persistentHttpUserSession);
+                    try {
+                        database.addPersistentHttpUserSession(persistentHttpUserSession);
+                    } catch (FailedException e) {
+                        throw new InternalServerException("Exception while adding persistent http session to database", e);
+                    }
                 }
                 sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                 return;
@@ -300,7 +306,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 assert !user.isRegistered();
 
                 Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
-                if (!database.addLogin(login)) {
+                boolean loginAdded;
+                try {
+                    loginAdded = database.addLogin(login);
+                } catch (FailedException e) {
+                    throw new InternalServerException("Exception while adding login for user " + login.getId() + " with username " + login.getUsername(), e);
+                }
+                if (!loginAdded) {
                     Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
                     sendRedirect(ctx, request, REGISTER_PAGE);
                     return;
@@ -319,8 +331,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
                     if (httpUserSession != null) {
                         if (httpUserSession.validate(cookie)) {
-                            database.expireHttpSession(httpUserSession);
                             httpUserSession.clearCookie(config, headers);
+                            try {
+                                database.expireHttpSession(httpUserSession);
+                            } catch (FailedException e) {
+                                //todo still send clear cookie
+                                throw new InternalServerException("Failed to log out user", e);
+                            }
                         } else {
                             Scribbleshare.getLogger(ctx).warning("Tried to log out of existing session with bad authentication");
                         }
@@ -334,8 +351,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
                     if (persistentHttpUserSession != null) {
                         if (persistentHttpUserSession.validate(persistentCookie)) {
-                            database.expirePersistentHttpUserSession(persistentHttpUserSession);
                             persistentHttpUserSession.clearCookie(config, headers);
+                            try {
+                                database.expirePersistentHttpUserSession(persistentHttpUserSession);
+                            } catch (FailedException e) {
+                                //todo still send clear cookie
+                                throw new InternalServerException("Failed to log out user", e);
+                            }
                         } else {
                             Scribbleshare.getLogger(ctx).warning("Tried to log out of existing persistent session with bad authentication");
                             //todo error
@@ -402,7 +424,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             logIn(ctx, config, request, headers);
         }*/
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
-        sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
+        try {
+            sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
+        } catch (IOException e) {
+            throw new InternalServerException("Exception while sending file", e);
+        }
     }
 
     private Long authenticate(ChannelHandlerContext ctx, FullHttpRequest request) throws UnauthorizedException {
@@ -424,7 +450,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         throw new UnauthorizedException("Bad authentication");
     }
 
-    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) throws SQLException {
+    private void logIn(ChannelHandlerContext ctx, HttpConfig config, FullHttpRequest request, HttpHeaders headers) throws FailedException {
         if (!logIn(config, request, headers)) {
             Scribbleshare.getLogger(ctx).warning("Bad authentication");
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
@@ -434,7 +460,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws SQLException {
+    private boolean logIn(HttpConfig config, HttpRequest request, HttpHeaders headers) throws FailedException {
         HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
         if (cookie == null) {
             User user;

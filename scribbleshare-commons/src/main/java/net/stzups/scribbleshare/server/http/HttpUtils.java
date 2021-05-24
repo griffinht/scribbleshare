@@ -23,11 +23,14 @@ import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
@@ -47,13 +50,17 @@ public class HttpUtils {
         send(ctx, request, response);
     }
 
-    public static boolean isModifiedSince(FullHttpRequest request, Timestamp lastModified) throws Exception {
+    public static boolean isModifiedSince(FullHttpRequest request, Timestamp lastModified) throws BadRequestException {
         String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);//todo
 
             //round lastModified to nearest second and compare
-            return Instant.ofEpochSecond(lastModified.getTime() / 1000).isAfter(dateFormatter.parse(ifModifiedSince).toInstant());
+            try {
+                return Instant.ofEpochSecond(lastModified.getTime() / 1000).isAfter(dateFormatter.parse(ifModifiedSince).toInstant());
+            } catch (ParseException e) {
+                throw new BadRequestException("Exception while parsing date " + ifModifiedSince, e);
+            }
         }
 
         return true;
@@ -135,7 +142,7 @@ public class HttpUtils {
     }
 
     /** sends if stale, otherwise sends not modified */
-    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws Exception {
+    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws BadRequestException {
         setDateAndLastModified(headers, lastModified);
         if (isModifiedSince(request, lastModified)) {
             Scribbleshare.getLogger(ctx).info("Uncached");
@@ -158,7 +165,7 @@ public class HttpUtils {
     }
 
     /** make sure the file being sent is valid */
-    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws Exception {
+    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws IOException, BadRequestException {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             long fileLength = randomAccessFile.length();
             if (mimeType == null) {

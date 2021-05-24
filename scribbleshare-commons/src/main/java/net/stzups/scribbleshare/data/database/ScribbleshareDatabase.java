@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.database;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
+import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.User;
@@ -22,5 +23,5 @@ public interface ScribbleshareDatabase extends PersistentHttpSessionDatabase, Re
     InviteCode getInviteCode(Document document);
     Login getLogin(String username);
     /** false if the username already existed */
-    boolean addLogin(Login login);
+    boolean addLogin(Login login) throws FailedException;
 }
