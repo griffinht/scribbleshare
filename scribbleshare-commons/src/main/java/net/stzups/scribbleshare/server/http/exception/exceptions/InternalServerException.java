@@ -9,6 +9,10 @@ public class InternalServerException extends HttpException {
         super(message);
     }
 
+    public InternalServerException(Throwable cause) {
+        super(cause);
+    }
+
     public InternalServerException(String message, Throwable cause) {
         super(message, cause);
     }

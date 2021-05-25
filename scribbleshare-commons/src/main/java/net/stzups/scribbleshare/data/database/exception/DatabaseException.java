@@ -1,7 +1,10 @@
 package net.stzups.scribbleshare.data.database.exception;
 
 public class DatabaseException extends Exception {
-    protected DatabaseException(Throwable cause) {
+    public DatabaseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    public DatabaseException(Throwable cause) {
         super(cause);
     }
 }

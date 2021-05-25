@@ -2,7 +2,7 @@ package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
@@ -17,6 +17,8 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
+
+import java.util.logging.Level;
 
 public class HandshakeState extends State {
     private final AuthenticatedUserSession session;
@@ -48,7 +50,7 @@ public class HandshakeState extends State {
                             if (client.getUser().getSharedDocuments().add(document.getId())) {
                                 try {
                                     RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
-                                } catch (FailedException e) {
+                                } catch (DatabaseException e) {
                                     e.printStackTrace();
                                     //todo
                                 }
@@ -64,7 +66,11 @@ public class HandshakeState extends State {
                     }
                 } else {
                     if (client.getUser().getOwnedDocuments().size() == 0) {
-                        RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
+                        try {
+                            RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
+                        } catch (DatabaseException e) {
+                            Scribbleshare.getLogger().log(Level.WARNING, "Failed to create document for new user with no documents", e);
+                        }
                     }
                 }
                 client.getUser().getOwnedDocuments().removeIf((id) -> {

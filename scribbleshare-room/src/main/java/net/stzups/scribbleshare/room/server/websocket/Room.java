@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 
 public class Room {
     private static final int SEND_PERIOD = 1000;
@@ -64,7 +66,11 @@ public class Room {
         if (canvas.isDirty()) {
             ByteBuf byteBuf = Unpooled.buffer();
             canvas.serialize(byteBuf);
-            database.updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
+            try {
+                database.updateResource(document.getId(), document.getId(), new Resource(byteBuf));//todo autosave?
+            } catch (DatabaseException e) {
+                Scribbleshare.getLogger().log(Level.WARNING, "Failed to save canvas to database", e);
+            }
         }
         //todo
         Scribbleshare.getLogger().info("Ended room " + this);

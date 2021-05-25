@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
@@ -183,7 +183,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 if (document == null)
                                     throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
 
-                                send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
+                                try {
+                                    send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
+                                } catch (DatabaseException e) {
+                                    throw new InternalServerException(e);
+                                }
                             } else {
                                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
                             }
@@ -255,14 +259,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
                     try {
                         database.addHttpSession(userSession);
-                    } catch (FailedException e) {
+                    } catch (DatabaseException e) {
                         throw new InternalServerException("Exception while adding http session to database", e);
                     }
                     if (remember) {
                         PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
                         try {
                             database.addPersistentHttpUserSession(persistentHttpUserSession);
-                        } catch (FailedException e) {
+                        } catch (DatabaseException e) {
                             throw new InternalServerException("Exception while adding persistent http session to database", e);
                         }
                     }
@@ -296,7 +300,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 user = new User(username);
                                 try {
                                     database.addUser(user);
-                                } catch (FailedException e) {
+                                } catch (DatabaseException e) {
                                     throw new InternalServerException("todo", e);
                                 }
                             } else {
@@ -307,7 +311,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             user = new User(username);
                             try {
                                 database.addUser(user);
-                            } catch (FailedException e) {
+                            } catch (DatabaseException e) {
                                 throw new InternalServerException("todo", e);
                             }
                         }
@@ -315,7 +319,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         user = new User(username);
                         try {
                             database.addUser(user);
-                        } catch (FailedException e) {
+                        } catch (DatabaseException e) {
                             throw new InternalServerException("todo", e);
                         }
                     }
@@ -326,7 +330,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     boolean loginAdded;
                     try {
                         loginAdded = database.addLogin(login);
-                    } catch (FailedException e) {
+                    } catch (DatabaseException e) {
                         throw new InternalServerException("Exception while adding login for user " + login.getId() + " with username " + login.getUsername(), e);
                     }
                     if (!loginAdded) {

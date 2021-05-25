@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
@@ -12,6 +13,8 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
+
+import java.util.logging.Level;
 
 public class ReadyState extends State {
     private final Client client;
@@ -44,7 +47,13 @@ public class ReadyState extends State {
             }
             case CREATE_DOCUMENT: {
                 //create
-                Document document = RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
+                Document document;
+                try {
+                    document = RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
+                } catch (DatabaseException e) {
+                    Scribbleshare.getLogger().log(Level.WARNING, "Failed to create document for client that requested it", e);//todo this will probably break the client
+                    return;//todo throw server exception
+                }
                 client.sendMessage(new ServerMessageUpdateDocument(document));
                 //open
                 Room room;

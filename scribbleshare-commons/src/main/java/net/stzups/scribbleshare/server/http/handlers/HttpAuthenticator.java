@@ -10,7 +10,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
-import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
@@ -113,7 +113,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         HttpUserSession httpUserSession = new HttpUserSession(httpConfig, user, httpHeaders);
         try {
             database.addHttpSession(httpUserSession);
-        } catch (FailedException e) {
+        } catch (DatabaseException e) {
             throw new InternalServerException("Failed to add http session", e);
         }
 
@@ -121,7 +121,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         PersistentHttpUserSession a = new PersistentHttpUserSession(httpConfig, httpUserSession, httpHeaders);
         try {
             database.addPersistentHttpUserSession(a);
-        } catch (FailedException e) {
+        } catch (DatabaseException e) {
             throw new InternalServerException("Failed to add persistent http session", e);
         }
 
@@ -152,7 +152,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
 
         try {
             database.expirePersistentHttpUserSession(persistentHttpUserSession);
-        } catch (FailedException e) {
+        } catch (DatabaseException e) {
             throw new InternalServerException("Failed to expire persistent http session", e);
         }
 
@@ -180,7 +180,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         User user = new User();
         try {
             database.addUser(user);
-        } catch (FailedException e) {
+        } catch (DatabaseException e) {
             throw new InternalServerException("Failed to add user", e);
         }
 

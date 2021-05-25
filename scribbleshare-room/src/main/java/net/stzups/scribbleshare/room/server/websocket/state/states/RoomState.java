@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
@@ -15,6 +16,8 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.C
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
+
+import java.util.logging.Level;
 
 public class RoomState extends ReadyState {
     private final Client client;
@@ -58,7 +61,12 @@ public class RoomState extends ReadyState {
                     Scribbleshare.getLogger(ctx).info("Deleting live document " + room.getDocument());
                     room.sendMessage(new ServerMessageDeleteDocument(room.getDocument()));
                     room.end();
-                    RoomHttpServerInitializer.getDatabase(ctx).deleteDocument(room.getDocument());
+                    try {
+                        RoomHttpServerInitializer.getDatabase(ctx).deleteDocument(room.getDocument());
+                    } catch (DatabaseException e) {
+                        Scribbleshare.getLogger().log(Level.WARNING, "Failed to delete document", e);
+                        //todo
+                    }
                     break;
                 } else {
                     throw new ClientMessageException(clientMessage, "Tried to delete document which is not currently open");
@@ -82,7 +90,12 @@ public class RoomState extends ReadyState {
                 }
                 room.getDocument().setName(clientMessageUpdateDocument.getName());
                 room.queueMessageExcept(new ServerMessageUpdateDocument(room.getDocument()), client);
-                RoomHttpServerInitializer.getDatabase(ctx).updateDocument(room.getDocument());
+                try {
+                    RoomHttpServerInitializer.getDatabase(ctx).updateDocument(room.getDocument());
+                } catch (DatabaseException e) {
+                    Scribbleshare.getLogger(ctx).log(Level.WARNING, "Failed to update document", e);
+                    //todo
+                }
                 break;//todo better update logic
             }
             default:

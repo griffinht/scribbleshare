@@ -7,6 +7,10 @@ public abstract class HttpException extends Exception {
         super(message);
     }
 
+    protected HttpException(Throwable cause) {
+        super(cause);
+    }
+
     protected HttpException(String message, Throwable cause) {
         super(message, cause);
     }

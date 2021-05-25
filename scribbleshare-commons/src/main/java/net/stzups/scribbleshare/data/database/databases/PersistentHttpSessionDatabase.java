@@ -1,6 +1,6 @@
 package net.stzups.scribbleshare.data.database.databases;
 
-import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
+import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 
@@ -13,10 +13,10 @@ public interface PersistentHttpSessionDatabase {
     /**
      * Add new {@link PersistentHttpUserSession}
      */
-    void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws FailedException;
+    void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws DatabaseException;
 
     /**
      * Expire existing {@link PersistentHttpUserSession}
      */
-    void expirePersistentHttpUserSession(PersistentHttpUserSession persistentHttpUserSession) throws FailedException;
+    void expirePersistentHttpUserSession(PersistentHttpUserSession persistentHttpUserSession) throws DatabaseException;
 }
