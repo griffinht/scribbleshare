@@ -227,79 +227,89 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         if (request.method().equals(HttpMethod.POST)) {
             //todo validate for extra fields that should not happen
-            if (route.path().equals(LOGIN_PATH)) {
-                Form form = new Form(request);
+            switch (route.path()) {
+                case LOGIN_PATH: {
+                    Form form = new Form(request);
 
-                String username = form.getText("username");
-                String password = form.getText("password");
-                boolean remember = form.getCheckbox("remember");
+                    String username = form.getText("username");
+                    String password = form.getText("password");
+                    boolean remember = form.getCheckbox("remember");
 
 
-                System.out.println(username + ", " + password + ", " + remember);
+                    System.out.println(username + ", " + password + ", " + remember);
 
-                Login login = database.getLogin(username);
-                if (Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
-                    //todo rate limit and generic error handling
-                    if (login == null) {
-                        Scribbleshare.getLogger(ctx).info("Bad username " + username);
-                    } else {
-                        Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
+                    Login login = database.getLogin(username);
+                    if (Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
+                        //todo rate limit and generic error handling
+                        if (login == null) {
+                            Scribbleshare.getLogger(ctx).info("Bad username " + username);
+                        } else {
+                            Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
+                        }
+
+                        sendRedirect(ctx, request, LOGIN_PAGE);
+                        return;
                     }
 
-                    sendRedirect(ctx, request, LOGIN_PAGE);
-                    return;
-                }
-
-                HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
-                try {
-                    database.addHttpSession(userSession);
-                } catch (FailedException e) {
-                    throw new InternalServerException("Exception while adding http session to database", e);
-                }
-                if (remember) {
-                    PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+                    HttpHeaders httpHeaders = new DefaultHttpHeaders();
+                    HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
                     try {
-                        database.addPersistentHttpUserSession(persistentHttpUserSession);
+                        database.addHttpSession(userSession);
                     } catch (FailedException e) {
-                        throw new InternalServerException("Exception while adding persistent http session to database", e);
+                        throw new InternalServerException("Exception while adding http session to database", e);
                     }
-                }
-                sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
-                return;
-            } else if (route.path().equals(REGISTER_PATH)) {
-                Form form = new Form(request);
-
-                // validate
-
-                String username = form.getText("username");
-                String password = form.getText("password");
-
-                //todo validate
-                if (false) {
-                    //todo rate limit and generic error handling
-
-                    sendRedirect(ctx, request, REGISTER_PAGE);
+                    if (remember) {
+                        PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+                        try {
+                            database.addPersistentHttpUserSession(persistentHttpUserSession);
+                        } catch (FailedException e) {
+                            throw new InternalServerException("Exception while adding persistent http session to database", e);
+                        }
+                    }
+                    sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
                     return;
                 }
+                case REGISTER_PATH: {
+                    Form form = new Form(request);
 
-                User user;
-                HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
-                if (cookie != null) {
-                    HttpUserSession httpSession = database.getHttpSession(cookie);
-                    if (httpSession != null) {
-                        User u = database.getUser(httpSession.getUser());
-                        if (u.isRegistered()) {
-                            Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
+                    // validate
+
+                    String username = form.getText("username");
+                    String password = form.getText("password");
+
+                    //todo validate
+                    if (false) {
+                        //todo rate limit and generic error handling
+
+                        sendRedirect(ctx, request, REGISTER_PAGE);
+                        return;
+                    }
+
+                    User user;
+                    HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
+                    if (cookie != null) {
+                        HttpUserSession httpSession = database.getHttpSession(cookie);
+                        if (httpSession != null) {
+                            User u = database.getUser(httpSession.getUser());
+                            if (u.isRegistered()) {
+                                Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
+                                user = new User(username);
+                                try {
+                                    database.addUser(user);
+                                } catch (FailedException e) {
+                                    throw new InternalServerException("todo", e);
+                                }
+                            } else {
+                                Scribbleshare.getLogger(ctx).info("Temporary user is registering");
+                                user = u;
+                            }
+                        } else {
                             user = new User(username);
                             try {
                                 database.addUser(user);
                             } catch (FailedException e) {
                                 throw new InternalServerException("todo", e);
                             }
-                        } else {
-                            Scribbleshare.getLogger(ctx).info("Temporary user is registering");
-                            user = u;
                         }
                     } else {
                         user = new User(username);
@@ -309,39 +319,33 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             throw new InternalServerException("todo", e);
                         }
                     }
-                } else {
-                    user = new User(username);
+
+                    assert !user.isRegistered();
+
+                    Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
+                    boolean loginAdded;
                     try {
-                        database.addUser(user);
+                        loginAdded = database.addLogin(login);
                     } catch (FailedException e) {
-                        throw new InternalServerException("todo", e);
+                        throw new InternalServerException("Exception while adding login for user " + login.getId() + " with username " + login.getUsername(), e);
                     }
-                }
+                    if (!loginAdded) {
+                        Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
+                        sendRedirect(ctx, request, REGISTER_PAGE);
+                        return;
+                    }
 
-                assert !user.isRegistered();
+                    Scribbleshare.getLogger(ctx).info("Registered with username " + username);
 
-                Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
-                boolean loginAdded;
-                try {
-                    loginAdded = database.addLogin(login);
-                } catch (FailedException e) {
-                    throw new InternalServerException("Exception while adding login for user " + login.getId() + " with username " + login.getUsername(), e);
-                }
-                if (!loginAdded) {
-                    Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
-                    sendRedirect(ctx, request, REGISTER_PAGE);
+                    sendRedirect(ctx, request, REGISTER_SUCCESS);
                     return;
                 }
+                case LOGOUT_PATH: {
+                    Form form = new Form(request);//todo necessary?
 
-                Scribbleshare.getLogger(ctx).info("Registered with username " + username);
 
-                sendRedirect(ctx, request, REGISTER_SUCCESS);
-                return;
-            } else if (route.path().equals(LOGOUT_PATH)) {
-                Form form = new Form(request);//todo necessary?
-
-                HttpHeaders headers = new DefaultHttpHeaders();
-                HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
+                    HttpHeaders headers = new DefaultHttpHeaders();
+                    HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
 /*                if (cookie != null) {
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
                     if (httpUserSession != null) {
@@ -383,8 +387,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     }
                 }*/
 
-                sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
-                return;
+                    sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
+                    return;
+                }
             }
         }
 
