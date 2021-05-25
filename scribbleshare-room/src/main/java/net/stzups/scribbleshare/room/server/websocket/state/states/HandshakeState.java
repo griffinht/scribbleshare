@@ -5,7 +5,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
-import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.room.server.RoomHttpServerInitializer;
 import net.stzups.scribbleshare.room.server.websocket.Client;
@@ -19,10 +19,10 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 
 public class HandshakeState extends State {
-    private final User user;
+    private final AuthenticatedUserSession session;
 
-    public HandshakeState(User user) {
-        this.user = user;
+    public HandshakeState(AuthenticatedUserSession session) {
+        this.session = session;
     }
 
     @Override
@@ -32,9 +32,9 @@ public class HandshakeState extends State {
             case HANDSHAKE: {
                 ClientMessageHandshake clientPacketHandshake = (ClientMessageHandshake) clientMessage;
 
-                Scribbleshare.getLogger(ctx).info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + user);
+                Scribbleshare.getLogger(ctx).info("Handshake with invite " + clientPacketHandshake.getCode() + ", " + session);
 
-                Client client = new Client(user, ctx.channel());
+                Client client = new Client(session.getUser(), ctx.channel());
 
                 client.queueMessage(new ServerMessageHandshake(client));
                 InviteCode inviteCode = RoomHttpServerInitializer.getDatabase(ctx).getInviteCode(clientPacketHandshake.getCode());

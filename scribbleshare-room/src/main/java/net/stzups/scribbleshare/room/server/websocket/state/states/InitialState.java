@@ -17,7 +17,7 @@ public class InitialState extends State {
     public void userEventTriggered(ChannelHandlerContext ctx, Object event) {
         if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
             Scribbleshare.getLogger(ctx).info("WebSocket connection initialized");
-            setState(ctx, new HandshakeState(user));
+            setState(ctx, new HandshakeState(session));
             return;
         }
 
