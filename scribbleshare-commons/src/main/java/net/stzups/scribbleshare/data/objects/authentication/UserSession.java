@@ -1,6 +1,7 @@
-package net.stzups.scribbleshare.data.objects.authentication.http;
+package net.stzups.scribbleshare.data.objects.authentication;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,7 +11,6 @@ import java.time.Instant;
 import java.util.Arrays;
 
 public class UserSession {
-    protected static final int TOKEN_LENGTH = 16;
     private static final int HASHED_TOKEN_LENGTH = 32;
 
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -46,7 +46,7 @@ public class UserSession {
     }
 
     protected byte[] generateToken() {
-        byte[] token = new byte[TOKEN_LENGTH];
+        byte[] token = new byte[HttpSessionCookie.TOKEN_LENGTH];
         secureRandom.nextBytes(token);
 
         System.arraycopy(messageDigest.digest(token), 0, hashedToken, 0, hashedToken.length);
@@ -73,8 +73,12 @@ public class UserSession {
         return hashedToken;
     }
 
-    protected boolean validate(byte[] token) {
-        return Arrays.equals(messageDigest.digest(token), this.hashedToken) && created.equals(expired);
+    protected void validate(byte[] token) throws AuthenticationException {
+        if (!Arrays.equals(messageDigest.digest(token), this.hashedToken))
+            throw new AuthenticationException("Bad token");
+
+        if (!created.equals(expired))
+            throw new AuthenticationException("Expired session");
     }
 
     public void serialize(ByteBuf byteBuf) {

@@ -12,23 +12,29 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.HttpUtils;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class HttpSessionCookie {
+    public static final int TOKEN_LENGTH = 16;
+
     private final long id;
     private final byte[] token;
 
-    HttpSessionCookie(ByteBuf byteBuf, int tokenLength) throws DeserializationException {
+    HttpSessionCookie(ByteBuf byteBuf) throws DeserializationException {
         try {
             id = byteBuf.readLong();
-            token = new byte[tokenLength];
+            token = new byte[TOKEN_LENGTH];
             byteBuf.readBytes(token);
         } catch (IndexOutOfBoundsException e) {
             throw new DeserializationException("Exception while deserializing HttpSessionCookie", e);
         }
+    }
+
+    HttpSessionCookie(long id, byte[] token) {
+        this.id = id;
+        this.token = token;
     }
 
     public long getId() {
@@ -39,14 +45,14 @@ public class HttpSessionCookie {
         return token;
     }
 
-    private static void setCookie(HttpConfig config, DefaultCookie cookie) {
+    protected static void setCookie(HttpConfig config, DefaultCookie cookie) {
         cookie.setDomain(config.getDomain());
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
     }
 
-    public void setCookie(HttpConfig config, String name, HttpHeaders headers, long id, byte[] token) {
+    public void setCookie(HttpConfig config, String name, HttpHeaders headers) {
         ByteBuf tokenBuffer = Unpooled.buffer();
         tokenBuffer.writeLong(id);
         tokenBuffer.writeBytes(token);
@@ -70,7 +76,7 @@ public class HttpSessionCookie {
         HttpUtils.setCookie(headers, cookie);
     }
 
-    public static HttpSessionCookie getCookie(HttpRequest request, String name, int tokenLength) throws BadRequestException {
+    public static ByteBuf getCookie(HttpRequest request, String name) {
         String cookiesHeader = request.headers().get(HttpHeaderNames.COOKIE);
         if (cookiesHeader == null)
             return null;
@@ -81,18 +87,10 @@ public class HttpSessionCookie {
                 continue;
             }
 
-            ByteBuf tokenBase64 = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
-            ByteBuf token = Base64.decode(tokenBase64);
-            tokenBase64.release();
-            HttpSessionCookie httpSessionCookie;
-            try {
-                httpSessionCookie = new HttpSessionCookie(token, tokenLength);
-            } catch (DeserializationException e) {
-                throw new BadRequestException("Malformed cookie content", e);
-            } finally {
-                token.release();
-            }
-            return httpSessionCookie;
+            ByteBuf valueBase64 = Unpooled.wrappedBuffer(cookie.value().getBytes(StandardCharsets.UTF_8));
+            ByteBuf value = Base64.decode(valueBase64);
+            valueBase64.release();
+            return value;
         }
 
         return null;

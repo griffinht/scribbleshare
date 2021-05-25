@@ -160,7 +160,11 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         }
         addResource(document.getId(), document.getId(), new Resource(Canvas.getEmptyCanvas()));
         owner.getOwnedDocuments().add(document.getId());
-        updateUser(owner);//todo
+        try {
+            updateUser(owner);//todo
+        } catch (FailedException e) {
+            e.printStackTrace();
+        }
         return document;
     }
 

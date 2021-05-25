@@ -8,6 +8,10 @@ public class UnauthorizedException extends HttpException {
         super(message);
     }
 
+    public UnauthorizedException(String message, Exception e) {
+        super(message, e);
+    }
+
     @Override
     public HttpResponseStatus responseStatus() {
         return HttpResponseStatus.UNAUTHORIZED;
