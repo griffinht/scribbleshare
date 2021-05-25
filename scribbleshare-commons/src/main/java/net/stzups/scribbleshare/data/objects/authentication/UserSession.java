@@ -73,12 +73,14 @@ public class UserSession {
         return hashedToken;
     }
 
-    protected void validate(byte[] token) throws AuthenticationException {
+    protected AuthenticationResult validate(byte[] token) {
         if (!Arrays.equals(messageDigest.digest(token), this.hashedToken))
-            throw new AuthenticationException("Bad token");
+            return AuthenticationResult.BAD_TOKEN;
 
         if (!created.equals(expired))
-            throw new AuthenticationException("Expired session");
+            return AuthenticationResult.EXPIRED;
+
+        return AuthenticationResult.SUCCESS;
     }
 
     public void serialize(ByteBuf byteBuf) {

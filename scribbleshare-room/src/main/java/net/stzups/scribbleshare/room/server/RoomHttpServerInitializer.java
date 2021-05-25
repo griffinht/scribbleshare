@@ -39,7 +39,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         super(config);
         this.config = config;
         this.database = database;
-        clientMessageHandler = new ClientMessageHandler(database);
+        clientMessageHandler = new ClientMessageHandler();
         httpAuthenticator = new HttpAuthenticator(database);
     }
 

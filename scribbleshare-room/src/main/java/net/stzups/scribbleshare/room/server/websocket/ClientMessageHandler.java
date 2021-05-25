@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
@@ -22,15 +21,9 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
         return ctx.channel().attr(STATE);
     }
 
-    private final ScribbleshareDatabase database;
-
-    public ClientMessageHandler(ScribbleshareDatabase database) {
-        this.database = database;
-    }
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        State.setState(ctx, new InitialState(database.getUser(HttpAuthenticator.getUser(ctx))));
+        State.setState(ctx, new InitialState(HttpAuthenticator.getUser(ctx)));
     }
 
     @Override

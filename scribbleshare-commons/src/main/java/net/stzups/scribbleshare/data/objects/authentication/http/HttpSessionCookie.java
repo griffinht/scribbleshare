@@ -52,7 +52,7 @@ public class HttpSessionCookie {
         cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
     }
 
-    public void setCookie(HttpConfig config, String name, HttpHeaders headers) {
+    protected void setCookie(HttpConfig config, String name, HttpHeaders headers) {
         ByteBuf tokenBuffer = Unpooled.buffer();
         tokenBuffer.writeLong(id);
         tokenBuffer.writeBytes(token);
@@ -67,7 +67,7 @@ public class HttpSessionCookie {
         HttpUtils.setCookie(headers, cookie);
     }
 
-    public static void clearCookie(HttpConfig config, String name, HttpHeaders headers) {
+    protected static void clearCookie(HttpConfig config, String name, HttpHeaders headers) {
         DefaultCookie cookie = new DefaultCookie(name, "");
 
         setCookie(config, cookie);
@@ -76,7 +76,7 @@ public class HttpSessionCookie {
         HttpUtils.setCookie(headers, cookie);
     }
 
-    public static ByteBuf getCookie(HttpRequest request, String name) {
+    protected static ByteBuf getCookie(HttpRequest request, String name) {
         String cookiesHeader = request.headers().get(HttpHeaderNames.COOKIE);
         if (cookiesHeader == null)
             return null;

@@ -31,11 +31,11 @@ public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
         setCookie(config, COOKIE_NAME, headers);
     }
 
-    public HttpUserSessionCookie getHttpUserSessionCookie(HttpRequest request) throws BadRequestException {
+    public static PersistentHttpUserSessionCookie getHttpUserSessionCookie(HttpRequest request) throws BadRequestException {
         ByteBuf byteBuf = HttpSessionCookie.getCookie(request, COOKIE_NAME);
         if (byteBuf != null) {
             try {
-                return new HttpUserSessionCookie(byteBuf);
+                return new PersistentHttpUserSessionCookie(byteBuf);
             } catch (DeserializationException e) {
                 throw new BadRequestException("Malformed cookie", e);
             } finally {

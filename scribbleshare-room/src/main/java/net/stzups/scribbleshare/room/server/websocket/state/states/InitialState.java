@@ -3,14 +3,14 @@ package net.stzups.scribbleshare.room.server.websocket.state.states;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 
 public class InitialState extends State {
-    private final User user;
+    private final AuthenticatedUserSession session;
 
-    public InitialState(User user) {
-        this.user = user;
+    public InitialState(AuthenticatedUserSession session) {
+        this.session = session;
     }
 
     @Override

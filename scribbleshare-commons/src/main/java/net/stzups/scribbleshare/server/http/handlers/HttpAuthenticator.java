@@ -8,11 +8,10 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
-import net.stzups.scribbleshare.data.objects.authentication.AuthenticationException;
+import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
@@ -36,17 +35,15 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         return ctx.channel().attr(USER).get();
     }
 
-    private final HttpSessionDatabase httpSessionDatabase;
-    private final HttpConfig httpConfig;
+    private final ScribbleshareDatabase httpSessionDatabase;
     private final String uri;
 
-    public HttpAuthenticator(HttpSessionDatabase httpSessionDatabase, HttpConfig httpConfig) {
-        this(httpSessionDatabase, httpConfig, null);
+    public HttpAuthenticator(ScribbleshareDatabase httpSessionDatabase) {
+        this(httpSessionDatabase, null);
     }
 
-    public HttpAuthenticator(HttpSessionDatabase httpSessionDatabase, HttpConfig httpConfig, String uri) {
+    public HttpAuthenticator(ScribbleshareDatabase httpSessionDatabase, String uri) {
         this.httpSessionDatabase = httpSessionDatabase;
-        this.httpConfig = httpConfig;
         this.uri = uri;
     }
 
@@ -75,7 +72,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     /** authenticates, or null if no authentication */
-    public static AuthenticatedUserSession authenticateHttpUserSession(FullHttpRequest request, HttpSessionDatabase database) throws UnauthorizedException {
+    public static AuthenticatedUserSession authenticateHttpUserSession(FullHttpRequest request, ScribbleshareDatabase database) throws UnauthorizedException, InternalServerException {
         HttpSessionCookie sessionCookie;
         try {
             sessionCookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
@@ -92,13 +89,16 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             throw new UnauthorizedException("Bad authentication (bad id)");
         }
 
-        try {
-            userSession.validate(sessionCookie);
-        } catch (AuthenticationException e) {
-            throw new UnauthorizedException("Bad authentication", e);
+        AuthenticationResult result = userSession.validate(sessionCookie);
+        if (result != AuthenticationResult.SUCCESS) {
+            throw new UnauthorizedException("Bad authentication " + result);
         }
 
-        return new AuthenticatedUserSession(userSession.getUser());
+        User user = database.getUser(userSession.getUser());
+        if (user == null)
+            throw new InternalServerException("Unknown user for authentication");
+
+        return new AuthenticatedUserSession(user);
     }
 
     /** create session and persistent session for user */
@@ -119,7 +119,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             throw new InternalServerException("Failed to add persistent http session", e);
         }
 
-        return new AuthenticatedUserSession(httpUserSession.getUser());
+        return new AuthenticatedUserSession(user);
     }
 
     /** logs in if not authenticated, or null if no auth */
@@ -150,10 +150,9 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             throw new InternalServerException("Failed to expire persistent http session", e);
         }
 
-        try {
-            persistentHttpUserSession.validate(sessionCookie);
-        } catch (AuthenticationException e) {
-            throw new UnauthorizedException("Bad authentication (bad validation)");
+        AuthenticationResult result = persistentHttpUserSession.validate(sessionCookie);
+        if (result != AuthenticationResult.SUCCESS) {
+            throw new UnauthorizedException("Bad authentication " + result);
         }
         // now logged in
 

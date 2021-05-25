@@ -2,7 +2,7 @@ package net.stzups.scribbleshare.data.objects.authentication.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
-import net.stzups.scribbleshare.data.objects.authentication.AuthenticationException;
+import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
 import net.stzups.scribbleshare.data.objects.authentication.UserSession;
 
 import java.sql.Timestamp;
@@ -23,10 +23,10 @@ public class PersistentHttpUserSession extends UserSession {
         super(id, creation, expiration, userId, byteBuf);
     }
 
-    public void validate(HttpSessionCookie cookie) throws AuthenticationException {
+    public AuthenticationResult validate(HttpSessionCookie cookie) {
         if (!Instant.now().isBefore(getCreated().toInstant().plus(MAX_AGE)))
-            throw new AuthenticationException("Session is too old");
+            return AuthenticationResult.STALE;
 
-        validate(cookie.getToken());
+        return validate(cookie.getToken());
     }
 }

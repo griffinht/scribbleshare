@@ -18,9 +18,11 @@ import net.stzups.scribbleshare.data.database.exception.exceptions.FailedExcepti
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
@@ -28,6 +30,7 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestExcep
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
+import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 import net.stzups.scribbleshare.server.http.objects.Form;
 import net.stzups.scribbleshare.server.http.objects.Route;
 import net.stzups.scribbleshare.server.http.objects.Uri;
@@ -141,11 +144,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             case "api": {
                 switch (route.get(1)) {
                     case "document": {
-                        Long userId = authenticate(ctx, request);
+                        AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(request, database);
 
-                        User user = database.getUser(userId);
-                        if (user == null) //todo
-                            throw new UnauthorizedException("User with " + userId + " authenticated but does not exist");
+                        if (session == null) {
+                            throw new UnauthorizedException("No authentication");
+                        }
+
+                        User user = session.getUser();
 
                         long documentId;
                         try {
@@ -279,7 +284,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 }
 
                 User user;
-                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
+                HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
                 if (cookie != null) {
                     HttpUserSession httpSession = database.getHttpSession(cookie);
                     if (httpSession != null) {
@@ -336,8 +341,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 Form form = new Form(request);//todo necessary?
 
                 HttpHeaders headers = new DefaultHttpHeaders();
-                HttpSessionCookie cookie = HttpSessionCookie.getHttpSessionCookie(request, HttpUserSession.COOKIE_NAME);
-                if (cookie != null) {
+                HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
+/*                if (cookie != null) {
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
                     if (httpUserSession != null) {
                         if (httpUserSession.validate(cookie)) {
@@ -356,12 +361,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     }
                 }
 
-                HttpSessionCookie persistentCookie = HttpSessionCookie.getHttpSessionCookie(request, PersistentHttpUserSession.COOKIE_NAME);
+                PersistentHttpUserSessionCookie persistentCookie = PersistentHttpUserSessionCookie.getHttpUserSessionCookie(request);
                 if (persistentCookie != null) {
                     PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(persistentCookie);
                     if (persistentHttpUserSession != null) {
                         if (persistentHttpUserSession.validate(persistentCookie)) {
-                            persistentHttpUserSession.clearCookie(config, headers);
+                            persistentCookie.clearCookie(config, headers);
                             try {
                                 database.expirePersistentHttpUserSession(persistentHttpUserSession);
                             } catch (FailedException e) {
@@ -376,7 +381,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
                         //todo error
                     }
-                }
+                }*/
 
                 sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
                 return;

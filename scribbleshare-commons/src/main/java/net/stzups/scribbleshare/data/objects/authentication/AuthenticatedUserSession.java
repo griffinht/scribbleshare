@@ -1,13 +1,15 @@
 package net.stzups.scribbleshare.data.objects.authentication;
 
-public class AuthenticatedUserSession {
-    private final long userId;
+import net.stzups.scribbleshare.data.objects.User;
 
-    public AuthenticatedUserSession(long userId) {
-        this.userId = userId;
+public class AuthenticatedUserSession {
+    private final User user;
+
+    public AuthenticatedUserSession(User user) {
+        this.user = user;
     }
 
-    public long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 }
