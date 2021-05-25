@@ -1,27 +1,15 @@
 package net.stzups.scribbleshare.data.database;
 
+import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.InviteCodeDatabase;
+import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
 import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
-import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
-import net.stzups.scribbleshare.data.objects.Document;
-import net.stzups.scribbleshare.data.objects.InviteCode;
-import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.authentication.login.Login;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
+import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 
-public interface ScribbleshareDatabase extends PersistentHttpSessionDatabase, ResourceDatabase, HttpSessionDatabase {
-    void addUser(User user) throws FailedException;
-    User getUser(long id);
-    void updateUser(User user) throws FailedException;
+public interface ScribbleshareDatabase extends PersistentHttpSessionDatabase, ResourceDatabase, HttpSessionDatabase, UserDatabase, DocumentDatabase, InviteCodeDatabase, LoginDatabase,
+        HttpAuthenticator.Database {
 
-    Document createDocument(User owner);
-    Document getDocument(long id);
-    void updateDocument(Document document);
-    void deleteDocument(Document document);
-
-    InviteCode getInviteCode(String code);
-    InviteCode getInviteCode(Document document);
-    Login getLogin(String username);
-    /** false if the username already existed */
-    boolean addLogin(Login login) throws FailedException;
 }

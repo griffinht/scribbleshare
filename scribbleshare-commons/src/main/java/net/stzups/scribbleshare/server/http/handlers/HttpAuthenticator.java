@@ -7,7 +7,9 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.exceptions.FailedException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
@@ -35,15 +37,19 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         return ctx.channel().attr(USER).get();
     }
 
-    private final ScribbleshareDatabase httpSessionDatabase;
-    private final String uri;
+    public interface Database extends HttpSessionDatabase, PersistentHttpSessionDatabase, UserDatabase {
 
-    public HttpAuthenticator(ScribbleshareDatabase httpSessionDatabase) {
-        this(httpSessionDatabase, null);
     }
 
-    public HttpAuthenticator(ScribbleshareDatabase httpSessionDatabase, String uri) {
-        this.httpSessionDatabase = httpSessionDatabase;
+    private final Database database;
+    private final String uri;
+
+    public HttpAuthenticator(Database database) {
+        this(database, null);
+    }
+
+    public HttpAuthenticator(Database database, String uri) {
+        this.database = database;
         this.uri = uri;
     }
 
@@ -68,11 +74,11 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
             return;
         }
 
-        ctx.channel().attr(USER).set(authenticateHttpUserSession(request, httpSessionDatabase));
+        ctx.channel().attr(USER).set(authenticateHttpUserSession(request, database));
     }
 
     /** authenticates, or null if no authentication */
-    public static AuthenticatedUserSession authenticateHttpUserSession(FullHttpRequest request, ScribbleshareDatabase database) throws UnauthorizedException, InternalServerException {
+    public static AuthenticatedUserSession authenticateHttpUserSession(FullHttpRequest request, Database database) throws UnauthorizedException, InternalServerException {
         HttpSessionCookie sessionCookie;
         try {
             sessionCookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
@@ -102,7 +108,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     /** create session and persistent session for user */
-    private static AuthenticatedUserSession createHttpSession(User user, HttpConfig httpConfig, ScribbleshareDatabase database, HttpHeaders httpHeaders) throws InternalServerException {
+    private static AuthenticatedUserSession createHttpSession(User user, HttpConfig httpConfig, Database database, HttpHeaders httpHeaders) throws InternalServerException {
         // create session
         HttpUserSession httpUserSession = new HttpUserSession(httpConfig, user, httpHeaders);
         try {
@@ -123,7 +129,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     /** logs in if not authenticated, or null if no auth */
-    public static AuthenticatedUserSession logInHttpSession(FullHttpRequest request, ScribbleshareDatabase database, HttpHeaders httpHeaders, HttpConfig httpConfig) throws UnauthorizedException, InternalServerException {
+    public static AuthenticatedUserSession logInHttpSession(FullHttpRequest request, Database database, HttpHeaders httpHeaders, HttpConfig httpConfig) throws UnauthorizedException, InternalServerException {
         AuthenticatedUserSession session = authenticateHttpUserSession(request, database);
         if (session != null) {
             return session;
@@ -165,7 +171,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     /** creates new user if not logged in or authenticated */
-    public static AuthenticatedUserSession createHttpSession(FullHttpRequest request, ScribbleshareDatabase database, HttpConfig httpConfig, HttpHeaders httpHeaders) throws UnauthorizedException, InternalServerException {
+    public static AuthenticatedUserSession createHttpSession(FullHttpRequest request, Database database, HttpConfig httpConfig, HttpHeaders httpHeaders) throws UnauthorizedException, InternalServerException {
         AuthenticatedUserSession session = logInHttpSession(request, database, httpHeaders, httpConfig);
         if (session != null) {
             return session;
