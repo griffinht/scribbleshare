@@ -60,6 +60,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         } catch (HttpException e) {
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, e.responseStatus());
+            return;
         }
         out.add(request.retain());
     }
