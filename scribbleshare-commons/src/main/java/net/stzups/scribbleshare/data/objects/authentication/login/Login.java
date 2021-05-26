@@ -62,11 +62,7 @@ public class Login {
         }
 
         if (login == null) {
-            assert !verified : "Null logins should never be verified";
-        }
-
-        if (hashedPassword == DUMMY) {
-            assert !verified : "Dummy logins should never be verified";
+            return false;
         }
 
         return verified;

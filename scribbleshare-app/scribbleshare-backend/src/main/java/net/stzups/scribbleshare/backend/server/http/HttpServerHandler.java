@@ -243,12 +243,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     System.out.println(username + ", " + password + ", " + remember);
 
                     Login login = database.getLogin(username);
-                    if (Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
+                    if (!Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
                         //todo rate limit and generic error handling
                         if (login == null) {
-                            Scribbleshare.getLogger(ctx).info("Bad username " + username);
+                            Scribbleshare.getLogger(ctx).info("Failed login attempt with bad username " + username);
                         } else {
-                            Scribbleshare.getLogger(ctx).info("Bad password for username " + username);
+                            Scribbleshare.getLogger(ctx).info("Failed login attempt with bad password for username " + username);
                         }
 
                         sendRedirect(ctx, request, LOGIN_PAGE);

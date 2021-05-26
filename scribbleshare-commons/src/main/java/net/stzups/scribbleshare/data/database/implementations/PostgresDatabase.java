@@ -37,15 +37,14 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
     public Login getLogin(String username) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
-            throw new SQLException("poggers");
-            //preparedStatement.setString(1, username);
-/*            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            preparedStatement.setString(1, username);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return new Login(username, resultSet.getLong("user_id"), resultSet.getBytes("hashed_password"));
                 } else {
                     return null;
                 }
-            }*/
+            }
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting login for username " + username, e);
             return null;
