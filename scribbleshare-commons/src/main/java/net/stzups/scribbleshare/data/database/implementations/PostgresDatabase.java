@@ -91,6 +91,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Exception while finding PostgreSQL JDBC driver", e);
         }
+
         int retries = 0;
         while (connection == null) {
             try {
@@ -128,14 +129,14 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new User(id,
-                            (Long[]) (resultSet.getArray("owned_documents").getArray()),
-                            (Long[]) (resultSet.getArray("shared_documents").getArray()),
-                            resultSet.getString("username"));
-                } else {
+                if (!resultSet.next()) {
                     return null;
                 }
+
+                return new User(id,
+                        (Long[]) (resultSet.getArray("owned_documents").getArray()),
+                        (Long[]) (resultSet.getArray("shared_documents").getArray()),
+                        resultSet.getString("username"));
             }
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + User.class.getSimpleName() + " with id " + id, e);
@@ -180,15 +181,13 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM documents WHERE id=?")) {
                 preparedStatement.setLong(1, id);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        document = new Document(id,
-                                resultSet.getLong("owner"),
-                                resultSet.getString("name"));
-                        documents.put(document.getId(), document);
-                    } else {
-                        System.out.println(Document.class.getSimpleName() + " with id " + id + " does not exist");
+                    if (!resultSet.next()) {
                         return null;
                     }
+                    document = new Document(id,
+                            resultSet.getLong("owner"),
+                            resultSet.getString("name"));
+                    documents.put(document.getId(), document);
                 }
             } catch (SQLException e) {
                 Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + Document.class.getSimpleName() + " with id " + id, e);
@@ -233,6 +232,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 if (!resultSet.next()) {
                     return null;
                 }
+
                 return new InviteCode(code, resultSet.getLong(1));
             }
         } catch (SQLException e) {
@@ -293,7 +293,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (!resultSet.next()) {
-                    return null; // does not exist
+                    return null;
                 }
 
                 return new HttpUserSession(
@@ -379,11 +379,11 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, owner);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new Resource(resultSet.getTimestamp("last_modified"), Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
-                } else {
+                if (!resultSet.next()) {
                     return null;
                 }
+
+                return new Resource(resultSet.getTimestamp("last_modified"), Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
             }
         } catch (IOException e) {
             throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
@@ -400,17 +400,16 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    persistentHttpSession = new PersistentHttpUserSession(
-                            resultSet.getLong("id"),
-                            resultSet.getTimestamp("created"),
-                            resultSet.getTimestamp("expired"),
-                            resultSet.getLong("user_id"),
-                            Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
-                } else {
-                    //todo
+                if (!resultSet.next()) {
                     return null;
                 }
+
+                persistentHttpSession = new PersistentHttpUserSession(
+                        resultSet.getLong("id"),
+                        resultSet.getTimestamp("created"),
+                        resultSet.getTimestamp("expired"),
+                        resultSet.getLong("user_id"),
+                        Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
             }
         } catch (IOException e) {
             throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
