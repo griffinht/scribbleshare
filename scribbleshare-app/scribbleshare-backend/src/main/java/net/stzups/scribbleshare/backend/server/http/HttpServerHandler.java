@@ -302,6 +302,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         HttpUserSession httpSession = database.getHttpSession(cookie);
                         if (httpSession != null) {
                             User u = database.getUser(httpSession.getUser());
+                            if (u == null) {
+                                throw new InternalServerException("User somehow does not exist for " + httpSession);
+                            }
                             if (u.isRegistered()) {
                                 Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
                                 user = new User(username);
@@ -352,12 +355,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     return;
                 }
                 case LOGOUT_PATH: {
-                    Form form = new Form(request);//todo necessary?
+/*                    Form form = new Form(request);//todo necessary?
 
 
                     HttpHeaders headers = new DefaultHttpHeaders();
                     HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
-/*                if (cookie != null) {
+                if (cookie != null) {
                     HttpUserSession httpUserSession = database.getHttpSession(cookie);
                     if (httpUserSession != null) {
                         if (httpUserSession.validate(cookie)) {
@@ -396,10 +399,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         Scribbleshare.getLogger(ctx).warning("Tried to log out of non existent persistent session");
                         //todo error
                     }
-                }*/
-
+                }
                     sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
-                    return;
+                    return;*/
                 }
             }
         }

@@ -17,6 +17,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 import java.util.logging.Level;
 
@@ -44,25 +45,25 @@ public class HandshakeState extends State {
                 //figure out which document to open first
                 if (inviteCode != null) {
                     Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(inviteCode.getDocument());
-                    if (document != null) {
-                        //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
-                        if (document.getOwner() != client.getUser().getId()) {
-                            if (client.getUser().getSharedDocuments().add(document.getId())) {
-                                try {
-                                    RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
-                                } catch (DatabaseException e) {
-                                    e.printStackTrace();
-                                    //todo
-                                }
+                    if (document == null) {
+                        throw new ClientMessageException(clientMessage, "Somehow used invite code for non existent document");
+                    }
+
+                    //if this isn't the user's own document and this isn't part of the user's shared documents then add and update
+                    if (document.getOwner() != client.getUser().getId()) {
+                        if (client.getUser().getSharedDocuments().add(document.getId())) {
+                            try {
+                                RoomHttpServerInitializer.getDatabase(ctx).updateUser(client.getUser());
+                            } catch (DatabaseException e) {
+                                e.printStackTrace();
+                                //todo
                             }
                         }
-                        try {
-                            room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                        } catch (DeserializationException e) {
-                            throw new ClientMessageException(clientMessage, e);
-                        }
-                    } else {
-                        throw new ClientMessageException(clientMessage, "Somehow used invite code for non existent document");
+                    }
+                    try {
+                        room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
+                    } catch (DeserializationException | InternalServerException e) {
+                        throw new ClientMessageException(clientMessage, e);
                     }
                 } else {
                     if (client.getUser().getOwnedDocuments().size() == 0) {
@@ -78,7 +79,7 @@ public class HandshakeState extends State {
                     if (document == null) {
                         return true;
                     } else {
-                        client.queueMessage(new ServerMessageUpdateDocument(RoomHttpServerInitializer.getDatabase(ctx).getDocument(id)));
+                        client.queueMessage(new ServerMessageUpdateDocument(document));
                         return false;
                     }
                 });//todo this is bad
@@ -87,7 +88,7 @@ public class HandshakeState extends State {
                     if (document == null) {
                         return true;
                     } else {
-                        client.queueMessage(new ServerMessageUpdateDocument(RoomHttpServerInitializer.getDatabase(ctx).getDocument(id)));
+                        client.queueMessage(new ServerMessageUpdateDocument(document));
                         return false;
                     }
                 });

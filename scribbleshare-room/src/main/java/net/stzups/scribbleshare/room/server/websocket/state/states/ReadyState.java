@@ -13,6 +13,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.ClientMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 import java.util.logging.Level;
 
@@ -35,7 +36,7 @@ public class ReadyState extends State {
                     Room room;
                     try {
                         room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                    } catch (DeserializationException e) {
+                    } catch (DeserializationException | InternalServerException e) {
                         throw new ClientMessageException(clientMessage, e);
                     }
                     room.addClient(client);
@@ -59,7 +60,7 @@ public class ReadyState extends State {
                 Room room;
                 try {
                     room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                } catch (DeserializationException e) {
+                } catch (DeserializationException | InternalServerException e) {
                     throw new ClientMessageException(clientMessage, e);
                 }
                 room.addClient(client);

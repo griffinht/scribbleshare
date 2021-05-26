@@ -14,6 +14,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageAddUser;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,16 +45,20 @@ public class Room {
     private final Document document;
     private final Canvas canvas;
 
-    Room(ScribbleshareDatabase database, Document document) throws DeserializationException {
+    Room(ScribbleshareDatabase database, Document document) throws DeserializationException, InternalServerException {
         this.database = database;
         this.document = document;
-        ByteBuf canvas = database.getResource(document.getId(), document.getId()).getData();
+        Resource resource = database.getResource(document.getId(), document.getId());
+        if (resource == null) {
+            throw new InternalServerException("Somehow there is no resource for " + document);
+        }
+        ByteBuf canvas = resource.getData();
         this.canvas = new Canvas(canvas);
         rooms.put(document, this);
         Scribbleshare.getLogger().info("Started " + this);
     }
 
-    public static Room getRoom(ScribbleshareDatabase database, Document document) throws DeserializationException {
+    public static Room getRoom(ScribbleshareDatabase database, Document document) throws DeserializationException, InternalServerException {
         Room room = rooms.get(document);
         if (room == null) {
             return new Room(database, document);
