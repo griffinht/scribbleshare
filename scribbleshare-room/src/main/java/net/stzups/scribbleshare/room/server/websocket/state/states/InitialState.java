@@ -28,6 +28,6 @@ public class InitialState extends State {
 
     @Override
     public String toString() {
-        return InitialState.class.getSimpleName() + "{" + session + "}";
+        return InitialState.class.getSimpleName() + "{session=" + session + "}";
     }
 }

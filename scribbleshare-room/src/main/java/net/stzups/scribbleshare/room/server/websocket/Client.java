@@ -72,7 +72,7 @@ public class Client {
 
     @Override
     public String toString() {
-        return Client.class.getSimpleName() + "[" + user + ",address=" + channel.remoteAddress() + ",id=" + id + "]";
+        return Client.class.getSimpleName() + "{user=" + user + ",address=" + channel.remoteAddress() + ",id=" + id + "}";
     }
 
     @Override

@@ -21,6 +21,6 @@ public class MouseMove {
 
     @Override
     public String toString() {
-        return MouseMove.class.getSimpleName() + "[dt=" + dt + ",x=" + x + ",y=" + y + "}";
+        return MouseMove.class.getSimpleName() + "{dt=" + dt + ",x=" + x + ",y=" + y + "}";
     }
 }

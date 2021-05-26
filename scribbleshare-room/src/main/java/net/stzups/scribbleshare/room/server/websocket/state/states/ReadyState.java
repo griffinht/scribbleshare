@@ -109,6 +109,6 @@ public class ReadyState extends State {
 
     @Override
     public String toString() {
-        return ReadyState.class.getSimpleName() + "{" + client + "}";
+        return ReadyState.class.getSimpleName() + "{client=" + client + "}";
     }
 }

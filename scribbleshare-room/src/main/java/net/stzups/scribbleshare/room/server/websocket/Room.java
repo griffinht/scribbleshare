@@ -180,6 +180,6 @@ public class Room {
 
     @Override
     public String toString() {
-        return Room.class.getSimpleName() + "[" + document + "," + canvas + ",clients[" + clients.size() + "]]";
+        return Room.class.getSimpleName() + "{" + document + "," + canvas + ",clients=[" + clients.size() + "]}";
     }
 }

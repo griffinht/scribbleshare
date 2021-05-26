@@ -124,6 +124,6 @@ public class HandshakeState extends State {
 
     @Override
     public String toString() {
-        return HandshakeState.class.getSimpleName() + "{" + session + "}";
+        return HandshakeState.class.getSimpleName() + "{session=" + session + "}";
     }
 }

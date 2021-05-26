@@ -102,6 +102,6 @@ public class RoomState extends ReadyState {
 
     @Override
     public String toString() {
-        return RoomState.class.getSimpleName() + "[" + client + "," + room + "]";
+        return RoomState.class.getSimpleName() + "{client=" + client + ",room=" + room + "}";
     }
 }
