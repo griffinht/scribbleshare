@@ -145,10 +145,10 @@ public class HttpUtils {
     public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws BadRequestException {
         setDateAndLastModified(headers, lastModified);
         if (isModifiedSince(request, lastModified)) {
-            Scribbleshare.getLogger(ctx).info("Uncached");
+            //Scribbleshare.getLogger(ctx).info("Uncached");
             sendChunkedResource(ctx, request, headers, chunkedInput);
         } else {
-            Scribbleshare.getLogger(ctx).info("Cached");
+            //Scribbleshare.getLogger(ctx).info("Cached");
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
             response.headers().set(headers);
 
