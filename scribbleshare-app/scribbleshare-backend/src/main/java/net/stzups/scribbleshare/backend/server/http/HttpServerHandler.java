@@ -121,7 +121,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-        Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
         try {
             handle(ctx, request);
         } catch (HttpException e) {
