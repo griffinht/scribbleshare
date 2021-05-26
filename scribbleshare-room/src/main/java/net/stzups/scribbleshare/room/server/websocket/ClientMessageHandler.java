@@ -10,7 +10,6 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMess
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 
 import java.util.logging.Level;
 
@@ -24,7 +23,7 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        State.setState(ctx, new InitialState(HttpAuthenticator.getUser(ctx)));
+        State.setState(ctx, new InitialState());
     }
 
     @Override
