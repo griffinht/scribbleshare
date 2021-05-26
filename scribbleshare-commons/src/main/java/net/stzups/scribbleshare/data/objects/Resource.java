@@ -27,4 +27,9 @@ public class Resource {
     public ByteBuf getData() {
         return data;
     }
+
+    @Override
+    public String toString() {
+        return Resource.class.getSimpleName() + "{lastModified=" + lastModified + ",data=" + data + "}";
+    }
 }

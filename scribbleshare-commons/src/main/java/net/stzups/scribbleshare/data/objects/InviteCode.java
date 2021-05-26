@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.data.objects;
 
+import net.stzups.scribbleshare.util.DebugString;
 import net.stzups.scribbleshare.util.RandomString;
 
 public class InviteCode {
@@ -23,5 +24,13 @@ public class InviteCode {
 
     public long getDocument() {
         return document;
+    }
+
+    @Override
+    public String toString() {
+        return new DebugString(this)
+                .add("code", code)
+                .add("document", document)
+                .toString();
     }
 }

@@ -18,6 +18,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.logging.Level;
 
@@ -124,6 +125,8 @@ public class HandshakeState extends State {
 
     @Override
     public String toString() {
-        return HandshakeState.class.getSimpleName() + "{session=" + session + "}";
+        return new DebugString(this)
+                .add("session", session)
+                .toString();
     }
 }

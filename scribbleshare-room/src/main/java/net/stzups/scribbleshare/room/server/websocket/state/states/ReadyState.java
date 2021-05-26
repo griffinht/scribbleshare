@@ -14,6 +14,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.C
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ReadyState extends State {
     private final Client client;
@@ -109,6 +110,8 @@ public class ReadyState extends State {
 
     @Override
     public String toString() {
-        return ReadyState.class.getSimpleName() + "{client=" + client + "}";
+        return new DebugString(this)
+                .add("client", client)
+                .toString();
     }
 }

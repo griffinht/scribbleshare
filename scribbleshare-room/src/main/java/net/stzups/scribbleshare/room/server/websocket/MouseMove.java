@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class MouseMove {
     private final byte dt;
@@ -21,6 +22,10 @@ public class MouseMove {
 
     @Override
     public String toString() {
-        return MouseMove.class.getSimpleName() + "{dt=" + dt + ",x=" + x + ",y=" + y + "}";
+        return new DebugString(this)
+                .add("dt", dt)
+                .add("x", x)
+                .add("y", y)
+                .toString();
     }
 }

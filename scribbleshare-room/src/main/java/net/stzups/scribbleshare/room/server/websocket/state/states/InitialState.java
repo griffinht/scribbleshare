@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class InitialState extends State {
 
@@ -27,6 +28,7 @@ public class InitialState extends State {
 
     @Override
     public String toString() {
-        return InitialState.class.getSimpleName();
+        return new DebugString(this)
+                .toString();
     }
 }

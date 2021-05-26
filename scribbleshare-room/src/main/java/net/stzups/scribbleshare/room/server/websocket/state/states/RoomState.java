@@ -17,6 +17,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class RoomState extends ReadyState {
     private final Client client;
@@ -102,6 +103,9 @@ public class RoomState extends ReadyState {
 
     @Override
     public String toString() {
-        return RoomState.class.getSimpleName() + "{client=" + client + ",room=" + room + "}";
+        return new DebugString(this)
+                .add("client", client)
+                .add("room", room)
+                .toString();
     }
 }
