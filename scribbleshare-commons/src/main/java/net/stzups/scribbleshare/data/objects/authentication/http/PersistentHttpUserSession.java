@@ -29,4 +29,9 @@ public class PersistentHttpUserSession extends UserSession {
 
         return validate(cookie.getToken());
     }
+
+    @Override
+    public String toString() {
+        return PersistentHttpUserSession.class.getSimpleName() + "{" + super.toString() + "}";
+    }
 }

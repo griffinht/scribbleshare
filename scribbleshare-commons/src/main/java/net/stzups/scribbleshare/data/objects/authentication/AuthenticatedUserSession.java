@@ -12,4 +12,9 @@ public class AuthenticatedUserSession {
     public User getUser() {
         return user;
     }
+
+    @Override
+    public String toString() {
+        return AuthenticatedUserSession.class.getSimpleName() + "{user=" + user + "}";
+    }
 }

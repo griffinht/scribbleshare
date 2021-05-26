@@ -75,4 +75,9 @@ public class Login {
 
         return verified;
     }
+
+    @Override
+    public String toString() {
+        return Login.class.getSimpleName() + "{username=" + username + ",id=" + id + "}";
+    }
 }

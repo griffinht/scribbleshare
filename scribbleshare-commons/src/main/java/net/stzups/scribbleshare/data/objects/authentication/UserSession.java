@@ -89,7 +89,7 @@ public class UserSession {
 
     @Override
     public String toString() {
-        return "Session{id=" + id + ",userId" + userId + ",created=" + created + ",expires=" + expired + "}";
+        return UserSession.class.getSimpleName() + "{id=" + id + ",userId" + userId + ",created=" + created + ",expires=" + expired + "}";
     }
 
     @Override

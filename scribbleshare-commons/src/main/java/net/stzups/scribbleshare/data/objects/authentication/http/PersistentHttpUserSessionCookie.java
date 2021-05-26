@@ -45,4 +45,9 @@ public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return PersistentHttpUserSessionCookie.class.getSimpleName() + "{" + super.toString() + "}";
+    }
 }

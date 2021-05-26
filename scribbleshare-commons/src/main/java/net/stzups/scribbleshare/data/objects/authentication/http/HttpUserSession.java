@@ -32,4 +32,9 @@ public class HttpUserSession extends UserSession {
 
         return validate(cookie.getToken());
     }
+
+    @Override
+    public String toString() {
+        return HttpUserSession.class.getSimpleName() + "{" + super.toString() + "}";
+    }
 }

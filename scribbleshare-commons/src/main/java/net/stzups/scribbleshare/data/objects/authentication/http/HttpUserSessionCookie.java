@@ -35,4 +35,9 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return HttpUserSessionCookie.class.getSimpleName() + "{" + super.toString() + "}";
+    }
 }

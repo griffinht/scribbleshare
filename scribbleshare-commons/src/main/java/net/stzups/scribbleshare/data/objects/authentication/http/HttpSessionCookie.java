@@ -95,4 +95,9 @@ public class HttpSessionCookie {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return HttpSessionCookie.class.getSimpleName() + "{id=" + id + "}";
+    }
 }
