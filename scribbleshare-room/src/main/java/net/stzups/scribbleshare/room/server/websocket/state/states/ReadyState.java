@@ -106,4 +106,9 @@ public class ReadyState extends State {
                 super.message(ctx, clientMessage);
         }
     }
+
+    @Override
+    public String toString() {
+        return ReadyState.class.getSimpleName() + "{" + client + "}";
+    }
 }

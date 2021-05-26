@@ -48,8 +48,7 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
             ctx.channel().attr(STATE).get().message(ctx, message);
         } catch (ClientMessageException | InternalServerException e) {
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling message while in " + getState(ctx), e);
-            //todo write exception
-            //todo toString for state
+            //todo send exception to client
         }
     }
 }

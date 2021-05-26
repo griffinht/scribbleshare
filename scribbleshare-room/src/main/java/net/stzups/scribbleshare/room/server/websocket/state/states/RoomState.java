@@ -99,4 +99,9 @@ public class RoomState extends ReadyState {
                 super.message(ctx, clientMessage);
         }
     }
+
+    @Override
+    public String toString() {
+        return RoomState.class.getSimpleName() + "[" + client + "," + room + "]";
+    }
 }

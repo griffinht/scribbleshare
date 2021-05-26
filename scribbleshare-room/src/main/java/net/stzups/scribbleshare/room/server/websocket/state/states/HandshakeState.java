@@ -121,4 +121,9 @@ public class HandshakeState extends State {
                 super.message(ctx, clientMessage);
         }
     }
+
+    @Override
+    public String toString() {
+        return HandshakeState.class.getSimpleName() + "{" + session + "}";
+    }
 }

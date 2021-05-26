@@ -18,4 +18,9 @@ public class MouseMove {
         byteBuf.writeShort(x);
         byteBuf.writeShort(y);
     }
+
+    @Override
+    public String toString() {
+        return MouseMove.class.getSimpleName() + "[dt=" + dt + ",x=" + x + ",y=" + y + "}";
+    }
 }

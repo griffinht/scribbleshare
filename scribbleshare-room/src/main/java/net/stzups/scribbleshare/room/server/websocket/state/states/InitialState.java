@@ -25,4 +25,9 @@ public class InitialState extends State {
 
         super.userEventTriggered(ctx, event);
     }
+
+    @Override
+    public String toString() {
+        return InitialState.class.getSimpleName() + "{" + session + "}";
+    }
 }
