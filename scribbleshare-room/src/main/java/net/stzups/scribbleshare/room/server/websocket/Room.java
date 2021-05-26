@@ -15,6 +15,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageOpenDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageRemoveClient;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -180,6 +181,10 @@ public class Room {
 
     @Override
     public String toString() {
-        return Room.class.getSimpleName() + "{" + document + "," + canvas + ",clients=[" + clients.size() + "]}";
+        return DebugString.get(this)
+                .add("document", document)
+                .add("canvas", canvas)
+                .add("clients", clients)
+                .toString();
     }
 }

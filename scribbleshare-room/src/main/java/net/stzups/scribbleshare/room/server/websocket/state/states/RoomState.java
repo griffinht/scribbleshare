@@ -103,7 +103,7 @@ public class RoomState extends ReadyState {
 
     @Override
     public String toString() {
-        return new DebugString(this)
+        return DebugString.get(this)
                 .add("client", client)
                 .add("room", room)
                 .toString();

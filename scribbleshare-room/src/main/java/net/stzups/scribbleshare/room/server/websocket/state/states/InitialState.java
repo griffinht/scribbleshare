@@ -28,7 +28,7 @@ public class InitialState extends State {
 
     @Override
     public String toString() {
-        return new DebugString(this)
+        return DebugString.get(this)
                 .toString();
     }
 }

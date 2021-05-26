@@ -13,7 +13,7 @@ import java.util.List;
  *         ...
  *
  *         public String toString() {
- *             return new DebugString(this)
+ *             return DebugString.get(this)
  *                 .add("make", make)
  *                 .add("year", year)
  *                 .toString();
@@ -42,11 +42,11 @@ public class DebugString {
     private final Class<?> clazz;
     private List<Property> properties; // will be lazily allocated if needed
 
-    public DebugString(Object object) {
+    private DebugString(Object object) {
         this(object.getClass());
     }
 
-    public DebugString(Class<?> clazz) {
+    private DebugString(Class<?> clazz) {
         this.clazz = clazz;
     }
 
@@ -69,5 +69,14 @@ public class DebugString {
             stringBuilder.append("}");
         }
         return stringBuilder.toString();
+    }
+
+    // useless factory methods that are easier to type than new DebugLog
+    public static DebugString get(Object object) {
+        return new DebugString(object);
+    }
+
+    public static DebugString get(Class<?> clazz) {
+        return new DebugString(clazz);
     }
 }

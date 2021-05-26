@@ -28,7 +28,7 @@ public class InviteCode {
 
     @Override
     public String toString() {
-        return new DebugString(this)
+        return DebugString.get(this)
                 .add("code", code)
                 .add("document", document)
                 .toString();
