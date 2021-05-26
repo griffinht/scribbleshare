@@ -10,7 +10,7 @@ public interface HttpSessionDatabase {
      * @param cookie cookie of {@link HttpUserSession}
      * @return null if the {@link HttpUserSession} does not exist
      */
-    @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie);
+    @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie) throws DatabaseException;
 
     void addHttpSession(HttpUserSession httpUserSession) throws DatabaseException;
 

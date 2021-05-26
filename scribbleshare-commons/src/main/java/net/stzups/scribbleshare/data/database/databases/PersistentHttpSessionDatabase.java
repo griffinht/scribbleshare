@@ -10,7 +10,7 @@ public interface PersistentHttpSessionDatabase {
      * @param cookie {@link HttpSessionCookie} of {@link PersistentHttpUserSession}
      * @return null if {@link PersistentHttpUserSession} does not exist
      */
-    @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie);
+    @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) throws DatabaseException;
 
     void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws DatabaseException;
 

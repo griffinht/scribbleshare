@@ -10,7 +10,7 @@ public interface LoginDatabase {
      * @param username username of {@link Login}
      * @return null if {@link Login} does not exist
      */
-    @Nullable Login getLogin(String username);
+    @Nullable Login getLogin(String username) throws DatabaseException;
 
     /**
      * @return false if the login with duplicate username already exists

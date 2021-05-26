@@ -9,6 +9,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
 
 import java.util.logging.Level;
@@ -38,11 +39,17 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<ClientMess
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Unhandled exception while in connection state " + getState(ctx).get(), cause);
+        Scribbleshare.getLogger(ctx).log(Level.WARNING, "Unhandled exception while in " + getState(ctx).get(), cause);
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) throws ClientMessageException {
-        ctx.channel().attr(STATE).get().message(ctx, message);
+    protected void channelRead0(ChannelHandlerContext ctx, ClientMessage message) {
+        try {
+            ctx.channel().attr(STATE).get().message(ctx, message);
+        } catch (ClientMessageException | InternalServerException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling message while in " + getState(ctx), e);
+            //todo write exception
+            //todo toString for state
+        }
     }
 }

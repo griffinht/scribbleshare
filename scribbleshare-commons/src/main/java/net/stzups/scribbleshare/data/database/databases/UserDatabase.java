@@ -11,7 +11,7 @@ public interface UserDatabase {
      * @param id id of {@link User}
      * @return null if the {@link User} does not exist
      */
-    @Nullable User getUser(long id);
+    @Nullable User getUser(long id) throws DatabaseException;
 
     void updateUser(User user) throws DatabaseException;
 }

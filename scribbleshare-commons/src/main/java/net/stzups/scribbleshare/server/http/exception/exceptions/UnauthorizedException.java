@@ -8,8 +8,12 @@ public class UnauthorizedException extends HttpException {
         super(message);
     }
 
-    public UnauthorizedException(String message, Exception e) {
-        super(message, e);
+    public UnauthorizedException(Throwable cause) {
+        super(cause);
+    }
+
+    public UnauthorizedException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     @Override

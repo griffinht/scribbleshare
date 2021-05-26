@@ -15,8 +15,6 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
-import java.util.logging.Level;
-
 public class ReadyState extends State {
     private final Client client;
 
@@ -25,18 +23,23 @@ public class ReadyState extends State {
     }
 
     @Override
-    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
+    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException, InternalServerException {
 
         switch (clientMessage.getMessageType()) {
             case OPEN_DOCUMENT: {
                 ClientMessageOpenDocument clientPacketOpenDocument = (ClientMessageOpenDocument) clientMessage;
-                Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(clientPacketOpenDocument.getId());
+                Document document;
+                try {
+                    document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(clientPacketOpenDocument.getId());
+                } catch (DatabaseException e) {
+                    throw new InternalServerException(e);
+                }
                 if (document != null) {
                     //open
                     Room room;
                     try {
                         room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                    } catch (DeserializationException | InternalServerException e) {
+                    } catch (DeserializationException e) {
                         throw new ClientMessageException(clientMessage, e);
                     }
                     room.addClient(client);
@@ -52,15 +55,14 @@ public class ReadyState extends State {
                 try {
                     document = RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
                 } catch (DatabaseException e) {
-                    Scribbleshare.getLogger().log(Level.WARNING, "Failed to create document for client that requested it", e);//todo this will probably break the client
-                    return;//todo throw server exception
+                    throw new InternalServerException("Exception while creating document for client " + client + " that request it", e);
                 }
                 client.sendMessage(new ServerMessageUpdateDocument(document));
                 //open
                 Room room;
                 try {
                     room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                } catch (DeserializationException | InternalServerException e) {
+                } catch (DeserializationException e) {
                     throw new ClientMessageException(clientMessage, e);
                 }
                 room.addClient(client);

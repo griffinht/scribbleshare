@@ -48,7 +48,12 @@ public class Room {
     Room(ScribbleshareDatabase database, Document document) throws DeserializationException, InternalServerException {
         this.database = database;
         this.document = document;
-        Resource resource = database.getResource(document.getId(), document.getId());
+        Resource resource;
+        try {
+            resource = database.getResource(document.getId(), document.getId());
+        } catch (DatabaseException e) {
+            throw new InternalServerException(e);
+        }
         if (resource == null) {
             throw new InternalServerException("Somehow there is no resource for " + document);
         }

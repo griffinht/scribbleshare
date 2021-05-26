@@ -85,44 +85,45 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         } catch (BadRequestException e) {
             throw new UnauthorizedException("Malformed cookie", e);
         }
-
         if (sessionCookie == null) {
             return null;
         }
 
-        HttpUserSession userSession = database.getHttpSession(sessionCookie);
-        if (userSession == null) {
-            throw new UnauthorizedException("Bad authentication (bad id)");
-        }
+        User user;
+        try {
+            HttpUserSession userSession = database.getHttpSession(sessionCookie);
+            if (userSession == null) {
+                throw new UnauthorizedException("Bad authentication (bad id)");
+            }
 
-        AuthenticationResult result = userSession.validate(sessionCookie);
-        if (result != AuthenticationResult.SUCCESS) {
-            throw new UnauthorizedException("Bad authentication " + result);
-        }
+            AuthenticationResult result = userSession.validate(sessionCookie);
+            if (result != AuthenticationResult.SUCCESS) {
+                throw new UnauthorizedException("Bad authentication " + result);
+            }
 
-        User user = database.getUser(userSession.getUser());
-        if (user == null)
-            throw new InternalServerException("Unknown user for authentication");
+            user = database.getUser(userSession.getUser());
+            if (user == null) {
+                throw new InternalServerException("Unknown user for authentication");
+            }
+        } catch (DatabaseException e) {
+            throw new InternalServerException(e);
+        }
 
         return new AuthenticatedUserSession(user);
     }
 
     /** create session and persistent session for user */
     private static AuthenticatedUserSession createHttpSession(User user, HttpConfig httpConfig, Database database, HttpHeaders httpHeaders) throws InternalServerException {
-        // create session
-        HttpUserSession httpUserSession = new HttpUserSession(httpConfig, user, httpHeaders);
         try {
+            // create session
+            HttpUserSession httpUserSession = new HttpUserSession(httpConfig, user, httpHeaders);
             database.addHttpSession(httpUserSession);
-        } catch (DatabaseException e) {
-            throw new InternalServerException("Failed to add http session", e);
-        }
 
-        // create new persistent session
-        PersistentHttpUserSession a = new PersistentHttpUserSession(httpConfig, httpUserSession, httpHeaders);
-        try {
+            // create new persistent session
+            PersistentHttpUserSession a = new PersistentHttpUserSession(httpConfig, httpUserSession, httpHeaders);
             database.addPersistentHttpUserSession(a);
         } catch (DatabaseException e) {
-            throw new InternalServerException("Failed to add persistent http session", e);
+            throw new InternalServerException(e);
         }
 
         return new AuthenticatedUserSession(user);
@@ -139,32 +140,34 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         try {
             sessionCookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
         } catch (BadRequestException e) {
-            throw new UnauthorizedException("Malformed cookie", e);
+            throw new UnauthorizedException(e);
         }
         if (sessionCookie == null) {
             return null;
         }
 
-        PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(sessionCookie);
-        if (persistentHttpUserSession == null) {
-            throw new UnauthorizedException("Bad authentication (bad id)");
-        }
-
+        User user;
         try {
+            PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(sessionCookie);
+            if (persistentHttpUserSession == null) {
+                throw new UnauthorizedException("Bad authentication (bad id)");
+            }
+
             database.expirePersistentHttpUserSession(persistentHttpUserSession);
+
+            AuthenticationResult result = persistentHttpUserSession.validate(sessionCookie);
+            if (result != AuthenticationResult.SUCCESS) {
+                throw new UnauthorizedException("Bad authentication " + result);
+            }
+            // now logged in
+
+            user = database.getUser(persistentHttpUserSession.getId());
+            if (user == null) {
+                throw new InternalServerException("User somehow does not exist " + persistentHttpUserSession.getUser());
+            }
+
         } catch (DatabaseException e) {
-            throw new InternalServerException("Failed to expire persistent http session", e);
-        }
-
-        AuthenticationResult result = persistentHttpUserSession.validate(sessionCookie);
-        if (result != AuthenticationResult.SUCCESS) {
-            throw new UnauthorizedException("Bad authentication " + result);
-        }
-        // now logged in
-
-        User user = database.getUser(persistentHttpUserSession.getId());
-        if (user == null) {
-            throw new InternalServerException("User somehow does not exist " + persistentHttpUserSession.getUser());
+            throw new InternalServerException(e);
         }
 
         return createHttpSession(user, httpConfig, database, httpHeaders);
@@ -181,7 +184,7 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
         try {
             database.addUser(user);
         } catch (DatabaseException e) {
-            throw new InternalServerException("Failed to add user", e);
+            throw new InternalServerException(e);
         }
 
         return createHttpSession(user, httpConfig, database, httpHeaders);

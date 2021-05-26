@@ -16,8 +16,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.C
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
-
-import java.util.logging.Level;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 public class RoomState extends ReadyState {
     private final Client client;
@@ -36,7 +35,7 @@ public class RoomState extends ReadyState {
     }
 
     @Override
-    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
+    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException, InternalServerException {
 
         switch (clientMessage.getMessageType()) {
             case CANVAS_UPDATE: {
@@ -64,8 +63,7 @@ public class RoomState extends ReadyState {
                     try {
                         RoomHttpServerInitializer.getDatabase(ctx).deleteDocument(room.getDocument());
                     } catch (DatabaseException e) {
-                        Scribbleshare.getLogger().log(Level.WARNING, "Failed to delete document", e);
-                        //todo
+                        throw new InternalServerException(e);
                     }
                     break;
                 } else {
@@ -93,8 +91,7 @@ public class RoomState extends ReadyState {
                 try {
                     RoomHttpServerInitializer.getDatabase(ctx).updateDocument(room.getDocument());
                 } catch (DatabaseException e) {
-                    Scribbleshare.getLogger(ctx).log(Level.WARNING, "Failed to update document", e);
-                    //todo
+                    throw new InternalServerException(e);
                 }
                 break;//todo better update logic
             }

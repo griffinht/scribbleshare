@@ -12,7 +12,7 @@ public interface DocumentDatabase {
      * @param id id of document
      * @return null if {@link Document} does not exist
      */
-    @Nullable Document getDocument(long id);
+    @Nullable Document getDocument(long id) throws DatabaseException;
 
     void updateDocument(Document document) throws DatabaseException;
     //todo fail silently or throw exception if document does not exist?

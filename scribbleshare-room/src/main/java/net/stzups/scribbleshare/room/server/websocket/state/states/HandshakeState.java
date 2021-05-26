@@ -29,7 +29,7 @@ public class HandshakeState extends State {
     }
 
     @Override
-    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
+    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException, InternalServerException {
         Room room = null;//todo
         switch (clientMessage.getMessageType()) {
             case HANDSHAKE: {
@@ -40,11 +40,21 @@ public class HandshakeState extends State {
                 Client client = new Client(session.getUser(), ctx.channel());
 
                 client.queueMessage(new ServerMessageHandshake(client));
-                InviteCode inviteCode = RoomHttpServerInitializer.getDatabase(ctx).getInviteCode(clientPacketHandshake.getCode());
+                InviteCode inviteCode;
+                try {
+                    inviteCode = RoomHttpServerInitializer.getDatabase(ctx).getInviteCode(clientPacketHandshake.getCode());
+                } catch (DatabaseException e) {
+                    throw new InternalServerException(e);
+                }
                 client.queueMessage(new ServerMessageAddUser(client.getUser()));
                 //figure out which document to open first
                 if (inviteCode != null) {
-                    Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(inviteCode.getDocument());
+                    Document document;
+                    try {
+                        document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(inviteCode.getDocument());
+                    } catch (DatabaseException e) {
+                        throw new InternalServerException(e);
+                    }
                     if (document == null) {
                         throw new ClientMessageException(clientMessage, "Somehow used invite code for non existent document");
                     }
@@ -62,7 +72,7 @@ public class HandshakeState extends State {
                     }
                     try {
                         room = Room.getRoom(RoomHttpServerInitializer.getDatabase(ctx), document);
-                    } catch (DeserializationException | InternalServerException e) {
+                    } catch (DeserializationException e) {
                         throw new ClientMessageException(clientMessage, e);
                     }
                 } else {
@@ -75,7 +85,12 @@ public class HandshakeState extends State {
                     }
                 }
                 client.getUser().getOwnedDocuments().removeIf((id) -> {
-                    Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
+                    Document document;
+                    try {
+                        document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
+                    } catch (DatabaseException e) {
+                        throw new RuntimeException(new InternalServerException(e));//todo
+                    }
                     if (document == null) {
                         return true;
                     } else {
@@ -84,7 +99,12 @@ public class HandshakeState extends State {
                     }
                 });//todo this is bad
                 client.getUser().getSharedDocuments().removeIf((id) -> {
-                    Document document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
+                    Document document;
+                    try {
+                        document = RoomHttpServerInitializer.getDatabase(ctx).getDocument(id);
+                    } catch (DatabaseException e) {
+                        throw new RuntimeException(new InternalServerException(e));//todo
+                    }
                     if (document == null) {
                         return true;
                     } else {

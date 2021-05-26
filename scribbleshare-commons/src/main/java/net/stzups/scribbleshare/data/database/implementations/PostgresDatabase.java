@@ -35,7 +35,7 @@ import java.util.logging.Level;
 
 public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
-    public Login getLogin(String username) {
+    public Login getLogin(String username) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -99,7 +99,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 if (e.getCause() instanceof ConnectException && (config.getMaxRetries() < 0 || retries < config.getMaxRetries())) {
                     Scribbleshare.getLogger().info("Retrying PostgreSQL database connection (" + ++retries + "/" + config.getMaxRetries() + " retries)");
                 } else {
-                    throw new ConnectionException("Exception while establishing connection to PostgreSQL database", e);
+                    throw new ConnectionException(e);
                 }
             }
         }
@@ -119,12 +119,12 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setString(4, user.getUsername());
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException("Exception while getting " + user, e);
         }
     }
 
     @Override
-    public @Nullable User getUser(long id) {
+    public @Nullable User getUser(long id) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -151,7 +151,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.setLong(3, user.getId());
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException("Exception while updating user " + user, e);
         }
     }
 
@@ -174,7 +174,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public @Nullable Document getDocument(long id) {
+    public @Nullable Document getDocument(long id) throws DatabaseException {
         Document document = documents.get(id);
         if (document == null) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM documents WHERE id=?")) {
@@ -189,8 +189,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                     documents.put(document.getId(), document);
                 }
             } catch (SQLException e) {
-                Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + Document.class.getSimpleName() + " with id " + id, e);
-                return null;
+                throw new DatabaseException("Exception while getting " + Document.class.getSimpleName() + " with id " + id, e);
             }
         }
         return document;
@@ -221,7 +220,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public InviteCode getInviteCode(String code) {//gets a document for an existing invite code
+    public InviteCode getInviteCode(String code) throws DatabaseException {//gets a document for an existing invite code
         if (code.length() != InviteCode.INVITE_CODE_LENGTH) {
             return null;
         }
@@ -235,13 +234,12 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 return new InviteCode(code, resultSet.getLong(1));
             }
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + InviteCode.class.getSimpleName() + " code " + code, e);
-            return null;
+            throw new DatabaseException("Exception while getting " + InviteCode.class.getSimpleName() + " with code " + code, e);
         }
     }
 
     @Override
-    public @Nullable InviteCode getInviteCode(Document document) {//gets an invite code for a document
+    public @Nullable InviteCode getInviteCode(Document document) throws DatabaseException {//gets an invite code for a document
         //check if invite code already exists, otherwise generate a new one
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT code FROM invite_codes WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
@@ -262,8 +260,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             preparedStatement.execute();
             return inviteCode;
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while inserting new " + inviteCode + " for " + document, e);
-            return null;
+            throw new DatabaseException("Exception while inserting new " + inviteCode + " for " + document, e);
         }
     }
 
@@ -287,7 +284,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie) {
+    public @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -305,8 +302,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         } catch (IOException e) {
             throw new RuntimeException("Exception while getting " + HttpUserSession.class.getSimpleName() + " for " + cookie, e);
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + HttpUserSession.class.getSimpleName() + " for " + cookie, e);
-            return null;
+            throw new DatabaseException("Exception while getting " + HttpUserSession.class.getSimpleName() + " for " + cookie, e);
         }
     }
 
@@ -325,7 +321,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException("Exception while adding " + httpUserSession, e);
         }
     }
 
@@ -373,7 +369,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public @Nullable Resource getResource(long id, long owner) {
+    public @Nullable Resource getResource(long id, long owner) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=? AND owner=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, owner);
@@ -387,13 +383,12 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         } catch (IOException e) {
             throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
-            return null;
+            throw new DatabaseException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
         }
     }
 
     @Override
-    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) {//todo combine
+    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) throws DatabaseException {//todo combine
         PersistentHttpUserSession persistentHttpSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
@@ -413,8 +408,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
         } catch (IOException e) {
             throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + PersistentHttpUserSession.class.getSimpleName() + " for " + cookie);
-            return null;
+            throw new DatabaseException("Exception while getting " + PersistentHttpUserSession.class.getSimpleName() + " for " + cookie);
         }
 
         return persistentHttpSession;

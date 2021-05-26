@@ -5,6 +5,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageException;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
+import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 public abstract class State {
     public static void setState(ChannelHandlerContext ctx, State state) {
@@ -20,7 +21,7 @@ public abstract class State {
         throw new UnsupportedOperationException("Unhandled Netty userEventTriggered " + event);
     }
 
-    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException {
+    public void message(ChannelHandlerContext ctx, ClientMessage clientMessage) throws ClientMessageException, InternalServerException {
         throw new UnsupportedOperationException("Unhandled ClientMessage " + clientMessage.getClass().getSimpleName());
     }
 }

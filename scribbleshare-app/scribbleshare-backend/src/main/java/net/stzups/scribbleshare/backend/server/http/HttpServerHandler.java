@@ -179,7 +179,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
                                 sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
                             } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                Document document = database.getDocument(documentId);
+                                Document document;
+                                try {
+                                    document = database.getDocument(documentId);
+                                } catch (DatabaseException e) {
+                                    throw new InternalServerException(e);
+                                }
                                 if (document == null)
                                     throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
 
@@ -200,13 +205,23 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                                 throw new BadRequestException("Exception while parsing " + route.get(3), e);
                             }
 
-                            Document document = database.getDocument(documentId);
+                            Document document;
+                            try {
+                                document = database.getDocument(documentId);
+                            } catch (DatabaseException e) {
+                                throw new InternalServerException(e);
+                            }
                             if (document == null)
                                 throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
 
                             if (request.method().equals(HttpMethod.GET)) {
                                 // get resource, resource must exist on the document
-                                Resource resource = database.getResource(resourceId, documentId);
+                                Resource resource;
+                                try {
+                                    resource = database.getResource(resourceId, documentId);
+                                } catch (DatabaseException e) {
+                                    throw new InternalServerException(e);
+                                }
                                 if (resource == null) {
                                     throw new NotFoundException("Resource does not exist");
                                 }
@@ -239,10 +254,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     String password = form.getText("password");
                     boolean remember = form.getCheckbox("remember");
 
-
-                    System.out.println(username + ", " + password + ", " + remember);
-
-                    Login login = database.getLogin(username);
+                    Login login;
+                    try {
+                        login = database.getLogin(username);
+                    } catch (DatabaseException e) {
+                        throw new InternalServerException(e);
+                    }
                     if (!Login.verify(login, password.getBytes(StandardCharsets.UTF_8))) {
                         //todo rate limit and generic error handling
                         if (login == null) {
@@ -258,7 +275,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     assert login != null : "Verified logins should never be null";
 
                     HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                    User user = database.getUser(login.getId());
+                    User user;
+                    try {
+                        user = database.getUser(login.getId());
+                    } catch (DatabaseException e) {
+                        throw new InternalServerException(e);
+                    }
                     if (user == null) {
                         throw new InternalServerException("No user for id " + login.getId());
                     }
@@ -267,14 +289,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     try {
                         database.addHttpSession(userSession);
                     } catch (DatabaseException e) {
-                        throw new InternalServerException("Exception while adding http session to database", e);
+                        throw new InternalServerException(e);
                     }
                     if (remember) {
                         PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
                         try {
                             database.addPersistentHttpUserSession(persistentHttpUserSession);
                         } catch (DatabaseException e) {
-                            throw new InternalServerException("Exception while adding persistent http session to database", e);
+                            throw new InternalServerException(e);
                         }
                     }
                     sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
@@ -299,9 +321,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     User user;
                     HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
                     if (cookie != null) {
-                        HttpUserSession httpSession = database.getHttpSession(cookie);
+                        HttpUserSession httpSession;
+                        try {
+                            httpSession = database.getHttpSession(cookie);
+                        } catch (DatabaseException e) {
+                            throw new InternalServerException(e);
+                        }
                         if (httpSession != null) {
-                            User u = database.getUser(httpSession.getUser());
+                            User u;
+                            try {
+                                u = database.getUser(httpSession.getUser());
+                            } catch (DatabaseException e) {
+                                throw new InternalServerException(e);
+                            }
                             if (u == null) {
                                 throw new InternalServerException("User somehow does not exist for " + httpSession);
                             }
@@ -322,7 +354,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                             try {
                                 database.addUser(user);
                             } catch (DatabaseException e) {
-                                throw new InternalServerException("todo", e);
+                                throw new InternalServerException(e);
                             }
                         }
                     } else {
@@ -330,7 +362,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         try {
                             database.addUser(user);
                         } catch (DatabaseException e) {
-                            throw new InternalServerException("todo", e);
+                            throw new InternalServerException(e);
                         }
                     }
 

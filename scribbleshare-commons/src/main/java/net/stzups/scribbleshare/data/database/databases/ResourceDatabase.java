@@ -18,5 +18,5 @@ public interface ResourceDatabase {
      * @param owner owner of {@link Resource}
      * @return null if the {@link Resource} does not exist
      */
-    @Nullable Resource getResource(long id, long owner);
+    @Nullable Resource getResource(long id, long owner) throws DatabaseException;
 }
