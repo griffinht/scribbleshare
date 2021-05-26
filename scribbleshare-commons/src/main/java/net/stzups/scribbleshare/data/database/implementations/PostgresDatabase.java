@@ -72,8 +72,11 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     public interface Config {
         String getUrl();
+
         String getUser();
+
         String getPassword();
+
         int getMaxRetries();
     }
 
@@ -142,7 +145,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     @Override
     public void updateUser(User user) throws DatabaseException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET owned_documents=?, shared_documents=? WHERE id=?")){
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET owned_documents=?, shared_documents=? WHERE id=?")) {
             preparedStatement.setArray(1, connection.createArrayOf("bigint", user.getOwnedDocuments().toArray()));
             preparedStatement.setArray(2, connection.createArrayOf("bigint", user.getSharedDocuments().toArray()));
             preparedStatement.setLong(3, user.getId());
@@ -155,7 +158,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
     public Document createDocument(User owner) throws DatabaseException {
         Document document = new Document(owner);
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)")){
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO documents(id, owner, name) VALUES (?, ?, ?)")) {
             preparedStatement.setLong(1, document.getId());
             preparedStatement.setLong(2, document.getOwner());
             preparedStatement.setString(3, document.getName());
@@ -381,8 +384,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 }
             }
         } catch (IOException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Unexpected exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
-            return null;
+            throw new RuntimeException("Unexpected exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
             return null;
@@ -408,7 +410,9 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                     return null;
                 }
             }
-        } catch (SQLException | IOException e) {
+        } catch (IOException e) {
+            throw new RuntimeException("Unexpected exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
+        } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + PersistentHttpUserSession.class.getSimpleName() + " for " + cookie);
             return null;
         }
