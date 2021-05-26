@@ -22,7 +22,7 @@ public class MouseMove {
 
     @Override
     public String toString() {
-        return DebugString.get(this)
+        return DebugString.get(MouseMove.class)
                 .add("dt", dt)
                 .add("x", x)
                 .add("y", y)

@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.server.http.objects;
 
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,5 +85,14 @@ public class Query extends Uri {
         }
 
         return queries;
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(Query.class)
+                .add("path", path)
+                .add("rawQuery", rawQuery)
+                .add("queries", queries)
+                .toString();
     }
 }

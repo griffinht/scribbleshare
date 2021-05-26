@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.HttpUtils;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -98,6 +99,8 @@ public class HttpSessionCookie {
 
     @Override
     public String toString() {
-        return HttpSessionCookie.class.getSimpleName() + "{id=" + id + "}";
+        return DebugString.get(HttpSessionCookie.class)
+                .add("id", id)
+                .toString();
     }
 }

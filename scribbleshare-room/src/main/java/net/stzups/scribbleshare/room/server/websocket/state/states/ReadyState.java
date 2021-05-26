@@ -110,7 +110,7 @@ public class ReadyState extends State {
 
     @Override
     public String toString() {
-        return DebugString.get(this)
+        return DebugString.get(ReadyState.class)
                 .add("client", client)
                 .toString();
     }

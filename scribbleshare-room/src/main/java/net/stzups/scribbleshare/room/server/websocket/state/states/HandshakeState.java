@@ -125,7 +125,7 @@ public class HandshakeState extends State {
 
     @Override
     public String toString() {
-        return DebugString.get(this)
+        return DebugString.get(HandshakeState.class)
                 .add("session", session)
                 .toString();
     }

@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.server.http.objects;
 
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.regex.Pattern;
 
@@ -24,5 +25,12 @@ public class Uri {
 
     public boolean equals(String string) {
         return uri.equals(string);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(Uri.class)
+                .add("uri", uri)
+                .toString();
     }
 }

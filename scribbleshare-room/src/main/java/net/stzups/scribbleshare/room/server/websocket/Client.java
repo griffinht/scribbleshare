@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +73,11 @@ public class Client {
 
     @Override
     public String toString() {
-        return Client.class.getSimpleName() + "{user=" + user + ",address=" + channel.remoteAddress() + ",id=" + id + "}";
+        return DebugString.get(Client.class)
+                .add("user", user)
+                .add("address", channel.remoteAddress())
+                .add("id", id)
+                .toString();
     }
 
     @Override

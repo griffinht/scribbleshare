@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Queue;
 
@@ -29,7 +30,7 @@ import java.util.Queue;
 public class DebugString {
     private static final String OPEN = "{";
     private static final String CLOSE = "}";
-    private static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ", ";
     private static final String EQUALS = "=";
 
     private static class Property {
@@ -43,8 +44,15 @@ public class DebugString {
 
         @Override
         public String toString() {
+            String value;
+            if (this.value.getClass().isArray()) {
+                value = Arrays.toString((Object[]) this.value);
+            } else {
+                value = this.value.toString();
+            }
+
             if (name == null) {
-                return value.toString();
+                return value;
             } else {
                 return name + EQUALS + value;
             }
@@ -54,8 +62,8 @@ public class DebugString {
     private final Class<?> clazz;
     private Queue<Property> properties; // will be lazily allocated if needed
 
-    private DebugString(Object object) {
-        this.clazz = object.getClass();
+    private DebugString(Class<?> clazz) {
+        this.clazz = clazz;
     }
 
     public DebugString add(Object value) {
@@ -88,7 +96,7 @@ public class DebugString {
     }
 
     // useless factory methods that are easier to type than new DebugLog
-    public static DebugString get(Object object) {
-        return new DebugString(object);
+    public static DebugString get(Class<?> clazz) {
+        return new DebugString(clazz);
     }
 }

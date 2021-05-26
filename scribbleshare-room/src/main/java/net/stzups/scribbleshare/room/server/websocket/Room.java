@@ -181,7 +181,7 @@ public class Room {
 
     @Override
     public String toString() {
-        return DebugString.get(this)
+        return DebugString.get(Room.class)
                 .add("document", document)
                 .add("canvas", canvas)
                 .add("clients", clients)

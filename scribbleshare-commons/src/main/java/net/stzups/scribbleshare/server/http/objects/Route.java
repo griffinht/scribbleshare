@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.server.http.objects;
 
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class Route extends Query {
 
@@ -37,5 +38,13 @@ public class Route extends Query {
     /** true if length is long enough */
     public boolean length(int index) {
         return route.length >= index;
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(Route.class)
+                .add("route", route)
+                .add(super.toString())
+                .toString();
     }
 }
