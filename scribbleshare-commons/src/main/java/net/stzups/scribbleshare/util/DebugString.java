@@ -1,7 +1,10 @@
 package net.stzups.scribbleshare.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.Queue;
 
 /**
  * Used to format a String returned by a toString override. Use the following mock Car class as an example
@@ -24,6 +27,11 @@ import java.util.List;
  * Now the <code>toString</code> method will return <code>Car{model=Toyota,year=1999}</code>
  */
 public class DebugString {
+    private static final String OPEN = "{";
+    private static final String CLOSE = "}";
+    private static final String SEPARATOR = ",";
+    private static final String EQUALS = "=";
+
     private static class Property {
         private final String name;
         private final Object value;
@@ -35,24 +43,28 @@ public class DebugString {
 
         @Override
         public String toString() {
-            return name + "=" + value;
+            if (name == null) {
+                return value.toString();
+            } else {
+                return name + EQUALS + value;
+            }
         }
     }
 
     private final Class<?> clazz;
-    private List<Property> properties; // will be lazily allocated if needed
+    private Queue<Property> properties; // will be lazily allocated if needed
 
     private DebugString(Object object) {
-        this(object.getClass());
+        this.clazz = object.getClass();
     }
 
-    private DebugString(Class<?> clazz) {
-        this.clazz = clazz;
+    public DebugString add(Object value) {
+        return add(null, value);
     }
 
-    public DebugString add(String name, Object value) {
+    public DebugString add(@Nullable String name, Object value) {
         if (properties == null) {
-            properties = new ArrayList<>();
+            properties = new ArrayDeque<>();
         }
         properties.add(new Property(name, value));
         return this;
@@ -62,11 +74,15 @@ public class DebugString {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder(clazz.getSimpleName());
         if (properties != null) {
-            stringBuilder.append("{");
-            for (Property property : properties) {
-                stringBuilder.append(property);
+            stringBuilder.append(OPEN);
+            Iterator<Property> iterator = properties.iterator();
+            while (iterator.hasNext()) {
+                stringBuilder.append(iterator.next());
+                if (iterator.hasNext()) {
+                    stringBuilder.append(SEPARATOR);
+                }
             }
-            stringBuilder.append("}");
+            stringBuilder.append(CLOSE);
         }
         return stringBuilder.toString();
     }
@@ -74,9 +90,5 @@ public class DebugString {
     // useless factory methods that are easier to type than new DebugLog
     public static DebugString get(Object object) {
         return new DebugString(object);
-    }
-
-    public static DebugString get(Class<?> clazz) {
-        return new DebugString(clazz);
     }
 }
