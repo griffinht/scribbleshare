@@ -6,14 +6,17 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ResourceDatabase {
     /**
-     * @return id for the newly added {@link Resource}
+     * @param owner owner of new {@link Resource}
+     * @return id of the newly added {@link Resource}
      */
     long addResource(long owner, Resource resource) throws DatabaseException;
 
     void updateResource(long id, long owner, Resource resource) throws DatabaseException;
 
     /**
-     * @return null if the {@link Resource} does not exist for {@param id} and {@param owner}
+     * @param id id of {@link Resource}
+     * @param owner owner of {@link Resource}
+     * @return null if the {@link Resource} does not exist
      */
     @Nullable Resource getResource(long id, long owner);
 }

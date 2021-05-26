@@ -9,7 +9,7 @@ public interface DocumentDatabase {
     Document createDocument(User owner) throws DatabaseException;
 
     /**
-     * @param id of document
+     * @param id id of document
      * @return null if {@link Document} does not exist
      */
     @Nullable Document getDocument(long id);

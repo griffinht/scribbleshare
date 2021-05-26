@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface HttpSessionDatabase {
     /**
-     * @param cookie of {@link HttpUserSession}
+     * @param cookie cookie of {@link HttpUserSession}
      * @return null if the {@link HttpUserSession} does not exist
      */
     @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie);

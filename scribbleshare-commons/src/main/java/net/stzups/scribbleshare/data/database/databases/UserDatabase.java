@@ -8,7 +8,8 @@ public interface UserDatabase {
     void addUser(User user) throws DatabaseException;
 
     /**
-     * @return null if the {@link User} does not exist for {@param id}
+     * @param id id of {@link User}
+     * @return null if the {@link User} does not exist
      */
     @Nullable User getUser(long id);
 

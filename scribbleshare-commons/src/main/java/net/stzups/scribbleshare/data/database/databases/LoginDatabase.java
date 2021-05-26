@@ -5,6 +5,10 @@ import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import org.jetbrains.annotations.Nullable;
 
 public interface LoginDatabase {
+    /**
+     * @param username username of {@link Login}
+     * @return null if {@link Login} does not exist
+     */
     @Nullable Login getLogin(String username);
 
     /**

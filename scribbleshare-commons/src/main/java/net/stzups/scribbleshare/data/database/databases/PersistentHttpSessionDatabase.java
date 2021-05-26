@@ -7,7 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PersistentHttpSessionDatabase {
     /**
-     * @return null if {@link PersistentHttpUserSession} does not exist for {@param cookie}
+     * @param cookie {@link HttpSessionCookie} of {@link PersistentHttpUserSession}
+     * @return null if {@link PersistentHttpUserSession} does not exist
      */
     @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie);
 

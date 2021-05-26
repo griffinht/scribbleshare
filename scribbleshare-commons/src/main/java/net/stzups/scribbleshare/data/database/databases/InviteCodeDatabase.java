@@ -6,13 +6,13 @@ import org.jetbrains.annotations.Nullable;
 
 public interface InviteCodeDatabase {
     /**
-     * @param code {@link InviteCode}
-     * @return null if the {@link InviteCode} does not exist for
+     * @param code code of {@link InviteCode}
+     * @return null if the {@link InviteCode} does not exist
      */
     @Nullable InviteCode getInviteCode(String code);
 
     /**
-     * @param document {@link Document}
+     * @param document {@link Document} of {@link InviteCode}
      * @return null if the {@link InviteCode} does not exist
      */
     @Nullable InviteCode getInviteCode(Document document);
