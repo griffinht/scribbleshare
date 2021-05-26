@@ -55,9 +55,18 @@ public class Login {
 
         boolean verified = VERIFIER.verify(plaintext, hashedPassword).verified;
 
+        // might as well clear the tokens after using them, as they should only be verified once and discarded
         Arrays.fill(plaintext, (byte) 0);
         if (hashedPassword != DUMMY) { // don't clear dummy, it will be reused
             Arrays.fill(hashedPassword, (byte) 0);
+        }
+
+        if (login == null) {
+            assert !verified : "Null logins should never be verified";
+        }
+
+        if (hashedPassword == DUMMY) {
+            assert !verified : "Dummy logins should never be verified";
         }
 
         return verified;

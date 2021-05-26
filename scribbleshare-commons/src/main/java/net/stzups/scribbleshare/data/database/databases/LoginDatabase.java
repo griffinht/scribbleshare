@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface LoginDatabase {
     /**
+     * It is important when verifying logins that the operation takes the same amount of time regardless of whether a {@link Login} exists for a provided username, or the result of the verification of the login.
      * @param username username of {@link Login}
      * @return null if {@link Login} does not exist
      */

@@ -255,8 +255,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                         return;
                     }
 
+                    assert login != null : "Verified logins should never be null";
+
                     HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                    HttpUserSession userSession = new HttpUserSession(config, database.getUser(login.getId()), httpHeaders);
+                    User user = database.getUser(login.getId());
+                    if (user == null) {
+                        throw new InternalServerException("No user for id " + login.getId());
+                    }
+
+                    HttpUserSession userSession = new HttpUserSession(config, user, httpHeaders);
                     try {
                         database.addHttpSession(userSession);
                     } catch (DatabaseException e) {
