@@ -2,18 +2,18 @@ package net.stzups.scribbleshare.data.database.databases;
 
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Resource;
+import org.jetbrains.annotations.Nullable;
 
 public interface ResourceDatabase {
     /**
-     * Add resource to database and return the corresponding id for the new resource
+     * @return id for the newly added {@link Resource}
      */
     long addResource(long owner, Resource resource) throws DatabaseException;
 
-    /** update resource */
     void updateResource(long id, long owner, Resource resource) throws DatabaseException;
 
     /**
-     * Gets resource, or null if the resource does not exist
+     * @return null if the {@link Resource} does not exist for {@param id} and {@param owner}
      */
-    Resource getResource(long id, long owner);
+    @Nullable Resource getResource(long id, long owner);
 }

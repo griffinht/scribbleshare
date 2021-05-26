@@ -3,20 +3,19 @@ package net.stzups.scribbleshare.data.database.databases;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
+import org.jetbrains.annotations.Nullable;
 
 public interface PersistentHttpSessionDatabase {
     /**
-     * Get existing {@link PersistentHttpUserSession}, or null if it does exist
+     * @return null if {@link PersistentHttpUserSession} does not exist for {@param cookie}
      */
-    PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie);
+    @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie);
 
-    /**
-     * Add new {@link PersistentHttpUserSession}
-     */
     void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws DatabaseException;
 
     /**
      * Expire existing {@link PersistentHttpUserSession}
+     * todo fail silently or loudly if the persistent http user session does not exist?
      */
     void expirePersistentHttpUserSession(PersistentHttpUserSession persistentHttpUserSession) throws DatabaseException;
 }

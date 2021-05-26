@@ -16,6 +16,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,14 +37,15 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
     public Login getLogin(String username) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
-            preparedStatement.setString(1, username);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            throw new SQLException("poggers");
+            //preparedStatement.setString(1, username);
+/*            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return new Login(username, resultSet.getLong("user_id"), resultSet.getBytes("hashed_password"));
                 } else {
                     return null;
                 }
-            }
+            }*/
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting login for username " + username, e);
             return null;
@@ -102,7 +104,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     @Override
     public void close() throws SQLException {
-        connection.close();    
+        connection.close();
     }
 
     @Override
@@ -119,7 +121,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public User getUser(long id) {
+    public @Nullable User getUser(long id) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id=?")) {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -169,7 +171,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public Document getDocument(long id) {
+    public @Nullable Document getDocument(long id) {
         Document document = documents.get(id);
         if (document == null) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM documents WHERE id=?")) {
@@ -237,7 +239,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public InviteCode getInviteCode(Document document) {//gets an invite code for a document
+    public @Nullable InviteCode getInviteCode(Document document) {//gets an invite code for a document
         //check if invite code already exists, otherwise generate a new one
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT code FROM invite_codes WHERE document=?")) {
             preparedStatement.setLong(1, document.getId());
@@ -283,7 +285,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public HttpUserSession getHttpSession(HttpSessionCookie cookie) {
+    public @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -367,7 +369,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public Resource getResource(long id, long owner) {
+    public @Nullable Resource getResource(long id, long owner) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM resources WHERE id=? AND owner=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, owner);
@@ -388,7 +390,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) {//todo combine
+    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) {//todo combine
         PersistentHttpUserSession persistentHttpSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
