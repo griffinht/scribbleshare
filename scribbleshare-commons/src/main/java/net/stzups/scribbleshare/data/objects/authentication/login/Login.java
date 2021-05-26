@@ -11,9 +11,10 @@ public class Login {
     private static final BCrypt.Hasher HASHER = BCrypt.withDefaults();
     private static final BCrypt.Verifyer VERIFIER = BCrypt.verifyer();
 
-    private static final byte[] DUMMY;
+    private static final byte[] DUMMY = new byte[0];
+    private static final byte[] HASHED_DUMMY;
     static {
-        DUMMY = HASHER.hash(COST, new byte[0]); // todo new byte[0] - use a different dummy plaintext?
+        HASHED_DUMMY = HASHER.hash(COST, DUMMY); // todo new byte[0] - use a different dummy plaintext?
     }
 
     private final String username;
@@ -48,20 +49,27 @@ public class Login {
     public static boolean verify(Login login, byte[] plaintext) {
         byte[] hashedPassword;
         if (login == null) {
-            hashedPassword = DUMMY; // still verify hash even when we know it will fail to protect against timing attack
+            hashedPassword = HASHED_DUMMY; // still verify hash even when we know it will fail to protect against timing attack
         } else {
             hashedPassword = login.hashedPassword;
         }
 
         boolean verified = VERIFIER.verify(plaintext, hashedPassword).verified;
 
+        if (Arrays.equals(plaintext, DUMMY)) {
+            assert !verified : "Dummy should be unverified";
+            return false;
+        }
+
         // might as well clear the tokens after using them, as they should only be verified once and discarded
         Arrays.fill(plaintext, (byte) 0);
-        if (hashedPassword != DUMMY) { // don't clear dummy, it will be reused
+        if (hashedPassword != HASHED_DUMMY) { // don't clear dummy, it will be reused
             Arrays.fill(hashedPassword, (byte) 0);
         }
 
+
         if (login == null) {
+            assert !verified : "Null login should be unverified";
             return false;
         }
 
