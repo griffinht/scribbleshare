@@ -303,7 +303,9 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                         resultSet.getLong("user_id"),
                         Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
             }
-        } catch (SQLException | IOException e) {
+        } catch (IOException e) {
+            throw new RuntimeException("Exception while getting " + HttpUserSession.class.getSimpleName() + " for " + cookie, e);
+        } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + HttpUserSession.class.getSimpleName() + " for " + cookie, e);
             return null;
         }
@@ -384,7 +386,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Unexpected exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
+            throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
             return null;
@@ -411,7 +413,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Unexpected exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
+            throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
         } catch (SQLException e) {
             Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + PersistentHttpUserSession.class.getSimpleName() + " for " + cookie);
             return null;
