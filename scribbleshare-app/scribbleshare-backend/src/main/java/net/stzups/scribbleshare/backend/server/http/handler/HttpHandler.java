@@ -15,5 +15,8 @@ public abstract class HttpHandler {
         return route;
     }
 
-    public abstract void handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException;
+    /**
+     * true if the request was handled
+     */
+    public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException;
 }

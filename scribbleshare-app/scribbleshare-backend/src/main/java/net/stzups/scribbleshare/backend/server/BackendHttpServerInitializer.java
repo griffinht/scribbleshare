@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
+import net.stzups.scribbleshare.backend.server.http.handler.handlers.DocumentRequestHandler;
+import net.stzups.scribbleshare.backend.server.http.handler.handlers.FileRequestHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.LoginFormHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.LogoutFormHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.RegisterFormHandler;
@@ -20,10 +22,12 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
 
     public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
-        httpServerHandler = new HttpServerHandler(config)
+        httpServerHandler = new HttpServerHandler()
+                .addHandler(new DocumentRequestHandler(database))
                 .addHandler(new LoginFormHandler(config, database))
                 .addHandler(new LogoutFormHandler(config, database))
-                .addHandler(new RegisterFormHandler(config, database));
+                .addHandler(new RegisterFormHandler(config, database))
+                .addHandler(new FileRequestHandler(config));
     }
 
     @Override

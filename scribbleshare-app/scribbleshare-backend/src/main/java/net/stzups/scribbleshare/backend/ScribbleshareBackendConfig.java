@@ -1,8 +1,8 @@
 package net.stzups.scribbleshare.backend;
 
 import net.stzups.scribbleshare.ScribbleshareConfig;
-import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
+import net.stzups.scribbleshare.backend.server.http.handler.handlers.FileRequestHandler;
 
-public interface ScribbleshareBackendConfig extends ScribbleshareConfig, HttpServerHandler.Config {
+public interface ScribbleshareBackendConfig extends ScribbleshareConfig, FileRequestHandler.Config {
 
 }

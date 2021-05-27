@@ -33,8 +33,8 @@ public class DocumentRequestHandler extends RequestHandler {
 
     private final ScribbleshareDatabase database;
 
-    protected DocumentRequestHandler(ScribbleshareDatabase database) {
-        super("document");
+    public DocumentRequestHandler(ScribbleshareDatabase database) {
+        super("/document");
         this.database = database;
     }
 
