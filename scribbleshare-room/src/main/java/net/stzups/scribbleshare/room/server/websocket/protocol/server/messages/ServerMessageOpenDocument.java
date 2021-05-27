@@ -5,6 +5,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ServerMessageOpenDocument extends ServerMessage {
     private final Document document;
@@ -25,5 +26,13 @@ public class ServerMessageOpenDocument extends ServerMessage {
         super.serialize(byteBuf);
         byteBuf.writeLong(document.getId());
         canvas.serialize(byteBuf);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ServerMessageOpenDocument.class)
+                .add("document", document)
+                .add("canvas", canvas)
+                .toString();
     }
 }

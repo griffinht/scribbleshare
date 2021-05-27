@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ServerMessageAddUser extends ServerMessage {
     private final User user;
@@ -21,5 +22,12 @@ public class ServerMessageAddUser extends ServerMessage {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeLong(user.getId());
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ServerMessageAddUser.class)
+                .add("user", user)
+                .toString();
     }
 }

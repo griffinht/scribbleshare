@@ -6,6 +6,7 @@ import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationLengthException;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ClientMessageCanvasUpdate extends ClientMessage {
     private final CanvasUpdates[] canvasUpdatesArray;
@@ -25,5 +26,12 @@ public class ClientMessageCanvasUpdate extends ClientMessage {
 
     public CanvasUpdates[] getCanvasUpdatesArray() {
         return canvasUpdatesArray;
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ClientMessageCanvasUpdate.class)
+                .add("canvasUpdatesArray", canvasUpdatesArray)
+                .toString();
     }
 }

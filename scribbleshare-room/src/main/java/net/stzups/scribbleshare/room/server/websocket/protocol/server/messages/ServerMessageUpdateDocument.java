@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ServerMessageUpdateDocument extends ServerMessage {
     private final Document document;
@@ -28,5 +29,13 @@ public class ServerMessageUpdateDocument extends ServerMessage {
         byteBuf.writeBoolean(shared);//takes up one byte
         byteBuf.writeLong(document.getId());
         writeString(document.getName(), byteBuf);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ServerMessageUpdateDocument.class)
+                .add("document", document)
+                .add("shared", shared)
+                .toString();
     }
 }

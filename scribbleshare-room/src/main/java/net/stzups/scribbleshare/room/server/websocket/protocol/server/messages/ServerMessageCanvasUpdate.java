@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ServerMessageCanvasUpdate extends ServerMessage {
     private final CanvasUpdates[] canvasUpdates;
@@ -24,5 +25,12 @@ public class ServerMessageCanvasUpdate extends ServerMessage {
         for (CanvasUpdates canvasUpdates : canvasUpdates) {
             canvasUpdates.serialize(byteBuf);
         }
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ServerMessageCanvasUpdate.class)
+                .add("canvasUpdates", canvasUpdates)
+                .toString();
     }
 }

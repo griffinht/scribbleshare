@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.room.server.websocket.Client;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class ServerMessageHandshake extends ServerMessage {
     private final Client client;
@@ -20,5 +21,12 @@ public class ServerMessageHandshake extends ServerMessage {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeShort(client.getId());
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(ServerMessageHandshake.class)
+                .add("client", client)
+                .toString();
     }
 }
