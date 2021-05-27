@@ -32,7 +32,7 @@ public class RegisterFormHandler extends FormHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
 
         // validate
 
@@ -44,7 +44,7 @@ public class RegisterFormHandler extends FormHandler {
             //todo rate limit and generic error handling
 
             sendRedirect(ctx, request, REGISTER_PAGE);
-            return;
+            return true;
         }
 
         User user;
@@ -107,12 +107,12 @@ public class RegisterFormHandler extends FormHandler {
         if (!loginAdded) {
             Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
             sendRedirect(ctx, request, REGISTER_PAGE);
-            return;
+            return true;
         }
 
         Scribbleshare.getLogger(ctx).info("Registered with username " + username);
 
         sendRedirect(ctx, request, REGISTER_SUCCESS);
-        return;
+        return true;
     }
 }

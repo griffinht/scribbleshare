@@ -36,7 +36,7 @@ public class LoginFormHandler extends FormHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
         String username = form.getText("username");
         String password = form.getText("password");
         boolean remember = form.getCheckbox("remember");
@@ -56,7 +56,7 @@ public class LoginFormHandler extends FormHandler {
             }
 
             sendRedirect(ctx, request, LOGIN_PAGE);
-            return;
+            return true;
         }
 
         assert login != null : "Verified logins should never be null";
@@ -86,6 +86,8 @@ public class LoginFormHandler extends FormHandler {
                 throw new InternalServerException(e);
             }
         }
+
         sendRedirect(ctx, request, httpHeaders, LOGIN_SUCCESS);
+        return true;
     }
 }

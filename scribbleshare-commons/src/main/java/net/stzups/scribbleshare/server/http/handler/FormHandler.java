@@ -14,12 +14,11 @@ public abstract class FormHandler extends HttpHandler {
     @Override
     public final boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         if (request.method().equals(HttpMethod.POST)) {
-            handle(ctx, request, new Form(request));
-            return true;
-        } else {
-            return false;
+            return handle(ctx, request, new Form(request));
         }
+
+        return false;
     }
 
-    public abstract void handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws HttpException;
+    public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws HttpException;
 }

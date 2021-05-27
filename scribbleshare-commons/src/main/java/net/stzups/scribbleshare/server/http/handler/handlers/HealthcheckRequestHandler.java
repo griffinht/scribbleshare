@@ -19,15 +19,17 @@ public class HealthcheckRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
         if (request.uri().equals("/healthcheck")) {
             if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
                 throw new NotFoundException("Healthcheck request from address which is not a loopback address");
             } else {
                 send(ctx, request, HttpResponseStatus.OK);
                 Scribbleshare.getLogger(ctx).info("Good healthcheck response");
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 }

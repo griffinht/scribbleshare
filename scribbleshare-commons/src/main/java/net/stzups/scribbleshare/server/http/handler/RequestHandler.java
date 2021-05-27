@@ -12,9 +12,8 @@ public abstract class RequestHandler extends HttpHandler {
 
     @Override
     public final boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
-        handle(ctx, request, new Route(request.uri()));
-        return true;
+        return handle(ctx, request, new Route(request.uri()));
     }
 
-    public abstract void handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException;
+    public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException;
 }

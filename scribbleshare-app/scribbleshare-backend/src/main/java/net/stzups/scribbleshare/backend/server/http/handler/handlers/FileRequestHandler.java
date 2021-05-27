@@ -73,24 +73,24 @@ public class FileRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
         // otherwise try to serve a regular HTTP file resource
 
         if (!HttpMethod.GET.equals(request.method())) {
             send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            return;
+            return true;
         }
 
         // redirects
         if (route.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
             sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
-            return;
+            return true;
         } else if ((route.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
             sendRedirect(ctx, request, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
-            return;
+            return true;
         } else if (route.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
             sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
-            return;
+            return true;
         }
 
         // get filesystem filePath from provided filePath
@@ -116,7 +116,7 @@ public class FileRequestHandler extends RequestHandler {
             } else {
                 throw new NotFoundException("File at path " + filePath + " not found");
             }
-            return;
+            return true;
         }
 
         HttpHeaders headers = new DefaultHttpHeaders();
@@ -130,6 +130,7 @@ public class FileRequestHandler extends RequestHandler {
         headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
         try {
             sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
+            return true;
         } catch (IOException e) {
             throw new InternalServerException("Exception while sending file", e);
         }

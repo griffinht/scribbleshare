@@ -39,7 +39,7 @@ public class DocumentRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
         AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(request, database);
 
         if (session == null) {
@@ -86,11 +86,13 @@ public class DocumentRequestHandler extends RequestHandler {
 
                 try {
                     send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
+                    return true;
                 } catch (DatabaseException e) {
                     throw new InternalServerException(e);
                 }
             } else {
                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                return true;
             }
         } else { // route.length == 4, get resource from document
             // does the document have this resource?
@@ -128,6 +130,7 @@ public class DocumentRequestHandler extends RequestHandler {
             } else {
                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
             }
+            return true;
         }
     }
 }

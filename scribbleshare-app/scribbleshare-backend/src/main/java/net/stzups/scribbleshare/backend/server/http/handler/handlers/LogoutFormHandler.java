@@ -2,8 +2,10 @@ package net.stzups.scribbleshare.backend.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.server.http.HttpUtils;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.handler.FormHandler;
@@ -24,7 +26,7 @@ public class LogoutFormHandler extends FormHandler {
     }
 
     @Override
-    public void handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
 /*                        Form form = new Form(request);//todo necessary?
 
 
@@ -72,6 +74,7 @@ public class LogoutFormHandler extends FormHandler {
             }
                 sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
                 return true;*/
-        return;
+        HttpUtils.send(ctx, request, HttpResponseStatus.NOT_FOUND);
+        return true;
     }
 }
