@@ -36,8 +36,7 @@ public class HttpUserSession extends UserSession {
 
     @Override
     public String toString() {
-        return DebugString.get(HttpUserSession.class)
-                .add(super.toString())
+        return DebugString.get(HttpUserSession.class, super.toString())
                 .toString();
     }
 }

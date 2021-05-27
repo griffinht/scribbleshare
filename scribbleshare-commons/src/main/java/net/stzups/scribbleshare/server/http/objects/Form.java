@@ -48,9 +48,8 @@ public class Form {
 
     @Override
     public String toString() {
-        return DebugString.get(Form.class)
+        return DebugString.get(Form.class, super.toString())
                 .add("form", form)
-                .add(super.toString())
                 .toString();
     }
 }

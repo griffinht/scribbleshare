@@ -28,7 +28,6 @@ public class CanvasImage extends EntityCanvasObject {
     public String toString() {
         return DebugString.get(CanvasImage.class, super.toString())
                 .add("id", id)
-                .add(super.toString())
                 .toString();
     }
 }

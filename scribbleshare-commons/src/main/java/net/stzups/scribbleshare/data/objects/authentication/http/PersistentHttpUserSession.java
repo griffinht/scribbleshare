@@ -33,8 +33,7 @@ public class PersistentHttpUserSession extends UserSession {
 
     @Override
     public String toString() {
-        return DebugString.get(PersistentHttpUserSession.class)
-                .add(super.toString())
+        return DebugString.get(PersistentHttpUserSession.class, super.toString())
                 .toString();
     }
 }

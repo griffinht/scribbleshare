@@ -42,9 +42,8 @@ public class Route extends Query {
 
     @Override
     public String toString() {
-        return DebugString.get(Route.class)
+        return DebugString.get(Route.class, super.toString())
                 .add("route", route)
-                .add(super.toString())
                 .toString();
     }
 }

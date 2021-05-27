@@ -49,8 +49,7 @@ public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
 
     @Override
     public String toString() {
-        return DebugString.get(PersistentHttpUserSessionCookie.class)
-                .add(super.toString())
+        return DebugString.get(PersistentHttpUserSessionCookie.class, super.toString())
                 .toString();
     }
 }

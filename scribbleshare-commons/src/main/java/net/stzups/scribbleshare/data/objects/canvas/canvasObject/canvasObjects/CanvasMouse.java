@@ -23,7 +23,6 @@ public class CanvasMouse extends CanvasObject {
     @Override
     public String toString() {
         return DebugString.get(CanvasMouse.class, super.toString())
-                .add(super.toString())
                 .toString();
     }
 }
