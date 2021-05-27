@@ -1,12 +1,10 @@
-package net.stzups.scribbleshare.server.http.handlers;
+package net.stzups.scribbleshare.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AttributeKey;
-import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
@@ -24,14 +22,10 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestExcep
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
-
-import java.util.List;
-import java.util.logging.Level;
-
-import static net.stzups.scribbleshare.server.http.HttpUtils.send;
+import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 
 @ChannelHandler.Sharable
-public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> {
+public class HttpAuthenticator extends HttpHandler {
     private static final AttributeKey<AuthenticatedUserSession> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
     public static AuthenticatedUserSession getUser(ChannelHandlerContext ctx) {
         return ctx.channel().attr(USER).get();
@@ -49,33 +43,23 @@ public class HttpAuthenticator extends MessageToMessageDecoder<FullHttpRequest> 
     }
 
     public HttpAuthenticator(Database database, String uri) {
+        super("/");
         this.database = database;
         this.uri = uri;
     }
 
-    @Override
-    protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
-        try {
-            handle(ctx, request);
-        } catch (HttpException e) {
-            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
-            send(ctx, request, e.responseStatus());
-            return;
-        }
-        out.add(request.retain());
-    }
-
-    private void handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         if (uri != null && !request.uri().equals(uri)) {
             throw new NotFoundException("Bad uri");
         }
 
         AuthenticatedUserSession user = ctx.channel().attr(USER).get();
         if (user != null) {
-            return;
+            return false;
         }
 
         ctx.channel().attr(USER).set(authenticateHttpUserSession(request, database));
+        return false;
     }
 
     /** authenticates, or null if no authentication */

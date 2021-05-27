@@ -6,14 +6,13 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.httphandler.httphandlers.FormHandler;
+import net.stzups.scribbleshare.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 import java.nio.charset.StandardCharsets;
@@ -25,12 +24,10 @@ public class RegisterFormHandler extends FormHandler {
     private static final String REGISTER_PATH = "/register"; // where register requests should go
     private static final String REGISTER_SUCCESS = LoginFormHandler.LOGIN_PAGE; // redirect for a good register, should be the login page
 
-    private final HttpConfig config;
     private final ScribbleshareDatabase database;
 
-    public RegisterFormHandler(HttpConfig config, ScribbleshareDatabase database) {
+    public RegisterFormHandler(ScribbleshareDatabase database) {
         super(REGISTER_PATH);
-        this.config = config;
         this.database = database;
     }
 

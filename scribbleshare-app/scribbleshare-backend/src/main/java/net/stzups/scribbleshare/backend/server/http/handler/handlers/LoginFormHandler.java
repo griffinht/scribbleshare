@@ -14,7 +14,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpU
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.httphandler.httphandlers.FormHandler;
+import net.stzups.scribbleshare.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 import java.nio.charset.StandardCharsets;

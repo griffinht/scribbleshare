@@ -10,8 +10,10 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
+import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
-import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
+import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
 
 import javax.net.ssl.SSLException;
 
@@ -32,7 +34,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
     private final ServerMessageEncoder serverMessageEncoder = new ServerMessageEncoder();
     private final ClientMessageDecoder clientMessageDecoder = new ClientMessageDecoder();
     private final ClientMessageHandler clientMessageHandler;
-    private final HttpAuthenticator httpAuthenticator;
+    private final HttpServerHandler httpServerHandler;
 
 
     public RoomHttpServerInitializer(Config config, ScribbleshareDatabase database) throws SSLException {
@@ -40,7 +42,9 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         this.config = config;
         this.database = database;
         clientMessageHandler = new ClientMessageHandler();
-        httpAuthenticator = new HttpAuthenticator(database);
+        httpServerHandler = new HttpServerHandler()
+                .addLast(new HealthcheckRequestHandler())
+                .addLast(new HttpAuthenticator(database));
     }
 
     @Override
@@ -50,8 +54,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         channel.attr(DATABASE).set(database);
 
         channel.pipeline()
-                .addLast(httpAuthenticator)
-                .addLast(httpExceptionHandler())
+                .addLast(httpServerHandler)
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler(config.getWebsocketPath(), null, true))
                 .addLast(serverMessageEncoder)

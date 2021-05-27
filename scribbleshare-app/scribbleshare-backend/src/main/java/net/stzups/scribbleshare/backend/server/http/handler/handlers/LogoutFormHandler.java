@@ -6,7 +6,7 @@ import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.httphandler.httphandlers.FormHandler;
+import net.stzups.scribbleshare.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 public class LogoutFormHandler extends FormHandler {

@@ -14,7 +14,7 @@ import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.httphandler.httphandlers.RequestHandler;
+import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
 import net.stzups.scribbleshare.server.http.objects.Uri;
 

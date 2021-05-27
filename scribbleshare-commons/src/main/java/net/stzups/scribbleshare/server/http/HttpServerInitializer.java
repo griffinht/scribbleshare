@@ -1,6 +1,8 @@
 package net.stzups.scribbleshare.server.http;
 
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -10,8 +12,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.server.http.handlers.DebugOpenCloseLog;
-import net.stzups.scribbleshare.server.http.handlers.HttpHandler;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -29,7 +29,6 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     private final SslContext sslContext;
 
     private final DebugOpenCloseLog debugOpenCloseLog = new DebugOpenCloseLog();
-    private final HttpHandler httpHandler = new HttpHandler();
 
     protected HttpServerInitializer(Config config) throws SSLException {
         this.config = config;
@@ -58,7 +57,21 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
         if (sslContext != null) channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
         channel.pipeline()
                 .addLast(new HttpServerCodec())
-                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)) //2gb todo decrease
-                .addLast(httpHandler);
+                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)); //2gb todo decrease
+    }
+}
+
+@ChannelHandler.Sharable
+class DebugOpenCloseLog extends ChannelDuplexHandler {
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        Scribbleshare.getLogger(ctx).info("Connection opened");
+        ctx.fireChannelActive();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+        Scribbleshare.getLogger(ctx).info("Connection closed");
+        ctx.fireChannelInactive();
     }
 }

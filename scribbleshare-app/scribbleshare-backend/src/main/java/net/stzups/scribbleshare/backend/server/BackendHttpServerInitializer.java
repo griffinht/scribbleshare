@@ -13,6 +13,7 @@ import net.stzups.scribbleshare.backend.server.http.handler.handlers.RegisterFor
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
+import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
 
 import javax.net.ssl.SSLException;
 
@@ -23,11 +24,12 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
     public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
         httpServerHandler = new HttpServerHandler()
-                .addHandler(new DocumentRequestHandler(database))
-                .addHandler(new LoginFormHandler(config, database))
-                .addHandler(new LogoutFormHandler(config, database))
-                .addHandler(new RegisterFormHandler(config, database))
-                .addHandler(new FileRequestHandler(config));
+                .addLast(new HealthcheckRequestHandler())
+                .addLast(new DocumentRequestHandler(database))
+                .addLast(new LoginFormHandler(config, database))
+                .addLast(new LogoutFormHandler(config, database))
+                .addLast(new RegisterFormHandler(database))
+                .addLast(new FileRequestHandler(config));
     }
 
     @Override
