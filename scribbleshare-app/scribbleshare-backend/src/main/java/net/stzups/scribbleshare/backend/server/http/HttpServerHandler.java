@@ -1,7 +1,5 @@
 package net.stzups.scribbleshare.backend.server.http;
 
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,22 +9,13 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.database.exception.DatabaseException;
-import net.stzups.scribbleshare.data.objects.Document;
-import net.stzups.scribbleshare.data.objects.Resource;
-import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
+import net.stzups.scribbleshare.backend.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
-import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
-import net.stzups.scribbleshare.server.http.objects.Form;
 import net.stzups.scribbleshare.server.http.objects.Route;
 import net.stzups.scribbleshare.server.http.objects.Uri;
 
@@ -40,7 +29,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
-import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendFile;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
@@ -52,7 +40,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         String getMimeTypesFilePath();
         String getDebugJsRoot();
     }
-    private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
+
 
 
     private static final String DEFAULT_FILE = "index.html"; // / -> /index.html
@@ -71,18 +59,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
 
 
-    private final ScribbleshareDatabase database;
 
     private final File jsRoot;
     private final File httpRoot;
     private final int httpCacheSeconds;
     private final MimeTypes mimeTypes = new MimeTypes();
 
-    private final Map<String, FormHandler> formHandlers = new HashMap<>();
+    private final Map<String, HttpHandler> handlers = new HashMap<>();
 
-    public HttpServerHandler(Config config, ScribbleshareDatabase database) {
-        this.database = database;
-
+    public HttpServerHandler(Config config) {
         httpRoot = new File(config.getHttpRoot());
         if (config.getDebugJsRoot().equals("")) {
             jsRoot = httpRoot;
@@ -109,8 +94,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    public HttpServerHandler addFormHandler(FormHandler formHandler) {
-        formHandlers.put(formHandler.getRoute(), formHandler);
+    public HttpServerHandler addHandler(HttpHandler handler) {
+        handlers.put(handler.getRoute(), handler);
         return this;
     }
 
@@ -134,115 +119,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         // check if this is a special request
 
-        switch (route.get(0)) {
-            case "api": {
-                switch (route.get(1)) {
-                    case "document": {
-                        AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(request, database);
-
-                        if (session == null) {
-                            throw new UnauthorizedException("No authentication");
-                        }
-
-                        User user = session.getUser();
-
-                        long documentId;
-                        try {
-                            documentId = Long.parseLong(route.get(2));
-                        } catch (NumberFormatException e) {
-                            throw new BadRequestException("Exception while parsing " + route.get(2), e);
-                        }
-
-                        if (!user.getOwnedDocuments().contains(documentId) && !user.getSharedDocuments().contains(documentId)) {
-                            throw new NotFoundException("User tried to open document they don't have access to");
-                            //todo public documents
-                        }
-
-                        // user has access to the document
-
-                        if (route.length() == 3) { // get document or submit new resource to document
-                            if (request.method().equals(HttpMethod.GET)) {
-                                //todo
-                                throw new NotFoundException("todo not implemented yet");
-                                /*Resource resource = BackendServerInitializer.getDatabase(ctx).getResource(documentId, documentId);
-                                if (resource == null) { //indicates an empty unsaved canvas, so serve that
-                                    send(ctx, request, Canvas.getEmptyCanvas());
-                                    return;
-                                }
-                                HttpHeaders headers = new DefaultHttpHeaders();
-                                headers.set(HttpHeaderNames.CACHE_CONTROL, "private,max-age=0");//cache but always revalidate
-                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())), resource.getLastModified());//todo don't fetch entire document from db if not modified*/
-                            } else if (request.method().equals(HttpMethod.POST)) { //todo validation/security for submitted resources
-                                Document document;
-                                try {
-                                    document = database.getDocument(documentId);
-                                } catch (DatabaseException e) {
-                                    throw new InternalServerException(e);
-                                }
-                                if (document == null)
-                                    throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
-
-                                try {
-                                    send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
-                                } catch (DatabaseException e) {
-                                    throw new InternalServerException(e);
-                                }
-                            } else {
-                                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-                            }
-                        } else { // route.length == 4, get resource from document
-                            // does the document have this resource?
-                            long resourceId;
-                            try {
-                                resourceId = Long.parseLong(route.get(3));
-                            } catch (NumberFormatException e) {
-                                throw new BadRequestException("Exception while parsing " + route.get(3), e);
-                            }
-
-                            Document document;
-                            try {
-                                document = database.getDocument(documentId);
-                            } catch (DatabaseException e) {
-                                throw new InternalServerException(e);
-                            }
-                            if (document == null)
-                                throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
-
-                            if (request.method().equals(HttpMethod.GET)) {
-                                // get resource, resource must exist on the document
-                                Resource resource;
-                                try {
-                                    resource = database.getResource(resourceId, documentId);
-                                } catch (DatabaseException e) {
-                                    throw new InternalServerException(e);
-                                }
-                                if (resource == null) {
-                                    throw new NotFoundException("Resource does not exist");
-                                }
-
-                                HttpHeaders headers = new DefaultHttpHeaders();
-                                headers.add(HttpHeaderNames.CACHE_CONTROL, "private,max-age=" + MAX_AGE_NO_EXPIRE + ",immutable");//cache and never revalidate - permanent
-                                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())));
-                            } else {
-                                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-                            }
-                        }
-                        return;
-                    }
-                    default:
-                        throw new NotFoundException("Bad route");
-                }
-            }
-
-        }
-
-        //login
-        if (request.method().equals(HttpMethod.POST)) {
-            //todo validate for extra fields that should not happen
-            FormHandler handler = formHandlers.get(route.path());
-            if (handler != null) {
-                handler.handle(ctx, request, new Form(request));
-            }
+        HttpHandler handler = handlers.get(route.path());
+        if (handler != null) {
+            handler.handle(ctx, request);
         }
 
 

@@ -1,8 +1,8 @@
-package net.stzups.scribbleshare.backend.server.http.handlers;
+package net.stzups.scribbleshare.backend.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import net.stzups.scribbleshare.backend.server.http.FormHandler;
+import net.stzups.scribbleshare.backend.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
@@ -71,6 +71,7 @@ public class LogoutFormHandler extends FormHandler {
                 }
             }
                 sendRedirect(ctx, request, headers, LOGOUT_SUCCESS);
-                return;*/
+                return true;*/
+        return;
     }
 }

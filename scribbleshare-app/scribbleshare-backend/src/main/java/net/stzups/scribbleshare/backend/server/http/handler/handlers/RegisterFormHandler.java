@@ -1,9 +1,9 @@
-package net.stzups.scribbleshare.backend.server.http.handlers;
+package net.stzups.scribbleshare.backend.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.http.FormHandler;
+import net.stzups.scribbleshare.backend.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
