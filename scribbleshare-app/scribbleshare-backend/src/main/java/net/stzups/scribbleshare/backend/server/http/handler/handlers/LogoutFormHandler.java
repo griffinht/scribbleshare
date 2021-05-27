@@ -2,11 +2,11 @@ package net.stzups.scribbleshare.backend.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import net.stzups.scribbleshare.backend.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.server.http.httphandler.httphandlers.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 public class LogoutFormHandler extends FormHandler {

@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.backend.server.http.handler;
+package net.stzups.scribbleshare.server.http.httphandler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -16,7 +16,7 @@ public abstract class HttpHandler {
     }
 
     /**
-     * true if the request was handled
+     * true if the request was handled, or false if it should be passed down
      */
     public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException;
 }

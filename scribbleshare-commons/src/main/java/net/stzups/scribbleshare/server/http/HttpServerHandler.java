@@ -1,13 +1,13 @@
-package net.stzups.scribbleshare.backend.server.http;
+package net.stzups.scribbleshare.server.http;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.httphandler.HttpHandler;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -17,10 +17,6 @@ import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
 @ChannelHandler.Sharable
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-
-    //private static final String AUTHENTICATE_PAGE = "/"; // the page where new users will be automatically created
-
-
     private final Queue<HttpHandler> handlers = new ArrayDeque<>();
 
     public HttpServerHandler() {
@@ -48,7 +44,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
         }
-        Scribbleshare.getLogger(ctx).warning("No handler for request, serving 404");
-        send(ctx, request, HttpResponseStatus.NOT_FOUND);
+        throw new NotFoundException("No " + HttpHandler.class + " for request");
     }
 }

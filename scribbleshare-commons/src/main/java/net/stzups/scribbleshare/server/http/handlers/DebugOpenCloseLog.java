@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import net.stzups.scribbleshare.Scribbleshare;
 
 @ChannelHandler.Sharable
-public class DebugLog extends ChannelDuplexHandler {
+public class DebugOpenCloseLog extends ChannelDuplexHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         Scribbleshare.getLogger(ctx).info("Connection opened");

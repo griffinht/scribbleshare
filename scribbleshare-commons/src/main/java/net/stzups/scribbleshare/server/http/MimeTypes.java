@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.backend.server.http;
+package net.stzups.scribbleshare.server.http;
 
 import java.io.BufferedReader;
 import java.io.File;

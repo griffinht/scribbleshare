@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
-import net.stzups.scribbleshare.backend.server.http.handler.RequestHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -23,6 +22,7 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerE
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.server.http.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.httphandler.httphandlers.RequestHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;

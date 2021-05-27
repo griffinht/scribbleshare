@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.backend.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
@@ -15,6 +14,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpU
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.server.http.httphandler.httphandlers.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 import java.nio.charset.StandardCharsets;

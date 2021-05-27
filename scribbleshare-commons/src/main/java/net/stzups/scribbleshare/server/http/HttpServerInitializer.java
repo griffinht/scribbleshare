@@ -10,8 +10,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.server.http.handlers.DebugLog;
-import net.stzups.scribbleshare.server.http.handlers.HttpExceptionHandler;
+import net.stzups.scribbleshare.server.http.handlers.DebugOpenCloseLog;
 import net.stzups.scribbleshare.server.http.handlers.HttpHandler;
 
 import javax.net.ssl.SSLException;
@@ -29,9 +28,8 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     private final Config config;
     private final SslContext sslContext;
 
-    private final DebugLog debugLog = new DebugLog();
+    private final DebugOpenCloseLog debugOpenCloseLog = new DebugOpenCloseLog();
     private final HttpHandler httpHandler = new HttpHandler();
-    private final HttpExceptionHandler httpExceptionHandler = new HttpExceptionHandler();
 
     protected HttpServerInitializer(Config config) throws SSLException {
         this.config = config;
@@ -46,15 +44,11 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
         }
     }
 
-    protected HttpExceptionHandler httpExceptionHandler() {
-        return httpExceptionHandler;
-    }
-
     @Override
     protected void initChannel(SocketChannel channel) {
         Scribbleshare.setLogger(channel);
 
-        channel.pipeline().addLast(debugLog);
+        channel.pipeline().addLast(debugOpenCloseLog);
         if (config.getDebugLogTraffic()) channel.pipeline().addLast(new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000) {
             @Override
             protected void doAccounting(TrafficCounter counter) {

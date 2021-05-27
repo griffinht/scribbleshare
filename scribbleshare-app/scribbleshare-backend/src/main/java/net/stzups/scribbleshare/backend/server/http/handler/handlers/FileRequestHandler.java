@@ -7,14 +7,14 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
-import net.stzups.scribbleshare.backend.server.http.MimeTypes;
-import net.stzups.scribbleshare.backend.server.http.handler.RequestHandler;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.server.http.HttpServerHandler;
+import net.stzups.scribbleshare.server.http.MimeTypes;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.httphandler.httphandlers.RequestHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
 import net.stzups.scribbleshare.server.http.objects.Uri;
 

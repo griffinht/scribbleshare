@@ -1,8 +1,9 @@
-package net.stzups.scribbleshare.backend.server.http.handler;
+package net.stzups.scribbleshare.server.http.httphandler.httphandlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.httphandler.HttpHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
 
 public abstract class RequestHandler extends HttpHandler {

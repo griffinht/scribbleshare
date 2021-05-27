@@ -5,13 +5,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
-import net.stzups.scribbleshare.backend.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.DocumentRequestHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.FileRequestHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.LoginFormHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.LogoutFormHandler;
 import net.stzups.scribbleshare.backend.server.http.handler.handlers.RegisterFormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 
 import javax.net.ssl.SSLException;
@@ -37,7 +37,6 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
         channel.pipeline()
                 .addLast(new HttpContentCompressor())
                 .addLast(new ChunkedWriteHandler())
-                .addLast(httpServerHandler)
-                .addLast(httpExceptionHandler());
+                .addLast(httpServerHandler);
     }
 }
