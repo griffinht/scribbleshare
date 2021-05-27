@@ -1,8 +1,10 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.data.objects.canvas.Color;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,18 +23,22 @@ public class Line extends CanvasObject {
             byteBuf.writeShort(x);
             byteBuf.writeShort(y);
         }
+
+        @Override
+        public String toString() {
+            return DebugString.get(Point.class)
+                    .add("x", x)
+                    .add("y", y)
+                    .toString();
+        }
     }
 
     private final List<Point> points = new ArrayList<>();
-    private final byte red;
-    private final byte green;
-    private final byte blue;
+    private final Color color;
 
     public Line(ByteBuf byteBuf) {
         super(byteBuf);
-        this.red = byteBuf.readByte();
-        this.green = byteBuf.readByte();
-        this.blue = byteBuf.readByte();
+        color = new Color(byteBuf);
         int length = byteBuf.readUnsignedByte();
         for (int i = 0; i < length; i++)  {
             points.add(new Point(byteBuf));
@@ -47,12 +53,18 @@ public class Line extends CanvasObject {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
-        byteBuf.writeByte(red);
-        byteBuf.writeByte(green);
-        byteBuf.writeByte(blue);
+        color.serialize(byteBuf);
         byteBuf.writeByte((byte) points.size());
         for (Point point : points) {
             point.serialize(byteBuf);
         }
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(Line.class, super.toString())
+                .add("points", points)
+                .add("color", color)
+                .toString();
     }
 }

@@ -1,5 +1,7 @@
 package net.stzups.scribbleshare.data.objects;
 
+import net.stzups.scribbleshare.util.DebugString;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
@@ -48,7 +50,11 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{id=" + id + ",ownedDocuments=" + ownedDocuments + ",sharedDocuments=" + sharedDocuments + "}";
+        return DebugString.get(User.class)
+                .add("id", id)
+                .add("ownedDocuments", ownedDocuments)
+                .add("sharedDocuments", sharedDocuments)
+                .toString();
     }
 
     @Override

@@ -56,7 +56,7 @@ public class ReadyState extends State {
                 try {
                     document = RoomHttpServerInitializer.getDatabase(ctx).createDocument(client.getUser());
                 } catch (DatabaseException e) {
-                    throw new InternalServerException("Exception while creating document for client " + client + " that request it", e);
+                    throw new InternalServerException(e);
                 }
                 client.sendMessage(new ServerMessageUpdateDocument(document));
                 //open

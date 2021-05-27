@@ -7,6 +7,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.C
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates.CanvasUpdateMove;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public abstract class CanvasUpdate {
     private final byte dt;
@@ -21,6 +22,13 @@ public abstract class CanvasUpdate {
 
     public void serialize(ByteBuf byteBuf) {
         byteBuf.writeByte(dt);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasUpdate.class)
+                .add("dt", dt)
+                .toString();
     }
 
     static CanvasUpdate deserialize(CanvasUpdateType type, ByteBuf byteBuf) throws DeserializationException {

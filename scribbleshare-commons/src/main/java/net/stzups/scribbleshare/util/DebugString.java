@@ -1,7 +1,5 @@
 package net.stzups.scribbleshare.util;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -60,17 +58,23 @@ public class DebugString {
     }
 
     private final Class<?> clazz;
+    private final String string;
     private Queue<Property> properties; // will be lazily allocated if needed
 
     private DebugString(Class<?> clazz) {
+        this(clazz, null);
+    }
+
+    private DebugString(Class<?> clazz, String string) {
         this.clazz = clazz;
+        this.string = string;
     }
 
     public DebugString add(Object value) {
         return add(null, value);
     }
 
-    public DebugString add(@Nullable String name, Object value) {
+    public DebugString add(String name, Object value) {
         if (properties == null) {
             properties = new ArrayDeque<>();
         }
@@ -90,6 +94,9 @@ public class DebugString {
                     stringBuilder.append(SEPARATOR);
                 }
             }
+            if (string != null) {
+                stringBuilder.append(string);
+            }
             stringBuilder.append(CLOSE);
         }
         return stringBuilder.toString();
@@ -98,5 +105,9 @@ public class DebugString {
     // useless factory methods that are easier to type than new DebugLog
     public static DebugString get(Class<?> clazz) {
         return new DebugString(clazz);
+    }
+
+    public static DebugString get(Class<?> clazz, String string) {
+        return new DebugString(clazz, string);
     }
 }

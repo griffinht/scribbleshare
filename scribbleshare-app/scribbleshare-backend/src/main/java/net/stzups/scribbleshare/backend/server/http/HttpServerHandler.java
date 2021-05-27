@@ -242,7 +242,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
 
         //login
-
+        System.out.println(route);
         if (request.method().equals(HttpMethod.POST)) {
             //todo validate for extra fields that should not happen
             switch (route.path()) {
@@ -372,7 +372,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     try {
                         loginAdded = database.addLogin(login);
                     } catch (DatabaseException e) {
-                        throw new InternalServerException("Exception while adding login for user " + login.getId() + " with username " + login.getUsername(), e);
+                        throw new InternalServerException(e);
                     }
                     if (!loginAdded) {
                         Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);

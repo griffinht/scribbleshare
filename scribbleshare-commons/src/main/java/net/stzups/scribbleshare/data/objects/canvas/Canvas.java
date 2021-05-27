@@ -8,6 +8,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateExc
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdates;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationLengthException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,6 +96,8 @@ public class Canvas {
 
     @Override
     public String toString() {
-        return "Canvas{canvasObjects=" + canvasObjects.size() + "}";
+        return DebugString.get(Canvas.class)
+                .add("canvasObjects", canvasObjects)
+                .toString();
     }
 }

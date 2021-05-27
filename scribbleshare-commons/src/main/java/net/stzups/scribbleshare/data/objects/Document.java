@@ -1,5 +1,7 @@
 package net.stzups.scribbleshare.data.objects;
 
+import net.stzups.scribbleshare.util.DebugString;
+
 import java.util.Random;
 
 public class Document {
@@ -46,7 +48,10 @@ public class Document {
 
     @Override
     public String toString() {
-        return "Document{id=" + id + ",name=" + name + "}";
+        return DebugString.get(Document.class)
+                .add("id", id)
+                .add("name", name)
+                .toString();
     }
 
     @Override

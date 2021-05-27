@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class HttpUserSessionCookie extends HttpSessionCookie {
     private static final String COOKIE_NAME = "session";
@@ -38,6 +39,8 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
 
     @Override
     public String toString() {
-        return HttpUserSessionCookie.class.getSimpleName() + "{" + super.toString() + "}";
+        return DebugString.get(HttpUserSessionCookie.class)
+                .add(super.toString())
+                .toString();
     }
 }

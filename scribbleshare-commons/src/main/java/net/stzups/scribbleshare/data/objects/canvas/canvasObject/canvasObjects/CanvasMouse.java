@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class CanvasMouse extends CanvasObject {
     public CanvasMouse(ByteBuf byteBuf) {
@@ -17,5 +18,12 @@ public class CanvasMouse extends CanvasObject {
     @Override
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasMouse.class, super.toString())
+                .add(super.toString())
+                .toString();
     }
 }

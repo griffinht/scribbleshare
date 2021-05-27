@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.data.objects.authentication.login;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.Arrays;
 
@@ -78,6 +79,9 @@ public class Login {
 
     @Override
     public String toString() {
-        return Login.class.getSimpleName() + "{username=" + username + ",id=" + id + "}";
+        return DebugString.get(Login.class)
+                .add("username", username)
+                .add("id", id)
+                .toString();
     }
 }

@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -48,6 +49,8 @@ public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
 
     @Override
     public String toString() {
-        return PersistentHttpUserSessionCookie.class.getSimpleName() + "{" + super.toString() + "}";
+        return DebugString.get(PersistentHttpUserSessionCookie.class)
+                .add(super.toString())
+                .toString();
     }
 }

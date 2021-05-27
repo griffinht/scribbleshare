@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasObject;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class EntityCanvasObject extends CanvasObject {
     private final short width;
@@ -20,5 +21,14 @@ public class EntityCanvasObject extends CanvasObject {
         byteBuf.writeShort(width);
         byteBuf.writeShort(height);
         byteBuf.writeByte(rotation);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(EntityCanvasObject.class, super.toString())
+                .add("width", width)
+                .add("height", height)
+                .add("rotation", rotation)
+                .toString();
     }
 }

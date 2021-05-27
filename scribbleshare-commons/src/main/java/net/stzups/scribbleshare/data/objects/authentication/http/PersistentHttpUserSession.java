@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
 import net.stzups.scribbleshare.data.objects.authentication.UserSession;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -32,6 +33,8 @@ public class PersistentHttpUserSession extends UserSession {
 
     @Override
     public String toString() {
-        return PersistentHttpUserSession.class.getSimpleName() + "{" + super.toString() + "}";
+        return DebugString.get(PersistentHttpUserSession.class)
+                .add(super.toString())
+                .toString();
     }
 }

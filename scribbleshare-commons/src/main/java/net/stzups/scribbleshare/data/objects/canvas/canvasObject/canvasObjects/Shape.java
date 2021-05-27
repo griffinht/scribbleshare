@@ -2,10 +2,12 @@ package net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
+import net.stzups.scribbleshare.data.objects.canvas.Color;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObjectType;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.EntityCanvasObject;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationTypeException;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -41,16 +43,12 @@ public class Shape extends EntityCanvasObject {
     }
 
     private final Type type;
-    private final byte red;
-    private final byte green;
-    private final byte blue;
+    private final Color color;
 
     public Shape(ByteBuf byteBuf) throws DeserializationException {
         super(byteBuf);
         this.type = Type.deserialize(byteBuf);
-        this.red = byteBuf.readByte();
-        this.green = byteBuf.readByte();
-        this.blue = byteBuf.readByte();
+        color = new Color(byteBuf);
     }
 
     @Override
@@ -61,8 +59,14 @@ public class Shape extends EntityCanvasObject {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         byteBuf.writeByte((byte) type.id);
-        byteBuf.writeByte(red);
-        byteBuf.writeByte(green);
-        byteBuf.writeByte(blue);
+        color.serialize(byteBuf);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(Shape.class, super.toString())
+                .add("type", type)
+                .add("color", color)
+                .toString();
     }
 }

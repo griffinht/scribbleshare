@@ -1,10 +1,11 @@
 package net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.canvasUpdates;
 
 import io.netty.buffer.ByteBuf;
-import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
+import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class CanvasUpdateDelete extends CanvasUpdate {
     public CanvasUpdateDelete(ByteBuf byteBuf) {
@@ -21,6 +22,12 @@ public class CanvasUpdateDelete extends CanvasUpdate {
         if (canvas.getCanvasObjects().remove(id) == null) {
             throw new CanvasUpdateException("CanvasObject does not exist");
         }
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasUpdateDelete.class, super.toString())
+                .toString();
     }
 
     @Override

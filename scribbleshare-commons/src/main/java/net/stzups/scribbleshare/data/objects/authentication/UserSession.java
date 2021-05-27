@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.data.objects.authentication;
 
 import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -89,7 +90,12 @@ public class UserSession {
 
     @Override
     public String toString() {
-        return UserSession.class.getSimpleName() + "{id=" + id + ",userId" + userId + ",created=" + created + ",expires=" + expired + "}";
+        return DebugString.get(UserSession.class)
+                .add("id", id)
+                .add("userId", userId)
+                .add("created", created)
+                .add("expires", expired)
+                .toString();
     }
 
     @Override

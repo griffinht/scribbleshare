@@ -6,6 +6,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasObject.CanvasObject;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdate;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateType;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class CanvasUpdateMove extends CanvasUpdate {
     private final CanvasObject canvasObject;
@@ -33,5 +34,12 @@ public class CanvasUpdateMove extends CanvasUpdate {
     public void serialize(ByteBuf byteBuf) {
         super.serialize(byteBuf);
         canvasObject.serialize(byteBuf);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasUpdateMove.class, super.toString())
+                .add("canvasObject", canvasObject)
+                .toString();
     }
 }

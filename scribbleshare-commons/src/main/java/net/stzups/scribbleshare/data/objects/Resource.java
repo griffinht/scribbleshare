@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects;
 
 import io.netty.buffer.ByteBuf;
+import net.stzups.scribbleshare.util.DebugString;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -30,6 +31,8 @@ public class Resource {
 
     @Override
     public String toString() {
-        return Resource.class.getSimpleName() + "{lastModified=" + lastModified + ",data=" + data + "}";
+        return DebugString.get(Resource.class)
+                .add("lastModifed", lastModified)
+                .toString();
     }
 }

@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.data.objects.authentication;
 
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class AuthenticatedUserSession {
     private final User user;
@@ -15,6 +16,8 @@ public class AuthenticatedUserSession {
 
     @Override
     public String toString() {
-        return AuthenticatedUserSession.class.getSimpleName() + "{user=" + user + "}";
+        return DebugString.get(AuthenticatedUserSession.class)
+                .add("user", user)
+                .toString();
     }
 }

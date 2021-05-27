@@ -6,6 +6,7 @@ import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.C
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Line;
 import net.stzups.scribbleshare.data.objects.canvas.canvasObject.canvasObjects.Shape;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class CanvasObject {//todo make abstract?
     private short x;
@@ -28,6 +29,14 @@ public class CanvasObject {//todo make abstract?
     public void serialize(ByteBuf byteBuf) {
         byteBuf.writeShort(x);
         byteBuf.writeShort(y);
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasMouse.class)
+                .add("x", x)
+                .add("y", y)
+                .toString();
     }
 
     public static CanvasObject deserialize(CanvasObjectType type, ByteBuf byteBuf) throws DeserializationException {

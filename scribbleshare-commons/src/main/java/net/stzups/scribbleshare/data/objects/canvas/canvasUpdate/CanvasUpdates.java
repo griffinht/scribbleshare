@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationLengthException;
+import net.stzups.scribbleshare.util.DebugString;
 
 public class CanvasUpdates {
     private final short id;
@@ -39,5 +40,13 @@ public class CanvasUpdates {
             canvasUpdates.getCanvasUpdateType().serialize(byteBuf);
             canvasUpdates.serialize(byteBuf);
         }
+    }
+
+    @Override
+    public String toString() {
+        return DebugString.get(CanvasUpdate.class)
+                .add("id", id)
+                .add("canvasUpdates", canvasUpdates)
+                .toString();
     }
 }
