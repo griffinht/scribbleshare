@@ -42,12 +42,118 @@ public class HttpUtils {
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
 
+
+
+
+
+    /** sets keep alive headers and returns whether the connection is keep alive */
+    public static boolean setKeepAlive(FullHttpRequest request, HttpResponse response) {
+        boolean keepAlive = HttpUtil.isKeepAlive(request);
+        if (!keepAlive) {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        }
+        return keepAlive;
+    }
+
+    /**
+     * Send {@link ByteBuf}
+     */
     public static void send(ChannelHandlerContext ctx, FullHttpRequest request, ByteBuf responseContent) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM);
         response.content().writeBytes(responseContent);
 
         send(ctx, request, response);
+    }
+
+
+    /**
+     * Send {@link FullHttpResponse}
+     */
+    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        if (request == null) { // assume no keep alive
+            ctx.writeAndFlush(response);
+            return;
+        }
+
+        boolean keepAlive = setKeepAlive(request, response);
+
+        ChannelFuture flushPromise = ctx.writeAndFlush(response);
+
+        if (!keepAlive) {
+            // Close the connection as soon as the response is sent.
+            flushPromise.addListener(ChannelFutureListener.CLOSE);
+        }
+    }
+
+    /**
+     * Send {@link HttpResponse} followed by {@link HttpChunkedInput}
+     */
+    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, HttpChunkedInput httpChunkedInput) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpChunkedInput.length());
+
+        boolean keepAlive = setKeepAlive(request, response);
+
+        // Write the initial line and the header.
+        ctx.write(response);
+
+        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
+        ChannelFuture lastContentFuture = ctx.writeAndFlush(httpChunkedInput, ctx.newProgressivePromise());
+
+        if (!keepAlive) {
+            // Close the connection when the whole content is written out.
+            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+        }
+    }
+
+    /**
+     * Send {@link HttpResponseStatus}
+     */
+    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
+
+        send(ctx, request, response);
+    }
+
+    /**
+     * Send redirect to a new URI
+     */
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, String newUri) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
+        response.headers().set(headers);
+        response.headers().set(HttpHeaderNames.LOCATION, newUri);
+
+        send(ctx, request, response);
+    }
+
+    /**
+     * Send redirect to a new URI
+     */
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
+        sendRedirect(ctx, request, EmptyHttpHeaders.INSTANCE, newUri);
+    }
+
+    /**
+     * Send {@link ChunkedInput<ByteBuf>} with {@link HttpHeaders}
+     */
+    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(headers);
+
+        send(ctx, request, response, new HttpChunkedInput(chunkedInput));
+    }
+
+    public static void setDateAndLastModified(HttpHeaders headers, Timestamp lastModified) {//todo
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
+
+        Calendar time = new GregorianCalendar();
+        headers.set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
+
+        headers.set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(lastModified));
     }
 
     public static boolean isModifiedSince(FullHttpRequest request, Timestamp lastModified) throws BadRequestException {
@@ -66,82 +172,9 @@ public class HttpUtils {
         return true;
     }
 
-    public static void setDateAndLastModified(HttpHeaders headers, Timestamp lastModified) {//todo
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        Calendar time = new GregorianCalendar();
-        headers.set(HttpHeaderNames.DATE, dateFormatter.format(time.getTime()));
-
-        headers.set(HttpHeaderNames.LAST_MODIFIED, dateFormatter.format(lastModified));
-    }
-
-    /** sets keep alive headers and returns whether the connection is keep alive */
-    public static boolean setKeepAlive(FullHttpRequest request, HttpResponse response) {
-        boolean keepAlive = HttpUtil.isKeepAlive(request);
-        if (!keepAlive) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-        } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
-        return keepAlive;
-    }
-
-
-
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        if (request == null) { // assume no keep alive
-            ctx.writeAndFlush(response);
-            return;
-        }
-
-        boolean keepAlive = setKeepAlive(request, response);
-
-        ChannelFuture flushPromise = ctx.writeAndFlush(response);
-
-        if (!keepAlive) {
-            // Close the connection as soon as the response is sent.
-            flushPromise.addListener(ChannelFutureListener.CLOSE);
-        }
-    }
-
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, HttpChunkedInput httpChunkedInput) {
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpChunkedInput.length());
-
-        boolean keepAlive = setKeepAlive(request, response);
-
-        // Write the initial line and the header.
-        ctx.write(response);
-
-        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
-        ChannelFuture lastContentFuture = ctx.writeAndFlush(httpChunkedInput, ctx.newProgressivePromise());
-
-        if (!keepAlive) {
-            // Close the connection when the whole content is written out.
-            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-        }
-    }
-
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, String newUri) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
-        response.headers().set(headers);
-        response.headers().set(HttpHeaderNames.LOCATION, newUri);
-
-        send(ctx, request, response);
-    }
-
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
-        sendRedirect(ctx, request, EmptyHttpHeaders.INSTANCE, newUri);
-    }
-
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
-
-        send(ctx, request, response);
-    }
-
-    /** sends if stale, otherwise sends not modified */
+    /**
+     * Send {@link ChunkedInput<ByteBuf>} if stale, or {@link HttpResponseStatus#NOT_MODIFIED} if fresh
+     */
     public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws BadRequestException {
         setDateAndLastModified(headers, lastModified);
         if (isModifiedSince(request, lastModified)) {
@@ -156,15 +189,9 @@ public class HttpUtils {
         }
     }
 
-    /** sends resource with headers */
-    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(headers);
-
-        send(ctx, request, response, new HttpChunkedInput(chunkedInput));
-    }
-
-    /** make sure the file being sent is valid */
+    /**
+     * Send {@link File} with respect to caching
+     */
     public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws IOException, BadRequestException {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             long fileLength = randomAccessFile.length();
@@ -181,14 +208,8 @@ public class HttpUtils {
         }
     }
 
+    //todo unused?
     public static void setCookie(HttpHeaders headers, Cookie cookie) {
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }
-
-
-
-
-
-
-
 }
