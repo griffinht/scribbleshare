@@ -8,6 +8,7 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
@@ -15,7 +16,6 @@ import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.handler.RequestHandler;
-import net.stzups.scribbleshare.server.http.objects.Route;
 
 import static net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandler.readString;
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
@@ -39,13 +39,13 @@ public class RegisterRequestHandler extends RequestHandler {
 
     private final ScribbleshareDatabase database;
 
-    public RegisterRequestHandler(ScribbleshareDatabase database) {
-        super(REGISTER_PATH);
+    public RegisterRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+        super(config, REGISTER_PAGE, REGISTER_PATH);
         this.database = database;
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
 
         // validate
         RegisterRequest registerRequest = new RegisterRequest(request.content());
@@ -55,7 +55,7 @@ public class RegisterRequestHandler extends RequestHandler {
             //todo rate limit and generic error handling
 
             sendRedirect(ctx, request, REGISTER_PAGE);
-            return true;
+            return;
         }
 
         User user;
@@ -118,12 +118,12 @@ public class RegisterRequestHandler extends RequestHandler {
         if (!loginAdded) {
             Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + registerRequest.username);
             send(ctx, request, HttpResponseStatus.CONFLICT);
-            return true;
+            return;
         }
 
         Scribbleshare.getLogger(ctx).info("Registered with username " + registerRequest.username);
 
         send(ctx, request, HttpResponseStatus.OK);
-        return true;
+        return;
     }
 }

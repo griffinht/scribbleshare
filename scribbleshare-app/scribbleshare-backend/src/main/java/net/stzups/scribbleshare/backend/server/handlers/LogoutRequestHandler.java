@@ -6,27 +6,25 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.HttpUtils;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.handler.FormHandler;
-import net.stzups.scribbleshare.server.http.objects.Form;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
+import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 
-public class LogoutFormHandler extends FormHandler {
+public class LogoutRequestHandler extends RequestHandler {
     private static final String LOGOUT_PAGE = "/"; // the logout page, where logout requests should come from
     private static final String LOGOUT_PATH = "/logout"; // where logout requests should go
 
     private final HttpConfig config;
     private final ScribbleshareDatabase database;
 
-    public LogoutFormHandler(HttpConfig config, ScribbleshareDatabase database) {
-        super(LOGOUT_PATH);
+    public LogoutRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+        super(config, LOGOUT_PAGE, LOGOUT_PATH);
         this.config = config;
         this.database = database;
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
-/*                        Form form = new Form(request);//todo necessary?
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+        /*                        Form form = new Form(request);//todo necessary?
 
 
                 HttpHeaders headers = new DefaultHttpHeaders();
@@ -75,5 +73,10 @@ public class LogoutFormHandler extends FormHandler {
                 return true;*/
         HttpUtils.send(ctx, request, HttpResponseStatus.NOT_FOUND);
         return true;
+    }
+
+    @Override
+    protected void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+
     }
 }

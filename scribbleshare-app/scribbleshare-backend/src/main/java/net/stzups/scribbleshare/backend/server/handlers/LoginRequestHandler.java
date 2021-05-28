@@ -20,7 +20,6 @@ import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.handler.RequestHandler;
-import net.stzups.scribbleshare.server.http.objects.Route;
 
 import java.nio.charset.StandardCharsets;
 
@@ -46,13 +45,13 @@ public class LoginRequestHandler extends RequestHandler {
     private final ScribbleshareDatabase database;
 
     public LoginRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
-        super(LOGIN_PATH);
+        super(config, LOGIN_PAGE, LOGIN_PATH);
         this.database = database;
         this.config = config;
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         LoginRequest loginRequest = new LoginRequest(request.content());
 
         Login login;
@@ -70,7 +69,7 @@ public class LoginRequestHandler extends RequestHandler {
             }
 
             send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
-            return true;
+            return;
         }
 
         assert login != null : "Verified logins should never be null";
@@ -104,7 +103,7 @@ public class LoginRequestHandler extends RequestHandler {
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
         response.headers().set(httpHeaders);
         send(ctx, request, response);
-        return true;
+        return;
     }
 
     static String readString(ByteBuf byteBuf) {

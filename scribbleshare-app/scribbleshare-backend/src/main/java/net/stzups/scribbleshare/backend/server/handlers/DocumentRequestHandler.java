@@ -16,6 +16,7 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
@@ -33,13 +34,14 @@ public class DocumentRequestHandler extends RequestHandler {
 
     private final ScribbleshareDatabase database;
 
-    public DocumentRequestHandler(ScribbleshareDatabase database) {
-        super("/document");
+    public DocumentRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+        super(config, "/", "/document");
         this.database = database;
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+        Route route = new Route(request.uri());
         AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(request, database);
 
         if (session == null) {
@@ -86,13 +88,13 @@ public class DocumentRequestHandler extends RequestHandler {
 
                 try {
                     send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
-                    return true;
+                    return;
                 } catch (DatabaseException e) {
                     throw new InternalServerException(e);
                 }
             } else {
                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-                return true;
+                return;
             }
         } else { // route.length == 4, get resource from document
             // does the document have this resource?
@@ -130,7 +132,7 @@ public class DocumentRequestHandler extends RequestHandler {
             } else {
                 send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
             }
-            return true;
+            return;
         }
     }
 }

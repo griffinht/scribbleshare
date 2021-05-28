@@ -14,7 +14,7 @@ import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.handler.RequestHandler;
+import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
 import net.stzups.scribbleshare.server.http.objects.Uri;
 
@@ -28,7 +28,7 @@ import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendFile;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
-public class FileRequestHandler extends RequestHandler {
+public class FileRequestHandler extends HttpHandler {
     public interface Config extends HttpConfig {
         String getHttpRoot();
         int getHttpCacheSeconds();
@@ -73,8 +73,8 @@ public class FileRequestHandler extends RequestHandler {
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
-        // otherwise try to serve a regular HTTP file resource
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+        Route route = new Route(request.uri());
 
         if (!HttpMethod.GET.equals(request.method())) {
             send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
