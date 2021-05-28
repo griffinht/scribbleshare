@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.backend.server.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
@@ -17,12 +18,13 @@ import net.stzups.scribbleshare.server.http.objects.Form;
 
 import java.nio.charset.StandardCharsets;
 
+import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
 public class RegisterFormHandler extends FormHandler {
-    private static final String REGISTER_PAGE = "/register"; // the register page, where register requests should come from
+    private static final String REGISTER_PAGE = "/"; // the register page, where register requests should come from
     private static final String REGISTER_PATH = "/register"; // where register requests should go
-    private static final String REGISTER_SUCCESS = LoginFormHandler.LOGIN_PAGE; // redirect for a good register, should be the login page
+    private static final String REGISTER_SUCCESS = LoginRequestHandler.LOGIN_PAGE; // redirect for a good register, should be the login page
 
     private final ScribbleshareDatabase database;
 
@@ -106,13 +108,13 @@ public class RegisterFormHandler extends FormHandler {
         }
         if (!loginAdded) {
             Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
-            sendRedirect(ctx, request, REGISTER_PAGE);
+            send(ctx, request, HttpResponseStatus.CONFLICT);
             return true;
         }
 
         Scribbleshare.getLogger(ctx).info("Registered with username " + username);
 
-        sendRedirect(ctx, request, REGISTER_SUCCESS);
+        send(ctx, request, HttpResponseStatus.OK);
         return true;
     }
 }

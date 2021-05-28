@@ -12,9 +12,8 @@ import net.stzups.scribbleshare.server.http.handler.FormHandler;
 import net.stzups.scribbleshare.server.http.objects.Form;
 
 public class LogoutFormHandler extends FormHandler {
-    private static final String LOGOUT_PAGE = "/logout"; // the logout page, where logout requests should come from
+    private static final String LOGOUT_PAGE = "/"; // the logout page, where logout requests should come from
     private static final String LOGOUT_PATH = "/logout"; // where logout requests should go
-    private static final String LOGOUT_SUCCESS = LoginFormHandler.LOGIN_PAGE; // redirect for a good logout, should be the login page
 
     private final HttpConfig config;
     private final ScribbleshareDatabase database;

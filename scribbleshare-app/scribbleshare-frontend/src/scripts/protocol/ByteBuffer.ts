@@ -73,6 +73,10 @@ export default class ByteBuffer {
         return btoa(this.readString8());
     }
 
+    readBoolean() {
+        return this.readUint8() == 1;
+    }
+
     readInt8() {
         let value = this.view.getInt8(this.position);
         this.position += 1;
@@ -169,6 +173,10 @@ export default class ByteBuffer {
 
     writeBase64_32(value: string) {
         this.writeString32(atob(value));
+    }
+
+    writeBoolean(value: boolean) {
+        this.writeUint8(value ? 1 : 0);
     }
 
     writeInt8(value: number) {

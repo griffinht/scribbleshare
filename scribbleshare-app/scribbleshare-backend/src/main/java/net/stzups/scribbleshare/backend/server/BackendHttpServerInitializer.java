@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.handlers.DocumentRequestHandler;
-import net.stzups.scribbleshare.backend.server.handlers.LoginFormHandler;
+import net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandler;
 import net.stzups.scribbleshare.backend.server.handlers.LogoutFormHandler;
 import net.stzups.scribbleshare.backend.server.handlers.RegisterFormHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
@@ -26,7 +26,7 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
         httpServerHandler = new HttpServerHandler()
                 .addLast(new HealthcheckRequestHandler())
                 .addLast(new DocumentRequestHandler(database))
-                .addLast(new LoginFormHandler(config, database))
+                .addLast(new LoginRequestHandler(config, database))
                 .addLast(new LogoutFormHandler(config, database))
                 .addLast(new RegisterFormHandler(database))
                 .addLast(new FileRequestHandler(config));

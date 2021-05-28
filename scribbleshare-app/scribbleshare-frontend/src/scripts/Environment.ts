@@ -5,7 +5,7 @@ interface Environment {
 
 class DevEnvironment implements Environment {
     getApiHost(): string {
-        return 'http://localhost';
+        return 'http://localhost:3456';
     }
 
     getWebsocketHost(): string {
