@@ -23,7 +23,7 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
 
     public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
-        httpServerHandler = new HttpServerHandler()
+        httpServerHandler = new HttpServerHandler(config)
                 .addLast(new HealthcheckRequestHandler())
                 .addLast(new DocumentRequestHandler(config, database))
                 .addLast(new LoginRequestHandler(config, database))

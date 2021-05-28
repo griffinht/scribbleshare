@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
@@ -19,7 +20,7 @@ import javax.net.ssl.SSLException;
 
 @ChannelHandler.Sharable
 public class RoomHttpServerInitializer extends HttpServerInitializer {
-    public interface Config extends HttpServerInitializer.Config {
+    public interface Config extends HttpServerInitializer.Config, HttpConfig {
         String getWebsocketPath();
     }
 
@@ -42,7 +43,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         this.config = config;
         this.database = database;
         clientMessageHandler = new ClientMessageHandler();
-        httpServerHandler = new HttpServerHandler()
+        httpServerHandler = new HttpServerHandler(config)
                 .addLast(new HealthcheckRequestHandler())
                 .addLast(new HttpAuthenticator(database));
     }
