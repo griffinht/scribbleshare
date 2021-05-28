@@ -1,8 +1,6 @@
 package net.stzups.scribbleshare.server.http;
 
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -28,8 +26,6 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     private final Config config;
     private final SslContext sslContext;
 
-    private final DebugOpenCloseLog debugOpenCloseLog = new DebugOpenCloseLog();
-
     protected HttpServerInitializer(Config config) throws SSLException {
         this.config = config;
 
@@ -47,7 +43,19 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel channel) {
         Scribbleshare.setLogger(channel);
 
-        channel.pipeline().addLast(debugOpenCloseLog);
+/*        channel.pipeline().addLast(new ChannelDuplexHandler() {
+            @Override
+            public void channelActive(ChannelHandlerContext ctx) {
+                Scribbleshare.getLogger(ctx).info("Connection opened");
+                ctx.fireChannelActive();
+            }
+
+            @Override
+            public void channelInactive(ChannelHandlerContext ctx) {
+                Scribbleshare.getLogger(ctx).info("Connection closed");
+                ctx.fireChannelInactive();
+            }
+        });*/
         if (config.getDebugLogTraffic()) channel.pipeline().addLast(new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000) {
             @Override
             protected void doAccounting(TrafficCounter counter) {
@@ -58,20 +66,5 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
         channel.pipeline()
                 .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(Integer.MAX_VALUE)); //2gb todo decrease
-    }
-}
-
-@ChannelHandler.Sharable
-class DebugOpenCloseLog extends ChannelDuplexHandler {
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) {
-        Scribbleshare.getLogger(ctx).info("Connection opened");
-        ctx.fireChannelActive();
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
-        Scribbleshare.getLogger(ctx).info("Connection closed");
-        ctx.fireChannelInactive();
     }
 }

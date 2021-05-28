@@ -3,7 +3,6 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
@@ -24,7 +23,6 @@ public class HealthcheckRequestHandler extends HttpHandler {
                 throw new NotFoundException("Healthcheck request from address which is not a loopback address");
             } else {
                 send(ctx, request, HttpResponseStatus.OK);
-                Scribbleshare.getLogger(ctx).info("Good healthcheck response");
                 return true;
             }
         }
