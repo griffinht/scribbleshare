@@ -1,5 +1,6 @@
 package net.stzups.scribbleshare.backend.server.handlers;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -11,35 +12,43 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCook
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.handler.FormHandler;
-import net.stzups.scribbleshare.server.http.objects.Form;
+import net.stzups.scribbleshare.server.http.handler.RequestHandler;
+import net.stzups.scribbleshare.server.http.objects.Route;
 
-import java.nio.charset.StandardCharsets;
-
+import static net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandler.readString;
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
-public class RegisterFormHandler extends FormHandler {
+public class RegisterRequestHandler extends RequestHandler {
+    private static class RegisterRequest {
+        private final String username;
+        private final byte[] password;
+
+        RegisterRequest(ByteBuf byteBuf) {
+            username = readString(byteBuf);
+            password = new byte[byteBuf.readUnsignedByte()];
+            byteBuf.readBytes(password);
+        }
+    }
+
     private static final String REGISTER_PAGE = "/"; // the register page, where register requests should come from
     private static final String REGISTER_PATH = "/register"; // where register requests should go
     private static final String REGISTER_SUCCESS = LoginRequestHandler.LOGIN_PAGE; // redirect for a good register, should be the login page
 
     private final ScribbleshareDatabase database;
 
-    public RegisterFormHandler(ScribbleshareDatabase database) {
+    public RegisterRequestHandler(ScribbleshareDatabase database) {
         super(REGISTER_PATH);
         this.database = database;
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Form form) throws BadRequestException, InternalServerException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, Route route) throws HttpException {
 
         // validate
-
-        String username = form.getText("username");
-        String password = form.getText("password");
+        RegisterRequest registerRequest = new RegisterRequest(request.content());
 
         //todo validate
         if (false) {
@@ -70,7 +79,7 @@ public class RegisterFormHandler extends FormHandler {
                 }
                 if (u.isRegistered()) {
                     Scribbleshare.getLogger(ctx).info("Registered user is creating a new account");
-                    user = new User(username);
+                    user = new User(registerRequest.username);
                     try {
                         database.addUser(user);
                     } catch (DatabaseException e) {
@@ -81,7 +90,7 @@ public class RegisterFormHandler extends FormHandler {
                     user = u;
                 }
             } else {
-                user = new User(username);
+                user = new User(registerRequest.username);
                 try {
                     database.addUser(user);
                 } catch (DatabaseException e) {
@@ -89,7 +98,7 @@ public class RegisterFormHandler extends FormHandler {
                 }
             }
         } else {
-            user = new User(username);
+            user = new User(registerRequest.username);
             try {
                 database.addUser(user);
             } catch (DatabaseException e) {
@@ -99,7 +108,7 @@ public class RegisterFormHandler extends FormHandler {
 
         assert !user.isRegistered();
 
-        Login login = new Login(user, password.getBytes(StandardCharsets.UTF_8));
+        Login login = new Login(user, registerRequest.password);
         boolean loginAdded;
         try {
             loginAdded = database.addLogin(login);
@@ -107,12 +116,12 @@ public class RegisterFormHandler extends FormHandler {
             throw new InternalServerException(e);
         }
         if (!loginAdded) {
-            Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + username);
+            Scribbleshare.getLogger(ctx).info("Tried to register with duplicate username " + registerRequest.username);
             send(ctx, request, HttpResponseStatus.CONFLICT);
             return true;
         }
 
-        Scribbleshare.getLogger(ctx).info("Registered with username " + username);
+        Scribbleshare.getLogger(ctx).info("Registered with username " + registerRequest.username);
 
         send(ctx, request, HttpResponseStatus.OK);
         return true;

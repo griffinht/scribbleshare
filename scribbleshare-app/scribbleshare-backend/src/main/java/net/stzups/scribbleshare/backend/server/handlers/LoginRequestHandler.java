@@ -102,7 +102,7 @@ public class LoginRequestHandler extends RequestHandler {
         return true;
     }
 
-    private static String readString(ByteBuf byteBuf) {
+    static String readString(ByteBuf byteBuf) {
         return byteBuf.readCharSequence(byteBuf.readUnsignedByte(), StandardCharsets.UTF_8).toString();
     }
 }

@@ -8,7 +8,7 @@ import net.stzups.scribbleshare.backend.ScribbleshareBackendConfig;
 import net.stzups.scribbleshare.backend.server.handlers.DocumentRequestHandler;
 import net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandler;
 import net.stzups.scribbleshare.backend.server.handlers.LogoutFormHandler;
-import net.stzups.scribbleshare.backend.server.handlers.RegisterFormHandler;
+import net.stzups.scribbleshare.backend.server.handlers.RegisterRequestHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
@@ -28,7 +28,7 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
                 .addLast(new DocumentRequestHandler(database))
                 .addLast(new LoginRequestHandler(config, database))
                 .addLast(new LogoutFormHandler(config, database))
-                .addLast(new RegisterFormHandler(database))
+                .addLast(new RegisterRequestHandler(database))
                 .addLast(new FileRequestHandler(config));
     }
 
