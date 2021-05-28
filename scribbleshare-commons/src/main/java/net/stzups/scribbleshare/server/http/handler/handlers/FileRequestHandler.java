@@ -152,7 +152,7 @@ public class FileRequestHandler extends RequestHandler {
                 || !ALLOWED_PATH.matcher(path).matches())
             throw new BadRequestException("File path contains illegal characters");
 
-        if (path.endsWith(File.separator)) { // / -> index.html
+        if (path.endsWith(File.separator)) { // / -> /index.html
             path = path + DEFAULT_FILE;
         } else if (path.lastIndexOf(File.separator) > path.lastIndexOf(".")) { // /page -> /page.html
             path = path + DEFAULT_FILE_EXTENSION;

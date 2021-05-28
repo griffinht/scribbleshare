@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class Uri {
     // abc-ABC_123.file
-    public static final String FILE_NAME_REGEX = "a-zA-Z0-9-_";
+    public static final String FILE_NAME_REGEX = "a-zA-Z0-9-";
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[/." + Query.QUERY_REGEX + FILE_NAME_REGEX + "]+$");
 
     final String uri;
