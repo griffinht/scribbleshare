@@ -55,11 +55,16 @@ public class HttpAuthenticator extends HttpHandler {
 
         AuthenticatedUserSession user = ctx.channel().attr(USER).get();
         if (user != null) {
-            return false;
+            return true;
         }
 
-        ctx.channel().attr(USER).set(authenticateHttpUserSession(request, database));
-        return false;
+        AuthenticatedUserSession session = authenticateHttpUserSession(request, database);
+        if (session == null) {
+            throw new UnauthorizedException("No authentication");
+        }
+
+        ctx.channel().attr(USER).set(session);
+        return true;
     }
 
     /** authenticates, or null if no authentication */
