@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AttributeKey;
+import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
@@ -63,6 +64,7 @@ public class HttpAuthenticator extends HttpHandler {
             throw new UnauthorizedException("No authentication");
         }
 
+        Scribbleshare.getLogger(ctx).info("" + session);
         ctx.channel().attr(USER).set(session);
         return true;
     }
