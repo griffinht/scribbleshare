@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.room.server;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.util.AttributeKey;
@@ -13,6 +14,8 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDeco
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
 import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
+import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
 
@@ -45,6 +48,16 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         clientMessageHandler = new ClientMessageHandler();
         httpServerHandler = new HttpServerHandler(config)
                 .addLast(new HealthcheckRequestHandler())
+                .addLast(new HttpHandler("/") {
+                    @Override
+                    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws NotFoundException {
+                        if (!request.uri().equals(config.getWebsocketPath())) {
+                            throw new NotFoundException("Bad uri " + request.uri());
+                        }
+
+                        return false;
+                    }
+                })
                 .addLast(new HttpAuthenticator(database));
     }
 
