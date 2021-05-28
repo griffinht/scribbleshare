@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.backend.server.handlers;
+package net.stzups.scribbleshare.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
