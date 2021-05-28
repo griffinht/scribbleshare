@@ -43,10 +43,10 @@ public class DebugString {
         @Override
         public String toString() {
             String value;
-            if (this.value.getClass().isArray()) {
+            if (this.value != null && this.value.getClass().isArray()) {
                 value = Arrays.toString((Object[]) this.value);
             } else {
-                value = this.value.toString();
+                value = "" + this.value;
             }
 
             if (name == null) {
