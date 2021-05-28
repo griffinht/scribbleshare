@@ -22,8 +22,8 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
-import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -192,13 +192,11 @@ public class HttpUtils {
     /**
      * Send {@link File} with respect to caching
      */
-    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws IOException, BadRequestException {
+    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws IOException, BadRequestException, NotFoundException {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             long fileLength = randomAccessFile.length();
             if (mimeType == null) {
-                Scribbleshare.getLogger(ctx).warning("Unknown MIME type for file " + file.getName());
-                send(ctx, request, HttpResponseStatus.NOT_FOUND);
-                return;
+                throw new NotFoundException("Unknown MIME type for file " + file.getName());
             }
             headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
 
