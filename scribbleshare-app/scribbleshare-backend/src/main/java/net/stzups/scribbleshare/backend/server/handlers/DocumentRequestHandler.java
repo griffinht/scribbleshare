@@ -1,4 +1,4 @@
-package net.stzups.scribbleshare.backend.server.http.handler.handlers;
+package net.stzups.scribbleshare.backend.server.handlers;
 
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
