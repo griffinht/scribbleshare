@@ -31,7 +31,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 
 public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
@@ -46,8 +45,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 }
             }
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting login for username " + username, e);
-            return null;
+            throw new DatabaseException("Exception while getting login for username " + username, e);
         }
     }
 
@@ -138,8 +136,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                         resultSet.getString("username"));
             }
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + User.class.getSimpleName() + " with id " + id, e);
-            return null;
+            throw new DatabaseException("Exception while getting " + User.class.getSimpleName() + " with id " + id, e);
         }
     }
 
@@ -249,8 +246,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
                 }
             }
         } catch (SQLException e) {
-            Scribbleshare.getLogger().log(Level.WARNING, "Exception while getting " + InviteCode.class.getSimpleName() + " code for " + document, e);
-            return null;
+            throw new DatabaseException("Exception while getting " + InviteCode.class.getSimpleName() + " code for " + document, e);
         }
         //invite code does not already exist, so a new one must be made
         InviteCode inviteCode = new InviteCode(document);
