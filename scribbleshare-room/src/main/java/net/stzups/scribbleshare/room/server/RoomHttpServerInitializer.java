@@ -18,6 +18,7 @@ import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
 
@@ -47,7 +48,8 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         this.config = config;
         this.database = database;
         clientMessageHandler = new ClientMessageHandler();
-        httpServerHandler = new DefaultHttpServerHandler(config)
+        httpServerHandler = new DefaultHttpServerHandler()
+                .addLast(new OriginHandler(config))
                 .addLast(new HttpHandler("/") {
                     @Override
                     public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws NotFoundException {

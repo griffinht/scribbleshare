@@ -16,7 +16,8 @@ services:
             scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
-            scribbleshare.domain: "scribbleshare.com"
+            scribbleshare.domain: "scribbleshare.com:8080"
+            scribbleshare.origin: "http://scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # App backend
     scribbleshare-app:
@@ -36,6 +37,7 @@ services:
             scribbleshare.postgres.user: "scribbleshare_backend"
             scribbleshare.postgres.password: "changeme"
             scribbleshare.domain: "scribbleshare.com"
+            scribbleshare.origin: "http://scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
 #    scribbleshare-nginx:
