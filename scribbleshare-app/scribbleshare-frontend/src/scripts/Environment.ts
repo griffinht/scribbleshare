@@ -19,7 +19,7 @@ class ProductionEnvironment implements Environment {
     }
 
     getWebsocketHost(): string {
-        return 'ws://scribbleshare.com:18080/scribblesocket';
+        return 'ws://scribbleshare.com:8080/scribblesocket';
     }
 }
 
