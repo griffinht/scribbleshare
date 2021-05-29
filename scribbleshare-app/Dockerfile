@@ -8,8 +8,8 @@ WORKDIR /usr/src/app
 COPY scribbleshare-frontend .
 
 RUN npm install
-RUN chmod +x build.sh \
-build.sh
+RUN chmod +x build.sh
+RUN ./build.sh
 
 
 #
