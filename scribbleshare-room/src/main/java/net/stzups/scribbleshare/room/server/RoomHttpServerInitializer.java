@@ -12,14 +12,12 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
+import net.stzups.scribbleshare.server.http.DefaultHttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
-import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
-import net.stzups.scribbleshare.server.http.handler.handlers.LogHandler;
-import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
 
@@ -49,10 +47,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         this.config = config;
         this.database = database;
         clientMessageHandler = new ClientMessageHandler();
-        httpServerHandler = new HttpServerHandler()
-                .addLast(new HealthcheckRequestHandler())
-                .addLast(new LogHandler())
-                .addLast(new OriginHandler(config, config.getOrigin()))
+        httpServerHandler = new DefaultHttpServerHandler(config)
                 .addLast(new HttpHandler("/") {
                     @Override
                     public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws NotFoundException {

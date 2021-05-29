@@ -10,4 +10,5 @@ public interface ScribbleshareConfig extends PostgresDatabase.Config, HttpServer
     int getPort();
     String getDomain();
     String getName();
+    String getOrigin();
 }

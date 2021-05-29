@@ -25,6 +25,13 @@ public class ScribbleshareConfigImplementation extends Config implements Scribbl
 
     public static final ConfigKey<Boolean> DEBUG_LOG_TRAFFIC = new OptionalConfigKey<>("debug.log.traffic", false);
 
+    private static final ConfigKey<String> ORIGIN = new OptionalConfigKey<>("origin", "");
+
+    @Override
+    public String getOrigin() {
+        return getString(ORIGIN);
+    }
+
     @Override
     public String getEnvironmentVariablePrefix() {
         return getString(ENVIRONMENT_VARIABLE_PREFIX);

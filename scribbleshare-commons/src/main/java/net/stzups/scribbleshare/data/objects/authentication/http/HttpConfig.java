@@ -4,4 +4,5 @@ public interface HttpConfig {
     String getDomain();
     boolean getSSL();
     int getPort();
+    String getOrigin();
 }
