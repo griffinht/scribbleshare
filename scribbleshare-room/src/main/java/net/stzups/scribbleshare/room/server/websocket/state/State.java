@@ -5,12 +5,16 @@ import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageException;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
+import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 public abstract class State {
     public static void setState(ChannelHandlerContext ctx, State state) {
-        Scribbleshare.getLogger(ctx).info(state.toString());
         ClientMessageHandler.getState(ctx).set(state);
+
+        if (!(state instanceof InitialState)) {
+            Scribbleshare.getLogger(ctx).info(state.toString());
+        }
     }
 
     public void channelInactive(ChannelHandlerContext ctx) {

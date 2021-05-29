@@ -18,6 +18,7 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundExcepti
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.handler.handlers.LogHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
@@ -50,6 +51,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         clientMessageHandler = new ClientMessageHandler();
         httpServerHandler = new HttpServerHandler()
                 .addLast(new HealthcheckRequestHandler())
+                .addLast(new LogHandler())
                 .addLast(new OriginHandler(config, config.getOrigin()))
                 .addLast(new HttpHandler("/") {
                     @Override

@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
@@ -28,8 +29,6 @@ public class HttpServerHandler extends MessageToMessageDecoder<FullHttpRequest> 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest request, List<Object> out) {
         try {
-            Scribbleshare.getLogger(ctx).info(request.method() + " " + request.uri());
-
             if (request.decoderResult().isFailure())
                 throw new BadRequestException("Decoding request resulted in " + request.decoderResult());
 
@@ -40,6 +39,9 @@ public class HttpServerHandler extends MessageToMessageDecoder<FullHttpRequest> 
             }
 
             out.add(request.retain());
+        } catch (IndexOutOfBoundsException e) {
+            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
+            send(ctx, request, HttpResponseStatus.BAD_REQUEST);
         } catch (HttpException e) {
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, e.responseStatus());
