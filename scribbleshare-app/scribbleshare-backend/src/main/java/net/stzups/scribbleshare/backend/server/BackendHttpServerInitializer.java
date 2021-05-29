@@ -14,6 +14,7 @@ import net.stzups.scribbleshare.server.http.HttpServerHandler;
 import net.stzups.scribbleshare.server.http.HttpServerInitializer;
 import net.stzups.scribbleshare.server.http.handler.handlers.FileRequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
+import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
 
@@ -23,7 +24,8 @@ public class BackendHttpServerInitializer extends HttpServerInitializer {
 
     public BackendHttpServerInitializer(ScribbleshareBackendConfig config, ScribbleshareDatabase database) throws SSLException {
         super(config);
-        httpServerHandler = new HttpServerHandler(config)
+        httpServerHandler = new HttpServerHandler()
+                .addLast(new OriginHandler(config))
                 .addLast(new HealthcheckRequestHandler())
                 .addLast(new DocumentRequestHandler(config, database))
                 .addLast(new LoginRequestHandler(config, database))

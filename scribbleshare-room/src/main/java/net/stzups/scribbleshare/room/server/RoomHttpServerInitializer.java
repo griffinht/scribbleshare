@@ -18,6 +18,7 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundExcepti
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HealthcheckRequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
+import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
 
@@ -25,6 +26,7 @@ import javax.net.ssl.SSLException;
 public class RoomHttpServerInitializer extends HttpServerInitializer {
     public interface Config extends HttpServerInitializer.Config, HttpConfig {
         String getWebsocketPath();
+        String getOrigin();
     }
 
     private static final AttributeKey<ScribbleshareDatabase> DATABASE = AttributeKey.valueOf(RoomHttpServerInitializer.class, "DATABASE");
@@ -46,8 +48,9 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
         this.config = config;
         this.database = database;
         clientMessageHandler = new ClientMessageHandler();
-        httpServerHandler = new HttpServerHandler(config)
+        httpServerHandler = new HttpServerHandler()
                 .addLast(new HealthcheckRequestHandler())
+                .addLast(new OriginHandler(config, config.getOrigin()))
                 .addLast(new HttpHandler("/") {
                     @Override
                     public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws NotFoundException {
