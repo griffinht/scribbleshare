@@ -3,9 +3,13 @@ package net.stzups.scribbleshare.backend.server.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
 import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
@@ -104,7 +108,7 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
 
         assert login != null : "Verified logins should never be null";
 
-        HttpHeaders httpHeaders = new DefaultHttpHeaders();
+        HttpHeaders headers = new DefaultHttpHeaders();
         User user;
         try {
             user = database.getUser(login.getId());
@@ -115,14 +119,14 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             throw new InternalServerException("No user for id " + login.getId());
         }
 
-        HttpUserSession userSession = new HttpUserSession(config, user, httpHeaders);
+        HttpUserSession userSession = new HttpUserSession(config, user, headers);
         try {
             database.addHttpSession(userSession);
         } catch (DatabaseException e) {
             throw new InternalServerException(e);
         }
         if (loginRequest.remember) {
-            PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, httpHeaders);
+            PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, headers);
             try {
                 database.addPersistentHttpUserSession(persistentHttpUserSession);
             } catch (DatabaseException e) {
@@ -130,10 +134,10 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             }
         }
 
-        ByteBuf byteBuf = Unpooled.buffer();
-        new LoginResponse(LoginResponseResult.SUCCESS).serialize(byteBuf);
-        send(ctx, request, byteBuf);
-        byteBuf.release();
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(headers);
+        new LoginResponse(LoginResponseResult.SUCCESS).serialize(response.content());
+        send(ctx, request, response);
         Scribbleshare.getLogger(ctx).info("Logged in as " + user);
     }
 
