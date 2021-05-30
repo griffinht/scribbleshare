@@ -14,10 +14,10 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
@@ -59,7 +59,7 @@ public class HttpAuthenticator extends HttpHandler {
             return true;
         }
 
-        AuthenticatedUserSession session = authenticateHttpUserSession(request, database);
+        AuthenticatedUserSession session = authenticateHttpUserSession(database, request);
         if (session == null) {
             throw new UnauthorizedException("No authentication");
         }
@@ -69,43 +69,90 @@ public class HttpAuthenticator extends HttpHandler {
         return true;
     }
 
-    /** authenticates, or null if no authentication */
-    public static AuthenticatedUserSession authenticateHttpUserSession(FullHttpRequest request, Database database) throws UnauthorizedException, InternalServerException {
-        HttpSessionCookie sessionCookie;
+    public static HttpUserSession getHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
+        HttpUserSessionCookie cookie;
         try {
-            sessionCookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
+            cookie = HttpUserSessionCookie.getCookie(request);
         } catch (BadRequestException e) {
             throw new UnauthorizedException("Malformed cookie", e);
         }
-        if (sessionCookie == null) {
+        if (cookie == null) {
+            return null;
+        }
+
+        HttpUserSession session;
+        try {
+            session = database.getHttpSession(cookie);
+        } catch (DatabaseException e) {
+            throw new InternalServerException(e);
+        }
+        if (session == null) {
+            throw new UnauthorizedException("No " + PersistentHttpUserSession.class + " for " + cookie);
+        }
+
+        AuthenticationResult result = session.validate(cookie);
+        if (result != AuthenticationResult.SUCCESS) {
+            throw new UnauthorizedException("Validating " + cookie + " for " + session + " resulted in " + result);
+        }
+
+        return session;
+    }
+
+    /** get and expire persistent http user session */
+    public static PersistentHttpUserSession getPersistentHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
+        PersistentHttpUserSessionCookie cookie;
+        try {
+            cookie = PersistentHttpUserSessionCookie.getCookie(request);
+        } catch (BadRequestException e) {
+            throw new UnauthorizedException("Malformed cookie");
+        }
+        if (cookie == null) {
+            return null;
+        }
+
+        PersistentHttpUserSession session;
+        try {
+            session = database.getPersistentHttpUserSession(cookie);
+
+            if (session == null) {
+                throw new UnauthorizedException("No " + PersistentHttpUserSession.class + " for " + cookie);
+            }
+
+            database.expirePersistentHttpUserSession(session);
+        } catch (DatabaseException e) {
+            throw new InternalServerException(e);
+        }
+
+        AuthenticationResult result = session.validate(cookie);
+        if (result != AuthenticationResult.SUCCESS) {
+            throw new UnauthorizedException("Validating " + cookie + " for " + session + " resulted in " + result);
+        }
+
+        return session;
+    }
+
+    /** authenticates, or null if no authentication */
+    public static AuthenticatedUserSession authenticateHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
+        HttpUserSession session = getHttpUserSession(database, request);
+        if (session == null) {
             return null;
         }
 
         User user;
         try {
-            HttpUserSession userSession = database.getHttpSession(sessionCookie);
-            if (userSession == null) {
-                throw new UnauthorizedException("Bad authentication (bad id)");
-            }
-
-            AuthenticationResult result = userSession.validate(sessionCookie);
-            if (result != AuthenticationResult.SUCCESS) {
-                throw new UnauthorizedException("Bad authentication " + result);
-            }
-
-            user = database.getUser(userSession.getUser());
-            if (user == null) {
-                throw new InternalServerException("Unknown user for authentication");
-            }
+            user = database.getUser(session.getUser());
         } catch (DatabaseException e) {
             throw new InternalServerException(e);
         }
 
+        if (user == null) {
+            throw new InternalServerException("Unknown user for authentication");
+        }
         return new AuthenticatedUserSession(user);
     }
 
     /** create session and persistent session for user */
-    private static AuthenticatedUserSession createHttpSession(User user, HttpConfig httpConfig, Database database, HttpHeaders httpHeaders) throws InternalServerException {
+    private static AuthenticatedUserSession createHttpSession(HttpConfig httpConfig, Database database, User user, HttpHeaders httpHeaders) throws InternalServerException {
         try {
             // create session
             HttpUserSession httpUserSession = new HttpUserSession(httpConfig, user, httpHeaders);
@@ -122,52 +169,33 @@ public class HttpAuthenticator extends HttpHandler {
     }
 
     /** logs in if not authenticated, or null if no auth */
-    public static AuthenticatedUserSession logInHttpSession(FullHttpRequest request, Database database, HttpHeaders httpHeaders, HttpConfig httpConfig) throws UnauthorizedException, InternalServerException {
-        AuthenticatedUserSession session = authenticateHttpUserSession(request, database);
+    public static AuthenticatedUserSession logInHttpSession(HttpConfig config, Database database, FullHttpRequest request, HttpHeaders httpHeaders) throws UnauthorizedException, InternalServerException {
+        AuthenticatedUserSession session = authenticateHttpUserSession(database, request);
         if (session != null) {
             return session;
         }
 
-        HttpSessionCookie sessionCookie;
-        try {
-            sessionCookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
-        } catch (BadRequestException e) {
-            throw new UnauthorizedException(e);
-        }
-        if (sessionCookie == null) {
+        PersistentHttpUserSession s = getPersistentHttpUserSession(database, request);
+        if (s == null) {
             return null;
         }
 
         User user;
         try {
-            PersistentHttpUserSession persistentHttpUserSession = database.getPersistentHttpUserSession(sessionCookie);
-            if (persistentHttpUserSession == null) {
-                throw new UnauthorizedException("Bad authentication (bad id)");
-            }
-
-            database.expirePersistentHttpUserSession(persistentHttpUserSession);
-
-            AuthenticationResult result = persistentHttpUserSession.validate(sessionCookie);
-            if (result != AuthenticationResult.SUCCESS) {
-                throw new UnauthorizedException("Bad authentication " + result);
-            }
-            // now logged in
-
-            user = database.getUser(persistentHttpUserSession.getId());
-            if (user == null) {
-                throw new InternalServerException("User somehow does not exist " + persistentHttpUserSession.getUser());
-            }
-
+            user = database.getUser(s.getId());
         } catch (DatabaseException e) {
             throw new InternalServerException(e);
         }
+        if (user == null) {
+            throw new InternalServerException("User somehow does not exist " + s);
+        }
 
-        return createHttpSession(user, httpConfig, database, httpHeaders);
+        return createHttpSession(config, database, user, httpHeaders);
     }
 
     /** creates new user if not logged in or authenticated */
-    public static AuthenticatedUserSession createHttpSession(FullHttpRequest request, Database database, HttpConfig httpConfig, HttpHeaders httpHeaders) throws UnauthorizedException, InternalServerException {
-        AuthenticatedUserSession session = logInHttpSession(request, database, httpHeaders, httpConfig);
+    public static AuthenticatedUserSession createHttpSession(FullHttpRequest request, Database database, HttpConfig config, HttpHeaders headers) throws UnauthorizedException, InternalServerException {
+        AuthenticatedUserSession session = logInHttpSession(config, database, request, headers);
         if (session != null) {
             return session;
         }
@@ -179,6 +207,6 @@ public class HttpAuthenticator extends HttpHandler {
             throw new InternalServerException(e);
         }
 
-        return createHttpSession(user, httpConfig, database, httpHeaders);
+        return createHttpSession(config, database, user, headers);
     }
 }

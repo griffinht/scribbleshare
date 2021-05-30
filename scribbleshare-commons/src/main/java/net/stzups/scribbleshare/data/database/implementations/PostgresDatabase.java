@@ -11,9 +11,10 @@ import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.InviteCode;
 import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import org.jetbrains.annotations.Nullable;
@@ -283,7 +284,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public @Nullable HttpUserSession getHttpSession(HttpSessionCookie cookie) throws DatabaseException {
+    public @Nullable HttpUserSession getHttpSession(HttpUserSessionCookie cookie) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, cookie.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -387,7 +388,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(HttpSessionCookie cookie) throws DatabaseException {//todo combine
+    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(PersistentHttpUserSessionCookie cookie) throws DatabaseException {//todo combine
         PersistentHttpUserSession persistentHttpSession;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {

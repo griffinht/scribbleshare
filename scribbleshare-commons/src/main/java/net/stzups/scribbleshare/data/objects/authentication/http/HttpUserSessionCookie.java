@@ -22,7 +22,7 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
         setCookie(config, COOKIE_NAME, headers);
     }
 
-    public static HttpUserSessionCookie getHttpUserSessionCookie(HttpRequest request) throws BadRequestException {
+    public static HttpUserSessionCookie getCookie(HttpRequest request) throws BadRequestException {
         ByteBuf byteBuf = HttpSessionCookie.getCookie(request, COOKIE_NAME);
         if (byteBuf != null) {
             try {
@@ -35,6 +35,10 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
         }
 
         return null;
+    }
+
+    public static void clearCookie(HttpConfig config, HttpHeaders headers) {
+        HttpSessionCookie.clearCookie(config, COOKIE_NAME, headers);
     }
 
     @Override
