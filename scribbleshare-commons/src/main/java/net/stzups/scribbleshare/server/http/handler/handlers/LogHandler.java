@@ -14,7 +14,7 @@ public class LogHandler extends HttpHandler {
 
     @Override
     public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
-        Scribbleshare.getLogger(ctx).info(log("user-agent", request.headers().get(HttpHeaderNames.USER_AGENT), 40) + log("origin", request.headers().get(HttpHeaderNames.ORIGIN)) + log("referer", request.headers().get(HttpHeaderNames.REFERER)) + request.method() + " " + request.uri() + " " + request.protocolVersion());
+        Scribbleshare.getLogger(ctx).info(log("user-agent", request.headers().get(HttpHeaderNames.USER_AGENT)) + log("origin", request.headers().get(HttpHeaderNames.ORIGIN)) + log("referer", request.headers().get(HttpHeaderNames.REFERER)) + request.method() + " " + request.uri() + " " + request.protocolVersion());
         return false;
     }
 
@@ -26,7 +26,7 @@ public class LogHandler extends HttpHandler {
         if (value == null) {
             return "";
         } else {
-            if (limit > 0) {
+            if (limit >= 0) {
                 return key + ": " + value.substring(0, Math.min(value.length(), limit)) + ", ";
             } else {
                 return key + ": " + value + ", ";

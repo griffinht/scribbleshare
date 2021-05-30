@@ -19,7 +19,7 @@ public class OriginHandler extends HttpHandler {
     @Override
     public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         String origin = request.headers().get(HttpHeaderNames.ORIGIN);
-        if (origin != null && !origin.equals(this.origin)) {
+        if (origin == null || !origin.equals(this.origin)) {
             throw new UnauthorizedException("Unknown origin " + origin + ", should have been " + this.origin);
         }
 

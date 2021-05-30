@@ -43,7 +43,11 @@ public class HttpServerHandler extends MessageToMessageDecoder<FullHttpRequest> 
             Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
             send(ctx, request, HttpResponseStatus.BAD_REQUEST);
         } catch (HttpException e) {
-            Scribbleshare.getLogger(ctx).log(Level.WARNING, "Exception while handling HTTP request", e);
+            if (e.getCause() != null) {
+                Scribbleshare.getLogger(ctx).log(Level.INFO, "Exception while handling HTTP request", e);
+            } else {
+                Scribbleshare.getLogger(ctx).log(Level.INFO, e.getClass().getSimpleName() + ": " + e.getLocalizedMessage()); //non verbose log for simple exceptions
+            }
             send(ctx, request, e.responseStatus());
         }
     }

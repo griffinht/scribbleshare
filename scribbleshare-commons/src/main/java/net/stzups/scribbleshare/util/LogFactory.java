@@ -48,10 +48,9 @@ public class LogFactory {
         handler.setFormatter(new Formatter() {
             @Override
             public String format(LogRecord record) {
-                String level = (record.getLevel() == Level.INFO) ? "" : "[" + record.getLevel() + "] "; // include Logger Level if it is not Level.INFO
                 return  FORMAT.format(Date.from(Instant.now()))
+                        + ((record.getLevel() == Level.INFO) ? "" : "[" + record.getLevel() + "] ") // include Logger Level if it is not Level.INFO
                         + "[" + name + "] "
-                        + level
                         + record.getMessage()
                         + System.lineSeparator()
                         + ((record.getThrown() == null) ? "" : getStackTrace(record.getThrown()));
