@@ -121,7 +121,7 @@ public class HttpUtils {
     /**
      * Send redirect to a new URI
      */
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, String newUri) {
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri, HttpHeaders headers) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MOVED_PERMANENTLY, Unpooled.EMPTY_BUFFER);
         response.headers().set(headers);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
@@ -133,7 +133,7 @@ public class HttpUtils {
      * Send redirect to a new URI
      */
     public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, String newUri) {
-        sendRedirect(ctx, request, EmptyHttpHeaders.INSTANCE, newUri);
+        sendRedirect(ctx, request, newUri, EmptyHttpHeaders.INSTANCE);
     }
 
     /**

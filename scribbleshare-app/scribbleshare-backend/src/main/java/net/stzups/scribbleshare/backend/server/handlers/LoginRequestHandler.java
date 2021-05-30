@@ -10,12 +10,15 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
+import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
@@ -25,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
-public class LoginRequestHandler extends RequestHandler {
+public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSessionDatabase & PersistentHttpSessionDatabase> extends RequestHandler {
     private static class LoginRequest {
         private final String username;
         private final String password;
@@ -38,13 +41,13 @@ public class LoginRequestHandler extends RequestHandler {
         }
     }
 
-    static final String LOGIN_PAGE = "/"; // the login page, where login requests should come from
+    static final String LOGIN_PAGE = "/login"; // the login page, where login requests should come from
     private static final String LOGIN_PATH = PersistentHttpUserSession.LOGIN_PATH; // where login requests should go
 
     private final HttpConfig config;
-    private final ScribbleshareDatabase database;
+    private final T database;
 
-    public LoginRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+    public LoginRequestHandler(HttpConfig config, T database) {
         super(config, LOGIN_PAGE, LOGIN_PATH);
         this.database = database;
         this.config = config;

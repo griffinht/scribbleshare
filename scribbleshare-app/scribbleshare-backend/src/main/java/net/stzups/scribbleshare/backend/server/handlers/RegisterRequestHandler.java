@@ -5,11 +5,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
@@ -21,7 +22,7 @@ import static net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandl
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
-public class RegisterRequestHandler extends RequestHandler {
+public class RegisterRequestHandler<T extends HttpSessionDatabase & UserDatabase & LoginDatabase> extends RequestHandler {
     private static class RegisterRequest {
         private final String username;
         private final byte[] password;
@@ -33,13 +34,13 @@ public class RegisterRequestHandler extends RequestHandler {
         }
     }
 
-    private static final String REGISTER_PAGE = "/"; // the register page, where register requests should come from
+    private static final String REGISTER_PAGE = "/register"; // the register page, where register requests should come from
     private static final String REGISTER_PATH = "/register"; // where register requests should go
     private static final String REGISTER_SUCCESS = LoginRequestHandler.LOGIN_PAGE; // redirect for a good register, should be the login page
 
-    private final ScribbleshareDatabase database;
+    private final T database;
 
-    public RegisterRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+    public RegisterRequestHandler(HttpConfig config, T database) {
         super(config, REGISTER_PAGE, REGISTER_PATH);
         this.database = database;
     }
@@ -59,7 +60,7 @@ public class RegisterRequestHandler extends RequestHandler {
         }
 
         User user;
-        HttpSessionCookie cookie = HttpUserSessionCookie.getHttpUserSessionCookie(request);
+        HttpUserSessionCookie cookie = HttpUserSessionCookie.getCookie(request);
         if (cookie != null) {
             HttpUserSession httpSession;
             try {
@@ -123,7 +124,7 @@ public class RegisterRequestHandler extends RequestHandler {
 
         Scribbleshare.getLogger(ctx).info("Registered with username " + registerRequest.username);
 
-        send(ctx, request, HttpResponseStatus.OK);
+        sendRedirect(ctx, request, REGISTER_SUCCESS);
         return;
     }
 }

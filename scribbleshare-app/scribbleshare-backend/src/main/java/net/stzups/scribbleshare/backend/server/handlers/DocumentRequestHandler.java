@@ -10,7 +10,10 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.stream.ChunkedStream;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.data.objects.Resource;
@@ -29,12 +32,12 @@ import net.stzups.scribbleshare.server.http.objects.Route;
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
 
-public class DocumentRequestHandler extends RequestHandler {
+public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabase & HttpSessionDatabase & UserDatabase> extends RequestHandler {
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
 
-    private final ScribbleshareDatabase database;
+    private final T database;
 
-    public DocumentRequestHandler(HttpConfig config, ScribbleshareDatabase database) {
+    public DocumentRequestHandler(HttpConfig config, T database) {
         super(config, "/", "/document");
         this.database = database;
     }
@@ -42,7 +45,7 @@ public class DocumentRequestHandler extends RequestHandler {
     @Override
     public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
         Route route = new Route(request.uri());
-        AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(request, database);
+        AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(database, request);
 
         if (session == null) {
             throw new UnauthorizedException("No authentication");

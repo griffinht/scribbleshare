@@ -2,9 +2,9 @@ package net.stzups.scribbleshare.backend;
 
 import io.netty.channel.ChannelFuture;
 import net.stzups.scribbleshare.Scribbleshare;
+import net.stzups.scribbleshare.backend.data.database.ScribbleshareBackendDatabase;
+import net.stzups.scribbleshare.backend.data.database.implementations.PostgresDatabase;
 import net.stzups.scribbleshare.backend.server.BackendHttpServerInitializer;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
-import net.stzups.scribbleshare.data.database.implementations.PostgresDatabase;
 
 public class ScribbleshareBackend extends Scribbleshare implements AutoCloseable {
     private final ScribbleshareBackendConfig config;
@@ -33,7 +33,7 @@ public class ScribbleshareBackend extends Scribbleshare implements AutoCloseable
         }
     }
 
-    public ScribbleshareDatabase getDatabase() {
+    public ScribbleshareBackendDatabase getDatabase() {
         return database;
     }
 

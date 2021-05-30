@@ -3,21 +3,16 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
-import net.stzups.scribbleshare.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
-import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
@@ -32,7 +27,7 @@ public class HttpAuthenticator extends HttpHandler {
         return ctx.channel().attr(USER).get();
     }
 
-    public interface Database extends HttpSessionDatabase, PersistentHttpSessionDatabase, UserDatabase {
+    public interface Database extends HttpSessionDatabase, UserDatabase {
 
     }
 
@@ -69,7 +64,7 @@ public class HttpAuthenticator extends HttpHandler {
         return true;
     }
 
-    public static HttpUserSession getHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
+    public static <T extends HttpSessionDatabase> HttpUserSession getHttpUserSession(T database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
         HttpUserSessionCookie cookie;
         try {
             cookie = HttpUserSessionCookie.getCookie(request);
@@ -87,7 +82,7 @@ public class HttpAuthenticator extends HttpHandler {
             throw new InternalServerException(e);
         }
         if (session == null) {
-            throw new UnauthorizedException("No " + PersistentHttpUserSession.class + " for " + cookie);
+            throw new UnauthorizedException("No " + HttpUserSession.class + " for " + cookie);
         }
 
         AuthenticationResult result = session.validate(cookie);
@@ -97,8 +92,11 @@ public class HttpAuthenticator extends HttpHandler {
 
         return session;
     }
+/*
 
-    /** get and expire persistent http user session */
+    */
+/** get and expire persistent http user session *//*
+
     public static PersistentHttpUserSession getPersistentHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
         PersistentHttpUserSessionCookie cookie;
         try {
@@ -130,9 +128,10 @@ public class HttpAuthenticator extends HttpHandler {
 
         return session;
     }
+*/
 
     /** authenticates, or null if no authentication */
-    public static AuthenticatedUserSession authenticateHttpUserSession(Database database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
+    public static <T extends HttpSessionDatabase & UserDatabase> AuthenticatedUserSession authenticateHttpUserSession(T database, FullHttpRequest request) throws UnauthorizedException, InternalServerException {
         HttpUserSession session = getHttpUserSession(database, request);
         if (session == null) {
             return null;
@@ -150,8 +149,8 @@ public class HttpAuthenticator extends HttpHandler {
         }
         return new AuthenticatedUserSession(user);
     }
-
-    /** create session and persistent session for user */
+/*
+    *//** create session and persistent session for user *//*
     private static AuthenticatedUserSession createHttpSession(HttpConfig httpConfig, Database database, User user, HttpHeaders httpHeaders) throws InternalServerException {
         try {
             // create session
@@ -166,9 +165,9 @@ public class HttpAuthenticator extends HttpHandler {
         }
 
         return new AuthenticatedUserSession(user);
-    }
-
-    /** logs in if not authenticated, or null if no auth */
+    }*/
+/*
+    *//** logs in if not authenticated, or null if no auth *//*
     public static AuthenticatedUserSession logInHttpSession(HttpConfig config, Database database, FullHttpRequest request, HttpHeaders httpHeaders) throws UnauthorizedException, InternalServerException {
         AuthenticatedUserSession session = authenticateHttpUserSession(database, request);
         if (session != null) {
@@ -191,9 +190,9 @@ public class HttpAuthenticator extends HttpHandler {
         }
 
         return createHttpSession(config, database, user, httpHeaders);
-    }
+    }*/
 
-    /** creates new user if not logged in or authenticated */
+/*    *//** creates new user if not logged in or authenticated *//*
     public static AuthenticatedUserSession createHttpSession(FullHttpRequest request, Database database, HttpConfig config, HttpHeaders headers) throws UnauthorizedException, InternalServerException {
         AuthenticatedUserSession session = logInHttpSession(config, database, request, headers);
         if (session != null) {
@@ -208,5 +207,5 @@ public class HttpAuthenticator extends HttpHandler {
         }
 
         return createHttpSession(config, database, user, headers);
-    }
+    }*/
 }

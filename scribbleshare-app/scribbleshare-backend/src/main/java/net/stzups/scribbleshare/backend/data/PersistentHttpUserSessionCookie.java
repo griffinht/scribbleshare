@@ -1,15 +1,15 @@
-package net.stzups.scribbleshare.data.objects.authentication.http;
+package net.stzups.scribbleshare.backend.data;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.util.DebugString;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
     private static final String COOKIE_NAME = "persistent_session";
@@ -19,14 +19,16 @@ public class PersistentHttpUserSessionCookie extends HttpSessionCookie {
         super(byteBuf);
     }
 
-    PersistentHttpUserSessionCookie(long id, byte[] token) {
+/*    PersistentHttpUserSessionCookie(long id, byte[] token) {
         super(id, token);
-    }
+    }*/
 
+  /*  @Override
     protected static void setCookie(HttpConfig config, DefaultCookie cookie) {
         HttpUserSessionCookie.setCookie(config, cookie);
         cookie.setMaxAge(MAX_AGE.get(ChronoUnit.SECONDS)); //persistent cookie
-    }
+        cookie.setPath("/login");//todo
+    }*/
 
     public void setCookie(HttpConfig config, HttpHeaders headers) {
         setCookie(config, COOKIE_NAME, headers);

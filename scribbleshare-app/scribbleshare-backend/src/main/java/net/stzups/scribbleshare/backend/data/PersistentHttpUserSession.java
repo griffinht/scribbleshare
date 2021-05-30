@@ -1,9 +1,12 @@
-package net.stzups.scribbleshare.data.objects.authentication.http;
+package net.stzups.scribbleshare.backend.data;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticationResult;
 import net.stzups.scribbleshare.data.objects.authentication.UserSession;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
+import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.util.DebugString;
 
 import java.sql.Timestamp;
@@ -17,7 +20,7 @@ public class PersistentHttpUserSession extends UserSession {
 
     public PersistentHttpUserSession(HttpConfig config, HttpUserSession httpSession, HttpHeaders headers) {
         super(httpSession.getUser());
-        new PersistentHttpUserSessionCookie(getId(), generateToken()).setCookie(config, headers);
+        //new PersistentHttpUserSessionCookie(getId(), generateToken()).setCookie(config, headers);
     }
 
     public PersistentHttpUserSession(long id, Timestamp creation, Timestamp expiration, long userId, ByteBuf byteBuf) {

@@ -23,7 +23,7 @@ public class HttpSessionCookie {
     private final long id;
     private final byte[] token;
 
-    HttpSessionCookie(ByteBuf byteBuf) throws DeserializationException {
+    protected HttpSessionCookie(ByteBuf byteBuf) throws DeserializationException {
         try {
             id = byteBuf.readLong();
             token = new byte[TOKEN_LENGTH];
@@ -46,7 +46,7 @@ public class HttpSessionCookie {
         return token;
     }
 
-    protected static void setCookie(HttpConfig config, DefaultCookie cookie) {
+    protected void setCookie(HttpConfig config, DefaultCookie cookie) {
         cookie.setDomain(config.getDomain());
         if (config.getSSL()) cookie.setSecure(true);
         cookie.setHttpOnly(true);
@@ -71,7 +71,7 @@ public class HttpSessionCookie {
     protected static void clearCookie(HttpConfig config, String name, HttpHeaders headers) {
         DefaultCookie cookie = new DefaultCookie(name, "");
 
-        setCookie(config, cookie);
+        //setCookie(config, cookie);
         cookie.setMaxAge(0);
 
         HttpUtils.setCookie(headers, cookie);

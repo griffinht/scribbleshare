@@ -1,6 +1,6 @@
-document.getElementById("logout")!.addEventListener('submit', (event) => {
-    console.log(event);
+document.getElementById('logout')!.addEventListener('submit', (event) => {
     let request = new XMLHttpRequest();
-    request.open("POST", "");
+    request.open('POST', '/logout');
+    request.send();
     event.preventDefault();
 });

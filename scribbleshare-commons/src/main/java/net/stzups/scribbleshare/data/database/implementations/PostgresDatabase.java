@@ -4,7 +4,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
+import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
+import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
+import net.stzups.scribbleshare.data.database.databases.InviteCodeDatabase;
+import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
+import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
+import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.database.exception.ConnectionException;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -13,8 +18,6 @@ import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSession;
-import net.stzups.scribbleshare.data.objects.authentication.http.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
 import net.stzups.scribbleshare.data.objects.canvas.Canvas;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
+public class PostgresDatabase implements AutoCloseable, DocumentDatabase, HttpSessionDatabase, InviteCodeDatabase, LoginDatabase, ResourceDatabase, UserDatabase {
     @Override
     public Login getLogin(String username) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
@@ -82,7 +85,7 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     private static final Random RANDOM = new Random();
-    private Connection connection;
+    protected Connection connection;
 
     private final Map<Long, Document> documents = new HashMap<>();
 
@@ -265,25 +268,6 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     }
 
     @Override
-    public void addPersistentHttpUserSession(PersistentHttpUserSession persistentHttpSession) throws DatabaseException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO persistent_user_sessions(id, created, expired, user_id, data) VALUES (?, ?, ?, ?, ?)")) {
-            preparedStatement.setLong(1, persistentHttpSession.getId());
-            preparedStatement.setTimestamp(2, persistentHttpSession.getCreated());
-            preparedStatement.setTimestamp(3, persistentHttpSession.getExpired());
-            preparedStatement.setLong(4, persistentHttpSession.getUser());
-
-            ByteBuf byteBuf = Unpooled.buffer();
-            persistentHttpSession.serialize(byteBuf);
-            preparedStatement.setBinaryStream(5, new ByteBufInputStream(byteBuf));
-            byteBuf.release();
-
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    @Override
     public @Nullable HttpUserSession getHttpSession(HttpUserSessionCookie cookie) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM user_sessions WHERE id=?")) {
             preparedStatement.setLong(1, cookie.getId());
@@ -384,43 +368,6 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
             throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
         } catch (SQLException e) {
             throw new DatabaseException("Exception while getting " + Resource.class.getSimpleName() + " with id " + id, e);
-        }
-    }
-
-    @Override
-    public @Nullable PersistentHttpUserSession getPersistentHttpUserSession(PersistentHttpUserSessionCookie cookie) throws DatabaseException {//todo combine
-        PersistentHttpUserSession persistentHttpSession;
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM persistent_user_sessions WHERE id=?")) {
-            preparedStatement.setLong(1, cookie.getId());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (!resultSet.next()) {
-                    return null;
-                }
-
-                persistentHttpSession = new PersistentHttpUserSession(
-                        resultSet.getLong("id"),
-                        resultSet.getTimestamp("created"),
-                        resultSet.getTimestamp("expired"),
-                        resultSet.getLong("user_id"),
-                        Unpooled.wrappedBuffer(resultSet.getBinaryStream("data").readAllBytes()));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Exception while getting " + Resource.class.getSimpleName() + " for " + cookie, e);
-        } catch (SQLException e) {
-            throw new DatabaseException("Exception while getting " + PersistentHttpUserSession.class.getSimpleName() + " for " + cookie);
-        }
-
-        return persistentHttpSession;
-    }
-
-    @Override
-    public void expirePersistentHttpUserSession(PersistentHttpUserSession session) throws DatabaseException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE persistent_user_sessions SET expired=? WHERE id=?; ")) {
-            preparedStatement.setTimestamp(1, Timestamp.from(Instant.now()));
-            preparedStatement.setLong(2, session.getId());
-        } catch (SQLException e) {
-            throw new DatabaseException("Exception while expiring " + session, e);
         }
     }
 }
