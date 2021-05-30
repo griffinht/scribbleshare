@@ -6,15 +6,11 @@ export default class LoginRequest extends ApiRequest {
     password: string;
     remember: boolean;
 
-    constructor(username: string, password: string, remember: boolean) {
+    constructor(form: HTMLFormElement) {
         super();
-        this.username = username;
-        this.password = password;
-        this.remember = remember;
-    }
-
-    getRoute(): string {
-        return "/login";
+        this.username = form.username.value;
+        this.password = form.password.value;
+        this.remember = form.remember.value === "on";
     }
 
     serialize(byteBuffer: ByteBuffer): void {

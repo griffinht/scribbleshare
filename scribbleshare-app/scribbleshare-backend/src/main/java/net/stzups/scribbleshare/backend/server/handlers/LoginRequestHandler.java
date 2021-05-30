@@ -3,12 +3,9 @@ package net.stzups.scribbleshare.backend.server.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
 import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
@@ -38,6 +35,33 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             username = readString(byteBuf);
             password = readString(byteBuf);
             remember = byteBuf.readBoolean();
+        }
+    }
+
+    private enum LoginResponseResult {
+        SUCCESS(0),
+        FAILED(1)
+        ;
+        private final int id;
+
+        LoginResponseResult(int id) {
+            this.id = id;
+        }
+
+        public void serialize(ByteBuf byteBuf) {
+            byteBuf.writeByte((byte) id);
+        }
+    }
+
+    private static class LoginResponse {
+        private final LoginResponseResult status;
+
+        LoginResponse(LoginResponseResult result) {
+            this.status = result;
+        }
+
+        public void serialize(ByteBuf byteBuf) {
+            status.serialize(byteBuf);
         }
     }
 
@@ -71,7 +95,10 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
                 Scribbleshare.getLogger(ctx).info("Failed login attempt with bad password for username " + loginRequest.username);
             }
 
-            send(ctx, request, HttpResponseStatus.UNAUTHORIZED);
+            ByteBuf byteBuf = Unpooled.buffer();
+            new LoginResponse(LoginResponseResult.FAILED).serialize(byteBuf);
+            send(ctx, request, byteBuf);
+            byteBuf.release();
             return;
         }
 
@@ -103,10 +130,11 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             }
         }
 
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
-        response.headers().set(httpHeaders);
-        send(ctx, request, response);
-        return;
+        ByteBuf byteBuf = Unpooled.buffer();
+        new LoginResponse(LoginResponseResult.SUCCESS).serialize(byteBuf);
+        send(ctx, request, byteBuf);
+        byteBuf.release();
+        Scribbleshare.getLogger(ctx).info("Logged in as " + user);
     }
 
     static String readString(ByteBuf byteBuf) {

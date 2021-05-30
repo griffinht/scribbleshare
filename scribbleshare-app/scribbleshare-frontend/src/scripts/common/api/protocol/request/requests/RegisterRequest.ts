@@ -5,14 +5,10 @@ export default class RegisterRequest extends ApiRequest {
     username: string;
     password: string;
 
-    constructor(username: string, password: string) {
+    constructor(form: HTMLFormElement) {
         super();
-        this.username = username;
-        this.password = password;
-    }
-
-    getRoute(): string {
-        return "/register";
+        this.username = form.username.value;
+        this.password = form.password.value;
     }
 
     serialize(byteBuffer: ByteBuffer) {

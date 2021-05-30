@@ -83,13 +83,13 @@ public class FileRequestHandler extends HttpHandler {
 
         // redirects
         if (route.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
+            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
             return true;
         } else if ((route.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
+            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
             return true;
         } else if (route.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, request, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
+            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
             return true;
         }
 
@@ -112,7 +112,7 @@ public class FileRequestHandler extends HttpHandler {
         File file = new File(root, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
             if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
-                sendRedirect(ctx, request, route.path() + "/" + route.rawQuery());
+                sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path() + "/" + route.rawQuery());
             } else {
                 throw new NotFoundException("File at path " + filePath + " not found");
             }

@@ -1,8 +1,14 @@
-import ApiResponse from "../ApiResponse.js";
 import ByteBuffer from "../../../../protocol/ByteBuffer.js";
 
-export default class RegisterResponse extends ApiResponse {
+export default class RegisterResponse {
+    result: RegisterResponseResult;
+
     constructor(byteBuffer: ByteBuffer) {
-        super();
+        this.result = byteBuffer.readUint8();
     }
+}
+
+export enum RegisterResponseResult {
+    SUCCESS,
+    USERNAME_TAKEN
 }

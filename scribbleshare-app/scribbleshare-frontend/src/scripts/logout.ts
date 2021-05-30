@@ -1,6 +1,13 @@
+import api from "./common/api/Api.js"
+
 document.getElementById('logout')!.addEventListener('submit', (event) => {
-    let request = new XMLHttpRequest();
-    request.open('POST', '/logout');
-    request.send();
     event.preventDefault();
+    api.logout()
+        .then(() => {
+            window.location.href = '/';
+        })
+        .catch((e: number) => {
+            window.alert('Unknown error ' + e);
+        });
+
 });

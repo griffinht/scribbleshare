@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
@@ -30,7 +31,7 @@ public class LogoutRequestHandler extends RequestHandler {
         HttpHeaders headers = new DefaultHttpHeaders();
         HttpUserSessionCookie.clearCookie(config, headers);
         PersistentHttpUserSessionCookie.clearCookie(config, headers);
-        sendRedirect(ctx, request, LOGOUT_SUCCESS, headers);
-        Scribbleshare.getLogger(ctx).info("Logged out ");
+        sendRedirect(ctx, request, HttpResponseStatus.SEE_OTHER, LOGOUT_SUCCESS, headers);
+        Scribbleshare.getLogger(ctx).info("Logged out");
     }
 }
