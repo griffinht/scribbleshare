@@ -60,7 +60,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
                         return false;
                     }
                 })
-                .addLast(new HttpAuthenticator(database));
+                .addLast(new HttpAuthenticator<>(database));
     }
 
     @Override

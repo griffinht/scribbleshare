@@ -21,24 +21,20 @@ import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedExc
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 
 @ChannelHandler.Sharable
-public class HttpAuthenticator extends HttpHandler {
+public class HttpAuthenticator<T extends UserDatabase & HttpSessionDatabase> extends HttpHandler {
     private static final AttributeKey<AuthenticatedUserSession> USER = AttributeKey.valueOf(HttpAuthenticator.class, "USER");
     public static AuthenticatedUserSession getUser(ChannelHandlerContext ctx) {
         return ctx.channel().attr(USER).get();
     }
 
-    public interface Database extends HttpSessionDatabase, UserDatabase {
-
-    }
-
-    private final Database database;
+    private final T database;
     private final String uri;
 
-    public HttpAuthenticator(Database database) {
+    public HttpAuthenticator(T database) {
         this(database, null);
     }
 
-    public HttpAuthenticator(Database database, String uri) {
+    public HttpAuthenticator(T database, String uri) {
         super("/");
         this.database = database;
         this.uri = uri;

@@ -4,12 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import net.stzups.scribbleshare.Scribbleshare;
-import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
-import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
-import net.stzups.scribbleshare.data.database.databases.InviteCodeDatabase;
-import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
-import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
-import net.stzups.scribbleshare.data.database.databases.UserDatabase;
+import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.database.exception.ConnectionException;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -36,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class PostgresDatabase implements AutoCloseable, DocumentDatabase, HttpSessionDatabase, InviteCodeDatabase, LoginDatabase, ResourceDatabase, UserDatabase {
+public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
     @Override
     public Login getLogin(String username) throws DatabaseException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM logins WHERE username=?")) {
