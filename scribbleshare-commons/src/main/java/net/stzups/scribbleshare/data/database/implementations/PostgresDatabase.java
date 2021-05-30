@@ -51,17 +51,20 @@ public class PostgresDatabase implements AutoCloseable, ScribbleshareDatabase {
 
     @Override
     public boolean addLogin(Login login) throws DatabaseException {
+        if (getLogin(login.getUsername()) != null) {
+            return false;
+        }
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO logins(username, user_id, hashed_password) VALUES(?, ?, ?)")) {
             preparedStatement.setString(1, login.getUsername());
             preparedStatement.setLong(2, login.getId());
             preparedStatement.setBinaryStream(3, new ByteArrayInputStream(login.getHashedPassword()));
             preparedStatement.execute();
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23505")) { // PostgreSQL error code unique_violation
+            /*if (e.getSQLState().equals("23505")) { // PostgreSQL error code unique_violation
                 return false;
             } else {
-                throw new DatabaseException(e);
-            }
+            }*/
+            throw new DatabaseException(e);
         }
 
         return true;
