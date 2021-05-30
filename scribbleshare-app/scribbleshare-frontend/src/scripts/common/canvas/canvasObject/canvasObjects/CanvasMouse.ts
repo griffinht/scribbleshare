@@ -1,6 +1,6 @@
 import {ctx} from "../../Canvas.js";
 import CanvasObject from "../CanvasObject.js";
-import ByteBuffer from "../../../protocol/ByteBuffer";
+import ByteBuffer from "../../../protocol/ByteBuffer.js";
 import CanvasObjectType from "../CanvasObjectType.js";
 
 const pointerImage = document.createElement('img');

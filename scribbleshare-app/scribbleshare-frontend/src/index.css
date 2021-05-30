@@ -111,3 +111,9 @@ aside button:active {
 input[type="radio"] {
     visibility: hidden;
 }
+
+#loginModal {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}

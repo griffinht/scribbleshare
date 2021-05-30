@@ -1,7 +1,7 @@
 import ClientMessage from "../ClientMessage.js";
 import ClientMessageType from "../ClientMessageType.js";
 import ByteBuffer from "../../ByteBuffer.js";
-import CanvasUpdates from "../../../canvas/canvasUpdate/CanvasUpdates";
+import CanvasUpdates from "../../../canvas/canvasUpdate/CanvasUpdates.js";
 
 export default class ClientMessageCanvasUpdate extends ClientMessage {
     canvasUpdatesArray: CanvasUpdates[];
