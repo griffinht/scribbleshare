@@ -16,11 +16,11 @@ import java.time.Instant;
 public class PersistentHttpUserSession extends UserSession {
     private static final Duration MAX_AGE = Duration.ofDays(90);
 
-    public static final String LOGIN_PATH = "/login";
+    public static final String LOGIN_PATH = "/";
 
     public PersistentHttpUserSession(HttpConfig config, HttpUserSession httpSession, HttpHeaders headers) {
         super(httpSession.getUser());
-        //new PersistentHttpUserSessionCookie(getId(), generateToken()).setCookie(config, headers);
+        new PersistentHttpUserSessionCookie(getId(), generateToken()).setCookie(config, headers);
     }
 
     public PersistentHttpUserSession(long id, Timestamp creation, Timestamp expiration, long userId, ByteBuf byteBuf) {

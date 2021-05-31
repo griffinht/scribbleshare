@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
+import net.stzups.scribbleshare.server.http.HttpUtils;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.util.DebugString;
 
@@ -19,7 +20,7 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
     }
 
     public void setCookie(HttpConfig config, HttpHeaders headers) {
-        setCookie(config, COOKIE_NAME, headers);
+        HttpUtils.setCookie(headers, getCookie(config, COOKIE_NAME));
     }
 
     public static HttpUserSessionCookie getCookie(HttpRequest request) throws BadRequestException {

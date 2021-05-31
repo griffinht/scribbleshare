@@ -70,7 +70,7 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
     }
 
     static final String LOGIN_PAGE = "/login"; // the login page, where login requests should come from
-    private static final String LOGIN_PATH = PersistentHttpUserSession.LOGIN_PATH; // where login requests should go
+    private static final String LOGIN_PATH = "/login"; // where login requests should go
 
     private final HttpConfig config;
     private final T database;

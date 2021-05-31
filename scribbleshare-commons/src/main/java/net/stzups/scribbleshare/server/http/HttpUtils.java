@@ -206,7 +206,6 @@ public class HttpUtils {
         }
     }
 
-    //todo unused?
     public static void setCookie(HttpHeaders headers, Cookie cookie) {
         headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
     }

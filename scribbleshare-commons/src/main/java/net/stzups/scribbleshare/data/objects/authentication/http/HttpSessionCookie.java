@@ -33,7 +33,7 @@ public class HttpSessionCookie {
         }
     }
 
-    HttpSessionCookie(long id, byte[] token) {
+    protected HttpSessionCookie(long id, byte[] token) {
         this.id = id;
         this.token = token;
     }
@@ -46,14 +46,7 @@ public class HttpSessionCookie {
         return token;
     }
 
-    protected void setCookie(HttpConfig config, DefaultCookie cookie) {
-        cookie.setDomain(config.getDomain());
-        if (config.getSSL()) cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
-    }
-
-    protected void setCookie(HttpConfig config, String name, HttpHeaders headers) {
+    protected Cookie getCookie(HttpConfig config, String name) {
         ByteBuf tokenBuffer = Unpooled.buffer();
         tokenBuffer.writeLong(id);
         tokenBuffer.writeBytes(token);
@@ -63,15 +56,17 @@ public class HttpSessionCookie {
         DefaultCookie cookie = new DefaultCookie(name, tokenBase64.toString(StandardCharsets.UTF_8));
         tokenBase64.release();
 
-        setCookie(config, cookie);
+        cookie.setDomain(config.getDomain());
+        if (config.getSSL()) cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setSameSite(CookieHeaderNames.SameSite.Strict);
 
-        HttpUtils.setCookie(headers, cookie);
+        return cookie;
     }
 
     protected static void clearCookie(HttpConfig config, String name, HttpHeaders headers) {
         DefaultCookie cookie = new DefaultCookie(name, "");
 
-        //setCookie(config, cookie);
         cookie.setMaxAge(0);
 
         HttpUtils.setCookie(headers, cookie);
