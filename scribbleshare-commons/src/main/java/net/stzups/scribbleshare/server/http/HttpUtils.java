@@ -89,7 +89,7 @@ public class HttpUtils {
 
         boolean keepAlive = setKeepAlive(request, response);
 
-        ctx.write(response);
+        ctx.writeAndFlush(response);
         ChannelFuture lastContentFuture = ctx.writeAndFlush(httpChunkedInput, ctx.newProgressivePromise());
 
         if (!keepAlive) {
