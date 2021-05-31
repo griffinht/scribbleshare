@@ -3,9 +3,7 @@ package net.stzups.scribbleshare.backend.server.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
@@ -105,7 +103,6 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
 
         assert login != null : "Verified logins should never be null";
 
-        HttpHeaders headers = new DefaultHttpHeaders();
         User user;
         try {
             user = database.getUser(login.getId());
@@ -116,14 +113,14 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             throw new InternalServerException("No user for id " + login.getId());
         }
 
-        HttpUserSession userSession = new HttpUserSession(config, user, headers);
+        HttpUserSession userSession = new HttpUserSession(config, user, response);
         try {
             database.addHttpSession(userSession);
         } catch (DatabaseException e) {
             throw new InternalServerException(e);
         }
         if (loginRequest.remember) {
-            PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, headers);
+            PersistentHttpUserSession persistentHttpUserSession = new PersistentHttpUserSession(config, userSession, response);
             try {
                 database.addPersistentHttpUserSession(persistentHttpUserSession);
             } catch (DatabaseException e) {

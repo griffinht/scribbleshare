@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.data.objects.authentication.http;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
 import net.stzups.scribbleshare.server.http.HttpUtils;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
@@ -38,8 +39,8 @@ public class HttpUserSessionCookie extends HttpSessionCookie {
         return null;
     }
 
-    public static void clearCookie(HttpConfig config, HttpHeaders headers) {
-        HttpSessionCookie.clearCookie(config, COOKIE_NAME, headers);
+    public static void clearCookie(HttpResponse response) {
+        HttpSessionCookie.clearCookie(COOKIE_NAME, response);
     }
 
     @Override

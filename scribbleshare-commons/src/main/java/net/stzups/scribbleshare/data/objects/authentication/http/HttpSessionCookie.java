@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -64,12 +64,12 @@ public class HttpSessionCookie {
         return cookie;
     }
 
-    protected static void clearCookie(HttpConfig config, String name, HttpHeaders headers) {
+    protected static void clearCookie(String name, HttpResponse response) {
         DefaultCookie cookie = new DefaultCookie(name, "");
 
         cookie.setMaxAge(0);
 
-        HttpUtils.setCookie(headers, cookie);
+        HttpUtils.setCookie(response.headers(), cookie);
     }
 
     protected static ByteBuf getCookie(HttpRequest request, String name) {

@@ -18,17 +18,14 @@ public class LogoutRequestHandler extends RequestHandler {
     private static final String LOGOUT_PATH = "/logout"; // where logout requests should go
     private static final String LOGOUT_SUCCESS = LoginRequestHandler.LOGIN_PAGE;
 
-    private final HttpConfig config;
-
     public LogoutRequestHandler(HttpConfig config) {
         super(config, LOGOUT_PAGE, LOGOUT_PATH);
-        this.config = config;
     }
 
     @Override
     protected void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException { //todo validate
-        HttpUserSessionCookie.clearCookie(config, response.headers());
-        PersistentHttpUserSessionCookie.clearCookie(config, response.headers());
+        HttpUserSessionCookie.clearCookie(response);
+        PersistentHttpUserSessionCookie.clearCookie(response);
         sendRedirect(ctx, request, response, HttpResponseStatus.SEE_OTHER, LOGOUT_SUCCESS);
         Scribbleshare.getLogger(ctx).info("Logged out");
     }
