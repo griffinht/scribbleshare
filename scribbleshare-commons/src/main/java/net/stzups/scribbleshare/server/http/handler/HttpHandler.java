@@ -2,6 +2,7 @@ package net.stzups.scribbleshare.server.http.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 
 public abstract class HttpHandler {
@@ -18,5 +19,5 @@ public abstract class HttpHandler {
     /**
      * true if the request was handled, or false if it should be passed down
      */
-    public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException;
+    public abstract boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException;
 }

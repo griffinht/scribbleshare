@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.AttributeKey;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
@@ -40,7 +41,7 @@ public class HttpAuthenticator<T extends UserDatabase & HttpSessionDatabase> ext
         this.uri = uri;
     }
 
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         if (uri != null && !request.uri().equals(uri)) {
             throw new NotFoundException("Bad uri");
         }

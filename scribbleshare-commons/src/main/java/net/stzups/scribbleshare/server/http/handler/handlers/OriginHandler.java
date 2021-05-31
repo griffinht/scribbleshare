@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
@@ -17,7 +18,7 @@ public class OriginHandler extends HttpHandler {
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         String origin = request.headers().get(HttpHeaderNames.ORIGIN);
         if (origin == null || !origin.equals(this.origin)) {
             throw new UnauthorizedException("Unknown origin " + origin + ", should have been " + this.origin);

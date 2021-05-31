@@ -3,13 +3,10 @@ package net.stzups.scribbleshare.backend.server.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
 import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
@@ -82,7 +79,7 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
     }
 
     @Override
-    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         LoginRequest loginRequest = new LoginRequest(request.content());
 
         Login login;
@@ -101,7 +98,7 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
 
             ByteBuf byteBuf = Unpooled.buffer();
             new LoginResponse(LoginResponseResult.FAILED).serialize(byteBuf);
-            send(ctx, request, byteBuf);
+            send(ctx, request, response, byteBuf);
             byteBuf.release();
             return;
         }
@@ -134,10 +131,10 @@ public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSe
             }
         }
 
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(headers);
-        new LoginResponse(LoginResponseResult.SUCCESS).serialize(response.content());
-        send(ctx, request, response);
+        ByteBuf byteBuf = Unpooled.buffer();
+        new LoginResponse(LoginResponseResult.SUCCESS).serialize(byteBuf);
+        send(ctx, request, response, byteBuf);
         Scribbleshare.getLogger(ctx).info("Logged in as " + user);
     }
 

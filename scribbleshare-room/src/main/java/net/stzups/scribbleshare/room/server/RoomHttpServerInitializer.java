@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.util.AttributeKey;
@@ -52,7 +53,7 @@ public class RoomHttpServerInitializer extends HttpServerInitializer {
                 .addLast(new OriginHandler(config))
                 .addLast(new HttpHandler("/") {
                     @Override
-                    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws NotFoundException {
+                    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws NotFoundException {
                         if (!request.uri().equals(config.getWebsocketPath())) {
                             throw new NotFoundException("Bad uri " + request.uri());
                         }

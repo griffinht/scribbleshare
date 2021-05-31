@@ -3,6 +3,7 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
@@ -13,7 +14,7 @@ public class LogHandler extends HttpHandler {
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         Scribbleshare.getLogger(ctx).info(log("user-agent", request.headers().get(HttpHeaderNames.USER_AGENT)) + log("origin", request.headers().get(HttpHeaderNames.ORIGIN)) + log("referer", request.headers().get(HttpHeaderNames.REFERER)) + request.method() + " " + request.uri() + " " + request.protocolVersion());
         return false;
     }

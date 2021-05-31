@@ -3,12 +3,11 @@ package net.stzups.scribbleshare.backend.server.handlers;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedStream;
 import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
@@ -23,6 +22,7 @@ import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.MethodNotAllowedException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.server.http.handler.RequestHandler;
@@ -30,7 +30,6 @@ import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
 import net.stzups.scribbleshare.server.http.objects.Route;
 
 import static net.stzups.scribbleshare.server.http.HttpUtils.send;
-import static net.stzups.scribbleshare.server.http.HttpUtils.sendChunkedResource;
 
 public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabase & HttpSessionDatabase & UserDatabase> extends RequestHandler {
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
@@ -43,7 +42,7 @@ public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabas
     }
 
     @Override
-    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         Route route = new Route(request.uri());
         AuthenticatedUserSession session = HttpAuthenticator.authenticateHttpUserSession(database, request);
 
@@ -90,14 +89,12 @@ public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabas
                     throw new NotFoundException("Document with id " + documentId + " for user " + user + " somehow does not exist");
 
                 try {
-                    send(ctx, request, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
-                    return;
+                    send(ctx, request, response, Unpooled.copyLong(database.addResource(document.getId(), new Resource(request.content()))));
                 } catch (DatabaseException e) {
                     throw new InternalServerException(e);
                 }
             } else {
-                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-                return;
+                throw new MethodNotAllowedException(request.method());
             }
         } else { // route.length == 4, get resource from document
             // does the document have this resource?
@@ -129,13 +126,11 @@ public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabas
                     throw new NotFoundException("Resource does not exist");
                 }
 
-                HttpHeaders headers = new DefaultHttpHeaders();
-                headers.add(HttpHeaderNames.CACHE_CONTROL, "private,max-age=" + MAX_AGE_NO_EXPIRE + ",immutable");//cache and never revalidate - permanent
-                sendChunkedResource(ctx, request, headers, new ChunkedStream(new ByteBufInputStream(resource.getData())));
+                response.headers().add(HttpHeaderNames.CACHE_CONTROL, "private,max-age=" + MAX_AGE_NO_EXPIRE + ",immutable");//cache and never revalidate - permanent
+                send(ctx, request, response, new HttpChunkedInput(new ChunkedStream(new ByteBufInputStream(resource.getData()))));
             } else {
-                send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                throw new MethodNotAllowedException(request.method());
             }
-            return;
         }
     }
 }

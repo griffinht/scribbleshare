@@ -2,7 +2,7 @@ package net.stzups.scribbleshare.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
@@ -20,12 +20,12 @@ public class HealthcheckRequestHandler extends HttpHandler {
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         if (request.uri().equals("/healthcheck")) {
             if (!((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().isLoopbackAddress()) {
                 throw new NotFoundException("Healthcheck request from address which is not a loopback address");
             } else {
-                send(ctx, request, HttpResponseStatus.OK);
+                send(ctx, request, response);
                 if (!done) {
                     done = true;
                     Scribbleshare.getLogger(ctx).info("Good healthcheck request, further requests will be muted");

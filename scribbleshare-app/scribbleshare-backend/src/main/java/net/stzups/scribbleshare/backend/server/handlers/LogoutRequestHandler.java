@@ -1,9 +1,8 @@
 package net.stzups.scribbleshare.backend.server.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSessionCookie;
@@ -27,11 +26,10 @@ public class LogoutRequestHandler extends RequestHandler {
     }
 
     @Override
-    protected void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException { //todo validate
-        HttpHeaders headers = new DefaultHttpHeaders();
-        HttpUserSessionCookie.clearCookie(config, headers);
-        PersistentHttpUserSessionCookie.clearCookie(config, headers);
-        sendRedirect(ctx, request, HttpResponseStatus.SEE_OTHER, LOGOUT_SUCCESS, headers);
+    protected void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException { //todo validate
+        HttpUserSessionCookie.clearCookie(config, response.headers());
+        PersistentHttpUserSessionCookie.clearCookie(config, response.headers());
+        sendRedirect(ctx, request, response, HttpResponseStatus.SEE_OTHER, LOGOUT_SUCCESS);
         Scribbleshare.getLogger(ctx).info("Logged out");
     }
 }

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
@@ -73,7 +74,7 @@ public class RegisterRequestHandler<T extends HttpSessionDatabase & UserDatabase
     }
 
     @Override
-    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
 
         // validate
         RegisterRequest registerRequest = new RegisterRequest(request.content());
@@ -144,6 +145,6 @@ public class RegisterRequestHandler<T extends HttpSessionDatabase & UserDatabase
 
         ByteBuf byteBuf = Unpooled.buffer();
         new RegisterResponse(result).serialize(byteBuf);
-        send(ctx, request, byteBuf);
+        send(ctx, request, response, byteBuf);
     }
 }

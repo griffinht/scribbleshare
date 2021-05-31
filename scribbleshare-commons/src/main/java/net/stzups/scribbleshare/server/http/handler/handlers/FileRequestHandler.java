@@ -1,11 +1,10 @@
 package net.stzups.scribbleshare.server.http.handler.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.server.http.HttpServerHandler;
@@ -13,6 +12,7 @@ import net.stzups.scribbleshare.server.http.MimeTypes;
 import net.stzups.scribbleshare.server.http.exception.HttpException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
+import net.stzups.scribbleshare.server.http.exception.exceptions.MethodNotAllowedException;
 import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
 import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.objects.Route;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
 
-import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendFile;
 import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
 
@@ -73,23 +72,24 @@ public class FileRequestHandler extends HttpHandler {
     }
 
     @Override
-    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request) throws HttpException {
+    public boolean handle(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) throws HttpException {
         Route route = new Route(request.uri());
 
         if (!HttpMethod.GET.equals(request.method())) {
-            send(ctx, request, HttpResponseStatus.METHOD_NOT_ALLOWED);
-            return true;
+            throw new MethodNotAllowedException(request.method(), HttpMethod.GET);
         }
 
         // redirects
         if (route.path().endsWith(DEFAULT_FILE)) { // /index.html -> /
-            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
+            sendRedirect(ctx, request, response, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE.length()) + route.rawQuery());
             return true;
         } else if ((route.path() + DEFAULT_FILE_EXTENSION).endsWith(DEFAULT_FILE)) { // /index -> /
-            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
+            response.setStatus(HttpResponseStatus.PERMANENT_REDIRECT);
+            sendRedirect(ctx, request, response, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - (DEFAULT_FILE.length() - DEFAULT_FILE_EXTENSION.length())) + route.rawQuery());
             return true;
         } else if (route.path().endsWith(DEFAULT_FILE_EXTENSION)) { // /page.html -> /page
-            sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
+            response.setStatus(HttpResponseStatus.PERMANENT_REDIRECT);
+            sendRedirect(ctx, request, response, HttpResponseStatus.PERMANENT_REDIRECT, route.path().substring(0, route.path().length() - DEFAULT_FILE_EXTENSION.length()) + route.rawQuery());
             return true;
         }
 
@@ -112,14 +112,13 @@ public class FileRequestHandler extends HttpHandler {
         File file = new File(root, filePath);
         if (file.isHidden() || !file.exists() || file.isDirectory() || !file.isFile()) {
             if (new File(httpRoot, filePath.substring(0, filePath.length() - DEFAULT_FILE_EXTENSION.length())).isDirectory()) { // /test -> /test/ if test is a valid directory and /test.html does not exist
-                sendRedirect(ctx, request, HttpResponseStatus.PERMANENT_REDIRECT, route.path() + "/" + route.rawQuery());
+                sendRedirect(ctx, request, response, HttpResponseStatus.PERMANENT_REDIRECT, route.path() + "/" + route.rawQuery());
             } else {
                 throw new NotFoundException("File at path " + filePath + " not found");
             }
             return true;
         }
 
-        HttpHeaders headers = new DefaultHttpHeaders();
         /*if (route.equals(AUTHENTICATE_PAGE)) {
             try {
                 logIn(config, request, headers);
@@ -127,9 +126,9 @@ public class FileRequestHandler extends HttpHandler {
                 throw new InternalServerException("Exception while logging user in", e);
             }
         }*/
-        headers.set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
+        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "public,max-age=" + httpCacheSeconds);//cache but revalidate if stale todo set to private cache for resources behind authentication
         try {
-            sendFile(ctx, request, headers, file, mimeTypes.getMimeType(file));
+            sendFile(ctx, request, response, file, mimeTypes.getMimeType(file));
             return true;
         } catch (IOException e) {
             throw new InternalServerException("Exception while sending file", e);

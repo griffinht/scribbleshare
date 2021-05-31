@@ -5,11 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -48,7 +44,13 @@ public class HttpUtils {
 
     /** sets keep alive headers and returns whether the connection is keep alive */
     public static boolean setKeepAlive(FullHttpRequest request, HttpResponse response) {
-        boolean keepAlive = HttpUtil.isKeepAlive(request);
+        boolean keepAlive;
+        if (request != null) {
+            keepAlive = HttpUtil.isKeepAlive(request);
+        } else {
+            keepAlive = false;
+        }
+
         if (!keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
         } else if (request.protocolVersion().equals(HttpVersion.HTTP_1_0)) {
@@ -58,35 +60,25 @@ public class HttpUtils {
     }
 
     /**
-     * Send {@link ByteBuf}
+     * Send {@link HttpResponse} with {@link ByteBuf} content
      */
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, ByteBuf responseContent) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM);
-        response.content().writeBytes(responseContent);
-
-        send(ctx, request, response);
-    }
-
-
-    /**
-     * Send {@link FullHttpResponse}
-     */
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, FullHttpResponse response) {
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        if (request == null) { // assume no keep alive
-            ctx.writeAndFlush(response);
-            return;
-        }
-
+    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, ByteBuf content) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
         boolean keepAlive = setKeepAlive(request, response);
 
-        ChannelFuture flushPromise = ctx.writeAndFlush(response);
+        ctx.write(response);
+        ChannelFuture flushPromise = ctx.writeAndFlush(content);
 
         if (!keepAlive) {
-            // Close the connection as soon as the response is sent.
             flushPromise.addListener(ChannelFutureListener.CLOSE);
         }
+    }
+
+    /**
+     * Send {@link HttpResponse} with no content
+     */
+    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response) {
+        send(ctx, request, response, Unpooled.EMPTY_BUFFER);
     }
 
     /**
@@ -97,53 +89,22 @@ public class HttpUtils {
 
         boolean keepAlive = setKeepAlive(request, response);
 
-        // Write the initial line and the header.
         ctx.write(response);
-
-        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
         ChannelFuture lastContentFuture = ctx.writeAndFlush(httpChunkedInput, ctx.newProgressivePromise());
 
         if (!keepAlive) {
-            // Close the connection when the whole content is written out.
             lastContentFuture.addListener(ChannelFutureListener.CLOSE);
         }
     }
 
     /**
-     * Send {@link HttpResponseStatus}
-     */
-    public static void send(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
-
-        send(ctx, request, response);
-    }
-
-    /**
      * Send redirect to a new URI
      */
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status, String newUri, HttpHeaders headers) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.EMPTY_BUFFER);
-        response.headers().set(headers);
+    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, HttpResponseStatus status, String newUri) {
+        response.setStatus(status);
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
 
         send(ctx, request, response);
-    }
-
-    /**
-     * Send redirect to a new URI
-     */
-    public static void sendRedirect(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status, String newUri) {
-        sendRedirect(ctx, request, status, newUri, EmptyHttpHeaders.INSTANCE);
-    }
-
-    /**
-     * Send {@link ChunkedInput<ByteBuf>} with {@link HttpHeaders}
-     */
-    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(headers);
-
-        send(ctx, request, response, new HttpChunkedInput(chunkedInput));
     }
 
     public static void setDateAndLastModified(HttpHeaders headers, Timestamp lastModified) {//todo
@@ -175,15 +136,14 @@ public class HttpUtils {
     /**
      * Send {@link ChunkedInput<ByteBuf>} if stale, or {@link HttpResponseStatus#NOT_MODIFIED} if fresh
      */
-    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws BadRequestException {
-        setDateAndLastModified(headers, lastModified);
+    public static void sendChunkedResource(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, ChunkedInput<ByteBuf> chunkedInput, Timestamp lastModified) throws BadRequestException {
+        setDateAndLastModified(response.headers(), lastModified);
         if (isModifiedSince(request, lastModified)) {
             //Scribbleshare.getLogger(ctx).info("Uncached");
-            sendChunkedResource(ctx, request, headers, chunkedInput);
+            send(ctx, request, response, new HttpChunkedInput(chunkedInput));
         } else {
             //Scribbleshare.getLogger(ctx).info("Cached");
-            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED, Unpooled.EMPTY_BUFFER);
-            response.headers().set(headers);
+            response.setStatus(HttpResponseStatus.NOT_MODIFIED);
 
             send(ctx, request, response);
         }
@@ -192,17 +152,18 @@ public class HttpUtils {
     /**
      * Send {@link File} with respect to caching
      */
-    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpHeaders headers, File file, String mimeType) throws IOException, BadRequestException, NotFoundException {
+    public static void sendFile(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponse response, File file, String mimeType) throws IOException, BadRequestException, NotFoundException {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             long fileLength = randomAccessFile.length();
             if (mimeType == null) {
                 throw new NotFoundException("Unknown MIME type for file " + file.getName());
             }
-            headers.set(HttpHeaderNames.CONTENT_TYPE, mimeType);
+            response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeType);
 
-            sendChunkedResource(ctx, request, headers, new ChunkedFile(randomAccessFile, 0, fileLength, 8192), Timestamp.from(Instant.ofEpochMilli(file.lastModified())));
+            sendChunkedResource(ctx, request, response, new ChunkedFile(randomAccessFile, 0, fileLength, 8192), Timestamp.from(Instant.ofEpochMilli(file.lastModified())));
         } catch (FileNotFoundException ignore) {
-            send(ctx, request, HttpResponseStatus.NOT_FOUND);
+            response.setStatus(HttpResponseStatus.NOT_FOUND);
+            send(ctx, request, response);
         }
     }
 
