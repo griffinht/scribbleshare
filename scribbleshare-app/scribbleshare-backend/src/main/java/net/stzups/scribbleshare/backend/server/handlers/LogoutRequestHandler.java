@@ -4,14 +4,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import net.stzups.netty.http.exception.HttpException;
+import net.stzups.netty.http.handler.RequestHandler;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSessionCookie;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 
-import static net.stzups.scribbleshare.server.http.HttpUtils.sendRedirect;
+import static net.stzups.netty.http.HttpUtils.sendRedirect;
 
 public class LogoutRequestHandler extends RequestHandler {
     private static final String LOGOUT_PAGE = "/logout"; // the logout page, where logout requests should come from

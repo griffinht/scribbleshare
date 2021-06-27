@@ -8,18 +8,18 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.util.AttributeKey;
+import net.stzups.netty.http.DefaultHttpServerHandler;
+import net.stzups.netty.http.HttpServerHandler;
+import net.stzups.netty.http.HttpServerInitializer;
+import net.stzups.netty.http.exception.exceptions.NotFoundException;
+import net.stzups.netty.http.handler.HttpHandler;
+import net.stzups.netty.http.handler.handlers.OriginHandler;
 import net.stzups.scribbleshare.data.database.ScribbleshareDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ClientMessageDecoder;
 import net.stzups.scribbleshare.room.server.websocket.protocol.ServerMessageEncoder;
-import net.stzups.scribbleshare.server.http.DefaultHttpServerHandler;
-import net.stzups.scribbleshare.server.http.HttpServerHandler;
-import net.stzups.scribbleshare.server.http.HttpServerInitializer;
-import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
-import net.stzups.scribbleshare.server.http.handler.handlers.OriginHandler;
 
 import javax.net.ssl.SSLException;
 

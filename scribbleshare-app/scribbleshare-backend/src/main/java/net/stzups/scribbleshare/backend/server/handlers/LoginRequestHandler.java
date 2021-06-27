@@ -5,6 +5,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import net.stzups.netty.http.exception.HttpException;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
+import net.stzups.netty.http.handler.RequestHandler;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.backend.data.PersistentHttpUserSession;
 import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
@@ -16,13 +19,10 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 
 import java.nio.charset.StandardCharsets;
 
-import static net.stzups.scribbleshare.server.http.HttpUtils.send;
+import static net.stzups.netty.http.HttpUtils.send;
 
 public class LoginRequestHandler<T extends LoginDatabase & UserDatabase & HttpSessionDatabase & PersistentHttpSessionDatabase> extends RequestHandler {
     private static class LoginRequest {

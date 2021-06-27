@@ -5,6 +5,10 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import net.stzups.netty.http.exception.HttpException;
+import net.stzups.netty.http.exception.exceptions.BadRequestException;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
+import net.stzups.netty.http.handler.RequestHandler;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.LoginDatabase;
@@ -14,14 +18,10 @@ import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.login.Login;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
 
+import static net.stzups.netty.http.HttpUtils.send;
 import static net.stzups.scribbleshare.backend.server.handlers.LoginRequestHandler.readString;
-import static net.stzups.scribbleshare.server.http.HttpUtils.send;
 
 public class RegisterRequestHandler<T extends HttpSessionDatabase & UserDatabase & LoginDatabase> extends RequestHandler {
     private static class RegisterRequest {

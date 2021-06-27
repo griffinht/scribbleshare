@@ -5,12 +5,12 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
+import net.stzups.netty.http.HttpUtils;
+import net.stzups.netty.http.exception.exceptions.BadRequestException;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.exceptions.DeserializationException;
-import net.stzups.scribbleshare.server.http.HttpUtils;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.util.DebugString;
+import net.stzups.util.DebugString;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

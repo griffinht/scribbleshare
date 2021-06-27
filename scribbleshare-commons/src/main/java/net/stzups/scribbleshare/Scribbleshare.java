@@ -4,12 +4,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
-import net.stzups.scribbleshare.server.Server;
-import net.stzups.scribbleshare.server.http.HttpServerInitializer;
-import net.stzups.scribbleshare.util.LogFactory;
 import net.stzups.config.configs.ArgumentConfig;
 import net.stzups.config.configs.EnvironmentVariableConfig;
 import net.stzups.config.configs.PropertiesConfig;
+import net.stzups.netty.Server;
+import net.stzups.netty.http.HttpServerInitializer;
+import net.stzups.util.LogFactory;
 
 import java.util.logging.Logger;
 

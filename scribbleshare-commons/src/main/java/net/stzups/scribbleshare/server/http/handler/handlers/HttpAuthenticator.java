@@ -5,15 +5,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.AttributeKey;
+import net.stzups.netty.http.exception.HttpException;
+import net.stzups.netty.http.exception.exceptions.NotFoundException;
+import net.stzups.netty.http.exception.exceptions.UnauthorizedException;
+import net.stzups.netty.http.handler.HttpHandler;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
-import net.stzups.scribbleshare.server.http.handler.HttpHandler;
 
 @ChannelHandler.Sharable
 public class HttpAuthenticator<T extends UserDatabase & HttpSessionDatabase> extends HttpHandler {

@@ -3,6 +3,9 @@ package net.stzups.scribbleshare.backend.data;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import net.stzups.netty.http.exception.exceptions.BadRequestException;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
+import net.stzups.netty.http.exception.exceptions.UnauthorizedException;
 import net.stzups.scribbleshare.backend.data.database.databases.PersistentHttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.UserDatabase;
@@ -13,10 +16,7 @@ import net.stzups.scribbleshare.data.objects.authentication.UserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpSessionCookie;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpUserSession;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
-import net.stzups.scribbleshare.util.DebugString;
+import net.stzups.util.DebugString;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -51,7 +51,7 @@ public class PersistentHttpUserSession extends UserSession {
 
     /** get and expire persistent http user session */
 
-    public static<T extends PersistentHttpSessionDatabase> PersistentHttpUserSession getSession(T database, FullHttpRequest request, HttpResponse response) throws UnauthorizedException, InternalServerException, BadRequestException {
+    public static<T extends PersistentHttpSessionDatabase> PersistentHttpUserSession getSession(T database, FullHttpRequest request, HttpResponse response) throws UnauthorizedException, InternalServerException {
         PersistentHttpUserSessionCookie cookie = PersistentHttpUserSessionCookie.getCookie(request);
         if (cookie == null) {
             return null;

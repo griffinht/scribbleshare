@@ -9,6 +9,14 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedStream;
+import net.stzups.netty.http.exception.HttpException;
+import net.stzups.netty.http.exception.exceptions.BadRequestException;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
+import net.stzups.netty.http.exception.exceptions.MethodNotAllowedException;
+import net.stzups.netty.http.exception.exceptions.NotFoundException;
+import net.stzups.netty.http.exception.exceptions.UnauthorizedException;
+import net.stzups.netty.http.handler.RequestHandler;
+import net.stzups.netty.http.objects.Route;
 import net.stzups.scribbleshare.data.database.databases.DocumentDatabase;
 import net.stzups.scribbleshare.data.database.databases.HttpSessionDatabase;
 import net.stzups.scribbleshare.data.database.databases.ResourceDatabase;
@@ -19,17 +27,9 @@ import net.stzups.scribbleshare.data.objects.Resource;
 import net.stzups.scribbleshare.data.objects.User;
 import net.stzups.scribbleshare.data.objects.authentication.AuthenticatedUserSession;
 import net.stzups.scribbleshare.data.objects.authentication.http.HttpConfig;
-import net.stzups.scribbleshare.server.http.exception.HttpException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.BadRequestException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.MethodNotAllowedException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.NotFoundException;
-import net.stzups.scribbleshare.server.http.exception.exceptions.UnauthorizedException;
-import net.stzups.scribbleshare.server.http.handler.RequestHandler;
 import net.stzups.scribbleshare.server.http.handler.handlers.HttpAuthenticator;
-import net.stzups.scribbleshare.server.http.objects.Route;
 
-import static net.stzups.scribbleshare.server.http.HttpUtils.send;
+import static net.stzups.netty.http.HttpUtils.send;
 
 public class DocumentRequestHandler<T extends ResourceDatabase & DocumentDatabase & HttpSessionDatabase & UserDatabase> extends RequestHandler {
     private static final long MAX_AGE_NO_EXPIRE = 31536000;//one year, max age of a cookie
