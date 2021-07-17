@@ -1,62 +1,62 @@
 services:
 # WebSocket backend
-    scribbleshare-room:
-        image: stzups/scribbleshare-room
+    room:
+        image: stzups/room
         build:
-            context: scribbleshare-room
+            context: room
         ports:
             - "8080:80"
         depends_on:
-            scribbleshare-postgres:
+            postgres:
                 condition: service_healthy
-#            scribbleshare-keydb:
+#            keydb:
 #                condition: service_healthy
         environment:
             scribbleshare.ssl: "false"
-            scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
+            scribbleshare.postgres.url: "jdbc:postgresql://postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_room"
             scribbleshare.postgres.password: "changeme"
             scribbleshare.domain: "scribbleshare.com:8080"
             scribbleshare.origin: "http://scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # App backend
-    scribbleshare-app:
-        image: stzups/scribbleshare-app
+    app:
+        image: stzups/app
         ports:
             - "80:80"
         build:
-            context: scribbleshare-app
+            context: app
         depends_on:
-            scribbleshare-postgres:
+            postgres:
                 condition: service_healthy
-#            scribbleshare-keydb:
+#            keydb:
 #                condition: service_healthy
         environment:
             scribbleshare.ssl: "false"
-            scribbleshare.postgres.url: "jdbc:postgresql://scribbleshare-postgres:5432/scribbleshare"
+            scribbleshare.postgres.url: "jdbc:postgresql://postgres:5432/scribbleshare"
             scribbleshare.postgres.user: "scribbleshare_backend"
             scribbleshare.postgres.password: "changeme"
             scribbleshare.domain: "scribbleshare.com"
             scribbleshare.origin: "http://scribbleshare.com"
 #            scribbleshare.redis.url: "redis://default:changeme@scribbleshare-keydb:6379"
 # Reverse proxy
-#    scribbleshare-nginx:
-#        image: stzups/scribbleshare-nginx
+#    nginx:
+#        image: nginx
 #        networks:
-#            - scribbleshare-network
-#            - scribbleshare-external-network
+#            - network
+#            - external-network
 #        build:
-#            context: scribbleshare-nginx
+#            context: nginx
 #        depends_on:
-#            scribbleshare-app:
+#            app:
 #                condition: service_healthy
 #        ports:
 #            - "80:80"
 # Database
-    scribbleshare-postgres:
-        image: stzups/scribbleshare-postgres
-        build:
-            context: scribbleshare-postgres
+    postgres:
+        image: postgres
+        volumes:
+            - ./postgres/sql:/docker-entrypoint-initdb.d/
 #        ports:
 #            - "5432:5432"
         healthcheck:
@@ -66,11 +66,12 @@ services:
             retries: 5
         environment:
             POSTGRES_PASSWORD: "changeme"
-#    scribbleshare-keydb:
-#        build:
-#            context: scribbleshare-keydb
+#    keydb:
+#        image: eqalpha/keydb
 #        ports:
 #            - "6379:6379"
+#        volumes:
+#            - ./keydb/usr/local/etc/redis/redis.conf
 #        healthcheck:
 #            test: [ "CMD", "keydb-cli", "ping" ]
 #            interval: 5s
