@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.stzups.scribbleshare.data.objects.Document;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessage;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.ServerMessageType;
-import net.stzups.scribbleshare.util.DebugString;
+import net.stzups.util.DebugString;
 
 public class ServerMessageDeleteDocument extends ServerMessage {
     private final long id;

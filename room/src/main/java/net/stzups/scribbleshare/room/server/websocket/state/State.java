@@ -1,12 +1,12 @@
 package net.stzups.scribbleshare.room.server.websocket.state;
 
 import io.netty.channel.ChannelHandlerContext;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageException;
 import net.stzups.scribbleshare.room.server.websocket.ClientMessageHandler;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 public abstract class State {
     public static void setState(ChannelHandlerContext ctx, State state) {

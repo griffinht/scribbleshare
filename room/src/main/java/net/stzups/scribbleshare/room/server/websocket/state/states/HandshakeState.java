@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.Document;
@@ -17,8 +18,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.S
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageHandshake;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.util.DebugString;
+import net.stzups.util.DebugString;
 
 import java.util.logging.Level;
 

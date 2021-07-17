@@ -5,11 +5,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.room.server.websocket.protocol.client.ClientMessage;
 import net.stzups.scribbleshare.room.server.websocket.state.State;
 import net.stzups.scribbleshare.room.server.websocket.state.states.InitialState;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
 
 import java.util.logging.Level;
 

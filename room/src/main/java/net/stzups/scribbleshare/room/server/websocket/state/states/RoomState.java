@@ -1,6 +1,7 @@
 package net.stzups.scribbleshare.room.server.websocket.state.states;
 
 import io.netty.channel.ChannelHandlerContext;
+import net.stzups.netty.http.exception.exceptions.InternalServerException;
 import net.stzups.scribbleshare.Scribbleshare;
 import net.stzups.scribbleshare.data.database.exception.DatabaseException;
 import net.stzups.scribbleshare.data.objects.canvas.canvasUpdate.CanvasUpdateException;
@@ -16,8 +17,7 @@ import net.stzups.scribbleshare.room.server.websocket.protocol.client.messages.C
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageCanvasUpdate;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageDeleteDocument;
 import net.stzups.scribbleshare.room.server.websocket.protocol.server.messages.ServerMessageUpdateDocument;
-import net.stzups.scribbleshare.server.http.exception.exceptions.InternalServerException;
-import net.stzups.scribbleshare.util.DebugString;
+import net.stzups.util.DebugString;
 
 public class RoomState extends ReadyState {
     private final Client client;
