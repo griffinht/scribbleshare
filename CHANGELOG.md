@@ -145,7 +145,7 @@ Canvas manipulation
 
 did a bunch of commits on master
 
-### v0.6
+## v0.6
 Rework project architecture
 
 ### v0.6.0
@@ -155,3 +155,12 @@ Typescript refactor
 ### v0.6.1
 Fix build system
 - Rework rollup with typescript and environment variables
+
+## v0.7
+HTTP improvements
+
+### v0.7.0
+Rework authentication
+- Robust exception handling
+- Password based authentication schemes
+- Log in, log out, registration pages

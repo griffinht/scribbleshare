@@ -1,0 +1,119 @@
+.noselect {
+    user-select: none;
+}
+
+html, body {
+    height: 100%;
+
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+header {
+    background-color: lightgray;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+header * {
+    padding: .2em;
+}
+
+aside {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgray;
+    flex: 0;
+}
+#side * {
+    padding: .2em;
+    width: 100%;
+}
+
+#canvasWrapper {
+    flex: 2
+}
+
+aside * {
+    font-size: 2.5em;
+    font-family: serif;
+    text-align: left;
+}
+
+aside button {
+    background-color: lightgray;
+    border: 0;
+    font-size: 2.5rem;
+}
+
+aside button:hover {
+    color: darkgray;
+}
+
+aside button:active {
+    box-shadow: none;
+}
+
+.active {
+    background-color: gray;
+}
+
+#clientsToolbar {
+    display: flex;
+    flex-direction: column-reverse;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+#clientsToolbar * {
+    width: 50px;
+    height: 50px;
+    margin: .5em;
+}
+
+#sideBottom {
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+}
+
+#renameInput {
+    width: 100%;
+    font-size: 2.5rem;
+}
+
+#toolbar {
+    position: absolute;
+    bottom: 10px;
+    left:50%;
+    transform: translate(-50%, 0);
+}
+
+.color {
+    width: 20px;
+    height: 20px;
+}
+
+#colors {
+    display: flex;
+    flex-direction: row;
+    align-content: space-evenly;
+}
+
+input[type="radio"] {
+    visibility: hidden;
+}
+
+#loginModal {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}

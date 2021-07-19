@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+apply from: rootProject.file('gradle/test.gradle')
+apply from: rootProject.file('gradle/jmh.gradle')
+
+dependencies {
+    api 'com.github.stzups:netty-http:master-SNAPSHOT'
+    implementation 'org.postgresql:postgresql:42.2.13'
+    implementation 'redis.clients:jedis:3.5.2'
+    implementation 'at.favre.lib:bcrypt:0.9.0'
+    api 'com.github.stzups:config:master-SNAPSHOT'
+    api 'org.jetbrains:annotations:16.0.2'
+}
